@@ -1,0 +1,432 @@
+0,1,label2,summary_sentences
+"Given a graph G = (V,E) on n vertices with adjacency matrix A ∈ {0, 1}n×n, the problem of graph embedding is to map the vertices of G to some d-dimensional vector space S in such a way that geometry in S reflects the topology of G. For example, we may ask that vertices with high conductance in G be assigned to nearby vectors in S.",1. Introduction,[0],[0]
+"This is a special case of the problem of dimensionality reduction, well-studied in machine learning and related disciplines (van der Maaten et al., 2009).",1. Introduction,[0],[0]
+"When applied to graph data, each vertex in G is described by an n-dimensional binary
+1Department of Statistics, University of Michigan, USA.",1. Introduction,[0],[0]
+"2School of Mathematics and Physics, University of Queensland, Australia.",1. Introduction,[0],[0]
+"3International Computer Science Institute, Berkeley, USA.",1. Introduction,[0],[0]
+"4Department of Statistics, University of California at Berkeley, USA.",1. Introduction,[0],[0]
+"5Department of Applied Mathematics and Statistics, Johns Hopkins University, USA.",1. Introduction,[0],[0]
+"Correspondence to: Keith Levin <klevin@umich.edu>.
+",1. Introduction,[0],[0]
+"Proceedings of the 35 th International Conference on Machine Learning, Stockholm, Sweden, PMLR 80, 2018.",1. Introduction,[0],[0]
+"Copyright 2018 by the author(s).
+vector, namely its corresponding column (or row) in adjacency matrix A ∈ {0, 1}n×n, and we wish to associate with each vertex v ∈ V a lower-dimensional representation, say xv ∈ S.",1. Introduction,[0.9652128527707186],"['When applied to graph data, each vertex in G is described by an n-dimensional binary vector, namely its corresponding column (or row) in adjacency matrix A ∈ {0, 1}n×n, and we wish to associate with each vertex v ∈ V a lower-dimensional representation, say xv ∈ S. The two most commonly-used approaches for graph embeddings are the graph Laplacian embedding and its variants (Belkin & Niyogi, 2003; Coifman & Lafon, 2006) and the adjacency spectral embedding (ASE, Sussman et al., 2012).']"
+"The two most commonly-used approaches for graph embeddings are the graph Laplacian embedding and its variants (Belkin & Niyogi, 2003; Coifman & Lafon, 2006) and the adjacency spectral embedding (ASE, Sussman et al., 2012).",1. Introduction,[0],[0]
+"Both of these embedding procedures produce low-dimensional representations of the vertices in a graph G, and the question of “which embedding is preferable?” is dependent on the downstream task.",1. Introduction,[0],[0]
+"Indeed, one can show that neither embedding dominates the other for the purposes of vertex classification; see, for example, Section 4.3 of Tang & Priebe (to appear).",1. Introduction,[0],[0]
+"In addition, the results in Section 4.3 of Tang & Priebe (to appear) suggest that ASE performs better than the Laplacian eigenmaps embedding for graphs that exhibit a core-periphery structure.",1. Introduction,[0],[0]
+"Such structures are ubiquitous in real networks, such as those arising in social and biological sciences (Jeub et al., 2015; Leskovec et al., 2009).
+",1. Introduction,[0],[0]
+"The ASE and Laplacian embedding differ in that the latter has received far more attention, especially with respect to questions of limit objects (Hein et al., 2005) and out-ofsample extensions (Bengio et al., 2003).",1. Introduction,[0.9606883551603794],"['A number of results exist showing that the adjacency spectral embedding yields consistent estimates of the latent positions in a random dot product graph (Sussman et al., 2012; Tang et al., 2013b) and recovers community structure in the stochastic block model (Lyzinski et al., 2014).']"
+The aim of this paper is to establish theoretical foundations for the latter of these two problems in the case of the adjacency spectral embedding.,1. Introduction,[0],[0]
+"In the standard out-of-sample (OOS) extension, we are presented with training dataD",2. Background and Notation,[0.9631652777242348],"['In the standard out-of-sample (OOS) extension, we are presented with training dataD = {z1, z2, .']"
+"= {z1, z2, . . .",2. Background and Notation,[0],[0]
+", zn} ⊆ X , where X is the set of possible observations.",2. Background and Notation,[0],[0]
+"The data D give rise to a symmetric matrix M = [K(zi, zj)] ∈",2. Background and Notation,[0],[0]
+"Rn×n, where K : X × X → R≥0 is a kernel function that measures similarity between elements of X , so that K(y, z) is large if y, z ∈ X are similar, and is small otherwise.",2. Background and Notation,[0],[0]
+"Suppose that we have computed an embedding of the data D. Let us denote this embedding by X ∈ Rn×d, so that the embedding of zi ∈ D is given by the i-th row of X .",2. Background and Notation,[0],[0]
+"Suppose that we are given an additional observation z ∈ X , not necessarily included in D, and we wish to embed z under the same scheme as was used to produce X .",2. Background and Notation,[0],[0]
+"A naı̈ve approach would be to discard the old embedding X , consider the augmented
+collection D = D ∪ {z} and construct a new embedding X̃ ∈ R(n+1)×d.",2. Background and Notation,[0],[0]
+"However, in many applications, it is infeasible to compute this embedding again from scratch, either because of computational constraints or because the similarities {K(zi, zj) : zi, zj ∈ D} may no longer be available after X has been computed.",2. Background and Notation,[0],[0]
+"Thus, the OOS problem is to embed z using only the available embedding X which was initially learned from D and the similarities {K(zi, z)}ni=1.
+",2. Background and Notation,[0],[0]
+"As an example, consider the Laplacian eigenmaps embedding (Belkin & Niyogi, 2003; Belkin et al., 2006).",2. Background and Notation,[0],[0]
+"Given a graph G = (V,E) with adjacency matrix A ∈ Rn×n, the d-dimensional normalized Laplacian of G is the matrix L = D−1/2AD−1/2, where D ∈ Rn×n is the diagonal degree matrix, i.e., dii = ∑ j Aij is the degree of the vertex",2. Background and Notation,[0],[0]
+"i (Luxburg, 2007; Vishnoi, 2013).",2. Background and Notation,[0],[0]
+"The d-dimensional normalized Laplacian eigenmaps embedding of G is given by the rows of the matrix UL ∈ Rn×d, whose columns are the d orthonormal eigenvectors corresponding to the top d eigenvalues of L, excepting the trivial eigenvalue 1.",2. Background and Notation,[0],[0]
+"We note that some authors (see, for example, Chung, 1997) use I −D−1/2AD−1/2 to be the normalized graph Laplacian, but since this matrix has the same eigenspace as our L, results concerning the eigenvectors of either of these matrices are equivalent.",2. Background and Notation,[1.0],"['We note that some authors (see, for example, Chung, 1997) use I −D−1/2AD−1/2 to be the normalized graph Laplacian, but since this matrix has the same eigenspace as our L, results concerning the eigenvectors of either of these matrices are equivalent.']"
+"Suppose that a vertex v is added to graph G, to form graph G̃ with adjacency matrix
+Ã =",2. Background and Notation,[0],[0]
+"[ A ~a ~aT 0 ] , (1)
+where ~a ∈ {0, 1}n.",2. Background and Notation,[0],[0]
+A naı̈ve approach to embedding G̃ would be to compute the top eigenvectors of the graph Laplacian of G̃ as before.,2. Background and Notation,[0],[0]
+"However, the OOS extension problem requires that we only use the information available in UL and ~a to compute an embedding of the new vertex v.
+Bengio et al. (2003) presented out-of-sample extensions for multidimensional scaling (MDS, Torgerson, 1952; Borg & Groenen, 2005), spectral clustering (Weiss, 1999; Ng et al., 2002), Laplacian eigenmaps (Belkin & Niyogi, 2003) and ISOMAP (Tenenbaum et al., 2000).",2. Background and Notation,[0],[0]
+"These OOS extensions were based on a least-squares formulation of the embedding problem, arising from the fact that the in-sample embeddings are given by functions of the eigenvalues and eigenfunctions.",2. Background and Notation,[0],[0]
+Trosset & Priebe (2008) considered a different OOS extension for MDS.,2. Background and Notation,[0],[0]
+"Rather than following the approach of Bengio et al. (2003), Trosset & Priebe (2008) cast the MDS OOS extension as a simple modification of the in-sample MDS optimization problem.
+",2. Background and Notation,[0.9515194708701021],"['In general, OOS extensions for eigenvector-based embeddings can be derived as in Bengio et al. (2003) as the solution of a least-squares problem min f(x)∈Rd n∑ i=1 ( K(x, xi)− 1 n d∑ t=1 λtft(xi)ft(x) )2 , where {xi}ni=1 are the in-sample observations, and ft(xi) = [vt]i is ith component of vt. Belkin et al. (2006) presented a slightly different approach that incorporates regularization in both the intrinsic geometry of the data distribution and the geometry of the similarity function K. Their approach applies to Laplacian eigenmaps as well as to regularized least squares and SVM.']"
+"Let {(λt, vt)}nt=1 be the eigen-pairs of the matrix M , constructed from some suitably-chosen similarity function, K, defined on pairs of observations in D ×D. In general, OOS extensions for eigenvector-based embeddings can be derived as in Bengio et al. (2003) as the solution of a least-squares
+problem
+min f(x)∈Rd n∑ i=1
+( K(x, xi)− 1
+n d∑ t=1 λtft(xi)ft(x)
+)2 ,
+where {xi}ni=1 are the in-sample observations, and ft(xi) =",2. Background and Notation,[0],[0]
+[vt]i is ith component of vt.,2. Background and Notation,[0],[0]
+Belkin et al. (2006) presented a slightly different approach that incorporates regularization in both the intrinsic geometry of the data distribution and the geometry of the similarity function K.,2. Background and Notation,[0],[0]
+Their approach applies to Laplacian eigenmaps as well as to regularized least squares and SVM.,2. Background and Notation,[0],[0]
+"The authors also introduced a Laplacian SVM, in which a Laplacian penalty term is added to the standard SVM objective function.",2. Background and Notation,[0],[0]
+Belkin et al. (2006) showed that all of these embeddings have OOS extensions that arise as the solution of a generalized eigenvalue problem.,2. Background and Notation,[0],[0]
+We refer the interested reader to Levin et al. (2015) for a practical application of this OOS extension.,2. Background and Notation,[0],[0]
+"More recent approaches to OOS extension have avoided altogether the need to solve a least squares or eigenvalue problem by, instead, training a neural net to learn the embedding directly (see, for example, Quispe et al., 2016; Jansen et al., 2017).
+",2. Background and Notation,[0],[0]
+The only existing work to date on the ASE OOS extension of which we are aware appears in Tang et al. (2013a).,2. Background and Notation,[1.0],['The only existing work to date on the ASE OOS extension of which we are aware appears in Tang et al. (2013a).']
+"The authors considered the OOS extension for ASE applied to latent position graphs (see, for example Hoff et al., 2002), in which each vertex is associated with an element of a vector space and edge probabilities are given by a suitably-chosen inner product.",2. Background and Notation,[1.0],"['The authors considered the OOS extension for ASE applied to latent position graphs (see, for example Hoff et al., 2002), in which each vertex is associated with an element of a vector space and edge probabilities are given by a suitably-chosen inner product.']"
+"The authors introduced a least-squares OOS extension for embeddings of latent position graphs and proved a theorem, analogous to our Theorem 1, for the error of this extension about the true latent position.",2. Background and Notation,[0],[0]
+"Theorem 1 simplifies the proof of the result due to Tang et al. (2013a) for the case of random dot product graphs (see Definition 1 below).
+",2. Background and Notation,[0],[0]
+"Of crucial importance in assessing OOS extensions, but largely missing from the existing literature, is an investigation of how the OOS estimate compares with the insample embedding.",2. Background and Notation,[0],[0]
+"That is, for an out-of-sample observation z ∈ X , how well does its OOS embedding X̂z ∈ Rd, approximate the embedding that would be obtained by considering the full sample D = D ∪ {z}?",2. Background and Notation,[0],[0]
+"In this paper, we address this question in the context of the adjacency spectral embedding.",2. Background and Notation,[0],[0]
+"In particular, we show in our main results, Theorems 1 and 2, that two different approaches to the ASE OOS extension recover the in-sample embedding at a rate that is, in a certain sense, optimal (see the discussion at the end of Section 4).",2. Background and Notation,[0.9501739915564604],"['Theorem 2 shows that ŵML recovers the true latent position of the OOS vertex, up to rotation, with error decaying at the same rate as that obtained in Theorem 1 for the LS OOS extension.']"
+We conjecture that analogous rate results can be obtained for other OOS extensions such as those presented in Bengio et al. (2003).,2. Background and Notation,[0],[0]
+We pause briefly to establish notational conventions for this paper.,2.1. Notation,[0],[0]
+"For a matrix B ∈ Rn1×n2 , we let σi(B) denote the i-th singular value of B, so that σ1(B) ≥ σ2(B) ≥ · · · ≥ σk(B) ≥ 0, where k = min{n1, n2}.",2.1. Notation,[1.0],"['For a matrix B ∈ Rn1×n2 , we let σi(B) denote the i-th singular value of B, so that σ1(B) ≥ σ2(B) ≥ · · · ≥ σk(B) ≥ 0, where k = min{n1, n2}.']"
+"For positive integer n, we let [n] = {1, 2, . . .",2.1. Notation,[0],[0]
+", n}.",2.1. Notation,[0],[0]
+"Throughout this paper, n will index the number of vertices in a hollow graph G, the observed data, and we let",2.1. Notation,[0],[0]
+"c > 0 denote a positive constant, not depending on n, whose value may change from line to line.",2.1. Notation,[0],[0]
+"For an event E, we let Ec denote its complement.",2.1. Notation,[0],[0]
+"We will say that event En, indexed so as to depend on n, occurs with high probability, and write En w.h.p.",2.1. Notation,[0],[0]
+", if for some constant > 0, it holds for all suitably large n that Pr[Ecn] ≤ n−(1+ ).",2.1. Notation,[0],[0]
+"In this paper, we will show Pr[Ec] ≤",2.1. Notation,[0],[0]
+cn−2 any time we wish to show that event E occurs with high probability.,2.1. Notation,[0],[0]
+"All our results involve showing that some event En occurs w.h.p., and we note that in all such cases, the Borel-Cantelli Lemma implies that with probability 1, the event Ecn occurs for at most finitely many n. That is, all our finite-sample results can be easily altered to yield corresponding asymptotic results, as well.",2.1. Notation,[0],[0]
+"For a function f : Z≥0 → R≥0 and a sequence of random variables {Zn}, we will write Zn = O(f(n))",2.1. Notation,[0],[0]
+"if there exists a constant C and a number n0 such that Zn ≤ Cf(n) for all n ≥ n0, and write Zn = O(f(n))",2.1. Notation,[0],[0]
+a.s.,2.1. Notation,[0],[0]
+if the event Zn ≤ Cf(n) occurs a.s.a.a.,2.1. Notation,[0],[0]
+"For a vector x ∈ Rd, we use the unadorned norm ‖x‖ to denote the Euclidean norm of x. For a matrix M ∈ Rn×d, we use the unadorned norm ‖M‖ to denote the operator norm
+‖M‖ = max x∈Rd:‖x‖=1 ‖Mx‖
+and we use ‖ · ‖2→∞ to denote the matrix operator norm
+‖M‖2→∞ = max x:‖x‖=1",2.1. Notation,[0],[0]
+"‖Mx‖∞ = max i∈[n] ‖Mi,·‖,
+which can be proven via the Cauchy-Schwarz inequality (Horn & Johnson, 2013).",2.1. Notation,[0],[0]
+"This latter operator norm will be especially useful for us, in that a bound on ‖M‖2→∞ gives a uniform bound on the rows of matrix M .",2.1. Notation,[0],[0]
+The remainder of this paper is structured as follows.,2.2. Roadmap,[0],[0]
+"In Section 3, we present two OOS extensions of the ASE.",2.2. Roadmap,[0],[0]
+"In Section 4, we prove convergence of these two OOS extensions when applied to random dot product graphs.",2.2. Roadmap,[0],[0]
+"In Section 5, we explore the empirical performance of the two extensions presented in Section 3, and we conclude with a brief discussion in Section 6.",2.2. Roadmap,[0],[0]
+"Given a graph G encoded by adjacency matrix A ∈ {0, 1}n×n, the adjacency spectral embedding (ASE) pro-
+duces a d-dimensional embedding of the vertices ofG, given by the rows of the n-by-d matrix
+X̂ = UAS 1/2 A , (2)
+where UA ∈ Rn×d is a matrix with orthonormal columns given by the d eigenvectors corresponding to the top d eigenvalues of A, which we collect in the diagonal matrix SA ∈ Rd×d.",3. Out-of-sample Embedding for ASE,[0.9999999764803688],"['Given a graph G encoded by adjacency matrix A ∈ {0, 1}n×n, the adjacency spectral embedding (ASE) pro- duces a d-dimensional embedding of the vertices ofG, given by the rows of the n-by-d matrix X̂ = UAS 1/2 A , (2) where UA ∈ Rn×d is a matrix with orthonormal columns given by the d eigenvectors corresponding to the top d eigenvalues of A, which we collect in the diagonal matrix SA ∈ Rd×d.']"
+"We note that in general, one would be better-suited to consider the matrix [ATA]1/2, so that all eigenvalues are guaranteed to be nonnegative, but we will see that in the random dot product graph, the model that is the focus of this paper, the top d eigenvalues of A are positive with high probability (see, for example, either Lemma 1 in Athreya et al. (2016) or Observation 2 in Levin et al. (2017), or refer to the technical report, (Levin et al., 2018)).
+",3. Out-of-sample Embedding for ASE,[0.9999999640087033],"['We note that in general, one would be better-suited to consider the matrix [ATA]1/2, so that all eigenvalues are guaranteed to be nonnegative, but we will see that in the random dot product graph, the model that is the focus of this paper, the top d eigenvalues of A are positive with high probability (see, for example, either Lemma 1 in Athreya et al. (2016) or Observation 2 in Levin et al. (2017), or refer to the technical report, (Levin et al., 2018)).']"
+"The random dot product graph (RDPG, Young & Scheinerman, 2007) is an edge-independent random graph model in which the graph structure arises from the geometry of a set of latent positions, i.e., vectors associated to the vertices of the graph.",3. Out-of-sample Embedding for ASE,[1.0],"['The random dot product graph (RDPG, Young & Scheinerman, 2007) is an edge-independent random graph model in which the graph structure arises from the geometry of a set of latent positions, i.e., vectors associated to the vertices of the graph.']"
+"As such, the adjacency spectral embedding is particularly well-suited to this model.
+",3. Out-of-sample Embedding for ASE,[0.9999999935136193],"['As such, the adjacency spectral embedding is particularly well-suited to this model.']"
+Definition 1.,3. Out-of-sample Embedding for ASE,[0],[0]
+(Random Dot Product Graph) Let F be a distribution on Rd such that,3. Out-of-sample Embedding for ASE,[0],[0]
+xT,3. Out-of-sample Embedding for ASE,[0],[0]
+y ∈,3. Out-of-sample Embedding for ASE,[0],[0]
+"[0, 1] whenever x, y ∈ suppF , and let X1, X2, . . .",3. Out-of-sample Embedding for ASE,[0],[0]
+", Xn be drawn i.i.d.",3. Out-of-sample Embedding for ASE,[0],[0]
+from F .,3. Out-of-sample Embedding for ASE,[0],[0]
+Collect these n random points in the rows of a matrix X ∈ Rn×d.,3. Out-of-sample Embedding for ASE,[1.0],['Collect these n random points in the rows of a matrix X ∈ Rn×d.']
+"Suppose that (symmetric) adjacency matrix A ∈ {0, 1}n×n is distributed in such a way that
+Pr[A|X] = ∏
+1≤i<j≤n
+(XTi Xj) Aij (1−XTi Xj)1−Aij .",3. Out-of-sample Embedding for ASE,[0],[0]
+"(3)
+When this is the case, we write (A,X) ∼ RDPG(F, n).",3. Out-of-sample Embedding for ASE,[0],[0]
+"If G is the random graph corresponding to adjacency matrix A, we say that G is a random dot product graph with latent positions X1, X2, . . .",3. Out-of-sample Embedding for ASE,[0.9938963698294129],"['If G is the random graph corresponding to adjacency matrix A, we say that G is a random dot product graph with latent positions X1, X2, .']"
+", Xn, where Xi is the latent position corresponding to the i-th vertex.
+",3. Out-of-sample Embedding for ASE,[0],[0]
+"A number of results exist showing that the adjacency spectral embedding yields consistent estimates of the latent positions in a random dot product graph (Sussman et al., 2012; Tang et al., 2013b) and recovers community structure in the stochastic block model (Lyzinski et al., 2014).",3. Out-of-sample Embedding for ASE,[0.9520596594666918],"['A detailed version of this proof can be found in the technical report (Levin et al., 2018).']"
+"We note an inherent nonidentifiability in the random dot product graph, arising from the fact that for any orthogonal matrix W ∈ Rd×d, the latent positions X ∈ Rn×d and XW ∈ Rd×d give rise to the same distribution over graphs, since XXT = (XW )(XW )T = E[A | X].",3. Out-of-sample Embedding for ASE,[0],[0]
+"Owing to this nonidentifiability, we can only hope to recover the latent positions in X up to some orthogonal rotation.",3. Out-of-sample Embedding for ASE,[1.0],"['Owing to this nonidentifiability, we can only hope to recover the latent positions in X up to some orthogonal rotation.']"
+The reader may notice that the RDPG as defined has the limitation that it can only capture graphs with positive semi-definite expected value.,3. Out-of-sample Embedding for ASE,[0],[0]
+"This limitation can be overcome by extending the RDPG to the generalized RDPG (Rubin-Delanchy
+et al., 2017).",3. Out-of-sample Embedding for ASE,[0],[0]
+"The results stated in the present work can, for the most part, be extended to this generalized model, but we restrict ourselves here to the RDPG as it appears in Definition 1 for the sake of simplicity.
+",3. Out-of-sample Embedding for ASE,[0],[0]
+"Suppose that, given adjacency matrix A, we compute embedding
+X̂ =",3. Out-of-sample Embedding for ASE,[0.9507063287467441],"['Suppose that, given adjacency matrix A, we compute embedding X̂ = [X̂1X̂2 .']"
+[X̂1X̂2 . . .,3. Out-of-sample Embedding for ASE,[0],[0]
+"X̂n] T ,
+where X̂i ∈ Rd denotes the embedding of the i-th vertex.",3. Out-of-sample Embedding for ASE,[0.9999999923727528],"['X̂n] T , where X̂i ∈ Rd denotes the embedding of the i-th vertex.']"
+Now suppose we add a vertex v with latent position w̄ ∈,3. Out-of-sample Embedding for ASE,[0],[0]
+"Rd to the original graph G, obtaining an augmented graph G̃ =",3. Out-of-sample Embedding for ASE,[0],[0]
+(,3. Out-of-sample Embedding for ASE,[0],[0]
+"[n] ∪ {v}, E ∪ Ev), where Ev denotes the set of edges between v and the vertices of G. One would like to embed vertex v according to the same distribution as the original n vertices and obtain an estimate of w̄.",3. Out-of-sample Embedding for ASE,[0.9838465670413189],"['Now suppose we add a vertex v with latent position w̄ ∈ Rd to the original graph G, obtaining an augmented graph G̃ = ([n] ∪ {v}, E ∪ Ev), where Ev denotes the set of edges between v and the vertices of G. One would like to embed vertex v according to the same distribution as the original n vertices and obtain an estimate of w̄.']"
+"Let the binary vector ~a ∈ {0, 1}n encode the edges Ev incident upon vertex v, with entries ai = (~a)i ∼ Bernoulli(XTi w̄).",3. Out-of-sample Embedding for ASE,[1.0],"['Let the binary vector ~a ∈ {0, 1}n encode the edges Ev incident upon vertex v, with entries ai = (~a)i ∼ Bernoulli(XTi w̄).']"
+The augmented graph G̃ then has the adjacency matrix as in (1).,3. Out-of-sample Embedding for ASE,[1.0],['The augmented graph G̃ then has the adjacency matrix as in (1).']
+"As discussed earlier, the natural approach to embedding vertex v is to simply re-embed the whole matrix G̃ by computing the ASE of Ã. Suppose that we wish to avoid such a computation, for example due to resource constraints.",3. Out-of-sample Embedding for ASE,[0],[0]
+The problem then becomes one of embedding the new vertex v based solely on the information present in X̂ and ~a.,3. Out-of-sample Embedding for ASE,[0],[0]
+Two natural approaches to such an OOS extension suggest themselves.,3. Out-of-sample Embedding for ASE,[0],[0]
+"A natural approach to OOS embedding, pursued by, for example, Bengio et al. (2003), is to embed vertex v as the least-squares solution to X̂w = ~a.",3.1. Linear Least Squares OOS Extension,[0],[0]
+"That is, we embed the vertex v as the vector ŵLS solving
+min w∈Rd n∑ i=1",3.1. Linear Least Squares OOS Extension,[0],[0]
+"( ai − X̂Ti w )2 , (4)
+where ai denotes the i-th component of the binary vector ~a encoding the edges between v and the original n vertices.",3.1. Linear Least Squares OOS Extension,[0],[0]
+"We will denote the solution to the least-squares optimization in Equation (4) by ŵLS, and term this the linear least squares out-of-sample (LLS OOS) embedding.",3.1. Linear Least Squares OOS Extension,[0],[0]
+"A more principled approach to OOS extension, but perhaps more involved computationally, is to consider the following maximum-likelihood formulation.",3.2. Maximum Likelihood OOS Extension,[0],[0]
+"The entries of the vector ~a are distributed independently as ai ∼ Bernoulli(XTi w̄), where w̄ denotes the true latent position of OOS vertex v.",3.2. Maximum Likelihood OOS Extension,[0],[0]
+"Since we do not have access to the latent positions {Xi}ni=1, we use instead their estimates {X̂i}ni=1.",3.2. Maximum Likelihood OOS Extension,[0],[0]
+"This yields the following objective:
+max w∈Rd n∑ i=1 ai log X̂ T",3.2. Maximum Likelihood OOS Extension,[0],[0]
+i w + (1− ai) log ( 1− X̂Ti w ) .,3.2. Maximum Likelihood OOS Extension,[0],[0]
+"(5)
+Unfortunately, this optimization problem may fail to achieve its optimum inside the support of F .",3.2. Maximum Likelihood OOS Extension,[0],[0]
+"Indeed, it may not even have a finite solution.",3.2. Maximum Likelihood OOS Extension,[0],[0]
+"Thus, we will instead settle for solving the following constrained modification of Equation (5),
+max w∈T̂ n∑ i=1",3.2. Maximum Likelihood OOS Extension,[0],[0]
+ai log,3.2. Maximum Likelihood OOS Extension,[0],[0]
+X̂,3.2. Maximum Likelihood OOS Extension,[0],[0]
+T,3.2. Maximum Likelihood OOS Extension,[0],[0]
+"i w + (1− ai) log ( 1− X̂Ti w ) , (6)
+",3.2. Maximum Likelihood OOS Extension,[0],[0]
+where T̂ = {w ∈,3.2. Maximum Likelihood OOS Extension,[0],[0]
+Rd : ≤ X̂Ti w ≤ 1,3.2. Maximum Likelihood OOS Extension,[0],[0]
+"− , i ∈",3.2. Maximum Likelihood OOS Extension,[0],[0]
+"[n]}, and > 0 is a small constant.",3.2. Maximum Likelihood OOS Extension,[0],[0]
+"We note that this is based only on the edges incident on the OOS vertex rather than on the full data Ã, and uses the spectral estimates {X̂i}ni=1 rather than the true latent positions {Xi}ni=1.",3.2. Maximum Likelihood OOS Extension,[0],[0]
+"Despite both of these facts, we will term the extension given by Equation (6) as the maximum-likelihood out-of-sample (ML OOS) extension, and we will let ŵML denote its solution.",3.2. Maximum Likelihood OOS Extension,[0],[0]
+"Our main results show that both the linear least-squares and maximum-likelihood OOS extensions in Equations (4) and (6) recover the true latent position w̄ of v. Further, both OOS extensions converge to w̄ at the same asymptotic rate (i.e., up to a constant) as we would have obtained, had we computed the ASE of Ã in (1) directly.",4. Main Results,[0],[0]
+"This rate is given by Lemma 2.5 from Lyzinski et al. (2014), which we state here in a slightly adapted form.",4. Main Results,[0],[0]
+"The lemma states, in essence, that the ASE recovers the latent positions with error of order n−1/2 log n, uniformly over the n vertices.",4. Main Results,[0],[0]
+"We remind the reader that ‖M‖2→∞ denotes the 2-to-∞ operator norm,",4. Main Results,[0],[0]
+"‖M‖2→∞ = maxx:‖x‖=1 ‖Mx‖∞. Lemma 1 (Adapted from Lyzinski et al. (2014), Lemma 2.5).",4. Main Results,[0],[0]
+Let X =,4. Main Results,[0],[0]
+"[X1, X2, . . .",4. Main Results,[0],[0]
+", Xn]T ∈ Rn×d be the matrix of latent positions of an RDPG, and let X̂ ∈ Rn×d denote the matrix of estimated latent positions yielded by ASE as in (2).",4. Main Results,[0],[0]
+"Then with probability at least 1− cn−2, there exists orthogonal matrix W ∈ Rd×d such that
+‖X̂",4. Main Results,[0],[0]
+"−XW‖2→∞ ≤ c log n
+n1/2 .
+",4. Main Results,[0],[0]
+"That is, it holds with high probability that for all i ∈",4. Main Results,[0],[0]
+"[n],
+‖X̂i",4. Main Results,[0],[0]
+−WTXi‖ ≤,4. Main Results,[0],[0]
+"c log n
+n1/2 .
+",4. Main Results,[0],[0]
+"In what follows, we let A ∈ {0, 1}n×n denote the random adjacency matrix of an RDPGG, and letX1, X2, . . .",4. Main Results,[0],[0]
+", Xn ∈ Rd denote its latent positions, collected in matrix X =",4. Main Results,[0],[0]
+"[X1, X2, . . .",4. Main Results,[0],[0]
+", Xn]
+T ∈ Rn×d.",4. Main Results,[0],[0]
+"That is, (A,X) ∼ RDPG(F, n).",4. Main Results,[0],[0]
+We use X̂ =,4. Main Results,[0],[0]
+"[X̂1, X̂2, . .",4. Main Results,[0],[0]
+.,4. Main Results,[0],[0]
+", X̂n]T ∈ Rn×d to denote the matrix whose rows are the estimated latent positions, obtained via ASE as in (2).",4. Main Results,[0],[0]
+"We let w̄ denote the true latent position of the OOS vertex v.
+Theorem 1.",4. Main Results,[0],[0]
+"With notation as above, let ŵLS denote the least-squares estimate of w̄, i.e., the solution to (4).",4. Main Results,[0],[0]
+"Then there exists an orthogonal matrix W ∈ Rd×d such that
+‖WŵLS − w̄‖ ≤",4. Main Results,[0],[0]
+"cn−1/2 log n w.h.p.
+",4. Main Results,[0],[0]
+Proof.,4. Main Results,[0],[0]
+"The proof of this result relies upon a classic result for solutions of perturbed linear systems to establish that with high probability, ‖WŵLS",4. Main Results,[0],[0]
+− wLS‖ ≤,4. Main Results,[0],[0]
+"cn−1/2 log n, where W ∈ Rd×d is the orthogonal matrix guaranteed by Lemma 1 andwLS is the LS estimate based on the true latent positions {Xi} rather than on the estimates {X̂i}.",4. Main Results,[0.956280175704502],"['The proof of this result relies upon a classic result for solutions of perturbed linear systems to establish that with high probability, ‖WŵLS − wLS‖ ≤ cn−1/2 log n, where W ∈ Rd×d is the orthogonal matrix guaranteed by Lemma 1 andwLS is the LS estimate based on the true latent positions {Xi} rather than on the estimates {X̂i}.']"
+"A basic Hoeffding inequality to show that with high probability, ‖wLS − w̄‖ ≤",4. Main Results,[0],[0]
+"cn−1/2 log n, where again W ∈ Rd×d is the orthogonal matrix in Lemma 1.",4. Main Results,[0],[0]
+A triangle inequality applied to ‖WŵLS− w̄‖ combined with a union bound over the two high-probability events just described yields the result.,4. Main Results,[0],[0]
+"A detailed version of this proof can be found in the technical report (Levin et al., 2018).
+",4. Main Results,[0],[0]
+"As mentioned in Section 3, we would like to consider a maximum-likelihood OOS extension based on the likelihood ˆ̀(w) = ∑n i=1 ai log",4. Main Results,[0],[0]
+X̂ T,4. Main Results,[0],[0]
+i w+ (1−ai) log(1− X̂Ti w).,4. Main Results,[0],[0]
+"Toward this end, we would ideally like to use the solution to the optimization problem
+arg max w∈Rd
+ˆ̀(w),
+but to ensure a sensible solution, we instead consider
+ŵML = arg max w∈T̂
+ˆ̀(w), (7)
+where we remind the reader that T̂ = {w ∈",4. Main Results,[0.9558185702574261],"['Toward this end, we would ideally like to use the solution to the optimization problem arg max w∈Rd ˆ̀(w), but to ensure a sensible solution, we instead consider ŵML = arg max w∈T̂ ˆ̀(w), (7) where we remind the reader that T̂ = {w ∈ Rd : ≤ X̂Ti w ≤ 1 − , i = 1, 2, .']"
+Rd : ≤ X̂Ti w ≤ 1,4. Main Results,[0],[0]
+"− , i = 1, 2, . . .",4. Main Results,[0],[0]
+", n}.",4. Main Results,[0],[0]
+"Theorem 2 shows that ŵML recovers the true latent position of the OOS vertex, up to rotation, with error decaying at the same rate as that obtained in Theorem 1 for the LS OOS extension.
+",4. Main Results,[0],[0]
+Theorem 2.,4. Main Results,[0],[0]
+"With notation as above, let ŵML be the estimate defined in Equation (7), and let > 0 be such that x, y ∈ suppF implies < xT",4. Main Results,[0.98114106651591],"['With notation as above, let ŵML be the estimate defined in Equation (7), and let > 0 be such that x, y ∈ suppF implies < xT y < 1 − .']"
+y,4. Main Results,[0],[0]
+< 1 − .,4. Main Results,[0],[0]
+Denote the true latent position of the OOS vertex v by w̄ ∈ suppF .,4. Main Results,[0],[0]
+"Then for all n suitably large, there exists an orthogonal matrix W ∈ Rd×d such that with high probability,
+‖WŵML − w̄‖ ≤",4. Main Results,[0],[0]
+"cn−1/2 log n w.h.p.,
+and this matrix W is the same one guaranteed by Lemma 1.
+",4. Main Results,[0],[0]
+Proof.,4. Main Results,[0],[0]
+"By a standard argument from convex optimization, alongside the definition of T̂ , one can thow that for suitably large n,
+‖WŵML − w̄‖ ≤",4. Main Results,[0],[0]
+"c‖∇ˆ̀(WT w̄)‖
+n w.h.p.
+",4. Main Results,[0],[0]
+"By the triangle inequality one can then show that
+‖∇ˆ̀(WT w̄)‖ ≤",4. Main Results,[0],[0]
+c,4. Main Results,[0],[0]
+"√ n log n w.h.p.
+",4. Main Results,[0],[0]
+"A detailed proof can be found in (Levin et al., 2018).
+",4. Main Results,[1.0000000204617967],"['A detailed proof can be found in (Levin et al., 2018).']"
+Remark 1.,4. Main Results,[0],[0]
+"Given our in-sample embedding X̂ and the vector of edge indicators ~a, we can think of the OOS extension as an estimate of w̄, the latent position of the OOS vertex v. Lemma 1 implies that if we took the naı̈ve approach of applying ASE to the adjacency matrix Ã in (1), our estimate would have error of order at most O(n−1/2 log n).",4. Main Results,[1.0],"['Given our in-sample embedding X̂ and the vector of edge indicators ~a, we can think of the OOS extension as an estimate of w̄, the latent position of the OOS vertex v. Lemma 1 implies that if we took the naı̈ve approach of applying ASE to the adjacency matrix Ã in (1), our estimate would have error of order at most O(n−1/2 log n).']"
+"Theorems 1 and 2 imply that the OOS estimate obtains the same asymptotic estimation error, without recomputing the embedding of Ã.
+",4. Main Results,[0],[0]
+"In addition to the bounds in Theorems 1 and 2, we can show that the least-squares OOS extension satisfies a stronger property, namely the following central limit theorem.
+",4. Main Results,[0],[0]
+Theorem 3.,4. Main Results,[0],[0]
+"Let (A,X) ∼ RDPG(F, n) be a ddimensional RDPG.",4. Main Results,[1.0],"['Let (A,X) ∼ RDPG(F, n) be a ddimensional RDPG.']"
+Let w̄ ∈,4. Main Results,[0],[0]
+suppF,4. Main Results,[0],[0]
+"and ŵLS ∈ Rd be, respectively, the latent position and the least-squares embedding from (4) of an OOS vertex v.",4. Main Results,[0],[0]
+"There exists a sequence of orthogonal d× d matrices {Vn}∞n=1 such that
+√ n(V Tn ŵLS",4. Main Results,[0],[0]
+"− w̄) L−→ N (0,Σw̄),
+where Σw̄ ∈ Rd×d is given by
+Σw̄ = ∆ −1E",4. Main Results,[0],[0]
+"[ XT1 w̄(1−XT1 w̄)X1XT1 ] ∆−1, (8)
+and ∆ = EX1XT1 .
+",4. Main Results,[0],[0]
+Proof.,4. Main Results,[0],[0]
+"This theorem follows from an adaptation of Theorem 1 in (Levin et al., 2017)",4. Main Results,[0],[0]
+"A detailed proof can be found in (Levin et al., 2018).
+",4. Main Results,[0],[0]
+"If the OOS vertex is distributed according to F , we have the following corollary by integrating w̄ with respect to F .
+",4. Main Results,[0],[0]
+Corollary 1.,4. Main Results,[0],[0]
+"Let (A,X) ∼ RDPG(F, n) be a ddimensional RDPG, and let w̄ be distributed according to F , independent of (A,X).",4. Main Results,[0],[0]
+"Then there exists a sequence of orthogonal d× d matrices {Vn}∞n=1 such that
+√ n(V Tn ŵLS − w̄) L−→ ∫ N (0,Σw)dF (w),
+where Σw is defined as in Equation (8) above.
+",4. Main Results,[0],[0]
+We conjecture that a CLT analogous to Theorem 3 holds for the ML OOS extension.,4. Main Results,[0],[0]
+"In this section, we briefly explore our results through simulations.",5. Experiments,[0],[0]
+"We leave a more thorough experimental examination of our results, particularly as they apply to realworld data, for future work.",5. Experiments,[0],[0]
+We first give a brief exploration of how quickly the asymptotic distribution in Theorem 3 becomes a good approximation.,5. Experiments,[0],[0]
+"Toward this end, let us consider a simple mixture of point masses, F = Fλ,x1,x2 = λδx1 +(1−λ)δx2 , where x1, x2 ∈ R2 and λ ∈",5. Experiments,[0],[0]
+"(0, 1).",5. Experiments,[0],[0]
+"This corresponds to a two-block stochastic block model (Holland et al., 1983), in which the block probability matrix is given by [
+xT1 x1 x T 1 x2",5. Experiments,[0],[0]
+xT1 x2 x T 2,5. Experiments,[0],[0]
+"x2
+] .
+",5. Experiments,[0],[0]
+"Corollary 1 implies that if all latent positions (including the OOS vertex) are drawn according to F , then the OOS estimate should be distributed as a mixture of normals centered at x1 and x2, with respective mixing coefficients λ and 1− λ.
+",5. Experiments,[0],[0]
+"To assess how well the asymptotic distribution predicted by Theorem 3 and Corollary 1 holds, we generate RDPGs with latent positions drawn i.i.d.",5. Experiments,[0],[0]
+"from distribution F = Fλ,x1,x2 defined above, with
+λ = 0.4, x1 = (0.2, 0.7) T , and x2 = (0.65, 0.3)T .
+",5. Experiments,[0],[0]
+"For each trial, we draw n+ 1 independent latent positions from F , and generate a binary adjacency matrix from these latent positions.",5. Experiments,[0],[0]
+We let the (n+1)-th vertex be the OOS vertex.,5. Experiments,[0],[0]
+"Retaining the subgraph induced by the first n vertices, we obtain an estimate X̂ ∈",5. Experiments,[0],[0]
+"Rn×2 via ASE, from which we obtain an estimate for the OOS vertex via the LS OOS extension as defined in (4).",5. Experiments,[0],[0]
+"We remind the reader that for each RDPG draw, we initially recover the latent positions
+only up to a rotation.",5. Experiments,[0],[0]
+"Thus, for each trial, we compute a Procrustes alignment (Gower & Dijksterhuis, 2004) of the in-sample estimates X̂ to their true latent positions.",5. Experiments,[0],[0]
+"This yields a rotation matrix R, which we apply to the OOS estimate.",5. Experiments,[0],[0]
+"Thus, the OOS estimates are sensibly comparable across trials.",5. Experiments,[0],[0]
+"Figure 1 shows the empirical distribution of the OOS embeddings of 100 independent RDPG draws, for n = 50 (left), n = 100 (center) and n = 500 (right) in-sample vertices.",5. Experiments,[0],[0]
+"Each cross is the location of the OOS estimate for a single draw from the RDPG with latent position distribution F , colored according to true latent position.",5. Experiments,[0],[0]
+"OOS estimates with true latent position x1 are plotted as blue crosses, while OOS estimates with true latent position x2 are plotted as red crosses.",5. Experiments,[0],[0]
+"The true latent positions x1 and x2 are plotted as solid circles, colored accordingly.",5. Experiments,[0],[0]
+"The plot includes contours for the two normals centered at x1 and x2 predicted by Theorem 3 and Corollary 1, with the ellipses indicating the isoclines corresponding to one and two (generalized) standard deviations.
+",5. Experiments,[0],[0]
+"Examining Figure 1, we see that even with only 100 vertices, the mixture of normal distributions predicted by Theorem 3 holds quite well, with the exception of a few gross outliers from the blue cluster.",5. Experiments,[0],[0]
+"With n = 500 vertices, the approximation is particularly good.",5. Experiments,[0],[0]
+"Indeed, the n = 500 case appears to be slightly under-dispersed, possibly due to the Procrustes alignment.",5. Experiments,[0],[0]
+It is natural to wonder whether a similarly good fit is exhibited by the ML-based OOS extension.,5. Experiments,[0],[0]
+We conjectured at the end of Section 4 that a CLT similar to that in Theorem 3 would also hold for the ML-based OOS extension as defined in Equation (7).,5. Experiments,[0],[0]
+"Figure 2 shows the empirical distribution of 100 independent OOS estimates, under the same experimental setup as Figure 1, but using the ML OOS extension rather than the linear least-squares extension.",5. Experiments,[0],[0]
+"The plot supports our conjecture that the ML-based OOS estimates are also approximately normally distributed
+about the true latent positions.
+",5. Experiments,[0],[0]
+Figure 1 suggests that we may be confident in applying the large-sample approximation suggested by Theorem 3 and Corollary 1.,5. Experiments,[0],[0]
+"Applying this approximation allows us to investigate the trade-offs between computational cost and classification accuracy, to which we now turn our attention.",5. Experiments,[0],[0]
+"The mixture distribution Fλ,x1,x2 above suggests a task in which, given an adjacency matrix A, we wish to classify the vertices according to which of two clusters or communities they belong.",5. Experiments,[0],[0]
+"That is, we will view two vertices as belonging to the same community if their latent positions are the same (Holland et al., 1983, i.e., the latent positions specify an SBM,).",5. Experiments,[0],[0]
+"More generally, one may view the task of recovering vertex block memberships in a stochastic block model as a clustering problem.",5. Experiments,[0],[0]
+"Lyzinski et al. (2014) showed that applying ASE to such a graph, followed by k-means clustering of the estimated latent positions, correctly recovers community memberships of all the vertices (i.e., correctly assigns all vertices to their true latent positions) with high probability.
+",5. Experiments,[0],[0]
+"For concreteness, let us consider a still simpler mixture model, F = Fλ,p,q = λδp+ (1−λ)δq , where 0 < p",5. Experiments,[0],[0]
+"< q < 1, and draw an RDPG (Ã,X) ∼ RDPG(F, n+m), taking the first n vertices to be in-sample, with induced adjacency matrix A ∈ Rn×n.",5. Experiments,[0],[0]
+"That is, we draw the full matrix
+Ã =",5. Experiments,[0],[0]
+"[ A B BT C ] ,
+where C ∈ Rm×m is the adjacency matrix of the subgraph induced by them OOS vertices andB ∈ Rn×m encodes the edges between the in-sample vertices and the OOS vertices.",5. Experiments,[0],[0]
+"The latent positions p and q encode a community structure in the graph Ã, and, as alluded to above, a common task in network statistics is to recover this community structure.
+",5. Experiments,[0],[0]
+"Let w̄(1), w̄(2), . . .",5. Experiments,[0],[0]
+", w̄(m) ∈ {p, q} denote the true latent positions of the m OOS vertices, with respective least-squares OOS estimates ŵ(1)LS , ŵ (2) LS , . . .",5. Experiments,[0],[0]
+", ŵ (m) LS , each obtained from the in-sample ASE X̂ ∈",5. Experiments,[0],[0]
+Rn of A.,5. Experiments,[0],[0]
+"We note that one could devise a different OOS embedding procedure that makes use of the subgraph C induced by these m OOS vertices, but we leave the development of such a method to future work.",5. Experiments,[0],[0]
+Corollary 1 implies that each ŵ(t)LS for t ∈,5. Experiments,[0],[0]
+"[m] is marginally (approximately) distributed as
+ŵ (t) LS ∼ λN",5. Experiments,[0],[0]
+"(p, (n+ 1) −1σ2p) + (1−λ)N (q, (n+ 1)−1σ2q ),
+where σ2p = ∆ −2",5. Experiments,[0],[0]
+"(λp2(1− p2)p2 + (1− λ)pq(1− pq)q2) ,
+σ2q = ∆ −2",5. Experiments,[0],[0]
+"(λpq(1− pq)p2 + (1− λ)q2(1− q2)q2) ,
+and ∆ =",5. Experiments,[0],[0]
+"λp2 + (1− λ)q2.
+",5. Experiments,[0],[0]
+"Classifying the t-th OOS vertex based on ŵ(t)LS via likelihood ratio thus has (approximate) probability of error
+ηn,p,q = λ(1−",5. Experiments,[0],[0]
+"Φ (√
+n+ 1(xn+1,p,q − p) σp ) + (1− λ)Φ (√ n+ 1(xn+1,p,q − q)
+σq
+) ,
+where Φ denotes the cdf of the standard normal and xn,p,q is the value of x solving
+λσ−1p exp{n(x− p)2/(2σ2p)} =",5. Experiments,[0],[0]
+"(1− λ)σ−1q exp{n(x− q)2/(2σ2q )},
+and hence our overall error rate when classifying the m OOS vertices will grow as mηn+1,p,q .
+",5. Experiments,[0],[0]
+"As discussed previously, the OOS extension allows us to avoid the expense of computing the ASE of the full matrix
+Ã =",5. Experiments,[0],[0]
+"[ A B BT C ] .
+",5. Experiments,[0],[0]
+"The LLS OOS extension is computationally inexpensive, requiring only the computation of the matrix-vector product S−1/2A U T A~a, with a time complexity O(d
+2n) (assuming one does not precompute the product S−1/2A U T A ).",5. Experiments,[0],[0]
+The eigenvalue computation required for embedding Ã is far more expensive than the LLS OOS extension.,5. Experiments,[0],[0]
+"Nonetheless, if one were intent on reducing the OOS classification error ηn+1,p,q, one might consider paying the computational expense of embedding Ã to obtain estimates w̃(1), w̃(2), . . .",5. Experiments,[0],[0]
+", w̃(m) of the m OOS vertices.",5. Experiments,[0],[0]
+"That is, we obtain estimates for the m OOS vertices by making them insample vertices, at the expense of solving an eigenproblem on the (m + n)-by-(m + n) adjacency matrix.",5. Experiments,[0],[0]
+"Of course, the entire motivation of our approach is that the in-sample matrix A may not be available.",5. Experiments,[0],[0]
+"Nonetheless, a comparison against this baseline, in which all data is used to compute our embeddings, is instructive.
+",5. Experiments,[0],[0]
+"Theorem 1 in Athreya et al. (2016) implies that the w̃(t) estimates based on embedding the full matrix Ã are (approximately) marginally distributed as
+w̃(t) ∼ λN",5. Experiments,[0],[0]
+"(p, (n+m)−1σ2p)+(1−λ)N (q, (n+m)−1σ2q ),
+with classification error
+ηn+m,p,q = λΦ
+( p− xn+m,p,q
+σp ) + (1− λ)Φ ( xn+m,p,q",5. Experiments,[0],[0]
+"− q
+σq
+) ,
+where xn+m,p,q is the value of x solving
+λσ−1p exp{(m+ n)(x− p)2/(2σ2p)}",5. Experiments,[0],[0]
+=,5. Experiments,[0],[0]
+"(1− λ)σ−1q exp{(m+ n)(x− q)2/(2σ2q )},
+and it can be checked that ηn+m,q,p < ηn,q,p when m > 1.",5. Experiments,[0],[0]
+"Thus, at the cost of computing the ASE of Ã, we may obtain a better estimate.",5. Experiments,[0],[0]
+How much does this additional computation improve classification the OOS vertices?,5. Experiments,[0],[0]
+"Figure 3 explores this question.
+",5. Experiments,[0],[0]
+"Figure 3 compares the error rates of the in-sample and OOS estimates as a function of m and n in the model just described, with λ = 0.4, p = 0.6 and q = 0.61.",5. Experiments,[0],[0]
+"The plot depicts the ratio of the (approximate) in-sample classification error η(n+m),p,q to the (approximate) OOS classification error η(n+1),p,q , as a function of the number of OOS vertices m, for differently-sized in-sample graphs, n = 100, 1000, and 10000.",5. Experiments,[0],[0]
+"We see that over several magnitudes of graph
+size, the in-sample embedding does not improve appreciably over the OOS embedding except when multiple hundreds of OOS vertices are available.",5. Experiments,[0],[0]
+"When hundreds or thousands of OOS vertices are available simultaneously, we see in the right-hand side of Figure 3 that the in-sample embedding classification error may improve upon the OOS classification error by a large multiplicative factor.",5. Experiments,[0],[0]
+"Whether or not this improvement is worth the additional computational expense will, depend upon the available resources and desired accuracy, but this suggests that the additional expense associated with performing a second ASE computation is only worthwhile in the event that hundreds or thousands of OOS vertices are available simultaneously.",5. Experiments,[0],[0]
+"This surfeit of OOS vertices is rather divorced from the typical setting of OOS extension problems, where one typically wishes to embed at most a few previously unseen observations.",5. Experiments,[0],[0]
+"We have presented a theoretical investigation of two OOS extensions of the ASE, one based on a linear least squares estimate and the other based on a plug-in maximum-likelihood estimate.",6. Discussion and Conclusion,[0],[0]
+"We have also proven a central limit theorem for the LLS-based extension, and simulation suggests that this CLT is a good approximation even with just a few hundred vertices.",6. Discussion and Conclusion,[0],[0]
+"We conjecture that a similar CLT holds for the MLbased OOS extension, a conjecture supported by similar simulation data.",6. Discussion and Conclusion,[0],[0]
+"Finally, we have given a brief illustration of how this OOS extension and the approximation it introduces might be weighed against the computational expense of recomputing a full graph embedding by examining how vertex classification error depends on the size of the set of OOS vertices.",6. Discussion and Conclusion,[0],[0]
+We leave a more thorough exploration of this trade-off for future work.,6. Discussion and Conclusion,[0],[0]
+"The authors would like to thank the reviewers for their helpful comments, which markedly improved the quality of this paper.",Acknowledgements,[0],[0]
+Keith Levin was partially supported by NSF grant DMS-1646108.,Acknowledgements,[0],[0]
+Farbod Roosta-Khorasani was partially supported by the Australian Research Council through a Discovery Early Career Researcher Award (DE180100923).,Acknowledgements,[0],[0]
+Carey E. Priebe was supported by the DARPA D3M program through contract FA8750-17-2-0112.,Acknowledgements,[0],[0]
+Farbod RoostaKhorasani and Michael Mahoney also gratefully acknowledge support from DARPA D3M.,Acknowledgements,[0],[0]
+"Many popular dimensionality reduction procedures have out-of-sample extensions, which allow a practitioner to apply a learned embedding to observations not seen in the initial training sample.",abstractText,[0],[0]
+"In this work, we consider the problem of obtaining an out-of-sample extension for the adjacency spectral embedding, a procedure for embedding the vertices of a graph into Euclidean space.",abstractText,[0],[0]
+"We present two different approaches to this problem, one based on a least-squares objective and the other based on a maximum-likelihood formulation.",abstractText,[0],[0]
+"We show that if the graph of interest is drawn according to a certain latent position model called a random dot product graph, then both of these out-of-sample extensions estimate the true latent position of the out-of-sample vertex with the same error rate.",abstractText,[0],[0]
+"Further, we prove a central limit theorem for the least-squares-based extension, showing that the estimate is asymptotically normal about the truth in the large-graph limit.",abstractText,[0],[0]
+Out-of-sample extension of graph adjacency spectral embedding,title,[0],[0]

@@ -1,0 +1,258 @@
+0,1,label2,summary_sentences
+"Proceedings of the 2017 Conference on Empirical Methods in Natural Language Processing, pages 78–88 Copenhagen, Denmark, September 7–11, 2017. c©2017 Association for Computational Linguistics",text,[0],[0]
+"Word Sense Disambiguation (WSD) is a key task in computational lexical semantics, inasmuch as it addresses the lexical ambiguity of text by making explicit the meaning of words occurring in a given context (Navigli, 2009).",1 Introduction,[1.0],"['Word Sense Disambiguation (WSD) is a key task in computational lexical semantics, inasmuch as it addresses the lexical ambiguity of text by making explicit the meaning of words occurring in a given context (Navigli, 2009).']"
+"Anyone who has struggled with frustratingly unintelligible translations from an automatic system, or with the meaning bias of search engines, can understand the importance for an intelligent system to go beyond the surface appearance of text.
+",1 Introduction,[0],[0]
+There are two mainstream lines of research in WSD: supervised and knowledge-based WSD.,1 Introduction,[1.0],['There are two mainstream lines of research in WSD: supervised and knowledge-based WSD.']
+"Supervised WSD frames the problem as a classical machine learning task in which, first a training phase occurs aimed at learning a classification model from sentences annotated with word senses and, second the model is applied to previouslyunseen sentences focused on a target word.",1 Introduction,[1.0],"['Supervised WSD frames the problem as a classical machine learning task in which, first a training phase occurs aimed at learning a classification model from sentences annotated with word senses and, second the model is applied to previouslyunseen sentences focused on a target word.']"
+"A key
+difference from many other problems, however, is that the classes to choose from (i.e., the senses of a target word) vary for each word, therefore requiring a separate training process to be performed on a word by word basis.",1 Introduction,[0],[0]
+"As a result, hundreds of training instances are needed for each ambiguous word in the vocabulary.",1 Introduction,[0],[0]
+"This would necessitate a million-item training set to be manually created for each language of interest, an endeavour that is currently beyond reach even in resource-rich languages like English.
+",1 Introduction,[0],[0]
+"The second paradigm, i.e., knowledge-based WSD, takes a radically different approach: the idea is to exploit a general-purpose knowledge resource like WordNet (Fellbaum, 1998) to develop an algorithm which can take advantage of the structural and lexical-semantic information in the resource to choose among the possible senses of a target word occurring in context.",1 Introduction,[0.9538508947235493],"['An idea of why a denser semantic network has more useful connections and thus leads to better results is provided by the example in iment for the animal, and operating system and Windows for the device sense, among others).']"
+"For example, a PageRank-based algorithm can be developed to determine the probability of a given sense being reached starting from the senses of its context words.",1 Introduction,[0],[0]
+"Recent approaches of this kind have been shown to obtain competitive results (Agirre et al., 2014; Moro et al., 2014).",1 Introduction,[0],[0]
+"However, due to its inherent nature, knowledge-based WSD tends to adopt bag-of-word approaches which do not exploit the local lexical context of a target word, including function and collocation words, which limits this approach in some cases.
+",1 Introduction,[0.9517698641694065],"['T-O-M was shown to provide training data for virtually all the target ambiguous nouns, in marked contrast to alternatives like OMSTI, which covers in many cases around half of the tokens, resorting to the MFS otherwise.']"
+"In this paper we get the best of both worlds and present Train-O-Matic, a novel method for generating huge high-quality training sets for all the words in a language’s vocabulary.",1 Introduction,[1.0],"['In this paper we get the best of both worlds and present Train-O-Matic, a novel method for generating huge high-quality training sets for all the words in a language’s vocabulary.']"
+"The approach is language-independent, thanks to its use of a multilingual knowledge resource, BabelNet (Navigli and Ponzetto, 2012), and it can be applied to any kind of corpus.",1 Introduction,[0],[0]
+"The training sets produced with Train-O-Matic are shown to provide competitive performance with those of manually and semi-
+78
+automatically tagged corpora.",1 Introduction,[0],[0]
+"Moreover, state-ofthe-art performance is also reported for low resourced languages (i.e., Italian and Spanish) and domains, where manual training data is not available.",1 Introduction,[0],[0]
+"In this Section we present Train-O-Matic, a language-independent approach to the automatic construction of a sense-tagged training set.",2 Building a Training Set from Scratch,[0],[0]
+"TrainO-Matic takes as input a corpus C (e.g., Wikipedia) and a semantic network G = (V,E).",2 Building a Training Set from Scratch,[1.0],"['TrainO-Matic takes as input a corpus C (e.g., Wikipedia) and a semantic network G = (V,E).']"
+"We assume a WordNet-like structure of G, i.e., V is the set of concepts (i.e., synsets) such that, for each word w in the vocabulary, Senses(w) is the set of vertices in V that are expressed by w, e.g., the WordNet synsets that include w as one of their senses.
+",2 Building a Training Set from Scratch,[0],[0]
+"Train-O-Matic consists of three steps:
+• Lexical profiling: for each vertex in the semantic network, we compute its Personalized PageRank vector, which provides its lexicalsemantic profile (Section 2.1).
+",2 Building a Training Set from Scratch,[1.0000000246236733],"['Train-O-Matic consists of three steps: • Lexical profiling: for each vertex in the semantic network, we compute its Personalized PageRank vector, which provides its lexicalsemantic profile (Section 2.1).']"
+"• Sentence scoring: For each sentence containing a word w, we compute a probability distribution over all the senses of w based on its context (Section 2.2).
+",2 Building a Training Set from Scratch,[0],[0]
+"• Sentence ranking and selection: for each sense s of a word w in the vocabulary, we select those sentences that are most likely to use w in the sense of s (Section 2.3).",2 Building a Training Set from Scratch,[1.0],"['• Sentence ranking and selection: for each sense s of a word w in the vocabulary, we select those sentences that are most likely to use w in the sense of s (Section 2.3).']"
+In terms of semantic networks the probability of reaching a node v′ starting from v can be interpreted as a measure of relatedness between the synsets v,2.1 Lexical profiling,[0],[0]
+and v′.,2.1 Lexical profiling,[0],[0]
+"Thus we define the lexical profile of a vertex v in a graph G = (V,E) as the probability distribution over all the vertices v′ in the graph.",2.1 Lexical profiling,[0],[0]
+"Such distribution is computed by applying the Personalized PagaRank algorithm, a variant of the traditional PageRank (Brin and Page, 1998).",2.1 Lexical profiling,[0],[0]
+"While the latter is equivalent to performing random walks with uniform restart probability on every vertex at each step, PPR, on the other hand, makes the restart probability non-uniform, thereby concentrating more probability mass in the surroundings of those vertices having higher restart
+probability.",2.1 Lexical profiling,[0],[0]
+"Formally, (P)PR is computed as follows:
+v(t+1) =",2.1 Lexical profiling,[0],[0]
+"(1− α)v(0) + αMv(t) (1)
+where M is the row-normalized adjacency matrix of the semantic network, the restart probability distribution is encoded by vector v(0), and α is the well-known damping factor usually set to 0.85 (Brin and Page, 1998).",2.1 Lexical profiling,[0],[0]
+"If we set v(0) to a unit probability vector (0, . . .",2.1 Lexical profiling,[0],[0]
+", 0, 1, 0, . . .",2.1 Lexical profiling,[0],[0]
+", 0), i.e., restart is always on a given vertex, PPR outputs the probability of reaching every vertex starting from the restart vertex after a certain number of steps.",2.1 Lexical profiling,[0],[0]
+"This approach has been used in the literature to create semantic signatures (i.e., profiles) of individual concepts, i.e., vertices of the semantic network (Pilehvar et al., 2013), and then to determine the semantic similarity of concepts.",2.1 Lexical profiling,[0],[0]
+"As also done by Pilehvar and Collier (2016), we instead use the PPR vector as an estimate of the conditional probability of a word w′",2.1 Lexical profiling,[0],[0]
+"given the target sense1 s ∈ V of word w:
+P (w′|s, w) = maxs′∈Senses(w′) vs(s ′)
+Z (2)
+where Z = ∑
+w” P (w”|s, w) is a normalization constant, vs is the vector resulting from an adequate number of random walks used to calculate PPR, and vs(s′) is the vector component corresponding to sense s′.",2.1 Lexical profiling,[0.972892109629636],"['As also done by Pilehvar and Collier (2016), we instead use the PPR vector as an estimate of the conditional probability of a word w′ given the target sense1 s ∈ V of word w: P (w′|s, w) = maxs′∈Senses(w′) vs(s ′) Z (2) where Z = ∑ w” P (w”|s, w) is a normalization constant, vs is the vector resulting from an adequate number of random walks used to calculate PPR, and vs(s′) is the vector component corresponding to sense s′.']"
+"To fix the number of iterations needed to have a sufficiently accurate vector, we follow Lofgren et al. (2014) and set the error δ = 0.00001 and the number of iterations to 1 δ = 100, 000.
+",2.1 Lexical profiling,[0],[0]
+As a result of this lexical profiling step we have a probability distribution over vocabulary words for each given word sense of interest.,2.1 Lexical profiling,[0],[0]
+The objective of the second step is to score the importance of word senses for each of the corpus sentences which contain the word of interest.,2.2 Sentence scoring,[1.0],['The objective of the second step is to score the importance of word senses for each of the corpus sentences which contain the word of interest.']
+Given a sentence σ =,2.2 Sentence scoring,[0],[0]
+"w1, w2, . .",2.2 Sentence scoring,[0],[0]
+.,2.2 Sentence scoring,[0],[0]
+", wn, for a given target wordw in the sentence (w ∈ σ), and for each of its senses s ∈ Senses(w), we compute the probability P (s|σ,w).",2.2 Sentence scoring,[0.9512247659814319],"['Finally, for a given word w and a given sense s1 ∈ Senses(w), we score each sentence σ in which w appears and s1 is its most likely sense according to a formula that takes into account the difference between the first (i.e., s1) and the second most likely sense of w in σ: ∆s1(σ) = P (s1|σ,w)− P (s2|σ,w) (6) where s1 = arg maxs∈Senses(w) P (s|σ,w), and s2 = arg maxs∈Senses(w)\\{s1} P (s|σ,w).']"
+"Thanks to Bayes’ theorem we can determine the probability of sense s of w given the
+1Note that we use senses and concepts (synsets) interchangeably, because – given a word – a word sense unambiguously determines a concept (i.e., the synset it is contained in) and vice versa.
+sentence as follows:
+P (s|σ,w) =",2.2 Sentence scoring,[0],[0]
+"P (σ|s, w)P (s|w) P (σ|w) (3)
+= P (w1, . . .",2.2 Sentence scoring,[0],[0]
+", wn|s, w)P (s|w) P (w1, . . .",2.2 Sentence scoring,[0],[0]
+", wn|w) ∝",2.2 Sentence scoring,[0],[0]
+"P (w1, . .",2.2 Sentence scoring,[0],[0]
+.,2.2 Sentence scoring,[0],[0]
+", wn|s, w)P (s|w) (4) ≈ P (w1|s, w) . . .",2.2 Sentence scoring,[0],[0]
+"P (wn|s, w)P (s|w)
+(5)
+where Formula 4 is proportional to the original probability (due to removing the constant in the denominator) and is approximated with Formula 5 due to the assumption of independence of the words in the sentence.",2.2 Sentence scoring,[0],[0]
+"P (wi|s, w) is calculated as in Formula 2 and P (s|w) is set to 1/|Senses(w)| (recall that s is a sense of w).",2.2 Sentence scoring,[0],[0]
+"For example, given the sentence σ =",2.2 Sentence scoring,[0],[0]
+"“A match is a tool for starting a fire”, the target word w = match and its set of senses Smatch = {s1match, s2match}, where s1match is the sense of lighter and s2match is the sense of game match, we want to calculate the probability of each simatch ∈ Smatch of being the correct sense of match in the sentence σ.",2.2 Sentence scoring,[0.99768276594246],"['For example, given the sentence σ = “A match is a tool for starting a fire”, the target word w = match and its set of senses Smatch = {s1match, s2match}, where s1match is the sense of lighter and s2match is the sense of game match, we want to calculate the probability of each simatch ∈ Smatch of being the correct sense of match in the sentence σ.']"
+"Following Formula 5 we have:
+P (s1match|σ,match)",2.2 Sentence scoring,[0],[0]
+"≈ P (tool|s1match,match) · P (start|s1match,match) · P (fire|s1match,match) · P (s1match|match) = 2.1 · 10−4 · 2 · 10−3 · 10−2 · 5 · 10−1 = 2.1 · 10−9
+P (s2match|σ,match)",2.2 Sentence scoring,[0],[0]
+"≈ P (tool|s2match,match) ·",2.2 Sentence scoring,[0],[0]
+"P (start|s2match,match) · P (fire|s2match,match) · P (s2match|match) = 10−5 · 2.9 · 10−4 · 10−6 · 5 · 10−1 = 1.45 · 10−15
+As can be seen, the first sense of match has a much higher probability due to its stronger relatedness to the other words in the context (i.e. start, fire and tool).",2.2 Sentence scoring,[0],[0]
+Note also that all the probabilities for the second sense are at least one magnitude less than the probability of the first sense.,2.2 Sentence scoring,[0],[0]
+"Finally, for a given word w and a given sense s1 ∈ Senses(w), we score each sentence σ in which w appears and s1 is its most likely sense according to a formula that takes into account the difference between the first (i.e., s1) and the second most likely sense of w in σ:
+∆s1(σ)",2.3 Sense-based sentence ranking and selection,[0],[0]
+"= P (s1|σ,w)− P (s2|σ,w) (6) where s1 = arg maxs∈Senses(w) P (s|σ,w), and s2 = arg maxs∈Senses(w)\{s1} P (s|σ,w).",2.3 Sense-based sentence ranking and selection,[0],[0]
+We then sort all sentences based on ∆s1(·) and return a ranked list of sentences where word w is most likely to be sense-annotated with s1.,2.3 Sense-based sentence ranking and selection,[0],[0]
+"Although we recognize that other scoring strategies could have been used, this was experimentally the most effective one when compared to alternative strategies, i.e., the sense probability, the number of words related to the target word w, the sentence length or a combination thereof.",2.3 Sense-based sentence ranking and selection,[0],[0]
+"In the previous Section we assumed that WordNet was our semantic network, with synsets as vertices and edges represented by its semantic relations.",3 Creating a Denser and Multilingual Semantic Network,[0],[0]
+"However, while its lexical coverage is high, with a rich set of fine-grained synsets, at the relation level WordNet provides mainly paradigmatic information, i.e., relations like hypernymy (is-a) and meronymy (part-of).",3 Creating a Denser and Multilingual Semantic Network,[0],[0]
+"It lacks, on the other hand, syntagmatic relations, such as those that connect verb synsets to their arguments (e.g., the appropriate senses of eatv and foodn), or pairs of noun synsets (e.g., the appropriate senses of busn and drivern).
+",3 Creating a Denser and Multilingual Semantic Network,[0],[0]
+"Intuitively, Train-O-Matic would suffer from such a lack of syntagmatic relations, as the relevance of a sense for a given word in a sentence depends directly on the possibility of visiting senses of the other words in the same sentence (cf.",3 Creating a Denser and Multilingual Semantic Network,[0],[0]
+Formula 5) via random walks as calculated with Formula 1.,3 Creating a Denser and Multilingual Semantic Network,[0],[0]
+Such reachability depends on the connections available between synsets.,3 Creating a Denser and Multilingual Semantic Network,[0],[0]
+"Because syntagmatic relations are sparse in WordNet, if it was used on its own, we would end up with a poor ranking of sentences for any given word sense.",3 Creating a Denser and Multilingual Semantic Network,[1.0],"['Because syntagmatic relations are sparse in WordNet, if it was used on its own, we would end up with a poor ranking of sentences for any given word sense.']"
+"Moreover, even though the methodology presented in Section 2 is languageindependent, Train-O-Matic would lack informa-
+tion (e.g. senses for a word in an arbitrary vocabulary) for languages other than English.
+",3 Creating a Denser and Multilingual Semantic Network,[0],[0]
+"To cope with these issues, we exploit BabelNet,2 a huge multilingual semantic network obtained from the automatic integration of WordNet, Wikipedia, Wiktionary and other resources (Navigli and Ponzetto, 2012), and create the BabelNet subgraph induced by the WordNet vertices.",3 Creating a Denser and Multilingual Semantic Network,[0],[0]
+The result is a graph whose vertices are BabelNet synsets that contain at least one WordNet synset and whose edge set includes all those relations in BabelNet coming either from WordNet itself or from links in other resources mapped to WordNet (such as hyperlinks in a Wikipedia article connecting it to other articles).,3 Creating a Denser and Multilingual Semantic Network,[0],[0]
+"The greatest contribution of syntagmatic relations comes, indeed, from Wikipedia, as its articles are linked to related articles (e.g., the English Wikipedia Bus article3 is linked to Passenger, Tourism, Bus lane, Timetable, School, and many more).
+",3 Creating a Denser and Multilingual Semantic Network,[0],[0]
+"Because not all Wikipedia (and other resources’) pages are connected with the same degree of relatedness (e.g., countries are often linked, but they are not necessarily closely related to the source article in which the link occurs), we apply the following weighting strategy to each edge (s, s′) ∈ E of our WordNet-induced subgraph of BabelNet G = (V,E):
+w(s, s′) =",3 Creating a Denser and Multilingual Semantic Network,[0],[0]
+"{ 1 (s, s′) ∈ E(WordNet)",3 Creating a Denser and Multilingual Semantic Network,[0],[0]
+"WO(s, s′)",3 Creating a Denser and Multilingual Semantic Network,[0],[0]
+"otherwise
+(7) where E(WordNet) is the edge set of the original WordNet graph andWO(s, s′) is the weighted
+2http://babelnet.org 3Retrieved on February 3rd, 2017.
+",3 Creating a Denser and Multilingual Semantic Network,[0],[0]
+"overlap measure which calculates the similarity between two synsets:
+WO(s, s′) = ∑|S|",3 Creating a Denser and Multilingual Semantic Network,[0],[0]
+"i=1(r 1 i + r
+2 i ) −1∑|S|
+i=1(2i)−1
+where r1i and r 2",3 Creating a Denser and Multilingual Semantic Network,[0],[0]
+"i are the rankings of the i-th synsets in the set S of the components in common between the vectors associated with s and s′, respectively.",3 Creating a Denser and Multilingual Semantic Network,[0],[0]
+"Because at this stage we still have to calculate our synset vector representation, we use the precomputed NASARI vectors (Camacho-Collados et al., 2015) to calculate WO.",3 Creating a Denser and Multilingual Semantic Network,[0],[0]
+"This choice is due to WO’s higher performance over cosine similarity for vectors with explicit dimensions (Pilehvar et al., 2013).
+",3 Creating a Denser and Multilingual Semantic Network,[0],[0]
+"As a result, each row of the original adjacency matrix M of G will be replaced with the weights calculated in Formula 7 and then normalized in order to be ready for PPR calculation (see Formula 1).",3 Creating a Denser and Multilingual Semantic Network,[0],[0]
+"An idea of why a denser semantic network has more useful connections and thus leads to better results is provided by the example in
+iment for the animal, and operating system and Windows for the device sense, among others).",3 Creating a Denser and Multilingual Semantic Network,[0],[0]
+"Corpora for sense annotation We used two different corpora to extract sentences: Wikipedia and the United Nations Parallel Corpus (Ziemski et al., 2016).",4 Experimental Setup,[1.0],"['Corpora for sense annotation We used two different corpora to extract sentences: Wikipedia and the United Nations Parallel Corpus (Ziemski et al., 2016).']"
+"The first is the largest and most up-to-date encyclopedic resource, containing definitional information, the second, on the other hand, is a public collection of parliamentary documents of the United Nations.",4 Experimental Setup,[0],[0]
+"The application of TrainO-Matic to the two corpora produced two senseannotated datasets, which we named T-O-MWiki and T-O-MUN , respectively.
+",4 Experimental Setup,[0.9999999488637434],"['The application of TrainO-Matic to the two corpora produced two senseannotated datasets, which we named T-O-MWiki and T-O-MUN , respectively.']"
+"Semantic Network We created sense-annotated corpora with Train-O-Matic both when using PPR vectors computed from vanilla WordNet and when using WordNetBN , our denser network obtained from the WordNet-induced subgraph of BabelNet (see Section 3).
+",4 Experimental Setup,[0.9999999103463316],"['Semantic Network We created sense-annotated corpora with Train-O-Matic both when using PPR vectors computed from vanilla WordNet and when using WordNetBN , our denser network obtained from the WordNet-induced subgraph of BabelNet (see Section 3).']"
+"Gold standard datasets We performed our evaluations using the framework made available by Raganato et al. (2017a) on five different allwords datasets, namely: the Senseval-2 (Edmonds and Cotton, 2001), Senseval-3 (Snyder and Palmer, 2004), SemEval-2007 (Pradhan et al., 2007), SemEval-2013 (Navigli et al., 2013) and SemEval-2015 (Moro and Navigli, 2015)",4 Experimental Setup,[0],[0]
+WSD datasets.,4 Experimental Setup,[0],[0]
+"We focused on nouns only, given the fact that Wikipedia provides connections between nominal synsets only, and therefore contributes mainly to syntagmatic relations between nouns.
+",4 Experimental Setup,[0],[0]
+"Comparison sense-annotated corpora To show the impact of our T-O-M corpora in WSD, we compared its performance on the above gold standard datasets, against training with:
+• SemCor (Miller et al., 1993), a corpus containing about 226,000 words annotated manually with WordNet senses.
+",4 Experimental Setup,[0.9999999369493345],"['Comparison sense-annotated corpora To show the impact of our T-O-M corpora in WSD, we compared its performance on the above gold standard datasets, against training with: • SemCor (Miller et al., 1993), a corpus containing about 226,000 words annotated manually with WordNet senses.']"
+"• One Million Sense-Tagged Instances (Taghipour and Ng, 2015, OMSTI), a sense-annotated dataset obtained via a semi-automatic approach based on the disambiguation of a parallel corpus, i.e., the United Nations Parallel Corpus, performed by exploiting manually translated word senses.",4 Experimental Setup,[1.0],"['• One Million Sense-Tagged Instances (Taghipour and Ng, 2015, OMSTI), a sense-annotated dataset obtained via a semi-automatic approach based on the disambiguation of a parallel corpus, i.e., the United Nations Parallel Corpus, performed by exploiting manually translated word senses.']"
+"Because OMSTI integrates SemCor
+to increase coverage, to keep a level playing field we excluded the latter from the corpus.
+",4 Experimental Setup,[0],[0]
+"We note that T-O-M, instead, is fully automatic and does not require any WSD-specific human intervention nor any aligned corpus.
+Reference system In all our experiments, we used It Makes Sense (Zhong and Ng, 2010, IMS), a state-of-the-art WSD system based on linear Support Vector Machines, as our reference system for comparing its performance when trained on TO-M, against the same WSD system trained on other sense-annotated corpora (i.e., SemCor and OMSTI).",4 Experimental Setup,[0.9505444560422961],"['We believe that the ability of T-O-M to overcome the current paucity of annotated data for WSD, coupled with video games with a purpose for validation purposes (Jurgens and Navigli, 2014; Vannella et al., 2014), paves the way for high-quality multilingual supervised WSD.']"
+"Following the WSD literature, unless stated otherwise, we report performance in terms of F1, i.e., the harmonic mean of precision and recall.
+",4 Experimental Setup,[0],[0]
+"We note that it is not the purpose of this paper to show that T-O-M, when integrated into IMS, beats all other configurations or alternative systems, but rather to fully automatize the WSD pipeline with performances which are competitive with the state of the art.
+",4 Experimental Setup,[0],[0]
+Baseline,4 Experimental Setup,[0],[0]
+"As a traditional baseline in WSD, we used the Most Frequent Sense (MFS) baseline given by the first sense in WordNet.",4 Experimental Setup,[0],[0]
+"The MFS is a very competitive baseline, due to the sense skewness phenomenon in language (Navigli, 2009).
+",4 Experimental Setup,[0],[0]
+"Number of training sentences per sense Given a target word w, we sorted its senses Senses(w) following the WordNet ordering and selected the top ki training sentences for the i-th sense according to Formula 6, where:
+ki = 1 iz ∗K",4 Experimental Setup,[0],[0]
+"(8)
+with K = 500 and z = 2 which were tuned on a separate small in-house development dataset5.",4 Experimental Setup,[0],[0]
+The first result we report regards the impact of vanilla WordNet vs. our WordNet-induced subgraph of BabelNet (WordNetBN ) when calculating PPR vectors.,5.1 Impact of syntagmatic relations,[0],[0]
+"As can be seen from Table 2 – which shows the performance of the T-O-MWiki corpora generated with the two semantic networks – using WordNet for PPR computation decreases
+550 word-sense pairs annotated manually.
+",5.1 Impact of syntagmatic relations,[0],[0]
+"the overall performance of IMS from 0.5 to around 4 points across the five datasets, with an overall loss of 1.6 F1 points.",5.1 Impact of syntagmatic relations,[1.0],"['the overall performance of IMS from 0.5 to around 4 points across the five datasets, with an overall loss of 1.6 F1 points.']"
+Similar performance losses were observed when using T-O-MUN (see Table 3).,5.1 Impact of syntagmatic relations,[0],[0]
+This corroborates our hunch discussed in Section 3 that a resource like BabelNet can contribute important syntagmatic relations that are beneficial for identifying (and ranking high) sentences which are semantically relevant for the target word sense.,5.1 Impact of syntagmatic relations,[1.0],['This corroborates our hunch discussed in Section 3 that a resource like BabelNet can contribute important syntagmatic relations that are beneficial for identifying (and ranking high) sentences which are semantically relevant for the target word sense.']
+"In the following experiments, we report only results using WordNetBN .",5.1 Impact of syntagmatic relations,[0],[0]
+"We now move to comparing the performance of T-O-M, which is fully automatic, against corpora which are annotated manually (SemCor) and semi-automatically (OMSTI).",5.2 Comparison against sense-annotated corpora,[1.0],"['We now move to comparing the performance of T-O-M, which is fully automatic, against corpora which are annotated manually (SemCor) and semi-automatically (OMSTI).']"
+"In Table 3 we show the F1-score of IMS on each gold standard dataset in the evaluation framework and on all datasets merged together (last row), when it is trained with the various corpora described above.
+",5.2 Comparison against sense-annotated corpora,[0],[0]
+"As can be seen, T-O-MWiki and T-O-MUN obtain higher performance than OMSTI (up to 5.5 points above) on 3 out of 5 datasets, and, overall, T-O-MWiki scores 1 point above OMSTI.",5.2 Comparison against sense-annotated corpora,[0],[0]
+"The MFS is in the same ballpark as T-O-MWiki, performing better on some datasets and worse on others.",5.2 Comparison against sense-annotated corpora,[0],[0]
+We note that IMS trained on T-O-MWiki succeeds in surpassing or obtaining the same results as IMS trained on SemCor on SemEval15 and SemEval-13.,5.2 Comparison against sense-annotated corpora,[0],[0]
+"We view this as a significant achievement given the total absence of manual effort involved in T-O-M. Because overall T-O-MWiki outperforms T-O-MUN , in what follows we report all the results with T-O-MWiki, except for the domain-oriented evaluation (see Section 5.4).",5.2 Comparison against sense-annotated corpora,[0],[0]
+"IMS uses the MFS as a backoff strategy when no sense can be output for a target word in context (Zhong and Ng, 2010).",5.3 Performance without backoff strategy,[0],[0]
+"Consequently, the performance of the MFS is mixed up with that of the SVM classifier.",5.3 Performance without backoff strategy,[0],[0]
+"As shown in Table 4, OMSTI is able to provide annotated sentences for roughly half of the tokens in the datasets.",5.3 Performance without backoff strategy,[1.0],"['As shown in Table 4, OMSTI is able to provide annotated sentences for roughly half of the tokens in the datasets.']"
+"Train-O-Matic, on the other hand, is able to cover almost all words in each dataset with at least one training sentence.",5.3 Performance without backoff strategy,[0],[0]
+"This means that in around 50% of cases OMSTI gives an answer based on the IMS backoff strategy.
+",5.3 Performance without backoff strategy,[0.9999999643176244],['This means that in around 50% of cases OMSTI gives an answer based on the IMS backoff strategy.']
+"To determine the real impact of the different training data, we therefore decided to perform an additional analysis of the IMS performance when the MFS backoff strategy is disabled.",5.3 Performance without backoff strategy,[0],[0]
+"Because we suspected the system would not always return a sense for each target word, in this experiment we measured precision, recall and their harmonic mean, i.e., F1.",5.3 Performance without backoff strategy,[0],[0]
+"The results in Table 5 confirm our hunch, showing that OMSTI’s recall drops heavily, thereby affecting F1 considerably.",5.3 Performance without backoff strategy,[0],[0]
+"T-O-M performances, instead, remain high in terms of precision, recall and F1.",5.3 Performance without backoff strategy,[0],[0]
+"This confirms that OMSTI relies heavily on data (those obtained for the MFS and from SemCor) that are produced manually, rather than semi-automatically.",5.3 Performance without backoff strategy,[0],[0]
+"To further inspect the ability of T-O-M to enable disambiguation in different domains, we decided to evaluate on specific documents from the various gold standard datasets which could be clearly assigned a domain label.",5.4 Domain-oriented WSD,[0],[0]
+"Specifically, we tested on 13 SemEval-13 documents from various domains6 and 2 SemEval-15 documents (namely, maths & computers, and biomedicine) and carried out two separate tests and evaluations of T-O-M on each domain: once using the MFS backoff strategy, and once not using it.",5.4 Domain-oriented WSD,[1.0],"['Specifically, we tested on 13 SemEval-13 documents from various domains6 and 2 SemEval-15 documents (namely, maths & computers, and biomedicine) and carried out two separate tests and evaluations of T-O-M on each domain: once using the MFS backoff strategy, and once not using it.']"
+"In Tables 6 and 7 we report the results of both T-O-MWiki and T-O-MUN to determine the impact of the corpus type.
+",5.4 Domain-oriented WSD,[0],[0]
+"As can be seen in the tables, T-O-MWiki systematically attains higher scores than OMSTI (except for the biology domain), and, in most cases, attains higher scores than MFS when the backoff is used, with a drastic, systematic increase over OMSTI with both Train-O-Matic configurations
+6Namely biology, climate, finance, health care, politics, social issues and sport.
+in recall and F1 when the backoff strategy is disabled.",5.4 Domain-oriented WSD,[0],[0]
+"This demonstrates the usefulness of the corpora annotated by Train-O-Matic not only on open text, but also on specific domains.",5.4 Domain-oriented WSD,[0],[0]
+"We note that T-O-MUN obtains the best results in the politics domain, which is the closest domain to the UN corpus from which its training sentences are obtained.",5.4 Domain-oriented WSD,[0],[0]
+"Experimental Setup In this section we investigate the ability of Train-O-Matic to scale to lowresourced languages, such as Italian and Spanish, for which training data for WSD is not available.
+",6 Scaling up to Multiple Languages,[0.9524118029815815],"['Moreover Train-O-Matic has proven to scale well to lowresourced languages, for which no manually annotated dataset exists, surpassing the current state of the art of knowledge-based systems.']"
+"Thanks to BabelNet, in fact, Train-O-Matic can
+be used to generate sense-annotated data for any language supported by the knowledge base.",6 Scaling up to Multiple Languages,[0],[0]
+"Thus, in order to build new training datasets for the two languages, we ran Train-O-Matic on their corresponding versions of Wikipedia, then we tuned the two parameters K and z on an in-house development dataset7.",6 Scaling up to Multiple Languages,[0],[0]
+"In contrast to the English setting, in order to calculate Formula 8 we sorted the senses of each word by vertex degree.",6 Scaling up to Multiple Languages,[0],[0]
+"Finally we used the output data to train IMS.
+Results To perform our evaluation we chose the most recent multilingual task (SemEval 2015 task 13) which includes gold data for Italian and Spanish.",6 Scaling up to Multiple Languages,[0],[0]
+"As can be seen from Table 8 TrainO-Matic enabled IMS to perform better than the best participating system (Manion and Sainudiin, 2014, SUDOKU) in all three settings (All domains, Maths & Computer and Biomedicine).",6 Scaling up to Multiple Languages,[1.0],"['As can be seen from Table 8 TrainO-Matic enabled IMS to perform better than the best participating system (Manion and Sainudiin, 2014, SUDOKU) in all three settings (All domains, Maths & Computer and Biomedicine).']"
+"Its performance was in fact, 1 to 3 points higher, with a 6-point peak on Maths & Computer in Spanish and on Biomedicine in Italian.",6 Scaling up to Multiple Languages,[0],[0]
+This demonstrates the ability of Train-O-Matic to enable supervised WSD systems to surpass state-of-theart knowledge-based WSD approaches in lowresourced languages without relying on manually curated data for training.,6 Scaling up to Multiple Languages,[1.0],['This demonstrates the ability of Train-O-Matic to enable supervised WSD systems to surpass state-of-theart knowledge-based WSD approaches in lowresourced languages without relying on manually curated data for training.']
+There are two mainstream approaches to Word Sense Disambiguation: supervised and knowledge-based approaches.,7 Related Work,[0],[0]
+"Both suffer in different ways from the so-called knowledge acquisition bottleneck, that is, the difficulty in obtaining an adequate amount of lexical-semantic data: for training in the case of supervised systems, and for enriching semantic networks in the case of knowledge-based ones (Pilehvar and
+7We set K = 100 and z",7 Related Work,[0],[0]
+"= 2.3 for Spanish and K = 100 and z = 2.5 for Italian.
+Navigli, 2014; Navigli, 2009).
+",7 Related Work,[0],[0]
+"State-of-the-art supervised systems include Support Vector Machines such as IMS (Zhong and Ng, 2010) and, more recently, LSTM neural networks with attention and multitask learning (Raganato et al., 2017b) as well as LSTMs paired with nearest neighbours classification (Melamud et al., 2016; Yuan et al., 2016).",7 Related Work,[0],[0]
+The latter also integrates a label propagation algorithm in order to enrich the sense annotated dataset.,7 Related Work,[0],[0]
+"The main difference from our approach is its need for a manually annotated dataset to start the label propagation algorithm, whereas Train-O-Matic is fully automatic.",7 Related Work,[0],[0]
+"An evaluation against this system would have been interesting, but neither the proprietary training data nor the code are available at the time of writing.
+",7 Related Work,[0],[0]
+"In order to generalize effectively, these supervised systems require large numbers of training in-
+stances annotated with senses for each target word occurrence.",7 Related Work,[0],[0]
+"Overall, this amounts to millions of training instances for each language of interest, a number that is not within reach for any language.",7 Related Work,[0],[0]
+"In fact, no supervised system has been submitted in major multilingual WSD competitions for languages other than English (Navigli et al., 2013; Moro and Navigli, 2015).",7 Related Work,[0],[0]
+"To overcome this problem, new methodologies have recently been developed which aim to create sense-tagged corpora automatically.",7 Related Work,[0],[0]
+Raganato et al. (2016) developed 7 heuristics to grow the number of hyperlinks in Wikipedia pages.,7 Related Work,[0],[0]
+"Otegi et al. (2016) applied a different disambiguation pipeline for each language to parallel text in Europarl (Koehn, 2005) and QTLeap (Agirre et al., 2015) in order to enrich them with semantic annotations.",7 Related Work,[0],[0]
+"Taghipour and Ng (2015), the work closest to ours, exploits the alignment from English to Chinese sentences of
+the United Nation Parallel Corpus (Ziemski et al., 2016) to reduce the ambiguity of English words and sense-tag English sentences.",7 Related Work,[0],[0]
+The assumption is that the second language is less ambiguous than the first one and that hand-made translations of senses are available for each WordNet synset.,7 Related Work,[0],[0]
+"This approach is, therefore, semi-automatic and relies on certain assumptions, in contrast to TrainO-Matic which is, instead, fully automatic and can be applied to any kind of corpus (and language) depending on the specific need.",7 Related Work,[0],[0]
+Earlier attempts at the automatic extraction of training samples were made by Agirre and De Lacalle (2004) and Fernández et al. (2004).,7 Related Work,[0],[0]
+"Both exploited the monosemous relatives method (Leacock et al., 1998) in order to retrieve sentences from the Web which contained a given monosemous noun or a relative monosemous word (e.g., a synonym, a hypernym, etc.).",7 Related Work,[0],[0]
+"As can be seen in (Fernández et al., 2004)",7 Related Work,[0],[0]
+"this approach can lead to the retrieval of very accurate examples, but its main drawback lies in the number of senses covered.",7 Related Work,[0],[0]
+"In fact, for all those synsets that do not have any monosemous relative, the system is unable to retrieve examples, thus heavily affecting the performance in terms of recall and F1.",7 Related Work,[0],[0]
+"Knowledge-based WSD, instead, bypasses the heavy requirement of sense-annotated corpora by applying algorithms that exploit a general-purpose semantic network, such as WordNet, which encodes the relational information that interconnects synsets via different kinds of relation.",7 Related Work,[0],[0]
+"Approaches include variants of Personalized PageRank (Agirre et al., 2014) and densest subgraph approximation algorithms (Moro et al., 2014) which, thanks to the availability of multilingual resources such as BabelNet, can easily be extended to perform WSD in arbitrary languages.",7 Related Work,[0],[0]
+Other approaches to knowledge-based WSD exploit the definitional knowledge contained in a dictionary.,7 Related Work,[0],[0]
+"The Lesk algorithm (Lesk, 1986) and its variants (Banerjee and Pedersen, 2002; Kilgarriff and Rosenzweig, 2000; Vasilescu et al., 2004) aim to determine the correct sense of a word by comparing each wordsense definition with the context in which the target word appears.",7 Related Work,[0],[0]
+"The limit of knowledge-based WSD, however, lies in the absence of mechanisms that can take into account the very local context of a target word occurrence, including non-content words such as prepositions and articles.",7 Related Work,[0],[0]
+"Furthermore, recent studies seem to suggest that such
+approaches are barely able to surpass supervised WSD systems when they enrich their networks starting from a comparable amount of annotated data (Pilehvar and Navigli, 2014).",7 Related Work,[0],[0]
+"With T-O-M, rather than further enriching an existing semantic network, we exploit the information available in the network to annotate raw sentences with sense information and train a state-of-the-art supervised WSD system without task-specific human annotations.",7 Related Work,[0],[0]
+"In this paper we presented Train-O-Matic, a novel approach to the automatic construction of large training sets for supervised WSD in an arbitrary language.",8 Conclusion,[0],[0]
+"Train-O-Matic removes the burden of manual intervention by leveraging the structural semantic information available in the WordNet graph enriched with additional relational information from BabelNet, and achieves performance competitive to that of semi-automatic approaches and, in some cases, of manually-curated training data.",8 Conclusion,[0],[0]
+"T-O-M was shown to provide training data for virtually all the target ambiguous nouns, in marked contrast to alternatives like OMSTI, which covers in many cases around half of the tokens, resorting to the MFS otherwise.",8 Conclusion,[0],[0]
+"Moreover Train-O-Matic has proven to scale well to lowresourced languages, for which no manually annotated dataset exists, surpassing the current state of the art of knowledge-based systems.
+",8 Conclusion,[0],[0]
+"We believe that the ability of T-O-M to overcome the current paucity of annotated data for WSD, coupled with video games with a purpose for validation purposes (Jurgens and Navigli, 2014; Vannella et al., 2014), paves the way for high-quality multilingual supervised WSD.",8 Conclusion,[0],[0]
+"All the training corpora, including approximately one million sentences which cover English, Italian and Spanish, are made available to the community at http://trainomatic.org.
+",8 Conclusion,[0.9999999784758938],"['All the training corpora, including approximately one million sentences which cover English, Italian and Spanish, are made available to the community at http://trainomatic.org.']"
+"As future work we plan to extend our approach to verbs, adjectives and adverbs.",8 Conclusion,[0],[0]
+Following Bennett et al. (2016) we will also experiment on more realistic estimates of P (s|w) in Formula 5 as well as other assumptions made in our work.,8 Conclusion,[0],[0]
+The authors gratefully acknowledge the support of the ERC Consolidator Grant MOUSSE,Acknowledgments,[0],[0]
+No.,Acknowledgments,[0],[0]
+726487.,Acknowledgments,[0],[0]
+Annotating large numbers of sentences with senses is the heaviest requirement of current Word Sense Disambiguation.,abstractText,[0],[0]
+"We present Train-O-Matic, a languageindependent method for generating millions of sense-annotated training instances for virtually all meanings of words in a language’s vocabulary.",abstractText,[0],[0]
+The approach is fully automatic: no human intervention is required and the only type of human knowledge used is a WordNet-like resource.,abstractText,[0],[0]
+"Train-O-Matic achieves consistently state-of-the-art performance across gold standard datasets and languages, while at the same time removing the burden of manual annotation.",abstractText,[0],[0]
+All the training data is available for research purposes at http://trainomatic.org.,abstractText,[0],[0]
+Train-O-Matic: Large-Scale Supervised Word Sense Disambiguation in Multiple Languages without Manual Training Data,title,[0],[0]

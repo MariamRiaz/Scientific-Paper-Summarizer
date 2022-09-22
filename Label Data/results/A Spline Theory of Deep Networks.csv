@@ -1,0 +1,458 @@
+0,1,label2,summary_sentences
+Deep learning has significantly advanced our ability to address a wide range of difficult machine learning and signal processing problems.,1. Introduction,[0],[0]
+"Today’s machine learning landscape is dominated by deep (neural) networks (DNs), which are compositions of a large number of simple parameterized linear and nonlinear transforms.",1. Introduction,[0],[0]
+"An all-too-common story of late is that of plugging a deep network into an application as a black box, training it on copious training data,
+1ECE Department, Rice University, Houston, TX, USA.",1. Introduction,[0],[0]
+"Correspondence to: Randall B. <randallbalestriero@gmail.com>.
+",1. Introduction,[0],[0]
+"Proceedings of the 35 th International Conference on Machine Learning, Stockholm, Sweden, PMLR 80, 2018.",1. Introduction,[0],[0]
+"Copyright 2018 by the author(s).
+",1. Introduction,[0],[0]
+"and then significantly improving performance over classical approaches.
+",1. Introduction,[0],[0]
+"Despite this empirical progress, the precise mechanisms by which deep learning works so well remain relatively poorly understood, adding an air of mystery to the entire field.",1. Introduction,[0],[0]
+"Ongoing attempts to build a rigorous mathematical framework fall roughly into five camps: (i) probing and measuring DNs to visualize their inner workings (Zeiler & Fergus, 2014); (ii) analyzing their properties such as expressive power (Cohen et al., 2016), loss surface geometry (Lu & Kawaguchi, 2017; Soudry & Hoffer, 2017), nuisance management (Soatto & Chiuso, 2016), sparsification (Papyan et al., 2017), and generalization abilities; (iii) new mathematical frameworks that share some (but not all) common features with DNs (Bruna & Mallat, 2013); (iv) probabilistic generative models from which specific DNs can be derived (Arora et al., 2013; Patel et al., 2016); and (v) information theoretic bounds (Tishby & Zaslavsky, 2015).
+",1. Introduction,[0],[0]
+"In this paper, we build a rigorous bridge between DNs and approximation theory via spline functions and operators.",1. Introduction,[1.0],"['In this paper, we build a rigorous bridge between DNs and approximation theory via spline functions and operators.']"
+"We prove that a large class of DNs — including convolutional neural networks (CNNs) (LeCun, 1998), residual networks (ResNets) (He et al., 2016; Targ et al., 2016), skip connection networks (Srivastava et al., 2015), fully connected networks (Pal & Mitra, 1992), recurrent neural networks (RNNs) (Graves, 2013), and beyond — can be written as spline operators.",1. Introduction,[1.0],"['We prove that a large class of DNs — including convolutional neural networks (CNNs) (LeCun, 1998), residual networks (ResNets) (He et al., 2016; Targ et al., 2016), skip connection networks (Srivastava et al., 2015), fully connected networks (Pal & Mitra, 1992), recurrent neural networks (RNNs) (Graves, 2013), and beyond — can be written as spline operators.']"
+"In particular, when these networks employ current standard-practice piecewise-affine, convex nonlinearities (e.g., ReLU, max-pooling, etc.)",1. Introduction,[0],[0]
+"they can be written as the composition of max-affine spline operators (MASOs) (Magnani & Boyd, 2009; Hannah & Dunson, 2013).",1. Introduction,[0],[0]
+"We focus on such nonlinearities here but note that our framework applies also to non-piecewise-affine nonlinearities through a standard approximation argument.
+",1. Introduction,[0],[0]
+The max-affine spline connection provides a powerful portal through which to view and analyze the inner workings of a DN using tools from approximation theory and functional analysis.,1. Introduction,[1.0],['The max-affine spline connection provides a powerful portal through which to view and analyze the inner workings of a DN using tools from approximation theory and functional analysis.']
+"Here is a summary of our key contributions:
+[C1] We prove that a large class of DNs can be written as a composition of MASOs, from which it follows immediately that, conditioned on the input signal, the output of a DN is a simple affine transformation of the input.",1. Introduction,[0.9999999611148424],"['Here is a summary of our key contributions: [C1] We prove that a large class of DNs can be written as a composition of MASOs, from which it follows immediately that, conditioned on the input signal, the output of a DN is a simple affine transformation of the input.']"
+"We illustrate in Section 4 by deriving a closed-form expression for the
+input/output mapping of a CNN.
+",1. Introduction,[0.9999999756342733],['We illustrate in Section 4 by deriving a closed-form expression for the input/output mapping of a CNN.']
+"[C2] The affine mapping formula enables us to interpret a MASO DN as constructing a set of signal-dependent, classspecific templates against which the signal is compared via a simple inner product.",1. Introduction,[1.0],"['[C2] The affine mapping formula enables us to interpret a MASO DN as constructing a set of signal-dependent, classspecific templates against which the signal is compared via a simple inner product.']"
+"In Section 5 we relate DNs directly to the classical theory of optimal classification via matched filters and provide insights into the effects of data memorization (Zhang et al., 2016).
+",1. Introduction,[0.9999999506066727],"['In Section 5 we relate DNs directly to the classical theory of optimal classification via matched filters and provide insights into the effects of data memorization (Zhang et al., 2016).']"
+[C3] We propose a simple penalty term that can be added to the cost function of any DN learning algorithm to force the templates to be orthogonal to each other.,1. Introduction,[1.0],['[C3] We propose a simple penalty term that can be added to the cost function of any DN learning algorithm to force the templates to be orthogonal to each other.']
+"In Section 6, we show that this leads to significantly improved classification performance and reduced overfitting on standard test data sets like CIFAR100 with no change to the DN architecture.
+",1. Introduction,[0.9999999869509275],"['In Section 6, we show that this leads to significantly improved classification performance and reduced overfitting on standard test data sets like CIFAR100 with no change to the DN architecture.']"
+"[C4] The partition of the input space induced by a MASO links DNs to the theory of vector quantization (VQ) and K-means clustering, which opens up a new geometric avenue to study how DNs cluster and organize signals in a hierarchical fashion.",1. Introduction,[1.0],"['[C4] The partition of the input space induced by a MASO links DNs to the theory of vector quantization (VQ) and K-means clustering, which opens up a new geometric avenue to study how DNs cluster and organize signals in a hierarchical fashion.']"
+"Section 7 studies the properties of the MASO partition.
+",1. Introduction,[0],[0]
+"[C5] Leveraging the fact that a DN considers two signals to be similar if they lie in the same MASO partition region, we develop a new signal distance in Section 7.3 that measures the difference between their partition encodings.",1. Introduction,[1.0],"['[C5] Leveraging the fact that a DN considers two signals to be similar if they lie in the same MASO partition region, we develop a new signal distance in Section 7.3 that measures the difference between their partition encodings.']"
+"The distance is easily computed via backpropagation.
+",1. Introduction,[1.0000000513564014],['The distance is easily computed via backpropagation.']
+A number of appendices in the Supplementary Material (SM) contain the mathematical setup and proofs.,1. Introduction,[1.0],['A number of appendices in the Supplementary Material (SM) contain the mathematical setup and proofs.']
+"A significantly extended account of these events with numerous new results is available in (Balestriero & Baraniuk, 2018).",1. Introduction,[1.0],"['A significantly extended account of these events with numerous new results is available in (Balestriero & Baraniuk, 2018).']"
+A deep network (DN) is an operator fΘ :,2. Background on Deep Networks,[0],[0]
+RD → RC that maps an input signal1 x ∈ RD to an output prediction ŷ ∈ RC as fΘ :,2. Background on Deep Networks,[0],[0]
+RD → RC .,2. Background on Deep Networks,[0],[0]
+"All current DNs can be written as a composition of L intermediate mappings called layers
+fΘ(x) =",2. Background on Deep Networks,[0],[0]
+( f (L) θ(L),2. Background on Deep Networks,[0],[0]
+◦ · · · ◦,2. Background on Deep Networks,[0],[0]
+f (1) θ(1) ),2. Background on Deep Networks,[0],[0]
+"(x), (1)
+where Θ = { θ(1), . . .",2. Background on Deep Networks,[0],[0]
+", θ(L) } is the collection of the network’s parameters from each layer.",2. Background on Deep Networks,[1.0],"[', θ(L) } is the collection of the network’s parameters from each layer.']"
+"This composition of mappings is nonlinear and non-commutative, in general.
+",2. Background on Deep Networks,[1.0000000276630818],"['This composition of mappings is nonlinear and non-commutative, in general.']"
+A DN layer at level ` is an operator f (`) θ(`) that takes as input the vector-valued signal z(`−1)(x) ∈ RD(`−1) and produces the vector-valued output z(`)(x) ∈ RD(`) .,2. Background on Deep Networks,[1.0],['A DN layer at level ` is an operator f (`) θ(`) that takes as input the vector-valued signal z(`−1)(x) ∈ RD(`−1) and produces the vector-valued output z(`)(x) ∈ RD(`) .']
+We will assume that x and z(`) are column vectors.,2. Background on Deep Networks,[0],[0]
+We initialize with z(0)(x) =,2. Background on Deep Networks,[0],[0]
+"x and denote z(L)(x) =: z for convenience.
+1",2. Background on Deep Networks,[0],[0]
+"For concreteness, we focus here on processing K-channel images x, such as color digital photographs.",2. Background on Deep Networks,[0],[0]
+"But our analysis and techniques apply to signals of any index-dimensionality, including speech and audio signals, video signals, etc.
+",2. Background on Deep Networks,[0],[0]
+"The signals z(`)(x) are typically called feature maps; it is easy to see that
+z(`)(x) =",2. Background on Deep Networks,[0],[0]
+"( f (`)
+θ(`) ◦ · · · ◦ f (1) θ(1)
+) (x), ` ∈ {1, . . .",2. Background on Deep Networks,[0],[0]
+", L}.",2. Background on Deep Networks,[0],[0]
+"(2)
+We briefly overview the basic DN operators and layers we consider in this paper; more details and additional layers are provided in (Goodfellow et al., 2016) and (Balestriero & Baraniuk, 2018).",2. Background on Deep Networks,[0],[0]
+"A fully connected operator performs an arbitrary affine transformation by multiplying its input by the dense matrix W (`) ∈ RD(`)×D(`−1) and adding the arbitrary bias vector b(`)W ∈ RD (`) , as in f (`)W ( z(`−1)(x) )",2. Background on Deep Networks,[0],[0]
+:= W (`)z(`−1)(x) + b (`) W .,2. Background on Deep Networks,[0],[0]
+"A convolution operator reduces the number of parameters in the affine transformation by replacing the unconstrained W (`) with a multichannel convolution matrix, as in f (`)C ( z(`−1)(x) )",2. Background on Deep Networks,[0],[0]
+:= C(`)z(`−1)(x) +,2. Background on Deep Networks,[0],[0]
+"b (`) C .
+",2. Background on Deep Networks,[0],[0]
+"An activation operator applies a scalar nonlinear activation function σ independently to each entry of its input, as in[ f (`) σ",2. Background on Deep Networks,[0],[0]
+( z(`−1)(x) ),2. Background on Deep Networks,[0],[0]
+],2. Background on Deep Networks,[0],[0]
+k := σ,2. Background on Deep Networks,[0],[0]
+"( [z(`−1)(x)]k ) , k = 1, . . .",2. Background on Deep Networks,[0],[0]
+", D(`).",2. Background on Deep Networks,[0],[0]
+"Nonlinearities are crucial to DNs, since otherwise the entire network would collapse to a single global affine transform.",2. Background on Deep Networks,[1.0],"['Nonlinearities are crucial to DNs, since otherwise the entire network would collapse to a single global affine transform.']"
+Three popular activation functions are the rectified linear unit (ReLU) σReLU(u),2. Background on Deep Networks,[0],[0]
+":= max(u, 0), the leaky ReLU σLReLU(u)",2. Background on Deep Networks,[0],[0]
+":= max(ηu, u), η > 0, and the absolute value σabs(u) := |u|.",2. Background on Deep Networks,[0],[0]
+These three functions are both piecewise affine and convex.,2. Background on Deep Networks,[1.0],['These three functions are both piecewise affine and convex.']
+Other popular activation functions include the sigmoid σsig(u) := 11+e−u and hyperbolic tangent σtanh(u) := 2σsig(2u)−1.,2. Background on Deep Networks,[0],[0]
+"These two functions are neither piecewise affine nor convex.
+",2. Background on Deep Networks,[1.000000038398795],['These two functions are neither piecewise affine nor convex.']
+"A pooling operator subsamples its input to reduce its dimensionality according to a sub-sampling policy ρ applied over a collection of input indices {Rk}K (`)
+k=1 (typically a small patch), e.g., max pooling[ f (`) ρ ( z(`−1)(x) )",2. Background on Deep Networks,[0],[0]
+],2. Background on Deep Networks,[0],[0]
+"k
+:= max d∈R(`)k
+[ z(`−1)(x) ]",2. Background on Deep Networks,[0],[0]
+"d , k =
+1, . . .",2. Background on Deep Networks,[0],[0]
+", D(`).",2. Background on Deep Networks,[0],[0]
+"See (Balestriero & Baraniuk, 2018) for the definitions of average pooling, channel pooling, skip connections, and recurrent layers.
+",2. Background on Deep Networks,[0.9999999445893654],"['See (Balestriero & Baraniuk, 2018) for the definitions of average pooling, channel pooling, skip connections, and recurrent layers.']"
+Definition 1.,2. Background on Deep Networks,[0],[0]
+"A DN layer f (`) θ(`)
+comprises a single nonlinear DN operator (non-affine to be precise) composed with any preceding affine operators lying between it and the preceding nonlinear operator.
+",2. Background on Deep Networks,[0.999999927045167],['A DN layer f (`) θ(`) comprises a single nonlinear DN operator (non-affine to be precise) composed with any preceding affine operators lying between it and the preceding nonlinear operator.']
+"This definition yields a single, unique layer decomposition for any DN, and the complete DN is then the composition of its layers per (1).",2. Background on Deep Networks,[0],[0]
+"For example, in a standard CNN, there are two different layers types: i) convolution-activation and ii) max-pooling.
+",2. Background on Deep Networks,[0.9999999189991823],"['For example, in a standard CNN, there are two different layers types: i) convolution-activation and ii) max-pooling.']"
+We form the prediction ŷ by feeding fΘ(x) through a final nonlinearity g : RD(L) → RD(L) as in ŷ = g(fΘ(x)).,2. Background on Deep Networks,[1.0],['We form the prediction ŷ by feeding fΘ(x) through a final nonlinearity g : RD(L) → RD(L) as in ŷ = g(fΘ(x)).']
+"In classification, g is typically the softmax nonlinearity, which arises naturally from posing the classification inference as a
+multinomial logistic regression problem (Bishop, 1995).",2. Background on Deep Networks,[0],[0]
+"In regression, typically no g is applied.
+",2. Background on Deep Networks,[0],[0]
+"We learn the DN parameters Θ for a particular prediction task in a supervised setting using a labeled data set D = (xn,yn) N n=1, a loss function, and a learning policy to update the parameters Θ in the predictor fΘ(x).",2. Background on Deep Networks,[0],[0]
+"For classification problems, the loss function is typically the negative cross-entropy LCE(x,y) (Bishop, 1995).",2. Background on Deep Networks,[0],[0]
+"For regression problems, the loss function is typically is the squared error.",2. Background on Deep Networks,[0],[0]
+"Since the layer-by-layer operations in a DN are differentiable almost everywhere with respect to their parameters and inputs, we can use some flavor of first-order optimization such as gradient descent to optimize the parameters Θ with respect to the loss function.",2. Background on Deep Networks,[0],[0]
+"Moreover, the gradients for all internal parameters can be computed efficiently by backpropagation (Hecht-Nielsen, 1992), which follows from the chain rule of calculus.",2. Background on Deep Networks,[0],[0]
+"Approximation theory is the study of how and how well functions can best be approximated using simpler functions (Powell, 1981).",3. Background on Spline Operators,[0],[0]
+"A classical example of a simpler function is a spline s : RD → R (Schmidhuber, 1994).",3. Background on Spline Operators,[0],[0]
+"For concreteness, we will work exclusively with affine splines in this paper (aka “linear splines”), but our ideas generalize naturally to higher-order splines.
+",3. Background on Spline Operators,[0],[0]
+Multivariate Affine Splines.,3. Background on Spline Operators,[0],[0]
+"Consider a partition of a domain RD into a set of regions Ω = {ω1, . . .",3. Background on Spline Operators,[0],[0]
+", ωR}",3. Background on Spline Operators,[0],[0]
+"and a set of local mappings Φ = {φ1, . . .",3. Background on Spline Operators,[0],[0]
+", φR} that map each region in the partition to R via φr(x) := 〈[α]r,·,x〉+ [β]r for x ∈ ωr.2",3. Background on Spline Operators,[0],[0]
+"The parameters are: α ∈ RR×D, a matrix of hyperplane “slopes,” and β ∈ RR, a vector of hyperplane “offsets” or “biases”.",3. Background on Spline Operators,[0],[0]
+We will use the terms offset and bias interchangeably in the sequel.,3. Background on Spline Operators,[0],[0]
+"The notation [α]r,· denotes the column vector formed from the rth row of α.
+",3. Background on Spline Operators,[0],[0]
+"With this setup, the multivariate affine spline is defined as
+s[α, β,Ω](x) = R∑ r=1 (〈[α]r,·,x〉+ [β]r)1(x ∈ ωr)
+",3. Background on Spline Operators,[0],[0]
+"=: 〈α[x],x〉+ β[x], (3)
+where 1(x ∈ ωr) is the indicator function.",3. Background on Spline Operators,[0],[0]
+The second line of (3) introduces the streamlined notation α[x] =,3. Background on Spline Operators,[0],[0]
+"[α]r,· when x ∈ ωr; the definition for β[x] is similar.",3. Background on Spline Operators,[0],[0]
+Such a spline is piecewise affine and hence piecewise convex.,3. Background on Spline Operators,[0],[0]
+"However, in general, it is neither globally affine nor globally convex unless R = 1, a case we denote as a degenerate spline, since it corresponds simply to an affine mapping.
+",3. Background on Spline Operators,[0],[0]
+"2 To make the connection between splines and DNs more immediately obvious, here x is interpreted as a point in RD , which plays the rôle of the space of signals in the other sections.
+",3. Background on Spline Operators,[0],[0]
+Max-Affine Spline Functions.,3. Background on Spline Operators,[0],[0]
+"A major complication of function approximation with splines in general is the need to jointly optimize both the spline parameters α, β and the input domain partition Ω (the “knots” for a 1D spline) (Bennett & Botkin, 1985).",3. Background on Spline Operators,[0],[0]
+"However, if a multivariate affine spline is constrained to be globally convex, then it can always be rewritten as a max-affine spline (Magnani & Boyd, 2009; Hannah & Dunson, 2013)
+s[α, β,Ω](x) = max r=1,...,R
+〈[α]r,·,x〉+ [β]r .",3. Background on Spline Operators,[0],[0]
+"(4)
+An extremely useful feature of such a spline is that it is completely determined by its parameters α and β without needing to specify the partition Ω.",3. Background on Spline Operators,[0],[0]
+"As such, we denote a max-affine spline simply as s[α, β].",3. Background on Spline Operators,[0],[0]
+"Changes in the parameters α, β of a max-affine spline automatically induce changes in the partition Ω, meaning that they are adaptive partitioning splines (Magnani & Boyd, 2009).
+",3. Background on Spline Operators,[0],[0]
+Max-Affine Spline Operators.,3. Background on Spline Operators,[0],[0]
+"A natural extension of an affine spline function is an affine spline operator (ASO) S[A,B,ΩS ] that produces a multivariate output.",3. Background on Spline Operators,[0],[0]
+It is obtained simply by concatenating K affine spline functions from (3).,3. Background on Spline Operators,[0],[0]
+"The details and a more general development are provided in the SM and (Balestriero & Baraniuk, 2018).
+",3. Background on Spline Operators,[0],[0]
+"We are particularly interested in the max-affine spline operator (MASO) S[A,B] :",3. Background on Spline Operators,[0],[0]
+RD → RK formed by concatenating K independent max-affine spline functions from (4).,3. Background on Spline Operators,[0],[0]
+"A MASO with slope parameters A ∈ RK×R×D and offset parameters B ∈ RK×R is defined as
+S[A,B](x) =  maxr=1,...,R〈[A]1,r,·,x〉+ [B]1,r... maxr=1,...,R〈[A]K,r,·,x〉+ [B]K,r  =: A[x]x",3. Background on Spline Operators,[0],[0]
++B[x].,3. Background on Spline Operators,[0],[0]
+"(5)
+The second line of (5) introduces the streamlined notation in terms of the signal-dependent matrix A[x] and signal-dependent vector B[x], where [A[x]]k,· := [A]k,rk(x),· and [B[x]]k := [B]k,rk(x) with rk(x) = arg maxr〈[A]k,r,·,x〉+ [B]k,r.
+Max-affine spline functions and operators are always piecewise affine and globally convex (and hence also continuous) with respect to each output dimension.",3. Background on Spline Operators,[0],[0]
+"Conversely, any piecewise affine and globally convex function/operator can be written as a max-affine spline.",3. Background on Spline Operators,[0],[0]
+"Moverover, using standard approximation arguments, it is easy to show that a MASO can approximate arbitrarily closely any (nonlinear) operator that is convex in each output dimension.",3. Background on Spline Operators,[0],[0]
+"While a MASO is appropriate only for approximating convex functions/operators, we now show that virtually all of
+today’s DNs can be written as a composition of MASOs, one for each layer.",4. DNs are Compositions of Spline Operators,[0],[0]
+"Such a composition is, in general, nonconvex and hence can approximate a much larger class of functions/operators.",4. DNs are Compositions of Spline Operators,[0],[0]
+"Interestingly, under certain broad conditions, the composition remains a piecewise affine spline operator, which enables a variety of insights into DNs.",4. DNs are Compositions of Spline Operators,[0],[0]
+"We now state our main theoretical results, which are proved in the SM and elaborated in (Balestriero & Baraniuk, 2018).
+",4.1. DN Operators are MASOs,[0],[0]
+Proposition 1.,4.1. DN Operators are MASOs,[0],[0]
+An arbitrary fully connected operator f (`)W is an affine mapping and hence a degenerate MASO S,4.1. DN Operators are MASOs,[0],[0]
+"[ A
+(`) W , B (`) W ] , with R = 1, [A(`)W ]k,1,· = [ W (`) ]",4.1. DN Operators are MASOs,[0],[0]
+"k,· and
+[B (`) W ]k,1 =
+[ b
+(`) W ] k , leading to W (`)z(`−1)(x) + b(`)W",4.1. DN Operators are MASOs,[0],[0]
+"=
+A (`)",4.1. DN Operators are MASOs,[0],[0]
+W,4.1. DN Operators are MASOs,[0],[0]
+[x]z (`−1)(x) +B (`) W,4.1. DN Operators are MASOs,[0],[0]
+[x].,4.1. DN Operators are MASOs,[0],[0]
+"The same is true of a convolution operator with W (`), b(`)W replaced by C (`), b (`) C .",4.1. DN Operators are MASOs,[0],[0]
+Proposition 2.,4.1. DN Operators are MASOs,[0],[0]
+"Any activation operator f (`)σ using a piecewise affine and convex activation function is a MASO S [ A (`) σ ,B (`) σ ] with R = 2, [ B (`) σ ]",4.1. DN Operators are MASOs,[0],[0]
+"k,1 = [ B (`) σ ] k,2 =
+0 ∀k, and for ReLU [ A (`) σ ]",4.1. DN Operators are MASOs,[0],[0]
+"k,1,· = 0, [ A (`) σ ] k,2,· =
+ek ∀k; for leaky ReLU [ A (`) σ ]",4.1. DN Operators are MASOs,[0],[0]
+"k,1,· = νek, [ A (`) σ ] k,2,· =
+ek ∀k, ν > 0; and for absolute value [ A (`) σ ]",4.1. DN Operators are MASOs,[0],[0]
+"k,1,·
+= −ek,[ A (`) σ ]",4.1. DN Operators are MASOs,[0],[0]
+"k,2,· = ek ∀k, where ek represents the kth canonical basis element of RD(`) .
+",4.1. DN Operators are MASOs,[0],[0]
+Proposition 3.,4.1. DN Operators are MASOs,[0],[0]
+"Any pooling operator f (`)ρ that is piecewise affine and convex is a MASO S [ A (`) ρ ,B (`) ρ ]",4.1. DN Operators are MASOs,[0],[0]
+.3,4.1. DN Operators are MASOs,[0],[0]
+"Max-
+pooling has R = #Rk (typically a constant over all output dimensions k), [ A (`) ρ ] k,·,·
+= {ei, i ∈ Rk}, and[ B (`) ρ ] k,r = 0 ∀k, r. Average-pooling is a degenerate
+MASO with R = 1, [ A (`) ρ ] k,1,· = 1#(Rk) ∑ i∈Rk ei, and[
+B (`) ρ ] k,1 = 0 ∀k.
+",4.1. DN Operators are MASOs,[0],[0]
+Proposition 4.,4.1. DN Operators are MASOs,[0],[0]
+"A DN layer constructed from an arbitrary composition of fully connected/convolution operators followed by one activation or pooling operator is a MASO S[A(`), B(`)] such that
+f (`)(z(`−1)(x))",4.1. DN Operators are MASOs,[0],[0]
+= A(`)[x]z(`−1)(x) +B(`)[x].,4.1. DN Operators are MASOs,[0],[0]
+"(6)
+Consequently, a large class of DNs boil down to a composition of MASOs.",4.1. DN Operators are MASOs,[0],[0]
+"We prove the following in the SM and in (Balestriero & Baraniuk, 2018) for CNNs, ResNets, skip connection nets, fully connected nets, and RNNs.
+3",4.1. DN Operators are MASOs,[0],[0]
+"This result is agnostic to the pooling type (spatial or channel).
+",4.1. DN Operators are MASOs,[0],[0]
+Theorem 1.,4.1. DN Operators are MASOs,[0],[0]
+"A DN constructed from an arbitrary composition of fully connected/convolution, activation, and pooling operators of the types in Propositions 1–3 is a composition of MASOs that is equivalent to a global affine spline operator.
+",4.1. DN Operators are MASOs,[0],[0]
+"Note carefully that, while the layers of each of the DNs stated in Theorem 1 are MASOs, the composition of several layers is not necessarily a MASO.",4.1. DN Operators are MASOs,[0],[0]
+"Indeed, a composition of MASOs remains a MASO if and only if all of its component operators (except the first) are non-decreasing with respect to each of their output dimensions (Boyd & Vandenberghe, 2004).",4.1. DN Operators are MASOs,[0],[0]
+"Interestingly, ReLU and max-pooling are both nondecreasing, while leaky ReLU is strictly increasing.",4.1. DN Operators are MASOs,[0],[0]
+"The culprits causing non-convexity of the composition of layers are negative entries in the fully connected or convolution operators, which destroy the required non-increasing property.",4.1. DN Operators are MASOs,[0],[0]
+"A DN where these culprits are thwarted is an interesting special case, because it is convex with respect to its input (Amos et al., 2016) and multiconvex (Xu & Yin, 2013) with respect to its parameters.
+",4.1. DN Operators are MASOs,[0],[0]
+Theorem 2.,4.1. DN Operators are MASOs,[0],[0]
+"A DN whose layers ` = 2, . . .",4.1. DN Operators are MASOs,[0],[0]
+", L consist of an arbitrary composition of fully connected and convolution operators with nonnegative weights, i.e., W (`)k,j ≥ 0, C (`) k,j ≥ 0; non-decreasing, piecewise-affine, and convex activation operators; and non-decreasing, piecewise-affine, and convex pooling operators is globally a MASO and thus also globally convex with respect to each of its output dimensions.
+",4.1. DN Operators are MASOs,[0],[0]
+"The above results pertain to DNs using convex, affine operators.",4.1. DN Operators are MASOs,[0],[0]
+"Other popular non-convex DN operators (e.g., the sigmoid and arctan activation functions) can be approximated arbitrarily closely by an affine spline operator but not by a MASO.
+DNs are Signal-Dependent Affine Transformations.",4.1. DN Operators are MASOs,[0],[0]
+"A common theme of the above results is that, for DNs constructed from fully connected/convolution, activation, and pooling operators from Propositions 1–3, the operator/layer outputs z(`)(x) are always a signal-dependent affine function of the input x (recall (5)).",4.1. DN Operators are MASOs,[0],[0]
+The particular affine mapping applied to x depends on which partition of the spline it falls in RD.,4.1. DN Operators are MASOs,[0],[0]
+"More on this in Section 7 below.
+",4.1. DN Operators are MASOs,[0],[0]
+DN Learning and MASO Parameters.,4.1. DN Operators are MASOs,[0],[0]
+"Given labeled training data (xn,yn)Nn=1, learning in a DN that meets the conditions of Theorem 1 (i.e., optimizing its parameters Θ) is equivalent to optimally approximating the mapping from input x to output ŷ =",4.1. DN Operators are MASOs,[0],[0]
+g ( z(L)(x) ),4.1. DN Operators are MASOs,[0],[0]
+"using an appropriate cost function (e.g., cross-entropy for classification or squared error for regression) by learning the parameters θ(`) of the layers.",4.1. DN Operators are MASOs,[0],[0]
+"In general the overall optimization problem is nonconvex (it is actually piecewise multi-convex in general (Rister, 2016)).
+",4.1. DN Operators are MASOs,[0],[0]
+"z (L) CNN(x) = W (L)
+( 1∏
+`=L−1
+A(`)ρ",4.1. DN Operators are MASOs,[0],[0]
+[x]A (`) σ,4.1. DN Operators are MASOs,[0],[0]
+[x]C (`) ) ︸,4.1. DN Operators are MASOs,[0],[0]
+"︷︷ ︸
+ACNN[x]
+x + W (L) L−1∑",4.1. DN Operators are MASOs,[0],[0]
+`=1  `+1∏ j=L−1 A(j)ρ [x]A (j) σ,4.1. DN Operators are MASOs,[0],[0]
+[x]C (j) (A(`)ρ [x]A(`)σ [x]b(`)C )︸ ︷︷ ︸,4.1. DN Operators are MASOs,[0],[0]
+"BCNN[x] +b (L) W
+(7)",4.1. DN Operators are MASOs,[0],[0]
+"Combining Propositions 1–3 and Theorem 1 and substituting (5) into (2), we can write an explicit formula for the output of any layer z(`)(x) of a DN in terms of the input x for a variety of different architectures.",4.2. Application: DN Affine Mapping Formula,[0],[0]
+"The formula for a standard CNN (using ReLU activation and max-pooling) is given in (7) above; we derive this formula and analogous formulas for ResNets and RNNs in (Balestriero & Baraniuk, 2018).",4.2. Application: DN Affine Mapping Formula,[0],[0]
+"In (7), A(`)σ [x] are the signal-dependent matrices corresponding to the ReLU activations,",4.2. Application: DN Affine Mapping Formula,[0],[0]
+A(`)ρ,4.2. Application: DN Affine Mapping Formula,[0],[0]
+"[x] are the signal-dependent matrices corresponding to maxpooling, and the biases b(L)W , b (`) C arise directly from the fully connected and convolution operators.",4.2. Application: DN Affine Mapping Formula,[0],[0]
+The absence of B (`) σ,4.2. Application: DN Affine Mapping Formula,[0],[0]
+"[x], B (`) ρ",4.2. Application: DN Affine Mapping Formula,[0],[0]
+"[x] is due to the absence of bias in the ReLU (recall (2)) and max-pooling operators (recall (3)).
+",4.2. Application: DN Affine Mapping Formula,[0],[0]
+"Inspection of (7) reveals the exact form of the signaldependent, piecewise affine mapping linking x to z(L)CNN(x).",4.2. Application: DN Affine Mapping Formula,[0],[0]
+"Moreover, this formula can be collapsed into
+z (L) CNN(x) = W (L) ( ACNN[x]x +BCNN[x] )",4.2. Application: DN Affine Mapping Formula,[0],[0]
+"+ b (L) W (8)
+from which we can recognize
+z",4.2. Application: DN Affine Mapping Formula,[0],[0]
+(L−1) CNN (x) = ACNN[x]x,4.2. Application: DN Affine Mapping Formula,[0],[0]
+"+BCNN[x] (9)
+as an explicit, signal-dependent, affine formula for the featurization process that aims to convert x into a set of (hopefully) linearly separable features that are then input to the linear classifier in layer ` = L with parameters W (L) and b
+(L) W .",4.2. Application: DN Affine Mapping Formula,[0],[0]
+"Of course, the final prediction ŷ is formed by running z (L) CNN(x) through a softmax nonlinearity g, but this merely rescales its entries to create a probability distribution.",4.2. Application: DN Affine Mapping Formula,[0],[0]
+We now dig deeper into (8) in order to bridge DNs and classical optimal classification theory.,5. DNs are Template Matching Machines,[0],[0]
+"While we focus on CNNs and classification for concreteness, our analysis holds for any DN meeting the conditions of Theorem 1.",5. DNs are Template Matching Machines,[0],[0]
+An alternate interpretation of (8) is that z(L)CNN(x) is the output of a bank of linear matched filters (plus a set of biases).,5.1. Template Matching,[0],[0]
+"That is, the cth element of z(L)(x) equals the inner product between the signal x and the matched filter for the cth class, which is contained in the cth row of the matrix
+W (L)A[x].",5.1. Template Matching,[0],[0]
+"The bias W (L)B[x] + b(L)W can be used to account for the fact that some classes might be more likely than others (i.e., the prior probability over the classes).",5.1. Template Matching,[0],[0]
+"It is well-known that a matched filterbank is the optimal classifier for deterministic signals in additive white Gaussian noise (Rabiner & Gold, 1975).",5.1. Template Matching,[0],[0]
+"Given an input x, the class decision is simply the index of the largest element of z(L)(x).4
+Yet another interpretation of (8) is that z(L)(x) is computed not in a single matched filter calculation but hierarchically as the signal propagates through the DN layers.",5.1. Template Matching,[0],[0]
+Abstracting (5) to write the per-layer maximization process as z(`)(x) = maxr(`),5.1. Template Matching,[0],[0]
+A (`) r(`) z(`−1)(x),5.1. Template Matching,[0],[0]
+"+B (`) r(`) and cascading, we obtain a formula for the end-to-end DN mapping
+z(L)(x) =",5.1. Template Matching,[0],[0]
+"W (L) max r(L−1)
+",5.1. Template Matching,[0],[0]
+"( A
+(L−1) r(L−1)
+max r(2)
+",5.1. Template Matching,[0],[0]
+"( A (2)
+r(2) . . .
+",5.1. Template Matching,[0],[0]
+"max r(1)
+",5.1. Template Matching,[0],[0]
+"( A (1)
+r(1) x + B (1) r(1)
+) + B (2)
+r(2)
+) · · ·+ B(L−1)
+r(L−1)
+) + b
+(L) W .
+",5.1. Template Matching,[0],[0]
+"(10)
+",5.1. Template Matching,[0],[0]
+"This formula elucidates that a DN performs a hierarchical, greedy template matching on its input, a computationally efficient yet sub-optimal template matching technique.",5.1. Template Matching,[0],[0]
+Such a procedure is globally optimal when the DN is globally convex.,5.1. Template Matching,[0],[0]
+Corollary 1.,5.1. Template Matching,[0],[0]
+"For a DN abiding by the requirements of Theorem 2, the computation (10) collapses to the following globally optimal template matching
+z(L−1)(x)",5.1. Template Matching,[0],[0]
+"= W (L) max r(L−1),r(2),...,r(1)
+( A
+(L−1) r(L−1)
+",5.1. Template Matching,[0],[0]
+"( A (2)
+r(2) . . .",5.1. Template Matching,[0],[0]
+"(
+A (1)
+r(1) x + B
+(1) r(1)
+) +",5.1. Template Matching,[0],[0]
+"B (2)
+r(2)
+) · · ·+ B(L−1
+r(L−1)
+)",5.1. Template Matching,[0],[0]
+"+ b
+(L) W .
+(11)",5.1. Template Matching,[0],[0]
+"Since the complete DN mapping (up to the final softmax) can be expressed as in (8), given a signal x, we can compute the signal-dependent template for class c via A[x]c =",5.2. Template Visualization Examples,[0],[0]
+"d[z(L)(x)]c dx , which can be efficiently computed via backpropogation (Hecht-Nielsen, 1992).5",5.2. Template Visualization Examples,[0],[0]
+"Once the template A[x]c has been computed, the bias term b[x]c can be computed via b[x]c = z(L)(x)c − 〈A[x]c,·,x〉.",5.2. Template Visualization Examples,[0],[0]
+"Figure 1 plots
+4Again, since the softmax merely rescales the entries of z(L)(x) into a probability distribution, it does not affect the location of its largest element.
+",5.2. Template Visualization Examples,[0],[0]
+"5In fact, we can use the same backpropagation procedure used for computing the gradient with respect to a fully connected or
+various signal-dependent templates for two CNNs trained on the MNIST and CIFAR10 datasets.",5.2. Template Visualization Examples,[0],[0]
+"Under the matched filterbank interpretation of a DN developed in Section 5.1, the optimal template for an image x of class c is a scaled version of x itself.",5.3. Collinear Templates and Data Set Memorization,[0],[0]
+But what are the optimal templates for the other (incorrect) classes?,5.3. Collinear Templates and Data Set Memorization,[0],[0]
+"In an idealized setting, we can answer this question.
+",5.3. Collinear Templates and Data Set Memorization,[0],[0]
+Proposition 5.,5.3. Collinear Templates and Data Set Memorization,[0],[0]
+Consider an idealized DN consisting of a composition of MASOs that has sufficient approximation power to span arbitrary MASO matrices A[xn] from (9) for any input xn from the training set.,5.3. Collinear Templates and Data Set Memorization,[0],[0]
+"Train the DN to classify among C classes using the training data D = (xn, yn)Nn=1 with normalized inputs ‖xn‖2 = 1 ∀n and the cross-entropy loss LCE(yn, fΘ(xn)) with the addition of the regularization constraint that ∑ c ‖A[xn]c,·‖2",5.3. Collinear Templates and Data Set Memorization,[0],[0]
+< α with α > 0.,5.3. Collinear Templates and Data Set Memorization,[0],[0]
+"At the global minimum of this constrained optimization problem, the rows of A?[xn] (the optimal templates) have the form:
+",5.3. Collinear Templates and Data Set Memorization,[0],[0]
+"[A?[xn]]c,· =  + √ (C−1)α C xn, c = yn − √
+α C(C−1) xn, c 6=",5.3. Collinear Templates and Data Set Memorization,[0],[0]
+"yn
+(12)
+",5.3. Collinear Templates and Data Set Memorization,[0],[0]
+"In short, the idealized CNN in the proposition will memorize a set of collinear templates whose bimodal outputs force
+convolution weight but instead with the input x.",5.3. Collinear Templates and Data Set Memorization,[0],[0]
+"This procedure is becoming increasingly popular in the study of adversarial examples (Szegedy et al., 2013).
+",5.3. Collinear Templates and Data Set Memorization,[0],[0]
+the softmax output to a Dirac delta function (aka 1-hot representation) that peaks at the correct class.,5.3. Collinear Templates and Data Set Memorization,[0],[0]
+Figure 2 confirms this bimodal behavior on the MNIST and CIFAR10 datasets.,5.3. Collinear Templates and Data Set Memorization,[0],[0]
+"While a DN’s signal-dependent matched filterbank (8) is optimized for classifying signals immersed in additive white Gaussian noise, such a statistical model is overly simplistic for most machine learning problems of interest.",6. New DNs with Orthogonal Templates,[0],[0]
+"In practice, errors will arise not just from random noise but also from nuisance variations in the inputs such as arbitrary rotations, positions, and modalities of the objects of interest.",6. New DNs with Orthogonal Templates,[0],[0]
+The effects of these nuisances are only poorly approximated as Gaussian random errors.,6. New DNs with Orthogonal Templates,[0],[0]
+"Limited work has been done on filterbanks for classification in nonGaussian noise; one promising direction involves using not matched but rather orthogonal templates (Eldar & Oppenheim, 2001).
+",6. New DNs with Orthogonal Templates,[0],[0]
+"For a MASO DN’s templates to be orthogonal for all inputs, it is necessary that the rows of the matrix W (L) in the final linear classifier layer be orthogonal.",6. New DNs with Orthogonal Templates,[0],[0]
+"This weak constraint on the DN still enables the earlier layers to create a high-performance, class-agnostic, featurized representation (recall the discussion just below (9)).",6. New DNs with Orthogonal Templates,[0],[0]
+"To create orthogonal templates during learning, we simply add to the standard (potentially regularized) cross-entropy loss function LCE a term that penalizes non-zero off-diagonal entries in the matrix W (L)(W (L))T leading to the new loss with the additional penalty
+LCE + λ ∑ c1 6=c2 ∣∣∣〈[W",6. New DNs with Orthogonal Templates,[0],[0]
+"(L)] c1,· , [ W (L) ]",6. New DNs with Orthogonal Templates,[0],[0]
+"c2,· 〉∣∣∣2 .",6. New DNs with Orthogonal Templates,[0],[0]
+"(13) The parameter λ controls the tradeoff between cross-entropy
+minimization and orthogonality preservation.",6. New DNs with Orthogonal Templates,[0],[0]
+"Conveniently, when minimizing (13) via backpropagation, the orthogonal rows of W (L) induce orthogonal backpropagation updates for the various classes.
+",6. New DNs with Orthogonal Templates,[0],[0]
+We now empirically demonstrate that orthogonal templates lead to significantly improved classification performance.,6. New DNs with Orthogonal Templates,[0],[0]
+"We conducted a range of experiments with three different conventional DN architectures – smallCNN, largeCNN, and ResNet4-4 – trained on three different datasets – SVHN, CIFAR10, and CIFAR100.",6. New DNs with Orthogonal Templates,[0],[0]
+"Each DN employed bias units, ReLU activations, and max-pooling as well as batchnormalization prior each ReLU.",6. New DNs with Orthogonal Templates,[0],[0]
+"The full experimental details are given in the (Balestriero & Baraniuk, 2018).",6. New DNs with Orthogonal Templates,[0],[0]
+"For learning, we used the Adam optimizer with an exponential learning rate decay.",6. New DNs with Orthogonal Templates,[0],[0]
+All inputs were centered to zero mean and scaled to a maximum value of one.,6. New DNs with Orthogonal Templates,[0],[0]
+"No further preprocessing was performed, such as ZCA whitening (Nam et al., 2014).",6. New DNs with Orthogonal Templates,[0],[0]
+We assessed how the classification performance of a given DN would change as we varied the orthogonality penalty λ in (13).,6. New DNs with Orthogonal Templates,[0],[0]
+"For each configuration of DN architecture, training dataset, learning rate, and penalty λ, we averaged over 15 runs to estimate the average performance and standard deviation.
+",6. New DNs with Orthogonal Templates,[0],[0]
+We report here on only the CIFAR100 with largeCNN experiments.,6. New DNs with Orthogonal Templates,[0],[0]
+"(See (Balestriero & Baraniuk, 2018) for detailed results for all three datasets and the other architectures.",6. New DNs with Orthogonal Templates,[0],[0]
+The trends for all three datasets are similar and are independent of the learning rate.),6. New DNs with Orthogonal Templates,[0],[0]
+The results for CIFAR100 in Figure 3 indicate that the benefits of the orthogonality penalty emerge distinctly as soon as λ > 0.,6. New DNs with Orthogonal Templates,[0],[0]
+"In addition to improved final accuracy and generalization performance, we see that template orthogonality reduces the temptation of the DN to overfit.",6. New DNs with Orthogonal Templates,[0],[0]
+"(This is is especially visible in the examples in (Balestriero & Baraniuk, 2018).)",6. New DNs with Orthogonal Templates,[0],[0]
+One explanation is that the orthogonal weights W (L) positively impact not only the prediction but also the backpropagation via orthogonal gradient updates with respect to each output dimension’s partial derivatives.,6. New DNs with Orthogonal Templates,[0],[0]
+"Like any spline, it is the interplay between the (affine) spline mappings and the input space partition that work the magic in a MASO DN.",7. DN’s Intrinsic Multiscale Partition,[0],[0]
+Recall from Section 3 that a MASO has the attractive property that it implicitly partitions its input space as a function of its slope and offset parameters.,7. DN’s Intrinsic Multiscale Partition,[0],[0]
+The induced partition Ω opens up a new geometric avenue to study how a DN clusters and organizes signals in a hierarchical fashion.,7. DN’s Intrinsic Multiscale Partition,[0],[0]
+"A DN operator at level ` directly influences the partitioning of its input space RD(`−1) and indirectly influences the partitioning of the overall signal space RD.
+",7.1. Effect of the DN Operators on the Partition,[0],[0]
+A ReLU activation operator splits each of its input dimensions into two half-planes depending on the sign of the input in each dimension.,7.1. Effect of the DN Operators on the Partition,[0],[0]
+"This partitions RD(`−1) into a combinatorially large number (up to 2D (`)
+) of regions.",7.1. Effect of the DN Operators on the Partition,[0],[0]
+Following a fully connected or convolution operator with a ReLU simply rotates the partition in RD(`−1) .,7.1. Effect of the DN Operators on the Partition,[0],[0]
+"A max-pooling operator also partitions RD(`−1) into a combinatorially large number (up to #RD (`)
+) of regions, where #R is the size of the pooling region.
+",7.1. Effect of the DN Operators on the Partition,[0],[0]
+This per-MASO partitioning of each layer’s input space constructs an overall partitioning of the input signal space RD.,7.1. Effect of the DN Operators on the Partition,[0],[0]
+"As each MASO is applied, it subdivides the input space RD into finer and finer partitions.",7.1. Effect of the DN Operators on the Partition,[0],[0]
+"The final partition corresponds to the intersection of all of the intermediate partitions, and hence we can encode the input in terms of the ordered collection of per-layer partition regions into which it falls.",7.1. Effect of the DN Operators on the Partition,[0],[0]
+This overall process can be interpreted as a hierarchical vector quantization (VQ) of the training input signals xn.,7.1. Effect of the DN Operators on the Partition,[0],[0]
+"There are thus many potential connections between DNs and optimal quantization, information theory, and clustering that we leave for future research.",7.1. Effect of the DN Operators on the Partition,[0],[0]
+"See (Balestriero & Baraniuk, 2018) for some early results.",7.1. Effect of the DN Operators on the Partition,[0],[0]
+Unfortunately there is no simple formula for the partition of the signal space.,7.2. Inferring a DN Layer’s Intrinsic Partition,[0],[0]
+"However, once can obtain the set of inputs signals xn that fall into the same partition region at each layer of a DN.",7.2. Inferring a DN Layer’s Intrinsic Partition,[0],[0]
+"At layer `, denote the index of the region selected by the input x (recall (6)) by[ t(`)(x) ]",7.2. Inferring a DN Layer’s Intrinsic Partition,[0],[0]
+"k
+= arg max r
+〈",7.2. Inferring a DN Layer’s Intrinsic Partition,[0],[0]
+"[A(`)]k,r,·, z (`−1)(x) 〉 +",7.2. Inferring a DN Layer’s Intrinsic Partition,[0],[0]
+"[B(`)]k,r.
+(14)
+Thus, [t(`)]k ∈ {1, . . .",7.2. Inferring a DN Layer’s Intrinsic Partition,[0],[0]
+", R(`)}, with R(`) the number of partition regions in the layer’s input space.",7.2. Inferring a DN Layer’s Intrinsic Partition,[0],[0]
+"Encoding the partition as an ordered collection of integers designating the activate hyperplane parameters from (4), we can now visualize which inputs fall into the same or nearby partitions.
+",7.2. Inferring a DN Layer’s Intrinsic Partition,[0],[0]
+"Due to the very large number of possible regions (up to 2D (`) for a ReLU at layer `) and the limited amount of training data, in general, many partitions will be empty or contain only a single training data point.",7.2. Inferring a DN Layer’s Intrinsic Partition,[0],[0]
+"To validate the utility of the hierarchical intrinsic clustering induced by a DN, we define a new distance function between the signals x1 and x2 that quantifies the similarity of their position encodings t`(x1) and t`(x2) at layer ` via
+d ( t(`)(x1), t (`)(x2) )
+",7.3. A New Image Distance based on the DN Partition,[0],[0]
+"= 1− ∑D(`) k=1 1 ( [t(`)(x1)]k = [t (`)(x2)]k )
+D(`) .",7.3. A New Image Distance based on the DN Partition,[0],[0]
+"(15)
+For a ReLU MASO, this corresponds simply to counting how many entries of the layer inputs for x1 and x2 are positive or negative at the same positions.",7.3. A New Image Distance based on the DN Partition,[0],[0]
+"For a max-pooling
+MASO, this corresponds to counting how many argmax positions are the same in each patch for x1 and x2.
+",7.3. A New Image Distance based on the DN Partition,[0],[0]
+Figure 4 provides a visualization of the nearest neighbors of a test image under this partition-based distance measure.,7.3. A New Image Distance based on the DN Partition,[0],[0]
+"Visual inspection of the figures highlights that, as we progress through the layers of the DN, similar images become closer in the new distance but further in Euclidean distance.",7.3. A New Image Distance based on the DN Partition,[0],[0]
+We have used the theory of splines to build a rigorous bridge between deep networks (DNs) and approximation theory.,8. Conclusions,[0],[0]
+"Our key finding is that, conditioned on the input signal, the output of a DN can be written as a simple affine transformation of the input.",8. Conclusions,[0],[0]
+"This links DNs directly to the classical theory of optimal classification via matched filters and provides insights into the positive effects of data memorization.
+",8. Conclusions,[0],[0]
+"There are many avenues for future work, including a more in-depth analysis of the hierarchical MASO partitioning, particularly from the viewpoint of vector quantization and K-means clustering, which are unsupervised learning techniques, and information theory.",8. Conclusions,[0],[0]
+The spline viewpoint also could inspire the creation of new DN layers that have certain attractive partitioning or approximation capabilities.,8. Conclusions,[0],[0]
+"We have begun exploring some of these directions in (Balestriero & Baraniuk, 2018).6
+6 This work was partially supported by ARO grant W911NF-151-0316, AFOSR grant FA9550-14-1-0088, ONR grants N0001417-1-2551 and N00014-18-12571, DARPA grant G001534-7500, and a DOD Vannevar Bush Faculty Fellowship (NSSEFF) grant N00014-18-1-2047.",8. Conclusions,[0],[0]
+We build a rigorous bridge between deep networks (DNs) and approximation theory via spline functions and operators.,abstractText,[0],[0]
+"Our key result is that a large class of DNs can be written as a composition of max-affine spline operators (MASOs), which provide a powerful portal through which to view and analyze their inner workings.",abstractText,[0],[0]
+"For instance, conditioned on the input signal, the output of a MASO DN can be written as a simple affine transformation of the input.",abstractText,[0],[0]
+"This implies that a DN constructs a set of signal-dependent, class-specific templates against which the signal is compared via a simple inner product; we explore the links to the classical theory of optimal classification via matched filters and the effects of data memorization.",abstractText,[0],[0]
+"Going further, we propose a simple penalty term that can be added to the cost function of any DN learning algorithm to force the templates to be orthogonal with each other; this leads to significantly improved classification performance and reduced overfitting with no change to the DN architecture.",abstractText,[0],[0]
+The spline partition of the input signal space opens up a new geometric avenue to study how DNs organize signals in a hierarchical fashion.,abstractText,[0],[0]
+"As an application, we develop and validate a new distance metric for signals that quantifies the difference between their partition encodings.",abstractText,[0],[0]
+A Spline Theory of Deep Networks,title,[0],[0]

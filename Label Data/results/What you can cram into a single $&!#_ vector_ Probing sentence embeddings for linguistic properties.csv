@@ -1,0 +1,1010 @@
+0,1,label2,summary_sentences
+"Proceedings of the 2016 Conference on Empirical Methods in Natural Language Processing, pages 1214–1223, Austin, Texas, November 1-5, 2016. c©2016 Association for Computational Linguistics",text,[0],[0]
+"People engage in argumentation in various contexts, both online and in the real life.",1 Introduction,[0],[0]
+"Existing definitions of argumentation do not solely focus on giving reasons and laying out a logical framework of premises and conclusions, but also highlight its social purpose which is to convince or to persuade (O’Keefe,
+2011; van Eemeren et al., 2014; Blair, 2011).",1 Introduction,[0],[0]
+Assessing the quality and strength of perceived arguments therefore plays an inherent role in argumentative discourse.,1 Introduction,[0],[0]
+"Despite strong theoretical foundations and plethora of normative theories, such as Walton’s schemes and their critical questions (Walton, 1989), an ideal model of critical discussion in the pragma-dialectic view (Van Eemeren and Grootendorst, 1987), or research into fallacies (Boudry et al., 2015), assessing qualitative criteria of everyday argumentation represents a challenge for argumentation scholars and practitioners (Weltzer-Ward et al., 2009; Swanson et al., 2015; Rosenfeld and Kraus, 2015).
+",1 Introduction,[0],[0]
+Addressing qualitative aspects of arguments has recently started gaining attention in the field of computational argumentation.,1 Introduction,[0],[0]
+"Scoring strength of persuasive essays (Farra et al., 2015; Persing and Ng, 2015), exploring interaction in persuasive dialogues on Reddit (Tan et al., 2016), or detecting convincing arguments (Habernal and Gurevych, 2016) are among recent attempts to tackle the quality of argumentation.",1 Introduction,[0],[0]
+"However, these approaches are holistic and do not necessarily explain why a given argument is strong or convincing.
+",1 Introduction,[0],[0]
+We asked the following research questions.,1 Introduction,[0],[0]
+"First, can we assess what makes an argument convincing in a purely empirical fashion as opposite to theoretical normative approaches?",1 Introduction,[0],[0]
+"Second, to what extent can the problem be tackled by computational models?",1 Introduction,[0],[0]
+"To address these questions, we exploit our recently introduced UKPConvArg1 corpus (Habernal and Gurevych, 2016).",1 Introduction,[0],[0]
+"This data set consists of 11,650 argument pairs – two arguments with the
+1214
+Prompt: Should physical education be mandatory in schools?",1 Introduction,[0],[0]
+Stance:,1 Introduction,[0],[0]
+"Yes!
+Argument 1 Argument 2 PE should be compulsory because it keeps us constantly fit and healthy.",1 Introduction,[0],[0]
+"If you really dislike sports, then you can quit it when you’re an adult.",1 Introduction,[0],[0]
+"But when you’re a kid, the best thing for you to do is study, play and exercise.",1 Introduction,[0],[0]
+If you prefer to be lazy and lie on the couch all day then you are most likely to get sick and unfit.,1 Introduction,[0],[0]
+"Besides, PE helps kids be better at teamwork.",1 Introduction,[0],[0]
+"physical education should be mandatory cuhz 112,000 people have died in the year 2011 so far and it’s because of the lack of physical activity and people are becoming obese!!!!
+",1 Introduction,[0],[0]
+"A1 is more convincing than A2, because: • “A1 is more intelligently written and makes
+same standpoint to the given topic, annotated with a binary relation describing which argument from the pair is more convincing.",1 Introduction,[0],[0]
+Each pair also contains several reasons written in natural language explaining which properties of the arguments influence their convincingness.,1 Introduction,[0],[0]
+"An example of such an argument pair is shown in Figure 1.
+",1 Introduction,[0],[0]
+We use these natural language reasons as a proxy to assess qualitative properties of the arguments in each argument pair.,1 Introduction,[0],[0]
+Our main contributions are: (1) We propose empirically inspired labels of quality properties of Web arguments and design a hierarchical annotation scheme.,1 Introduction,[0],[0]
+"(2) We create a new large crowd-sourced benchmark data set containing 9,111 argument pairs multi-labeled with 17 categories which is improved by local and global filtering techniques.",1 Introduction,[0],[0]
+"(3) We experiment with several computational models, both traditional and neu-
+ral network-based, and evaluate their performance quantitatively and qualitatively.
+",1 Introduction,[0],[0]
+The newly created data set UKPConvArg2 is available under CC-BY-SA license along with the experimental software for full reproducibility at GitHub.1,1 Introduction,[0],[0]
+"The growing field of computational argumentation has been traditionally devoted to structural tasks, such as argument component detection and classification (Habernal and Gurevych, 2017; Habernal and Gurevych, 2015), argument structure parsing (Peldszus and Stede, 2015; Stab and Gurevych, 2014), or argument schema classification (Lawrence and Reed, 2015), leaving the issues of argument evaluation or quality assessment as an open future work.
+",2 Related Work,[0],[0]
+"There are only few attempts to tackle the qualitative aspects of arguments, especially in the Web discourse.",2 Related Work,[0],[0]
+Park and Cardie (2014) classified propositions in Web arguments into four classes with respect to their level of verifiability.,2 Related Work,[0],[0]
+"Focusing on convincingness of Web arguments, Habernal and Gurevych (2016) annotated 16k pairs of arguments with a binary relation “is more convincing” and also elicited explanation for the annotators’ decisions.
+",2 Related Work,[0],[0]
+"Recently, research in persuasive essay scoring has started combining holistic approaches based on rubrics for several dimensions typical to this genre with explicit argument detection.",2 Related Work,[0],[0]
+"Persing and Ng (2015) manually labeled 1,000 student persuasive essays with a single score on the 1–4 scale and trained a regression predictor with a rich feature set using LIBSVM.",2 Related Work,[0],[0]
+"Among traditional features (such as POS or semantic frames), an argument structure parser by Stab and Gurevych (2014) was employed.",2 Related Work,[0],[0]
+"Farra et al. (2015) also deal with essay scoring but rather then tackling the argument structure, they focus on methods for detecting opinion expressions.",2 Related Work,[0],[0]
+"Persuasive essays however represent a genre with a rather strict qualitative and formal requirements (as taught in curricula) and substantially differ from online argumentation.
+",2 Related Work,[0],[0]
+"Argument evaluation belongs to the central research topics among argumentation scholars (Toul-
+1https://github.com/UKPLab/ emnlp2016-empirical-convincingness
+min, 2003; Walton et al., 2008; Van Eemeren and Grootendorst, 1987).",2 Related Work,[0],[0]
+"Yet treatment of assessing argumentation quality, persuasiveness, or convincingness is traditionally based on evaluating relevance, sufficiency or acceptability of premises (Govier, 2010; Johnson and Blair, 2006) or categorizing fallacies (Hamblin, 1970; Tindale, 2007).",2 Related Work,[0],[0]
+"However, the nature of these normative approaches causes a gap between the ‘ideal’ models and empirically encountered real-world arguments, such as those on the Web (van Eemeren et al., 2014; Walton, 2012).
+",2 Related Work,[0],[0]
+"Regarding the methodology utilized later in this paper, deep (recursive) neural networks have gained extreme popularity in NLP in recent years.",2 Related Work,[0],[0]
+"Long Short-Term Memory networks (LSTM) with Attention mechanism have been applied on textual entailment (Rocktäschel et al., 2016), QuestionAnswering (Golub and He, 2016), or source-code summarization (Allamanis et al., 2016).",2 Related Work,[0],[0]
+"As our source data set, we took the publicly available UKPConvArg1 corpus.2 It is based on arguments originated from 16 debates from Web debate platforms createdebate.com and convinceme.net, each debate has two sides (usually pro and con).",3 Data,[0],[0]
+"Arguments from each of the 32 debate sides are connected into a set of argument pairs, and each argument pair is annotated with a binary relation (argument A is more/less convincing than argument B), resulting in total into 11,650 argument pairs.",3 Data,[0],[0]
+"Annotations performed by Habernal and Gurevych (2016) also contain several reasons written by crowd-workers that explain why a particular argument is more or less convincing; see an example in Figure 1.
+",3 Data,[0],[0]
+"As these reasons were written in an uncontrolled setting, they naturally reflect the main properties of argument quality in a downstream task, which is to decide which argument from a pair is more convincing.",3 Data,[0.9551870633899143],"['This curious result might indicate that the latter information is stored in the embeddings in a complex way, not easily readable by our MLP.']"
+"It differs from scoring arguments in isolation, which is inherently harder not only due to subjectivity in argument “strength” decision but also because of possible annotator’s prior bias (Habernal and Gurevych, 2016).",3 Data,[0],[0]
+"Assessing an argument
+2https://github.com/UKPLab/ acl2016-convincing-arguments
+in context helps to emphasize its main flaws or strengths.",3 Data,[0],[0]
+This approach is also known as knowledge elicitation – acquiring appropriate information from experts by asking ”why?”,3 Data,[0],[0]
+"(Reed and Rowe, 2004).
+",3 Data,[0],[0]
+We therefore used the reasons as a proxy for developing a scheme for labeling argument quality attributes.,3 Data,[0],[0]
+"This was done in a purely bottom-up empirical manner, as opposed to using ‘standard’ evaluation criteria known from argumentation literature (Johnson and Blair, 2006; Schiappa and Nordin, 2013).",3 Data,[0],[0]
+"In particular, we split all reasons into several reason units by simple preprocessing (splitting using Stanford CoreNLP",3 Data,[0],[0]
+"(Manning et al., 2014), segmentation into Elementary Discourse Units by RST tools (Surdeanu et al., 2015)) and identified the referenced arguments (A1 or A2) by pattern matching and dependency parsing.",3 Data,[0],[0]
+"For example, each reason from Figure 1 would be transformed into two reason units.3 Overall, we obtained about 70k reason units from the entire UKPConvArg1 corpus.",3 Data,[0],[0]
+"In order to develop a code book for assigning a label to each reason unit, we ran several pilot expert annotation studies (each with 200-300 reason units).",3.1 Annotation scheme,[0],[0]
+"Having a set of ≈ 25 distinct labels, we ran two larger studies on Amazon Mechanical Turk (AMT), each with 500 reason units and 10 workers.",3.1 Annotation scheme,[0],[0]
+"The workers were split into two groups; we then estimated gold labels for each group using MACE (Hovy et al., 2013) and compared both groups’ results in order to find systematic discrepancies.",3.1 Annotation scheme,[0],[0]
+"Finally, we ended up with a set of 19 distinct labels (classes).",3.1 Annotation scheme,[0],[0]
+"As the number of classes is too big for non-expert crowd workers, we developed a hierarchical annotation process guided by questions that narrow down the final class decision.",3.1 Annotation scheme,[0],[0]
+"The scheme is depicted in Figure 2.4 Workers were shown only the reason units without seeing the original arguments.
+",3.1 Annotation scheme,[0],[0]
+"3We picked this example for its simplicity, in reality the texts are much more fuzzy.
+",3.1 Annotation scheme,[0],[0]
+"4It might seem that some labels are missing, such as C8-2 and C8-3; these belong to those removed during the pilot studies.",3.1 Annotation scheme,[0],[0]
+"We sampled 26,000 unique reason units ordered by the original author competence provided as part of the UKPConvArg corpus.",3.2 Annotation,[0],[0]
+We expected that workers with higher competence tend to write better reasons for their explanations.,3.2 Annotation,[0],[0]
+"Using the previously introduced scheme, 776 AMT workers annotated the batch during two weeks; we required assignments from 5 workers for a single item.",3.2 Annotation,[0],[0]
+"We employed MACE (Hovy et al., 2013) for gold label and worker competence estimation with 95% threshold to ignore the less confident labels.",3.2 Annotation,[0],[0]
+"Several workers were rejected based on their low computed competence and other criteria, such as too short submission times.",3.2 Annotation,[0],[0]
+"We performed several cleaning procedures to increase quality and consistency of the annotated data (apart from initial MACE filtering already explained above).
+",3.3 Data cleaning,[0],[0]
+"Local cleaning First, we removed 3,859 reason units annotated either with C1-2 (”not an explanation”) and C8-6 (”too topic-specific”, which usually paraphrases some details from the related argument and is not general enough).",3.3 Data cleaning,[0],[0]
+"In the next step, we removed reason units with wrong polarity.",3.3 Data cleaning,[0],[0]
+"In particular, all reason units labeled with C8-* or C9-* should refer to the more convincing argument in the argument pair (as they describe positive properties), whereas all reasons with labels C5-*, C6-*, and C7-* should refer to the less convincing argument.",3.3 Data cleaning,[0],[0]
+"The target arguments for reason units were known from the heuristic preprocessing (see above); in this step 2,455 units were removed.
+",3.3 Data cleaning,[0],[0]
+"Global cleaning Since the argument pairs from one debate can be projected into an argument graph (Habernal and Gurevych, 2016), we utilized this ‘global’ context for further consistency cleaning.
+",3.3 Data cleaning,[0],[0]
+"Suppose we have two argument pairs, P1(A → B) and P2(B → C) (where→ means “is more convincing than”).",3.3 Data cleaning,[0],[0]
+"Let P1(RB) be reason unit targeting
+B in argument pair P1 and similarly P2(RB) reason unit targeting B in argument pair P2.",3.3 Data cleaning,[0],[0]
+"In other words, two reason units target the same argument in two different argument pairs (in one of them the argument is more convincing while in the other pair it is less convincing).",3.3 Data cleaning,[0],[0]
+There might then exist contradicting combination of classes for P1(RB) and P2(RB).,3.3 Data cleaning,[0],[0]
+"For example classes C9-2 and C7-3 are contradicting, as the same argument cannot be both ”on the topic” and ”off-topic” at the same time.
+",3.3 Data cleaning,[0],[0]
+"When such a conflict between two reason units occurred, we selected the reason with a higher score using the following formula:
+wW ∗ σ   ∑
+A=G
+wA",3.3 Data cleaning,[0],[0]
+"− λ ∑
+A 6=G wA
+  (1)
+where wW is the competence of the original author of the reason unit (originated from the UKPConvArg corpus), A = G are crowdsourced assignments for a single reason unit that match the final predicted gold label, A 6= G are assignments that differ from the final predicted gold label, wA is the competence of worker for assignment A, λ is a penalty for non-gold labels, and σ is the sigmoid function to squeeze the score between 0 and 1.
+",3.3 Data cleaning,[0],[0]
+"We found 25 types of global contradictions between labels for reason units and used them for cleaning the data; in total 3,790 reason units were removed in this step.",3.3 Data cleaning,[0],[0]
+"After all cleaning procedures, annotations from reason units were mapped back to argument pairs, resulting into a multi-label annotation of one or both arguments from the given pair.",3.3 Data cleaning,[0],[0]
+"In total 9,111 pairs from the UKPConvArg corpus were annotated.
+",3.3 Data cleaning,[0],[0]
+"For example, the final annotations of argument pair shown in Figure 1 contain four labels – C8-1 (as the more convincing argument “has more details, information, facts, or examples / more reasons / better reasoning / goes deeper / is more specific”), C9-3 (as the more convincing argument “has provoking question / makes you think”), C5-2 (as the less convincing argument “has language issues / bad grammar /...”), and C6-1 (as the less convincing argument “provides not enough support / ...” ).",3.3 Data cleaning,[0],[0]
+"Only four of six reason units for this argument pair were annotated because of the competence score of their authors.
+",3.3 Data cleaning,[0],[0]
+Table 1 shows number of labels per argument pairs; about a half of the argument pairs have only one label.,3.3 Data cleaning,[0],[0]
+Figure 3 shows distribution of label in the entire data set which is heavily skewed towards C8-1 label.,3.3 Data cleaning,[0],[0]
+"This is not surprising, as this label was used for reason units pointing out that the more convincing argument provided more reasons, details, information or better reasoning – a feature inherent to argumentation seen as giving reasons (Freeley and Steinberg, 2008).",3.3 Data cleaning,[0],[0]
+"Since the qualitative attributes of arguments were annotated indirectly by labeling their corresponding reason units without seeing the original arguments, we wanted to validate correctness of this approach.",3.4 Data validation,[0],[0]
+"We designed a validation study, in which workers were shown the original argument pair and two sets of labels.",3.4 Data validation,[0],[0]
+"The first set contained the true labels as annotated previously, while we randomly replaced few labels in the second set.",3.4 Data validation,[0],[0]
+"The goal was then to decide which set of labels better explains that argument A is
+more convincing than argument B.",3.4 Data validation,[0],[0]
+"For example, for the argument pair from Figure 1, one set of shown labels would be {C8-1, C9-3, C5-2, C6-1} (the correct set) while the other ‘distracting’ set would be {C8-1, C9-3, C5-1, C7-3} .
+",3.4 Data validation,[0],[0]
+We randomly sampled 500 argument pairs and collected 9 assignments per pair on AMT; we again used MACE with 95% threshold.,3.4 Data validation,[0],[0]
+Accuracy of workers on 235 argument pairs achieved 82%.,3.4 Data validation,[0],[0]
+We can thus conclude that workers tend to prefer explanations based on labels from the reason units and using the annotation process presented in this section is reliable.,3.4 Data validation,[0],[0]
+"Total costs of the annotations including pilot studies, bonuses, and data validation were USD 3,300.",3.4 Data validation,[0],[0]
+"We propose two experiments, both performed in 16- fold cross-domain validation.",4 Experiments,[0],[0]
+"In each fold, argument pairs from 15 debates are used and the remaining one is used for testing.",4 Experiments,[0],[0]
+"In both experiments, it is assumed that the more convincing argument in a pair is known and we concatenate (using a particular delimiter) both arguments such that the more convincing argument comes first.",4 Experiments,[0],[0]
+This experiment is a multi-label classification.,4.1 Predicting full multi-label distribution,[0],[0]
+"Given an argument pair annotated with several labels, the goal is to predict all these labels.
+",4.1 Predicting full multi-label distribution,[0],[0]
+We use two deep learning models.,4.1 Predicting full multi-label distribution,[0],[0]
+"Our first model, Bidirectional Long Short-Term Memory (BLSTM) network contains two LSTM blocks (forward and backward), each with 64 hidden units on the output.",4.1 Predicting full multi-label distribution,[0],[0]
+The output is concatenated into a single vector and pushed through sigmoid layer with 17 output units (corresponding to 17 labels).,4.1 Predicting full multi-label distribution,[0],[0]
+"We use cross entropy loss function in order to minimize distance of label distributions in training and test data (Nam et al., 2014).",4.1 Predicting full multi-label distribution,[0],[0]
+"In the input layer, we rely on pre-trained word embeddings from Glove (Pennington et al., 2014) whose weights are updated during training the network.
+",4.1 Predicting full multi-label distribution,[0],[0]
+"The second models is BLSTM extended with an attention mechanism (Rocktäschel et al., 2016; Golub and He, 2016) combined with convolution layers over the input.",4.1 Predicting full multi-label distribution,[0],[0]
+"In particular, the input em-
+bedding layer is convoluted using 4 different convolution sizes (2, 3, 5, 7), each with 1,000 randomly initialized weight vectors.",4.1 Predicting full multi-label distribution,[0],[0]
+Then we perform maxover-time pooling and concatenate the output into a single vector.,4.1 Predicting full multi-label distribution,[0],[0]
+"This vector is used as the attention module in BLSTM.
+",4.1 Predicting full multi-label distribution,[0],[0]
+We evaluate the system using two widely used metrics in multi-label classification.,4.1 Predicting full multi-label distribution,[0],[0]
+"First, Hamming loss is the average per-item per-class total error; the smaller the better (Zhang and Zhou, 2007).",4.1 Predicting full multi-label distribution,[0],[0]
+"Second, we report One-error (Sokolova and Lapalme, 2009) which corresponds to the error of the predicted label with highest probability; the smaller the better.",4.1 Predicting full multi-label distribution,[0],[0]
+"We do not report other metrics (such as Area Under PRC-curves, MAP, or cover) as they require tuning a threshold parameter, see a survey by Zhang and Zhou (2014).
+",4.1 Predicting full multi-label distribution,[0],[0]
+Results from Table 2 do not show significant differences between the two models.,4.1 Predicting full multi-label distribution,[0],[0]
+"Putting the oneerror numbers into human performance context can be done only indirectly, as the data validation pre-
+sented in Section 3.4 had a different set-up.",4.1 Predicting full multi-label distribution,[0],[0]
+"Here we can see that the error rate of the most confident predicted label is about 30%, while human performed similarly by choosing from a two different label sets in a binary settings, so their task was inherently harder.
+",4.1 Predicting full multi-label distribution,[0],[0]
+Error analysis and discussion We examined outputs from the label distribution prediction for BLSTM/ATT/CNN.,4.1 Predicting full multi-label distribution,[0],[0]
+"It turns out that the output layer leans toward predicting the dominant label C8-1, while prediction of other labels is seldom.",4.1 Predicting full multi-label distribution,[0],[0]
+"We suspect two causes, first, the highly skewed distribution of labels (see Figure 3) and, second, insufficient training data sizes where 13 classes have less than 1k training examples (while Goodfellow et al. (2016) recommend at least 5k instances per class).
+",4.1 Predicting full multi-label distribution,[0],[0]
+"Although multi-label classification may be viewed as a set of binary classification tasks that decides for each label independently (and thus allows for employing other ‘standard’ classifiers such as SVM), this so-called binary relevance approach ignores dependencies between the labels.",4.1 Predicting full multi-label distribution,[0],[0]
+"That is why we focused directly on deep-learning methods, as they are capable of learning and predicting a full label distribution (Nam et al., 2014).",4.1 Predicting full multi-label distribution,[0],[0]
+"In the second experiment, we focus on predicting flaws in arguments using coarse-grained labels.",4.2 Predicting flaws in less convincing arguments,[0],[0]
+"While this task makes several simplifications in the labeling, it still provides meaningful insights into argument quality assessment.",4.2 Predicting flaws in less convincing arguments,[0],[0]
+"For this purpose, we use only argument pairs where the less convincing argument is labeled with a single label (no multi-label classification).",4.2 Predicting flaws in less convincing arguments,[0],[0]
+"Second, we merged all labels from categories C5-",4.2 Predicting flaws in less convincing arguments,[0],[0]
+*,4.2 Predicting flaws in less convincing arguments,[0],[0]
+C6-* C7-* into three classes corresponding to their parent nodes in the annotation decision schema from Figure 2.,4.2 Predicting flaws in less convincing arguments,[0],[0]
+Table 3 shows distribution of the gold data for this task with explanation of the labels.,4.2 Predicting flaws in less convincing arguments,[0],[0]
+"It is worth noting that predicting flaws in the less convincing argument is still contextdependent and requires the entire argument pair because some of the quality labels are relative to the more convincing argument (such as “less reasoning” or “not enough support”).
+",4.2 Predicting flaws in less convincing arguments,[0],[0]
+"For this experiment, we modified the output layer
+of the neural models from the previous experiment.",4.2 Predicting flaws in less convincing arguments,[0],[0]
+The non-linear output function is softmax and we train the networks using categorical cross-entropy loss.,4.2 Predicting flaws in less convincing arguments,[0],[0]
+"We also add another baseline model that employs SVM with RBF kernel5 and a rich set of linguistically motivated features, similarly to (Habernal and Gurevych, 2016).",4.2 Predicting flaws in less convincing arguments,[0],[0]
+"The feature set includes uni- and bi-gram presence, ratio of adjective and adverb endings that may signalize neuroticism (Corney et al., 2002), contextuality measure (Heylighen and Dewaele, 2002), dependency tree depth, ratio of exclamation or quotation marks, ratio of modal verbs, counts of several named entity types, ratio of past vs. future tense verbs, POS n-grams, presence of dependency tree production rules, seven different readability measures (e.g., Ari (Senter and Smith, 1967), Coleman-Liau (Coleman and Liau, 1975), Flesch (Flesch, 1948), and others), five sentiment scores (from very negative to very positive) (Socher et al., 2013), spell-checking using standard Unix words, ratio of superlatives, and some surface features such as sentence lengths, longer words count, etc.6 It results into a sparse 60k-dimensional feature vector space.
+",4.2 Predicting flaws in less convincing arguments,[0],[0]
+Results in Table 4 suggest that the SVM-RBF baseline system performs poorly and its results are on par with a majority class baseline (not reported in detail).,4.2 Predicting flaws in less convincing arguments,[0],[0]
+"Both deep learning models significantly outperform the baseline, yielding Macro-F1 score about 0.35.",4.2 Predicting flaws in less convincing arguments,[0],[0]
+"The attention-based model performs better than simple BLSTM in two classes (C5 and C6), but the overall Macro-F1 score is not significantly better.
+",4.2 Predicting flaws in less convincing arguments,[0],[0]
+"5We used LISBVM (Chang and Lin, 2011) with the default hyper-parameters.",4.2 Predicting flaws in less convincing arguments,[0],[0]
+"As Fernández-Delgado et al. (2014) show, SVM with gaussian kernels is a reasonable best choice on average.
+",4.2 Predicting flaws in less convincing arguments,[0],[0]
+"6Detailed explanation of the features can be found directly in the attached source codes.
+",4.2 Predicting flaws in less convincing arguments,[0],[0]
+Error analysis We manually examined several dozens of predictions where the BLSTM model failed but the BLSTM/ATT/CNN model was correct in order to reveal some phenomena that the system is capable to cope with.,4.2 Predicting flaws in less convincing arguments,[0],[0]
+"First, the BLSTM/ATT/CNN model started catching some purely abusive, sarcastic, and attacking arguments.",4.2 Predicting flaws in less convincing arguments,[0],[0]
+"Also, the language/grammar issues were revealed in many cases, as well as using slang in arguments.
+",4.2 Predicting flaws in less convincing arguments,[0],[0]
+Examining predictions in which both systems failed reveal some fundamental limitations of the current purely data-driven computational approach.,4.2 Predicting flaws in less convincing arguments,[0],[0]
+"While the problem of not catching off-topic arguments can be probably modeled by incorporating the debate description or some sort of debate topic model into the attention vector, the more common issue of non-sense arguments or fallacious arguments (which seem like actual arguments on the first view) needs much deeper understanding of realworld knowledge, logic, and reasoning.",4.2 Predicting flaws in less convincing arguments,[0],[0]
+"This paper presented a novel task in the field of computational argumentation, namely empirical assessment of reasons for argument convincingness.",5 Conclusion,[0],[0]
+We created a new large benchmark data set by utilizing a new annotation scheme and several filtering strategies for crowdsourced data.,5 Conclusion,[0],[0]
+"Then we tackled two challenging tasks, namely multi-label classification of argument pairs in order to reveal qualitative properties of the arguments, and predicting flaws in the less convincing argument from the given argument pair.",5 Conclusion,[0.9527023232147183],"['Interestingly, the latter only outperforms the former in SentLen, a task that captures a superficial aspect of sentences (how many words they contain), that could get in the way of inducing more useful linguistic knowledge.']"
+We performed all evaluations in a cross-domain scenario and experimented with feature-rich SVM and two state-of-the-art neural network models.,5 Conclusion,[0],[0]
+The results are promising but show that the task is inherently complex as it requires deep reasoning about the presented arguments that goes beyond capabilities of the current computational models.,5 Conclusion,[0],[0]
+"By releasing the
+UKPConvArg2 data and code to the community, we believe more progress can be made in this direction in the near future.",5 Conclusion,[0],[0]
+"This work has been supported by the Volkswagen Foundation as part of the Lichtenberg-Professorship Program under grant No I/82806, by the German Institute for Educational Research (DIPF), by the German Research Foundation (DFG) via the GermanIsraeli Project Cooperation (DIP, grant DA 1600/1- 1), by the GRK 1994/1",Acknowledgments,[0],[0]
+"AIPHES (DFG), by the ArguAna Project GU 798/20-1 (DFG), and by Amazon Web Services in Education Grant award.",Acknowledgments,[0],[0]
+"Lastly, we would like to thank the anonymous reviewers for their valuable feedback.",Acknowledgments,[0],[0]
+This article tackles a new challenging task in computational argumentation.,abstractText,[0],[0]
+"Given a pair of two arguments to a certain controversial topic, we aim to directly assess qualitative properties of the arguments in order to explain why one argument is more convincing than the other one.",abstractText,[0],[0]
+We approach this task in a fully empirical manner by annotating 26k explanations written in natural language.,abstractText,[0],[0]
+"These explanations describe convincingness of arguments in the given argument pair, such as their strengths or flaws.",abstractText,[0],[0]
+"We create a new crowd-sourced corpus containing 9,111 argument pairs, multilabeled with 17 classes, which was cleaned and curated by employing several strict quality measures.",abstractText,[0],[0]
+"We propose two tasks on this data set, namely (1) predicting the full label distribution and (2) classifying types of flaws in less convincing arguments.",abstractText,[0],[0]
+Our experiments with feature-rich SVM learners and Bidirectional LSTM neural networks with convolution and attention mechanism reveal that such a novel fine-grained analysis of Web argument convincingness is a very challenging task.,abstractText,[0],[0]
+We release the new corpus UKPConvArg2 and the accompanying software under permissive licenses to the research community.,abstractText,[0],[0]
+What makes a convincing argument? Empirical analysis and detecting attributes of convincingness in Web argumentation,title,[0],[0]
+"Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing, pages 4208–4219 Brussels, Belgium, October 31 - November 4, 2018. c©2018 Association for Computational Linguistics
+4208",text,[0],[0]
+"Evaluating natural language understanding (NLU) systems is a long-established problem in AI (Levesque, 2014).",1 Introduction,[0],[0]
+"One approach to doing so is the machine reading comprehension (MRC) task, in which a system answers questions about given texts (Hirschman et al., 1999).",1 Introduction,[0],[0]
+"Although recent studies have made advances (Yu et al., 2018), it is still unclear to what precise extent questions require understanding of texts (Jia and Liang, 2017).
+",1 Introduction,[0],[0]
+"In this study, we examine MRC datasets and discuss what is needed to create datasets suit-
+able for the detailed testing of NLU.",1 Introduction,[0],[0]
+"Our motivation originates from studies that demonstrated unintended biases in the sourcing of other NLU tasks, in which questions contain simple patterns and systems can recognize these patterns to answer them (Gururangan et al., 2018; Mostafazadeh et al., 2017).
+",1 Introduction,[0],[0]
+We conjecture that a situation similar to this occurs in MRC datasets.,1 Introduction,[0],[0]
+"Consider the question shown in Figure 1, for example.",1 Introduction,[0],[0]
+"Although the question, starting with when, requires an answer that is expressed as a moment in time, there is only one such expression (i.e., November 2014) in the given text (we refer to the text as the context).",1 Introduction,[0],[0]
+"In other words, the question has only a single candidate answer.",1 Introduction,[0],[0]
+The system can solve it merely by recognizing the entity type required by when.,1 Introduction,[0],[0]
+"In addition to this, even if another expression of time appears in other sentences, only one sentence (i.e., s1) appears to be related to the question; thus, the system can easily determine the correct answer by attention, that is, by matching the words appearing both in the context and the ques-
+tion.",1 Introduction,[0],[0]
+"Therefore, this kind of question does not require a complex understanding of language—e.g., multiple-sentence reasoning, which is known as a more challenging task (Richardson et al., 2013).
+",1 Introduction,[0],[0]
+"In Section 3, we define two heuristics, namely entity-type recognition and attention.",1 Introduction,[0],[0]
+We specifically analyze the differences in the performance of baseline systems for the following two configurations: (i) questions answerable or unanswerable with the first k tokens; and (ii) questions whose correct answer appears or does not appear in the context sentence that is most similar to the question (henceforth referred to as the most similar sentence).,1 Introduction,[0],[0]
+"Although similar heuristics are proposed by Weissenborn et al. (2017), ours are utilized for question filtering, rather than system development; Using these simple heuristics, we split each dataset into easy and hard subsets for further investigation of the baseline performance.
+",1 Introduction,[0],[0]
+"After conducting the experiments, we analyze the following two points in Section 4.",1 Introduction,[0],[0]
+"First, we consider which questions are valid for testing, i.e., reasonably solvable.",1 Introduction,[0],[0]
+"Second, we consider what reasoning skills are required and whether this exposes any differences among the subsets.",1 Introduction,[0],[0]
+"To investigate these two concerns, we manually annotate sample questions from each subset in terms of validity and required reasoning skills, such as word matching, knowledge inference, and multiple sentence reasoning.
+",1 Introduction,[0],[0]
+"We examine 12 recently proposed MRC datasets (Table 1), which include answer extraction, description, and multiple-choice styles.",1 Introduction,[0],[0]
+We also observe differences based on these styles.,1 Introduction,[0],[0]
+"For our baselines, we use two neural-based systems, namely, the Bidirectional Attention Flow (Seo et al., 2017) and the Gated-Attention Reader (Dhingra et al., 2017).
+",1 Introduction,[0],[0]
+"In Section 5, we describe the advantages and disadvantages of different question styles with regard to evaluating NLU systems.",1 Introduction,[0],[0]
+"We also interpret our heuristics for constructing realistic MRC datasets.
+",1 Introduction,[0],[0]
+"Our contributions are as follows:
+•",1 Introduction,[0],[0]
+"This study is the first large-scale investigation across recent 12 MRC datasets with three question styles.
+",1 Introduction,[0],[0]
+"• We propose to employ simple heuristics to split each dataset into easy and hard subsets and examine the performance of two baseline models for each of the subsets.
+",1 Introduction,[0],[0]
+"• We manually annotate questions sampled from each subset with both validity and requisite reasoning skills to investigate which skills explain the difference between easy and hard questions.
+",1 Introduction,[0],[0]
+"We observed the following:
+•",1 Introduction,[0],[0]
+"The baseline performances for the hard subsets remarkably degrade compared to those of entire datasets.
+",1 Introduction,[0],[0]
+"• Our annotation study shows that hard questions require knowledge inference and multiplesentence reasoning in comparison with easy questions.
+",1 Introduction,[0],[0]
+"• Compared to questions with answer extraction and description styles, multiple-choice questions tend to require a broader range of reasoning skills while exhibiting answerability, multiple answer candidates, and unambiguity.
+",1 Introduction,[0],[0]
+These findings suggest that one might overestimate recent advances in MRC systems.,1 Introduction,[0],[0]
+"They also emphasize the importance of considering simple answer-seeking heuristics when sourcing questions, in that a dataset could be easily biased unless such heuristics are employed.1",1 Introduction,[0],[0]
+"We analyzed 12 MRC datasets with three question styles: answer extraction, description, and
+1All scripts used in this study, along with the subsets of the datasets and the annotation results, are available at https://github.com/Alab-NII/ mrc-heuristics.
+multiple choice (Table 1).",2.1 Datasets,[0],[0]
+"Our aim was to select datasets varying in terms of corpus genre, context length, and question sourcing methods.2 Other datasets that are not covered in our study, but can be analyzed using the same method, include: QA4MRE (Sutcliffe et al., 2013), CNN/Daily Mail (Hermann et al., 2015), Children’s Book Test (Hill et al., 2016), bAbI (Weston et al., 2015),",2.1 Datasets,[0],[0]
+"WikiReading (Hewlett et al., 2016), LAMBADA (Paperno et al., 2016), Who-did-What (Onishi et al., 2016), ProPara (Dalvi et al., 2018), MultiRC (Khashabi et al., 2018), CliCR (Suster and Daelemans, 2018), SQuAD (v2.0) (Rajpurkar et al., 2018), and DuoRC (Saha et al., 2018).",2.1 Datasets,[0],[0]
+"We employed the following two widely used baselines.
+",2.2 Baseline Systems,[0],[0]
+"Bidirectional Attention Flow (BiDAF) (Seo et al., 2017) was used for the answer extraction and description datasets.",2.2 Baseline Systems,[0],[0]
+BiDAF models bi-directional attention between the context and question.,2.2 Baseline Systems,[0],[0]
+"It achieved state-of-the-art performance on the SQuAD dataset.
+",2.2 Baseline Systems,[0],[0]
+"Gated-Attentive Reader (GA) (Dhingra et al., 2017) was used for the multiple-choice datasets.",2.2 Baseline Systems,[0],[0]
+GA has a multi-hop architecture with an attention mechanism.,2.2 Baseline Systems,[0],[0]
+"It achieved state-of-the-artperformance on the CNN/Daily Mail and Whodid-What datasets.
+",2.2 Baseline Systems,[0],[0]
+"Why we used different baseline systems: The multiple-choice style can be transformed to answer extraction, as mentioned in Clark et al. (2018).",2.2 Baseline Systems,[0],[0]
+"However, in some datasets, many questions have no textual overlap to determine the correct answer span in the context.",2.2 Baseline Systems,[0],[0]
+"Therefore, in order to avoid underestimating the baseline performance of those datasets, we used the GA system which is applicable to multiple choice questions.
+",2.2 Baseline Systems,[0],[0]
+"We scored the performance using exact match (EM)/F1 (Rajpurkar et al., 2016), Rouge-L (Lin, 2004), and accuracy for the answer extraction, description, and multiple-choice datasets, respectively (henceforth, we refer to these collectively as the score, for simplicity).",2.2 Baseline Systems,[0],[0]
+"For the description datasets, we determined in advance the answer span of the context that gives the highest Rouge-L score to the human-generated gold answer.",2.2 Baseline Systems,[0],[0]
+"We computed the Rouge-L score between
+2The ARC Easy and Challenge were collected using different methods; hence, we treated them as different datasets (see Clark et al. (2018) for further details).
+",2.2 Baseline Systems,[0],[0]
+"the predicted span and the gold answer.3
+Reproduction of the baseline performance: We used the same architecture as the official baseline systems unless specified otherwise.",2.2 Baseline Systems,[0],[0]
+All systems were trained on the training set and tested on the development/test set of each dataset.,2.2 Baseline Systems,[0],[0]
+We also used different hyperparameters for each dataset according to characteristics such as context length (see Appendix A for details).,2.2 Baseline Systems,[0],[0]
+We show the baseline performance of both the official results and those from our implementations in Tables 2 and 3.,2.2 Baseline Systems,[0],[0]
+Our implementations outperformed or showed comparable performance to the official baseline on most datasets.,2.2 Baseline Systems,[0],[0]
+"However, in TriviaQA, MCTest, RACE, and ARC-E, our baseline performance did not reach that of the official baseline, due to differences in architecture or the absence of reported hyperparameters in the literature.",2.2 Baseline Systems,[0],[0]
+The first goal of this paper is to determine whether there are unintended biases of the kind exposed in Figure 1 in MRC datasets.,3 Two Filtering Heuristics,[0],[0]
+We examined the influence of the two filtering heuristics: (i) entity type recognition (Section 3.1) and (ii) attention (Section 3.2).,3 Two Filtering Heuristics,[0],[0]
+We then investigated the performance of the baseline systems on the questions filtered by the defined heuristics (Section 3.3).,3 Two Filtering Heuristics,[0],[0]
+"The aim of this heuristic was to detect questions that can be solved based on (i) the existence of a single candidate answer that is restricted by expressions such as “wh-” and “how many,” and (ii) lexical patterns that appear around the correct answer.",3.1 Entity Type-based Heuristic,[0],[0]
+"Because the query styles are not uniform across datasets (e.g., MARCO uses search engine queries), we could not directly use interrogatives.",3.1 Entity Type-based Heuristic,[0],[0]
+"Instead, we simply provided the first k tokens of questions to the baseline systems.",3.1 Entity Type-based Heuristic,[0],[0]
+We chose smaller values for k than the (macro) average of the question length across the datasets (= 12.2 tokens).,3.1 Entity Type-based Heuristic,[0],[0]
+"For example, for k = 4 of the question will I qualify for OSAP if I’m new in Canada (excerpted from MARCO), we use will I qualify for.",3.1 Entity Type-based Heuristic,[0],[0]
+"Even if the tokens do not have an interrogative, the system may recognize lexical patterns around the correct answer.",3.1 Entity Type-based Heuristic,[0],[0]
+"Questions that can be solved
+3We used the official evaluation scripts of SQuAD and MS MARCO to compute the EM/F1 and Rouge-L, respectively.
+by examining these patterns were also of interest when filtering.
+",3.1 Entity Type-based Heuristic,[0],[0]
+"Results: Tables 2 and 3 present the results for k = 1, 2, 4.",3.1 Entity Type-based Heuristic,[0],[0]
+"In addition, to know the exact ratio of the questions that are solved rather than the scores for the answer extraction and description styles, we counted questions with k = 2 that achieved the score ≥ 0.5.4",3.1 Entity Type-based Heuristic,[0],[0]
+"As k decreased, so too did the baseline performance on all datasets in Table 2 except QAngaroo.",3.1 Entity Type-based Heuristic,[0],[0]
+"By contrast, in QAngaroo and the multiple-choice datasets, the performance did not degrade so strongly.",3.1 Entity Type-based Heuristic,[0],[0]
+"In particular, the difference between the scores on the full and k = 1 questions in QAngaroo was 1.8.",3.1 Entity Type-based Heuristic,[0],[0]
+"Because the questions in QAngaroo are not complete sentences, but rather knowledge-base entries that have a blank, such as country of citizenship Henry VI of England, this result implies that the baseline system can infer the answer merely by the first token of questions, i.e., the type of knowledge-base entry.
+",3.1 Entity Type-based Heuristic,[0],[0]
+"In most multiple-choice datasets, the k = 1 scores were significantly higher than randomchoice scores.",3.1 Entity Type-based Heuristic,[0],[0]
+"Given that multiple-choice ques-
+4We considered that this threshold is sufficient to judge that the system attends to the correct span because of the potential ambiguity of these styles (see Section 4).
+tions offer multiple options that are of valid entity/event types, this gap was not necessarily caused by the limited number of candidate answers, as in the case with the answer extraction datasets.",3.1 Entity Type-based Heuristic,[0.9524254596996262],"['An interesting observation in Table 2 is that different encoder architectures trained with the same objective, and achieving similar performance on the training task,4 can lead to linguistically different embeddings, as indicated by the probing tasks.']"
+"Therefore, we inferred that in the solved questions, incorrect options appeared less than the correct option did or did not appear at all in the context (such questions were regarded as solvable exclusively using the word match skill, which we analyzed in Section 4).",3.1 Entity Type-based Heuristic,[0],[0]
+"Remarkably, although we failed to achieve a higher baseline performance, the score for the complete questions in MCTest was lower than that of the k = 1 questions.",3.1 Entity Type-based Heuristic,[0],[0]
+This result showed that the MCTest questions were sufficiently difficult such that it was not especially useful for the baseline system to consider the entire question statement.,3.1 Entity Type-based Heuristic,[0],[0]
+"Next, we examined in each dataset (i) how many questions have their correct answers in the most similar sentence and (ii) whether a performance gap exists for such questions (i.e., whether such questions are easier than the others).
+",3.2 Attention-based Heuristic,[0],[0]
+"We used uni-gram overlap as a similarity mea-
+sure.5 We counted how many times question words appeared in each sentence, where question words were stemmed and stopwords were dropped.",3.2 Attention-based Heuristic,[0],[0]
+We then checked whether the correct answer appeared in the most similar sentence.,3.2 Attention-based Heuristic,[0],[0]
+"For the multiple-choice datasets, we selected the text span that provided the highest Rouge-L score with the correct option as the correct answer.
+",3.2 Attention-based Heuristic,[0],[0]
+Results: Tables 2 and 3 show the results.,3.2 Attention-based Heuristic,[0],[0]
+"Considering the average number of context sentences, most datasets contained a significantly high proportion of questions whose answers were in the most similar sentence.
+",3.2 Attention-based Heuristic,[0],[0]
+"In the answer extraction and description datasets, except QAngaroo, the baseline performance improved when the correct answer appeared in the most similar sentence, and gaps were found between the performances on these questions and the others.",3.2 Attention-based Heuristic,[0],[0]
+These gaps indicated that the dataset may lack balance for testing NLU.,3.2 Attention-based Heuristic,[0],[0]
+"If these questions tend to require the word matching skill exclusively, attending the other portion is useful in studying a more realistic NLU, e.g., common-sense reasoning and discourse understanding.",3.2 Attention-based Heuristic,[0],[0]
+"Therefore, we investigated whether
+5Although there are other similarity measures, we used this basic measure to obtain an intuitive result.
+",3.2 Attention-based Heuristic,[0],[0]
+"these questions merely require word matching (see Section 4).
+",3.2 Attention-based Heuristic,[0],[0]
+"Meanwhile, in the first three multiple-choice datasets, the performance differences were marginal or inversed, implying that although the baseline performance was not especially high, the difficulty of these questions for the baseline system was not affected by whether their correct answers appeared in the most similar sentence.
+",3.2 Attention-based Heuristic,[0],[0]
+We further analyzed the baseline performance after removing the context and leaving only the most similar sentence.,3.2 Attention-based Heuristic,[0],[0]
+"In AddSent and QAngaroo, the scores remarkably improved (>20 F1).",3.2 Attention-based Heuristic,[0],[0]
+"From this result, we can infer that on these datasets the baseline systems were distracted by other sentences in the context.",3.2 Attention-based Heuristic,[0],[0]
+"This observation was supported by the results from the AddSent dataset (Jia and Liang, 2017), which contains manually injected distracting sentences (i.e., adversarial examples).
+",3.2 Attention-based Heuristic,[0],[0]
+"3.3 Performance on Hard Subsets
+In the previous two sections, we observed that in the examined datasets (i) some questions were solved by the baseline systems merely with the first k tokens and/or (ii) the baseline performances increased for questions whose answers were in the most similar sentence.",3.2 Attention-based Heuristic,[0],[0]
+"We were concerned that these two will become dominant factors in measuring the baseline performance using the datasets; Hence, we split each development/test set into easy and hard subsets for further investigation.
+",3.2 Attention-based Heuristic,[0],[0]
+Hard subsets: A hard subset comprised questions (i) whose score is not positive when k = 2 and (ii) whose correct answer does not appear in the most similar sentence.,3.2 Attention-based Heuristic,[0],[0]
+The easy subsets comprised the remaining questions.,3.2 Attention-based Heuristic,[0],[0]
+We aimed to investigate the gap of the performance values between the easy and hard subsets.,3.2 Attention-based Heuristic,[0],[0]
+"If the gap is large, the dataset may be strongly biased toward questions that are solved by recognizing entity types or lexical patterns and may not be suitable for measuring the system’s ability for complex reasoning.
+",3.2 Attention-based Heuristic,[0],[0]
+Results and clarification: The bottom row of Tables 2 and 3 shows that the baseline performances on the hard subset remarkably decreased in almost all examined datasets.,3.2 Attention-based Heuristic,[0],[0]
+These results revealed that we may overestimate the ability of the baseline systems previously perceived.,3.2 Attention-based Heuristic,[0],[0]
+"How-
+ever, we clarify that our intention is not to remove the questions solved or mitigated by our defined heuristics to create a new hard subset because this may generate new biases as indicated in Gururangan et al. (2018).",3.2 Attention-based Heuristic,[0],[0]
+"Rather, we would like to emphasize the importance of the defined heuristics when sourcing questions.",3.2 Attention-based Heuristic,[0],[0]
+"Indeed, ill attention to these heuristics can lead to unintended biases.",3.2 Attention-based Heuristic,[0],[0]
+"Objectives: To complement the observations in the previous sections, we annotated sampled questions from each subset of the datasets.",4.1 Annotation Specifications,[0],[0]
+Our motivation can be summarized as follows: (i) How many questions are valid in each dataset?,4.1 Annotation Specifications,[0],[0]
+"That is, the hard questions may not in fact be hard, but just unsolvable, as indicated in Chen et al. (2016).",4.1 Annotation Specifications,[0],[0]
+(ii) What kinds of reasoning skills explain the easy/hard questions?,4.1 Annotation Specifications,[0],[0]
+"(iii) Are there any differences among the datasets and the question styles?
+",4.1 Annotation Specifications,[0],[0]
+We annotated the minimum skills required to choose the correct answer among other candidates.,4.1 Annotation Specifications,[0],[0]
+"We assumed that the solver knows what type of entity or event is entailed by the question.
+",4.1 Annotation Specifications,[0],[0]
+Annotation labels:,4.1 Annotation Specifications,[0],[0]
+"Our annotation labels (Table 4) were inspired by previous works such as Chen et al. (2016), Trischler et al. (2017), and Lai et al. (2017).",4.1 Annotation Specifications,[0],[0]
+"The major modifications were twofold: (i) detailed question validity, including a number of reasonable candidate answers and answer ambiguity, and (ii) posing multiple-sentence reasoning as a skill compatible with other skills.
+",4.1 Annotation Specifications,[0],[0]
+Reasoning types indeed have other classifications.,4.1 Annotation Specifications,[0],[0]
+"For instance, Lai et al. (2017) defined five reasoning types, including attitude analysis and whole-picture reasoning.",4.1 Annotation Specifications,[0],[0]
+We incorporated them into the knowledge and meta/whole classes.,4.1 Annotation Specifications,[0],[0]
+"Clark et al. (2018) proposed detailed knowledge and reasoning types, but these were specific to science exams and, thus, omitted from our study.
+",4.1 Annotation Specifications,[0],[0]
+"Independent of the abovementioned reasoning types, we checked whether the question required multiple-sentence reasoning to answer the questions.",4.1 Annotation Specifications,[0],[0]
+"As another modification, we extended the notion of “sentence” in our annotation and considered a subordinate clause as a sentence.",4.1 Annotation Specifications,[0],[0]
+"This modification was intended to deal with the internal complexity of a sentence with multiple clauses, which can also render a question difficult.
+",4.1 Annotation Specifications,[0],[0]
+"Settings: For each subset of the datasets, 30 questions were annotated.",4.1 Annotation Specifications,[0],[0]
+Therefore we obtained annotations for 30× 2× 12 = 720 questions.,4.1 Annotation Specifications,[0],[0]
+The annotation was performed by the authors.,4.1 Annotation Specifications,[0],[0]
+"The annotator was given the context, question, and candidate answers for multiple-choice questions along with the correct answer.",4.1 Annotation Specifications,[0],[0]
+"To reduce bias, the annotator did not know which easy or hard subset the questions were in, and was not told the predictions and scores of the respective baseline systems.",4.1 Annotation Specifications,[0],[0]
+Tables 5 and 6 show the annotation results.,4.2 Annotation Results,[0],[0]
+"Validity: TriviaQA, QAngaroo, and ARCs revealed a relatively high unsolvability, which seemed to be caused by the unrelatedness between the questions and their context.",4.2 Annotation Results,[0],[0]
+"For example, QAngaroo’s context was gathered from Wikipedia articles that were not necessarily related to the questions.6",4.2 Annotation Results,[0],[0]
+"The context passages in ARCs were
+6Nonetheless, it is remarkable that even though the dataset was automatically constructed, the remaining valid hard
+curated from textbooks that may not provide sufficient information to answer the questions.7 Note
+questions were difficult for the baseline system.",4.2 Annotation Results,[0],[0]
+"7Our analysis was not intended to undermine the quality
+that it is possible for unsolvable questions to be permitted, and that the system must indicate them in some datasets, such as QA4MRE, NewsQA, MARCO, and SQuAD (v2.0).
+",4.2 Annotation Results,[0.9523266601092805],"['Note that, while we would not expect an untrained human subject to be explicitly aware of tree depth or top constituency, similar information must be implicitly computed to correctly parse sentences, and there is suggestive evidence that the brain tracks something akin to tree depth during sentence processing (Nelson et al., 2017).']"
+"However, for single candidate, we found that few questions had only single-candidate answers.",4.2 Annotation Results,[0],[0]
+"Furthermore, there were even fewer singlecandidate answers in AddSent than in SQuAD.",4.2 Annotation Results,[0],[0]
+"This result supported the claim that the adversarial examples augmented the number of possible candidate answers, thereby degrading the baseline performance.
+",4.2 Annotation Results,[0],[0]
+"In our annotation, ambiguous questions were
+of these questions.",4.2 Annotation Results,[0],[0]
+"We refer readers to Clark et al. (2018).
+found to be those with multiple correct spans.",4.2 Annotation Results,[0],[0]
+Figure 2 shows an example.,4.2 Annotation Results,[0],[0]
+"In this case, several answers aside from “93” were correct.",4.2 Annotation Results,[0],[0]
+"Ambiguity is an important feature insofar because it can lead to unstable scoring in EM/F1.
+",4.2 Annotation Results,[0],[0]
+"The multiple-choice datasets mostly comprised valid questions, with the exception of the unsolvable questions in the ARC datasets.
+",4.2 Annotation Results,[0],[0]
+"Reasoning skills: We can see that word matching was more important in the easy subsets, and knowledge was more pertinent to the hard subsets in 10 of the 12 datasets.",4.2 Annotation Results,[0],[0]
+These results confirmed that the manner by which we split the subsets was successful at filtering questions that were relatively easy in terms of reasoning skills.,4.2 Annotation Results,[0],[0]
+"However, we did not observe this trend with paraphrasing, which seemed difficult to distinguish from word matching and knowledge.",4.2 Annotation Results,[0],[0]
+"With regard to meta/whole and math/logic, we can see that these skills were needed less in the answer extraction and description datasets.",4.2 Annotation Results,[0],[0]
+"They were more pertinent to the multiple-choice datasets.
+",4.2 Annotation Results,[0],[0]
+Multiple-sentence reasoning:,4.2 Annotation Results,[0],[0]
+Multiplesentence reasoning was more correlated with the hard subsets in 10 of the 12 datasets.,4.2 Annotation Results,[0],[0]
+"Although NewsQA showed the inverse tendency for word matching, knowledge, and multiple-sentence reasoning, we suspect that this was caused by annotation variance and filtering a large portion of ambiguous questions.",4.2 Annotation Results,[0],[0]
+"For relational types, we did not see a significant trend in any particular type.
+",4.2 Annotation Results,[0],[0]
+"Correlation of labels and baseline scores: Across all examined datasets, we analyzed the correlations between the annotation labels and the scores of each baseline system in Table 7.",4.2 Annotation Results,[0],[0]
+"In spite of the small size of the annotated samples, we derived statistically significant correlations for six labels.",4.2 Annotation Results,[0],[0]
+These results confirmed that BiDAF performed well for the word matching questions and relatively poorly with the knowledge questions.,4.2 Annotation Results,[0],[0]
+"By contrast, we did not observe this trend in GA.",4.2 Annotation Results,[0],[0]
+"In this section, we discuss the advantages and disadvantages of the question styles.",5 Discussion,[0],[0]
+"We also interpret the defined heuristics in terms of constructing more realistic MRC datasets.
+",5 Discussion,[0],[0]
+"Differences among the question styles: The biggest advantage to the answer extraction style is its ease in generating questions, which enables us to produce large-scale datasets.",5 Discussion,[0],[0]
+"In contrast, a disadvantage to this style is that it rarely demands meta/whole and math/logic skills, which can require answers not contained in the context.",5 Discussion,[0],[0]
+"Moreover, as observed in Section 4, it seems difficult to guarantee that all possible answer spans are given as the correct answers.",5 Discussion,[0],[0]
+"By contrast, the description and multiple-choice styles have the advantage of having no such restrictions on the appearance of candidate answers (Kočiský et al., 2018; Khashabi et al., 2018).",5 Discussion,[0],[0]
+"Nonetheless, the description style is difficult to evaluate because the Rouge-L and BLEU scores are insufficient for testing NLU.",5 Discussion,[0],[0]
+"Whereas it is easy to evaluate the performance on multiple-choice questions, generating multiple reasonable options requires considerable effort.
+",5 Discussion,[0],[0]
+"Interpretation of our heuristics: When we regard the MRC task as recognizing textual entailment (RTE) (Dagan et al., 2006), the task requires the reader to construct one or more premises from the context and form the most reasonable hypothesis from the question and candidate answer (Sachan et al., 2015).",5 Discussion,[0],[0]
+"Thus, easier questions are those (i) where the reader needs to generate only one hypothesis, and (ii) where the premises directly describe the correct hypothesis.",5 Discussion,[0],[0]
+Our two heuristics can also be seen as the formalizations of these criteria.,5 Discussion,[0],[0]
+"Therefore, to make questions more realistic, we need to create multiple hypotheses that require complex reasoning to be distinguished.",5 Discussion,[0],[0]
+"Moreover, the integration of premises should be complemented by external knowledge to provide sufficient information to verify the correct hypothesis.",5 Discussion,[0],[0]
+"Our heuristics and annotation were motivated by unintended biases (Levesque, 2014) and evaluation overfitting (Whiteson et al., 2011), respectively.
+",6 Related Work,[0],[0]
+"Unintended biases: The MRC task tests a reading process that involves retrieving stored information and performing inferences (Sutcliffe et al.,
+2013).",6 Related Work,[0],[0]
+"However, constructing datasets that comprehensively require those skills is difficult.",6 Related Work,[0],[0]
+"As Levesque (2014) discussed as a desideratum for testing AI, we should avoid creating questions that can be solved by matching patterns, using unintended biases, and selectional restrictions.",6 Related Work,[0],[0]
+"For the unintended biases, one suggestive example is the Story Cloze Test (Mostafazadeh et al., 2016), in which a system chooses a sentence among candidates to conclude a given paragraph of the story.",6 Related Work,[0],[0]
+"A recent attempt at this task showed that recognizing superficial features in the correct candidate is critical to achieve the state of the art (Schwartz et al., 2017).
+",6 Related Work,[0],[0]
+"Similarly, in MRC, Weissenborn et al. (2017) proposed context/type matching heuristic to develop a simple neural system.",6 Related Work,[0],[0]
+"Min et al. (2018) observed that, in SQuAD, 92% of answerable questions can be answered only using a single context sentence.",6 Related Work,[0],[0]
+"In visual question answering, Agrawal et al. (2016) analyzed the behavior of models with the variable length of the first question words.",6 Related Work,[0],[0]
+"Khashabi et al. (2018) more recently proposed a dataset with questions for multisentence reasoning.
+",6 Related Work,[0],[0]
+"Evaluation overfitting: The theory behind evaluating AI distinguishes between taskand skill-oriented approaches (Hernández-Orallo, 2017).",6 Related Work,[0],[0]
+"In the task-oriented approach, we usually develop a system and test it on a specific dataset.",6 Related Work,[0],[0]
+The developed system sometimes lacks generality but achieves the state of the art for that specific dataset.,6 Related Work,[0],[0]
+"Further, it becomes difficult to verify and explain the solution to tasks.",6 Related Work,[0],[0]
+"The situation in which we are biased to the specific tasks is called evaluation overfitting (Whiteson et al., 2011).",6 Related Work,[0],[0]
+"By contrast, with the skill-oriented approach, we aim to interpret the relationships between tasks and skills.",6 Related Work,[0],[0]
+"This orientation can encourage the development of more realistic NLU systems.
+",6 Related Work,[0],[0]
+"As One of our goals was to investigate whether easy questions are dominant in recent datasets, it did not necessarily require a detailed classification of reasoning types.",6 Related Work,[0],[0]
+"Nonetheless, we recognize there are more fine-grained classifications of the required skills for NLU.",6 Related Work,[0],[0]
+"For example, Weston et al. (2015) defined 20 skills as a set of toy tasks.",6 Related Work,[0],[0]
+Sugawara et al. (2017) also organized 10 prerequisite skills for MRC.,6 Related Work,[0],[0]
+LoBue and Yates (2011) and Sammons et al. (2010) analyzed entailment phenomena using detailed classifications in RTE.,6 Related Work,[0],[0]
+"For
+the ARC dataset, Boratko et al. (2018) proposed knowledge and reasoning types.",6 Related Work,[0],[0]
+This study examined MRC questions from 12 datasets to determine what makes such questions easier to answer.,7 Conclusion,[0],[0]
+We defined two heuristics that limit candidate answers and thereby mitigate the difficulty of questions.,7 Conclusion,[0],[0]
+"Using these heuristics, the datasets were split into easy and hard subsets.",7 Conclusion,[0],[0]
+We further annotated the questions with their validity and the reasoning skills needed to answer them.,7 Conclusion,[0],[0]
+"Our experiments revealed that the baseline performance degraded with the hard questions, which required knowledge inference and multiple-sentence reasoning compared to easy questions.",7 Conclusion,[0],[0]
+These results suggest that one might overestimate the ability of the baseline systems.,7 Conclusion,[0],[0]
+They also emphasize the importance of analyzing and reporting the properties of new datasets when released.,7 Conclusion,[0],[0]
+One limitation of this work was the heavy cost of the annotation.,7 Conclusion,[0],[0]
+"In future research, we plan to explore a method for automatically classifying reasoning types.",7 Conclusion,[0],[0]
+This will enable us to evaluate systems through a detailed organization of the datasets.,7 Conclusion,[0],[0]
+"We would like to thank Rajarshi Das, Shehzaad Dhuliawala, and anonymous reviewers for their insightful comments.",Acknowledgments,[0],[0]
+This work was supported by JSPS KAKENHI Grant Numbers 18H03297 and 18J12960.,Acknowledgments,[0],[0]
+"We used different hyperparameters for each dataset because of the different characteristics of the datasets, e.g., the context length.",A Hyperparameters of the Baseline Systems,[0.9509155583748221],"['We further uncovered interesting patterns of correlation between the probing tasks and more complex “downstream” tasks, and presented a set of intriguing findings about the linguistic properties of various embedding methods.']"
+Tables 8 and 9 show the hyperparameters.,A Hyperparameters of the Baseline Systems,[0],[0]
+A challenge in creating a dataset for machine reading comprehension (MRC) is to collect questions that require a sophisticated understanding of language to answer beyond using superficial cues.,abstractText,[0],[0]
+"In this work, we investigate what makes questions easier across recent 12 MRC datasets with three question styles (answer extraction, description, and multiple choice).",abstractText,[0],[0]
+We propose to employ simple heuristics to split each dataset into easy and hard subsets and examine the performance of two baseline models for each of the subsets.,abstractText,[0],[0]
+We then manually annotate questions sampled from each subset with both validity and requisite reasoning skills to investigate which skills explain the difference between easy and hard questions.,abstractText,[0],[0]
+"From this study, we observed that (i) the baseline performances for the hard subsets remarkably degrade compared to those of entire datasets, (ii) hard questions require knowledge inference and multiple-sentence reasoning in comparison with easy questions, and (iii) multiplechoice questions tend to require a broader range of reasoning skills than answer extraction and description questions.",abstractText,[0],[0]
+These results suggest that one might overestimate recent advances in MRC.,abstractText,[0],[0]
+What Makes Reading Comprehension Questions Easier?,title,[0],[0]
+"Proceedings of NAACL-HLT 2018, pages 25–32 New Orleans, Louisiana, June 1 - 6, 2018. c©2017 Association for Computational Linguistics",text,[0],[0]
+"Many commercial applications of artificial agents require task-oriented conversational agents that help customers achieve a specific goal, such as making or cancelling a payment or reservation (Zue et al., 2000; Bennacef et al., 1996).",1 Introduction,[0],[0]
+"These chatbots must extract relevant information from the user, provide relevant knowledge to her, and issue appropriate system calls to achieve the goal.
+",1 Introduction,[0],[0]
+"Supervised approaches such as seq2seq models (Vinyals and Le, 2015; Shang et al., 2015; Serban et al., 2015; Sordoni et al., 2015b), have recently gained attention in non-task oriented dialog, due to their ability to perform end-to-end learning from expert dialogues1, removing the need for many of the independent modules in traditional systems such as, natural language understanding, dialog state tracker and natural language generator.
+",1 Introduction,[0],[0]
+Seq2Seq models have also shown promising results on small domain or synthetic task-oriented dialog datasets.,1 Introduction,[0],[0]
+"However, performance was much worse when we applied these models to real world
+1We refer to an entire session of text exchanges between an agent and a customer as a dialogue.
+datasets.",1 Introduction,[0],[0]
+"This is in part because end-to-end methods, in general, require large amounts of data before they are able to generate fluent textual responses.",1 Introduction,[0],[0]
+"In real world settings, words chosen by human users and agents are not constrained to a fixed vocabulary, and hence we see many lexical variations even among semantically similar dialogs.
+",1 Introduction,[0],[0]
+"To ensure that information is both conveyed and understood, we want responses to be fluent as well as coherent.",1 Introduction,[0],[0]
+We say a response is coherent if it is a sensible response in the dialogue context.,1 Introduction,[0],[0]
+"Table 1 shows responses generated by a variant of the seq2seq model, when trained on real customeragent chat transcripts.",1 Introduction,[0],[0]
+"The response of the chatbot during the fourth turn2 in Table 1, accepting the customer’s expression of gratitude, is coherent and fluent.",1 Introduction,[0],[0]
+Coherence of a response does not necessarily guarantee fluency.,1 Introduction,[0],[0]
+"The generated response during the second turn is coherent but not fluent.
+",1 Introduction,[0],[0]
+"On our customer support dataset, seq2seq models performed well with salutations, but performed poorly both in terms of fluency and coherency on intermediate responses.",1 Introduction,[0],[0]
+"The reason being, salutations contain minimal lexical variations across dialogs and occur more frequently when compared to other utterances.",1 Introduction,[0],[0]
+"(Koehn and Knowles, 2017) use beam search decoding in Neural Machine Translation to mitigate fluency issues on larger translation datasets.",1 Introduction,[0],[0]
+"Typically increasing the beam size improves translation quality, however, increasing beam sizes in Neural MT has shown to produce poor translations (Koehn and Knowles, 2017).
+",1 Introduction,[0],[0]
+We propose nearest neighbor based approaches that can directly use and replay available expert utterances.,1 Introduction,[0],[0]
+"This removes the need for the models to learn the grammar of the language, and allows the models to focus on learning what to say, rather than how to say it.",1 Introduction,[0],[0]
+"The nearest neighbor-based
+2We define a turn as a pair of text exchanges between the customer and the agent.
+25
+methods we propose naturally generate more fluent responses, since they use actual agent responses.",1 Introduction,[0],[0]
+"However, our results in Table 3 show that they perform poorly in predicting external actions and at ensuring dialogue level coherency.",1 Introduction,[0],[0]
+"In contrast, the skip-connection seq2seq models we propose here, learn when to produce external actions and produce more coherent dialogues.",1 Introduction,[0],[0]
+"We propose a hybrid model that brings together the strengths of both the approaches.
+",1 Introduction,[0],[0]
+"The contributions of this paper are as follows:
+• We propose skip-connections to handle multiturn dialogue that outperforms previous models.
+",1 Introduction,[0],[0]
+• We propose a hybrid model where nearest neighbor-based models generate fluent responses and skip-connection models generate accurate responses and external actions.,1 Introduction,[0],[0]
+"We show the effectiveness of the belief state representations obtained from the skip-connection model by comparing against previous approaches.
+",1 Introduction,[0],[0]
+"• To the best of our knowledge, our paper makes the first attempt at evaluating state of the art models on a large real world task with human users.",1 Introduction,[0],[0]
+"We show that methods that achieve state of the art performance on synthetic datasets, perform poorly in real world dialog tasks.",1 Introduction,[0],[0]
+"Comparing Tables 2 and 3, we see the impact of moving from synthetic to real world datasets, and as a result, find issues with previously proposed models that may have been obscured by the simplicity and regularity of synthetic datasets.",1 Introduction,[0],[0]
+"Although seq2seq models have been applied in taskoriented settings (Wen et al., 2017; Williams and
+Zweig, 2016; Bordes and Weston, 2016; Zhao and Eskénazi, 2016), they have only been evaluated on small domain or synthetic datasets.
+",2 Related Work,[0],[0]
+More recent work has focused on representation learning for multi-turn dialogue.,2 Related Work,[0],[0]
+Sordoni et al. (2015b) use a single bag-of-words representation of the entire dialog history.,2 Related Work,[0],[0]
+"Such a representation ignores the order of responses, which is crucial to ensure that utterances are coherent across turns.",2 Related Work,[0],[0]
+An alternative approach is to use a hierarchical encoder-decoder network (HRED),2 Related Work,[0],[0]
+"(Sordoni et al., 2015a) which uses a complex three layered RNN network, a query level encoder, a session level encoder and a decoder.",2 Related Work,[0],[0]
+"Attentional networks (Bordes and Weston, 2016; Dodge et al., 2015) use a weighted combination of all the context vectors upto the current turn.",2 Related Work,[0],[0]
+Attentional networks proved to be a stronger baseline over HRED during our evaluation.,2 Related Work,[0],[0]
+"We propose models that learn fixed size representations of the history using simpler skip-connection models showing comparable performance with attentional networks (Bordes and Weston, 2016; Dodge et al., 2015).
+",2 Related Work,[0],[0]
+Our work is closely related to retrieval-based chatbots.,2 Related Work,[0],[0]
+"Williams and Zweig (2016), select a response from a small set of templates.",2 Related Work,[0],[0]
+"Zhou et al. (2016); Yan et al. (2016) perform multi-turn dialogue by treating the dialogue history as the query, and perform classification with the number of classes equal to the number of possible responses.",2 Related Work,[0],[0]
+"They evaluate precision@K, from a restricted list, but do not indicate how this list is obtained in practice.",2 Related Work,[0],[0]
+"In our real world dataset, the number of possible responses grows with the dataset size.",2 Related Work,[0],[0]
+"In addition, responses are unevenly distributed with salutations occurring frequently.",2 Related Work,[0],[0]
+"As a
+result, the classification based approach performed poorly, with most of the outputs being salutations.",2 Related Work,[0],[0]
+Complete automation of customer service is still not possible as chatbots are not perfect yet.,3 Proposed Approach,[0],[0]
+"However, automation where possible in the workflow could still result in considerable savings.",3 Proposed Approach,[0],[0]
+"In order to ensure that the end user experience is not substandard, in live user testing, we ask a human agent to play intermediary role between the chatbot and the user.",3 Proposed Approach,[0],[0]
+A user initiates a chat by entering an initial query or an issue that requires resolution (Figure 1).,3 Proposed Approach,[0],[0]
+The chatbot responds with 5 diverse responses.,3 Proposed Approach,[0],[0]
+"The agent selects the most relevant response, and may choose to modify it.",3 Proposed Approach,[0],[0]
+"If the response is not relevant, she may type a different response.",3 Proposed Approach,[0],[0]
+"During offline testing, the chatbot returns only one response and no human agent is used.",3 Proposed Approach,[0],[0]
+The following section describes our skip connection seq2seq model for representation learning and our nearest neighbor approach for response selection.,3 Proposed Approach,[0],[0]
+First we describe the datasets and metrics we use.,3 Proposed Approach,[0],[0]
+"We use data from bAbI (Task1 and Task2) (Bordes and Weston, 2016) to evaluate our models.",3.1 Dataset and Metrics,[0],[0]
+"Other dialog tasks in bAbI require the model to mimic a knowledge base i.e., memorize it.",3.1 Dataset and Metrics,[0],[0]
+"This is not a suitable strategy for our application, since in practice knowledge bases undergo frequent changes, making this infeasible.",3.1 Dataset and Metrics,[0],[0]
+"In the bAbI task, the user interacts with an agent in a simulated restaurant reservation application, by providing her constraints, such as place, cuisine, number of people or price range.",3.1 Dataset and Metrics,[0],[0]
+"The agent or chatbot performs external actions or SQL-like queries (api call) to retrieve information
+from the knowledge base of restaurants.",3.1 Dataset and Metrics,[0],[0]
+"We used 80% of the data for training (of which 10% was used for validation) and the remaining 20% for testing.
+",3.1 Dataset and Metrics,[0],[0]
+We also evaluate our models on an internal customer support dataset of 160k chat transcripts containing 3 million interactions.,3.1 Dataset and Metrics,[0],[0]
+We limit the number of turns to 20.,3.1 Dataset and Metrics,[0],[0]
+We will refer to this dataset as CS large.,3.1 Dataset and Metrics,[0],[0]
+"We perform spell correction, deidentification to remove customer sensitive information, lexical normalization particularly of lingo words such as, lol and ty.",3.1 Dataset and Metrics,[0],[0]
+Generalizing such entities reduces the amount of training data required.,3.1 Dataset and Metrics,[0],[0]
+"The values must be reinserted, currently by a human in the loop.",3.1 Dataset and Metrics,[0],[0]
+"We have also masked product and the organization name in the examples.
+",3.1 Dataset and Metrics,[0],[0]
+"The use of MT evaluation metrics to evaluate dialogue fluency with just one reference has been debated (Liu et al., 2016).",3.1 Dataset and Metrics,[0],[0]
+"There is still no good alternative to evaluate dialog systems, and so we continue to report fluency using BLEU (BiLingual Evaluation Understudy (Papineni et al., 2002)), in addition to other metrics and human evaluations.",3.1 Dataset and Metrics,[0],[0]
+"Coherency also requires measuring correctness of the external actions which we measure using a metric we call, Exact Query Match (EQM), which represents the fraction of times the api call matched the ground truth query issued by the human agent.",3.1 Dataset and Metrics,[0],[0]
+We do not assign any credit to partial matches.,3.1 Dataset and Metrics,[0],[0]
+"In addition, we report the precision (P), recall (R) and accuracy (Acc) achieved by the models in predicting whether to make an api call (positive) or not (negative).",3.1 Dataset and Metrics,[0],[0]
+Obtaining and aligning api calls with the chat transcripts is often complex as such information is typically stored in multiple confidential logs.,3.1 Dataset and Metrics,[0],[0]
+"In order to measure coherency with respect to api calls, we randomly sampled 1000 chat tran-
+scripts and asked human agents to hand annotate the api calls wherever appropriate.",3.1 Dataset and Metrics,[0],[0]
+We will refer to this labeled dataset as CS small.,3.1 Dataset and Metrics,[0],[0]
+"Seq2seq models are an application of Long ShortTerm Memory (Hochreiter and Schmidhuber, 1997) architecture where inputs and outputs are variable length sequences.",3.1.1 Skip Connection Seq2Seq Model,[0],[0]
+We unroll the basic seq2seq model and make one copy for each turn.,3.1.1 Skip Connection Seq2Seq Model,[0],[0]
+This is illustrated in Figure 2.,3.1.1 Skip Connection Seq2Seq Model,[0],[0]
+"Input words are one hot encoded, and projected using a linear layer to obtain xtk for the input word at position k in turn t, resulting in a sequence Xt = {xt1, xt2, ...xtL}.",3.1.1 Skip Connection Seq2Seq Model,[0],[0]
+"The output sequence to be generated is represented by Yt = {yt1, yt2, ...ytL′}.",3.1.1 Skip Connection Seq2Seq Model,[0],[0]
+"The encoder at turn t receives the user’s projected input, as well as the context vectors from the final hidden units of the encoder and the decoder at turn t − 1, forming a skip connection.",3.1.1 Skip Connection Seq2Seq Model,[0],[0]
+This ensures that a fixed size vector is used to represent the dialogue history at every turn.,3.1.1 Skip Connection Seq2Seq Model,[0],[0]
+Orange-solid-square boxes in Figure 2 represent LSTM cells of the encoder.,3.1.1 Skip Connection Seq2Seq Model,[0],[0]
+"htL,enc is the context vector which is sent to every LSTM cell in the decoder (dec) at any turn t (Cho et al., 2014).
+",3.1.1 Skip Connection Seq2Seq Model,[0],[0]
+Green-dashed-square cells in the decoder represent the LSTM and dense layers with a softmax non-linearity.,3.1.1 Skip Connection Seq2Seq Model,[0],[0]
+These are trained to predict each word in the agent’s utterance.,3.1.1 Skip Connection Seq2Seq Model,[0],[0]
+Each of the seq2seq copies share the same parameters.,3.1.1 Skip Connection Seq2Seq Model,[0],[0]
+"Once the training is complete, we use only one copy of the seq2seq model to make predictions.",3.1.1 Skip Connection Seq2Seq Model,[0],[0]
+The results obtained with the vanilla seq2seq model on the bAbI dataset is shown in the first row (Model 1) of Table 2.,3.1.2 Results with Skip-Connections,[0],[0]
+"The EQM is 0%, even though the BLEU scores look reasonable.",3.1.2 Results with Skip-Connections,[0],[0]
+"Model 2 is the skip-connection seq2seq model, where only the output of the hidden states from the decoder at turn t− 1 is appended to the input at time t, i.e., ht−1L,enc from the encoder history is not explicitly presented to turn t.
+Model 3 extends Model 1 by adding an attentional layer.",3.1.2 Results with Skip-Connections,[0],[0]
+Model 3 is a variant of Bordes and Weston (2016); Dodge et al. (2015) where the output of the attentional layer is sent to the decoder for generating the responses rather than classifying as one of the known responses.,3.1.2 Results with Skip-Connections,[0],[0]
+This variant performed better on the customer support data compared to a direct implementation of Bordes and Weston (2016).,3.1.2 Results with Skip-Connections,[0],[0]
+"The reason being, salutations occurred more frequently in the customer support data and hence, the classification based approach originally proposed by Bordes and Weston (2016) classified most of the outputs as salutations.",3.1.2 Results with Skip-Connections,[0],[0]
+"Finally, Model 4 extends Model 2 by providing ht−1L,enc to turn t.
+We see that explicitly adding skip-connections substantially improves performance in EQM, from 0 or 6% to 55%, and has a positive effect on BLEU.",3.1.2 Results with Skip-Connections,[0],[0]
+The models show similar behavior on CS small.,3.1.2 Results with Skip-Connections,[0],[0]
+"In this case, when an api call is executed, the result is treated as a response and sent as input to the next turn.",3.1.2 Results with Skip-Connections,[0],[0]
+"Although Model 4 performed the best
+on CS small and CS large, our analysis showed that the generated responses were most often incoherent and not fluent, a phenomenon that did not arise in the synthetic dataset.",3.1.2 Results with Skip-Connections,[0],[0]
+"We now proceed to explain the nearest neighbor based approach, which we show is able to produce reasonable responses that are more fluent.",3.1.2 Results with Skip-Connections,[0],[0]
+"In our nearest neighbor approach, an agent’s response is chosen from human generated transcripts or the training data - ensuring fluency.",3.2 Nearest Neighbor-based approach,[0],[0]
+"However, this does not necessarily ensure that the responses are coherent in the context of the dialogue.",3.2 Nearest Neighbor-based approach,[0],[0]
+"The nearest neighbor approach starts with a representation of the entire dialogue history bst,i for turn t and dialogue i. Together with at,i, the action the agent took while in this state i.e., the natural language response or api call query issued by the agent, this results in a tuple < bst,i, at,i >.",3.2 Nearest Neighbor-based approach,[0],[0]
+"The entire training data is converted into a set of tuples S, that contains pairwise relationships between dialog state representations and agent actions.
+",3.2 Nearest Neighbor-based approach,[0],[0]
+"In the online or test phase, given an embedding of the dialogue so far, testV ec, we find the nearest neighbor bstestV ec in S. We return the nearest neighbor’s corresponding response, atestV ec, as the predicted agent’s response.",3.2 Nearest Neighbor-based approach,[0],[0]
+"We use ball trees (Kibriya and Frank, 2007) to perform efficient nearest neighbor search.",3.2 Nearest Neighbor-based approach,[0],[0]
+"Since we want to provide more flexibility to the human agent in choosing the most
+appropriate response, we extended this approach to find k = 100 responses and then used a diversitybased ranking approach (Zhu et al., 2007) to return 5 diverse responses.",3.2 Nearest Neighbor-based approach,[0],[0]
+"To construct the adjacency matrix for diversity ranking, we use word overlap between responses after stop word removal.
+",3.2 Nearest Neighbor-based approach,[0],[0]
+"Numerous techniques have been proposed for representating text including word2vec and sent2vec (Mikolov et al., 2013b,a; Pagliardini et al., 2017; Pennington et al., 2014).",3.2 Nearest Neighbor-based approach,[0],[0]
+"In the following sections, we compare these approaches against our proposed representations using skip connections.",3.2 Nearest Neighbor-based approach,[0],[0]
+"In our first baseline, Model 6, for a dialogue, i, the user’s response at turn t, usert, is concatenated with his/her responses in previous turns (useri,1:t−1) and the agent’s responses upto turn t − 1 (agenti,1:t−1), to obtain, pi,t = (useri,1:t, agenti,1:t−1).",3.2.1 Dialogue Embeddings from Word/Sentence Embeddings,[0],[0]
+"We obtain a belief state vector representation as the average of the word2vec (Mikolov et al., 2013b) representations of words in pi,t. We then apply the nearest neighbor approach described in Section 3.2.",3.2.1 Dialogue Embeddings from Word/Sentence Embeddings,[0],[0]
+"Results obtained with this approach on CS small are in Table 3.
+",3.2.1 Dialogue Embeddings from Word/Sentence Embeddings,[0],[0]
+We emphasize a subtle but important oracle advantage that we give this baseline algorithm.,3.2.1 Dialogue Embeddings from Word/Sentence Embeddings,[0],[0]
+"When we obtain the embeddings of a test dialogue, we use the true utterances of the expert agent so far,
+which would not be available in practice.",3.2.1 Dialogue Embeddings from Word/Sentence Embeddings,[0],[0]
+"However, we will show that our proposed representation, described in Section 3.3, performs better, even without access to this information.
+",3.2.1 Dialogue Embeddings from Word/Sentence Embeddings,[0],[0]
+Pagliardini et al. (2017) recently described a method that leads to better sentence-level representations.,3.2.1 Dialogue Embeddings from Word/Sentence Embeddings,[0],[0]
+We use their approach as another baseline.,3.2.1 Dialogue Embeddings from Word/Sentence Embeddings,[0],[0]
+bst is represented by the average of the sentence embeddings of all agent’s responses upto turn t− 1 and user’s responses upto turn t. We also explore geometric discounting to give higher importance to recent responses.,3.2.1 Dialogue Embeddings from Word/Sentence Embeddings,[0],[0]
+We use a similar process to obtain representations for the user’s responses during the test phase.,3.2.1 Dialogue Embeddings from Word/Sentence Embeddings,[0],[0]
+"As done with word-embeddings, we provide true agent responses upto turn t− 1 for predicting the agent’s response at turn t. Results obtained on CS small by averaging (Model 7) and discounted averaging (Model 8) are given in Table 3.",3.2.1 Dialogue Embeddings from Word/Sentence Embeddings,[0],[0]
+Model 8 performs better than Model 7 across all measures.,3.2.1 Dialogue Embeddings from Word/Sentence Embeddings,[0],[0]
+"A comparison between Model 6, 7 and 8 with Model 4 in Table 3, would not be a fair one as Model 4 does not use previous true agent responses to predict the agent’s next response.",3.2.1 Dialogue Embeddings from Word/Sentence Embeddings,[0],[0]
+"We suggest using the outputs of the hidden units in the decoder of our skip connection seq2seq model, as suitable representations for the belief states.",3.3 Hybrid model: Nearest Neighbor with Seq2Seq Embeddings,[0],[0]
+The seq2seq model for handling multi-turn dialogue is trained as before (Section 3.1.1).,3.3 Hybrid model: Nearest Neighbor with Seq2Seq Embeddings,[0],[0]
+"Once the parameters have been learned, we proceed to generate representations for all turns in the training data.",3.3 Hybrid model: Nearest Neighbor with Seq2Seq Embeddings,[0],[0]
+"The output of the last hidden unit of the encoder or the decoder before turn t is used to represent the belief state vector at turn t. As before, we obtain a set S consisting of pairs of belief state vectors and next actions taken by the agent.
+",3.3 Hybrid model: Nearest Neighbor with Seq2Seq Embeddings,[0],[0]
+"We test the models as done in Section 3.1.1, except now we select responses using the nearest neighbor approach (Figure 2).",3.3 Hybrid model: Nearest Neighbor with Seq2Seq Embeddings,[0],[0]
+Results obtained are in Table 3 (Models 9 and 10).,3.3 Hybrid model: Nearest Neighbor with Seq2Seq Embeddings,[0],[0]
+Model 9 uses the output of the last hidden unit of the encoder.,3.3 Hybrid model: Nearest Neighbor with Seq2Seq Embeddings,[0],[0]
+"Model 10 uses previous turn’s decoder’s last hidden unit.
+",3.3 Hybrid model: Nearest Neighbor with Seq2Seq Embeddings,[0],[0]
+Both the models show a significant improvement in BLEU when compared to generating the agent’s response (Model 4).,3.3 Hybrid model: Nearest Neighbor with Seq2Seq Embeddings,[0],[0]
+"Although Model 10 was not exposed to the past true agent responses, it still achieved comparable performance to that of Model 8.",3.3 Hybrid model: Nearest Neighbor with Seq2Seq Embeddings,[0],[0]
+"Appending both the encoder and the decoder outputs did not have significant impact.
+",3.3 Hybrid model: Nearest Neighbor with Seq2Seq Embeddings,[0],[0]
+The results also show that the seq2seq model achieved a better EQM when compared to the nearest neighbor approach.,3.3 Hybrid model: Nearest Neighbor with Seq2Seq Embeddings,[0],[0]
+"The final hybrid model, we propose (Model 11) combines both strategies.",3.3 Hybrid model: Nearest Neighbor with Seq2Seq Embeddings,[0],[0]
+We run both the Models 4 and 10 in parallel.,3.3 Hybrid model: Nearest Neighbor with Seq2Seq Embeddings,[0],[0]
+"When Model 4 predicts an API response, we use the output generated by Model 4 as the agent’s response, otherwise we use the output of Model 10 as the predicted agent’s response.",3.3 Hybrid model: Nearest Neighbor with Seq2Seq Embeddings,[0],[0]
+"This model achieved the best results among all models we study, both in terms of fluency (BLEU) as well as correctness of external actions (EQM).",3.3 Hybrid model: Nearest Neighbor with Seq2Seq Embeddings,[0],[0]
+"The hybrid model achieves a 78% relative improvement (from 9.91 to 17.67) in fluency scores, and 200% improvement in EQM over previous approaches (from 0.10 to 0.30).
+",3.3 Hybrid model: Nearest Neighbor with Seq2Seq Embeddings,[0],[0]
+Table 4 shows results obtained on CS large (column 3) using models that performed the best on the other datasets.,3.3 Hybrid model: Nearest Neighbor with Seq2Seq Embeddings,[0],[0]
+Another obvious baseline is to use traditional retrieval approaches.,3.3 Hybrid model: Nearest Neighbor with Seq2Seq Embeddings,[0],[0]
+"(query, agent response) pairs are created for each agent response, with a query constructed by concatenating all the agent’s responses upto turn t− 1 and user’s responses upto turn t, for an agent response at time t. For a given dialogue history query, the corresponding agent response is retrieved using Lucene3.",3.3 Hybrid model: Nearest Neighbor with Seq2Seq Embeddings,[0],[0]
+"Since CS large did not contain labeled api calls, we report results using Model 10.",3.3 Hybrid model: Nearest Neighbor with Seq2Seq Embeddings,[0],[0]
+"As seen, Model 10 provides a substantial boost in performance.",3.3 Hybrid model: Nearest Neighbor with Seq2Seq Embeddings,[0],[0]
+"One caveat to the above evaluations is that they are based on customer responses to the actual human agent interactions, and are not fully indicative of how customers would react to the real automated system in practice.",3.4 Manual Online Evaluation,[0],[0]
+"Another disadvantage of using
+3https://lucene.apache.org/
+automated evaluation with just one reference, is that the score (BLEU) penalizes valid responses that may be lexically different from the available agent response.",3.4 Manual Online Evaluation,[0],[0]
+"To overcome this issue, we conducted online experiments with human agents.
+",3.4 Manual Online Evaluation,[0],[0]
+We used 5 human users and 2 agents.,3.4 Manual Online Evaluation,[0],[0]
+On average each user interacted with an agent on 10 different issues that needed resolution.,3.4 Manual Online Evaluation,[0],[0]
+"To compare against our baseline, each user interacted with the Model 4, 5 and 10 using the same issues.",3.4 Manual Online Evaluation,[0],[0]
+This resulted in ≈ 50 dialogues from each of the models.,3.4 Manual Online Evaluation,[0],[0]
+"After every response from the user, the human agent was allowed to select one of the top five responses the system selected.",3.4 Manual Online Evaluation,[0],[0]
+"We refer to the selected response as A. The human agent was asked to make minimal modifications to the selected response, resulting in a response A′. If the responses suggested were completely irrelevant, the human agent was allowed to type in the most suitable response.
+",3.4 Manual Online Evaluation,[0],[0]
+"We then computed the BLEU between the system generated responses (As) and human generated responses (A′s), referred to as Online-BLEU in Table 4.",3.4 Manual Online Evaluation,[0],[0]
+"Since the human agent only made minimal changes where appropriate, we believe the BLEU score would now be more correlated to human judgments.",3.4 Manual Online Evaluation,[0],[0]
+"Since CS large did not contain any api calls, we only report BLEU scores.",3.4 Manual Online Evaluation,[0],[0]
+"The results obtained with models 4, 5 and 10 on CS large are shown in Table 4 (column 4).",3.4 Manual Online Evaluation,[0],[0]
+Model 10 performs better than Models 4 and 5.,3.4 Manual Online Evaluation,[0],[0]
+"We do not measure inter-annotator agreement as each human user can take a different dialog trajectory.
+",3.4 Manual Online Evaluation,[0],[0]
+We noticed that the approach mimics certain interesting human behavior.,3.4 Manual Online Evaluation,[0],[0]
+"For example, in Table 5, the chatbot detects that the user is frustrated and responds with smileys and even makes exceptions on the return policy.",3.4 Manual Online Evaluation,[0],[0]
+We demonstrated limitations of previous end-end dialog approaches and proposed variants to make them suitable for real world settings.,4 Conclusion and Future Work,[0],[0]
+"In ongoing work, we explore reinforcement learning tech-
+niques to reach the goal state quicker thereby reducing the number of interactions.",4 Conclusion and Future Work,[0],[0]
+"In task-oriented dialog, agents need to generate both fluent natural language responses and correct external actions like database queries and updates.",abstractText,[0],[0]
+"We show that methods that achieve state of the art performance on synthetic datasets, perform poorly in real world dialog tasks.",abstractText,[0],[0]
+"We propose a hybrid model, where nearest neighbor is used to generate fluent responses and Sequence-to-Sequence (Seq2Seq) type models ensure dialogue coherency and generate accurate external actions.",abstractText,[0],[0]
+"The hybrid model on an internal customer support dataset achieves a 78% relative improvement in fluency, and a 200% improvement in external call accuracy.",abstractText,[0],[0]
+What we need to learn if we want to do and not just talk,title,[0],[0]
+"Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics (Long Papers), pages 2126–2136 Melbourne, Australia, July 15 - 20, 2018. c©2018 Association for Computational Linguistics
+2126",text,[0],[0]
+"Despite Ray Mooney’s quip that you cannot cram the meaning of a whole %&!$# sentence into a single $&!#* vector, sentence embedding methods have achieved impressive results in tasks ranging from machine translation (Sutskever et al., 2014; Cho et al., 2014) to entailment detection (Williams et al., 2018), spurring the quest for “universal embeddings” trained once and used in a variety of applications (e.g., Kiros et al., 2015; Conneau et al., 2017; Subramanian et al., 2018).",1 Introduction,[1.0],"['Despite Ray Mooney’s quip that you cannot cram the meaning of a whole %&!$# sentence into a single $&!#* vector, sentence embedding methods have achieved impressive results in tasks ranging from machine translation (Sutskever et al., 2014; Cho et al., 2014) to entailment detection (Williams et al., 2018), spurring the quest for “universal embeddings” trained once and used in a variety of applications (e.g., Kiros et al., 2015; Conneau et al., 2017; Subramanian et al., 2018).']"
+Positive results on concrete problems suggest that embeddings capture important linguistic properties of sentences.,1 Introduction,[0],[0]
+"However, real-life “downstream” tasks require complex forms of inference, making it difficult to pinpoint the information a model is relying upon.",1 Introduction,[1.0],"['However, real-life “downstream” tasks require complex forms of inference, making it difficult to pinpoint the information a model is relying upon.']"
+"Impressive as it might be that a system can tell that the sentence “A movie that doesn’t aim too high, but it doesn’t need to” (Pang and Lee, 2004) expresses a subjective viewpoint, it is
+hard to tell how the system (or even a human) comes to this conclusion.",1 Introduction,[0],[0]
+"Complex tasks can also carry hidden biases that models might lock onto (Jabri et al., 2016).",1 Introduction,[0],[0]
+"For example, Lai and Hockenmaier (2014) show that the simple heuristic of checking for explicit negation words leads to good accuracy in the SICK sentence entailment task.
+",1 Introduction,[0.9999999849840471],"['For example, Lai and Hockenmaier (2014) show that the simple heuristic of checking for explicit negation words leads to good accuracy in the SICK sentence entailment task.']"
+Model introspection techniques have been applied to sentence encoders in order to gain a better understanding of which properties of the input sentences their embeddings retain (see Section 5).,1 Introduction,[0],[0]
+"However, these techniques often depend on the specifics of an encoder architecture, and consequently cannot be used to compare different methods.",1 Introduction,[0],[0]
+"Shi et al. (2016) and Adi et al. (2017) introduced a more general approach, relying on the notion of what we will call probing tasks.",1 Introduction,[0],[0]
+A probing task is a classification problem that focuses on simple linguistic properties of sentences.,1 Introduction,[0],[0]
+"For example, one such task might require to categorize sentences by the tense of their main verb.",1 Introduction,[0],[0]
+"Given an encoder (e.g., an LSTM) pre-trained on a certain task (e.g., machine translation), we use the sentence embeddings it produces to train the tense classifier (without further embedding tuning).",1 Introduction,[0],[0]
+"If the classifier succeeds, it means that the pre-trained encoder is storing readable tense information into the embeddings it creates.",1 Introduction,[0],[0]
+Note that: (i),1 Introduction,[0],[0]
+"The probing task asks a simple question, minimizing interpretability problems.",1 Introduction,[0],[0]
+"(ii) Because of their simplicity, it is easier to control for biases in probing tasks than in downstream tasks.",1 Introduction,[0],[0]
+"(iii) The probing task methodology is agnostic with respect to the encoder architecture, as long as it produces a vector representation of sentences.
+",1 Introduction,[0],[0]
+We greatly extend earlier work on probing tasks as follows.,1 Introduction,[0],[0]
+"First, we introduce a larger set of probing tasks (10 in total), organized by the type of linguistic properties they probe.",1 Introduction,[0],[0]
+"Second, we systematize the probing task methodology, controlling for
+a number of possible nuisance factors, and framing all tasks so that they only require single sentence representations as input, for maximum generality and to ease result interpretation.",1 Introduction,[0],[0]
+"Third, we use our probing tasks to explore a wide range of state-of-the-art encoding architectures and training methods, and further relate probing and downstream task performance.",1 Introduction,[0],[0]
+"Finally, we are publicly releasing our probing data sets and tools, hoping they will become a standard way to study the linguistic properties of sentence embeddings.1",1 Introduction,[0],[0]
+"In constructing our probing benchmarks, we adopted the following criteria.",2 Probing tasks,[0],[0]
+"First, for generality and interpretability, the task classification problem should only require single sentence embeddings as input (as opposed to, e.g., sentence and word embeddings, or multiple sentence representations).",2 Probing tasks,[0],[0]
+"Second, it should be possible to construct large training sets in order to train parameter-rich multi-layer classifiers, in case the relevant properties are non-linearly encoded in the sentence vectors.",2 Probing tasks,[0],[0]
+"Third, nuisance variables such as lexical cues or sentence length should be controlled for.",2 Probing tasks,[0],[0]
+"Finally, and most importantly, we want tasks that address an interesting set of linguistic properties.",2 Probing tasks,[0],[0]
+"We thus strove to come up with a set of tasks that, while respecting the previous constraints, probe a wide range of phenomena, from superficial properties of sentences such as which words they contain to their hierarchical structure to subtle facets of semantic acceptability.",2 Probing tasks,[0],[0]
+"We think the current task set is reasonably representative of different linguistic domains, but we are not claiming that it is exhaustive.",2 Probing tasks,[0],[0]
+"We expect future work to extend it.
+",2 Probing tasks,[0],[0]
+"The sentences for all our tasks are extracted from the Toronto Book Corpus (Zhu et al., 2015), more specifically from the random pre-processed portion made available by Paperno et al. (2016).",2 Probing tasks,[0.9533544766961924],"['We train SkipThought vectors (Kiros et al., 2015) by predicting the next sentence given the current one (Tang et al., 2017), on 30M sentences from the Toronto Book Corpus, excluding those in the probing sets.']"
+We only sample sentences in the 5-to-28 word range.,2 Probing tasks,[0],[0]
+"We parse them with the Stanford Parser (2017-06-09 version), using the pre-trained PCFG model (Klein and Manning, 2003), and we rely on the part-of-speech, constituency and dependency parsing information provided by this tool where needed.",2 Probing tasks,[0],[0]
+"For each task, we construct training sets containing 100k sentences, and 10k-sentence val-
+1https://github.com/facebookresearch/ SentEval/tree/master/data/probing
+idation and test sets.",2 Probing tasks,[0],[0]
+"All sets are balanced, having an equal number of instances of each target class.
+",2 Probing tasks,[0],[0]
+Surface information These tasks test the extent to which sentence embeddings are preserving surface properties of the sentences they encode.,2 Probing tasks,[0.9744810809120279],['Syntactic information The next batch of tasks test whether sentence embeddings are sensitive to syntactic properties of the sentences they encode.']
+One can solve the surface tasks by simply looking at tokens in the input sentences: no linguistic knowledge is called for.,2 Probing tasks,[0],[0]
+The first task is to predict the length of sentences in terms of number of words (SentLen).,2 Probing tasks,[0],[0]
+"Following Adi et al. (2017), we group sentences into 6 equal-width bins by length, and treat SentLen as a 6-way classification task.",2 Probing tasks,[0],[0]
+The word content (WC) task tests whether it is possible to recover information about the original words in the sentence from its embedding.,2 Probing tasks,[0],[0]
+"We picked 1000 mid-frequency words from the source corpus vocabulary (the words with ranks between 2k and 3k when sorted by frequency), and sampled equal numbers of sentences that contain one and only one of these words.",2 Probing tasks,[0],[0]
+The task is to tell which of the 1k words a sentence contains (1k-way classification).,2 Probing tasks,[1.0],['The task is to tell which of the 1k words a sentence contains (1k-way classification).']
+"This setup allows us to probe a sentence embedding for word content without requiring an auxiliary word embedding (as in the setup of Adi and colleagues).
+",2 Probing tasks,[0],[0]
+Syntactic information The next batch of tasks test whether sentence embeddings are sensitive to syntactic properties of the sentences they encode.,2 Probing tasks,[0],[0]
+The bigram shift (BShift) task tests whether an encoder is sensitive to legal word orders.,2 Probing tasks,[0],[0]
+"In this binary classification problem, models must distinguish intact sentences sampled from the corpus from sentences where we inverted two random adjacent words (“What you are doing out there?”).
+",2 Probing tasks,[0],[0]
+"The tree depth (TreeDepth) task checks whether an encoder infers the hierarchical structure of sentences, and in particular whether it can group sentences by the depth of the longest path from root to any leaf.",2 Probing tasks,[0],[0]
+"Since tree depth is naturally correlated with sentence length, we de-correlate these variables through a structured sampling procedure.",2 Probing tasks,[0],[0]
+"In the resulting data set, tree depth values range from 5 to 12, and the task is to categorize sentences into the class corresponding to their depth (8 classes).",2 Probing tasks,[1.0],"['In the resulting data set, tree depth values range from 5 to 12, and the task is to categorize sentences into the class corresponding to their depth (8 classes).']"
+"As an example, the following is a long (22 tokens) but shallow (max depth: 5) sentence: “[1 [2 But right now, for the time being, my past, my fears, and my thoughts [3 were [4 my [5business]]].]",2 Probing tasks,[0],[0]
+"]” (the outermost brackets correspond to the ROOT and S nodes in the parse).
+",2 Probing tasks,[0],[0]
+"In the top constituent task (TopConst), sentences must be classified in terms of the sequence of top constituents immediately below the sentence (S) node.",2 Probing tasks,[1.0],"['In the top constituent task (TopConst), sentences must be classified in terms of the sequence of top constituents immediately below the sentence (S) node.']"
+"An encoder that successfully addresses this challenge is not only capturing latent syntactic structures, but clustering them by constituent types.",2 Probing tasks,[0],[0]
+TopConst was introduced by Shi et al. (2016).,2 Probing tasks,[0],[0]
+"Following them, we frame it as a 20-way classification problem: 19 classes for the most frequent top constructions, and one for all other constructions.",2 Probing tasks,[0],[0]
+"As an example, “[Then] [very dark gray letters on a black screen]",2 Probing tasks,[0],[0]
+[appeared],2 Probing tasks,[0],[0]
+"[.]” has top constituent sequence: “ADVP NP VP .”.
+",2 Probing tasks,[0],[0]
+"Note that, while we would not expect an untrained human subject to be explicitly aware of tree depth or top constituency, similar information must be implicitly computed to correctly parse sentences, and there is suggestive evidence that the brain tracks something akin to tree depth during sentence processing (Nelson et al., 2017).
+",2 Probing tasks,[0],[0]
+"Semantic information These tasks also rely on syntactic structure, but they further require some understanding of what a sentence denotes.",2 Probing tasks,[0],[0]
+"The Tense task asks for the tense of the main-clause verb (VBP/VBZ forms are labeled as present, VBD as past).",2 Probing tasks,[0],[0]
+"No target form occurs across the train/dev/test split, so that classifiers cannot rely on specific words (it is not clear that Shi and colleagues, who introduced this task, controlled for this factor).",2 Probing tasks,[0],[0]
+The subject number (SubjNum) task focuses on the number of the subject of the main clause (number in English is more often explicitly marked on nouns than verbs).,2 Probing tasks,[0],[0]
+"Again, there is no target overlap across partitions.",2 Probing tasks,[0],[0]
+"Similarly, object number (ObjNum) tests for the number of the direct object of the main clause (again, avoiding lexical overlap).",2 Probing tasks,[0],[0]
+"To solve the previous tasks correctly, an encoder must not only capture tense and number, but also extract structural information (about the main clause and its arguments).",2 Probing tasks,[0],[0]
+"We grouped Tense, SubjNum and ObjNum with the semantic tasks, since, at least for models that treat words as unanalyzed input units (without access to morphology), they must rely on what a sentence denotes (e.g., whether the described event took place in the past), rather than on structural/syntactic information.",2 Probing tasks,[0],[0]
+"We recognize, however, that the boundary between syntactic and semantic tasks is somewhat arbitrary.
+",2 Probing tasks,[0],[0]
+"In the semantic odd man out (SOMO) task, we modified sentences by replacing a random noun
+or verb o with another noun or verb r. To make the task more challenging, the bigrams formed by the replacement with the previous and following words in the sentence have frequencies that are comparable (on a log-scale) with those of the original bigrams.",2 Probing tasks,[0],[0]
+"That is, if the original sentence contains bigrams wn−1o and own+1, the corresponding bigrams",2 Probing tasks,[0],[0]
+wn−1r and rwn+1 in the modified sentence will have comparable corpus frequencies.,2 Probing tasks,[0],[0]
+"No sentence is included in both original and modified format, and no replacement is repeated across train/dev/test sets.",2 Probing tasks,[0],[0]
+The task of the classifier is to tell whether a sentence has been modified or not.,2 Probing tasks,[0],[0]
+An example modified sentence is: “ No one could see this Hayes,2 Probing tasks,[0],[0]
+and I wanted to know if it was real or a spoonful (orig.: ploy).”,2 Probing tasks,[0],[0]
+"Note that judging plausibility of a syntactically well-formed sentence of this sort will often require grasping rather subtle semantic factors, ranging from selectional preference to topical coherence.
+",2 Probing tasks,[0],[0]
+The coordination inversion (CoordInv) benchmark contains sentences made of two coordinate clauses.,2 Probing tasks,[0],[0]
+"In half of the sentences, we inverted the order of the clauses.",2 Probing tasks,[0],[0]
+The task is to tell whether a sentence is intact or modified.,2 Probing tasks,[1.0],['The task is to tell whether a sentence is intact or modified.']
+"Sentences are balanced in terms of clause length, and no sentence appears in both original and inverted versions.",2 Probing tasks,[0],[0]
+"As an example, original “They might be only memories, but I can still feel each one” becomes: “I can still feel each one, but they might be only memories.”",2 Probing tasks,[0],[0]
+"Often, addressing CoordInv requires an understanding of broad discourse and pragmatic factors.
+",2 Probing tasks,[0],[0]
+Row Hum.,2 Probing tasks,[0],[0]
+Eval.,2 Probing tasks,[0],[0]
+"of Table 2 reports humanvalidated “reasonable” upper bounds for all the tasks, estimated in different ways, depending on the tasks.",2 Probing tasks,[0],[0]
+"For the surface ones, there is always a straightforward correct answer that a human annotator with enough time and patience could find.",2 Probing tasks,[0],[0]
+The upper bound is thus estimated at 100%.,2 Probing tasks,[0],[0]
+"The TreeDepth, TopConst, Tense, SubjNum and ObjNum tasks depend on automated PoS and parsing annotation.",2 Probing tasks,[0],[0]
+"In these cases, the upper bound is given by the proportion of sentences correctly annotated by the automated procedure.",2 Probing tasks,[0],[0]
+"To estimate this quantity, one linguistically-trained author checked the annotation of 200 randomly sampled test sentences from each task.",2 Probing tasks,[1.0],"['To estimate this quantity, one linguistically-trained author checked the annotation of 200 randomly sampled test sentences from each task.']"
+"Finally, the BShift, SOMO and CoordInv manipulations can accidentally generate acceptable sentences.",2 Probing tasks,[0],[0]
+"For
+example, one modified SOMO sentence is: “He pulled out the large round onion (orig.: cork) and saw the amber balm inside.”",2 Probing tasks,[0],[0]
+", that is arguably not more anomalous than the original.",2 Probing tasks,[0],[0]
+"For these tasks, we ran Amazon Mechanical Turk experiments in which subjects were asked to judge whether 1k randomly sampled test sentences were acceptable or not.",2 Probing tasks,[0],[0]
+Reported human accuracies are based on majority voting.,2 Probing tasks,[0],[0]
+See Appendix for details.,2 Probing tasks,[0],[0]
+"In this section, we present the three sentence encoders that we consider and the seven tasks on which we train them.",3 Sentence embedding models,[0],[0]
+A wide variety of neural networks encoding sentences into fixed-size representations exist.,3.1 Sentence encoder architectures,[0],[0]
+"We focus here on three that have been shown to perform well on standard NLP tasks.
+",3.1 Sentence encoder architectures,[0],[0]
+BiLSTM-last/max,3.1 Sentence encoder architectures,[0],[0]
+"For a sequence of T words {wt}t=1,...,T , a bidirectional LSTM computes a set of T vectors {ht}t.",3.1 Sentence encoder architectures,[0],[0]
+For t ∈,3.1 Sentence encoder architectures,[0],[0]
+"[1, . . .",3.1 Sentence encoder architectures,[0],[0]
+", T ], ht is the concatenation of a forward LSTM and a backward LSTM that read the sentences in two opposite directions.",3.1 Sentence encoder architectures,[0],[0]
+"We experiment with two ways of combining the varying number of (h1, . . .",3.1 Sentence encoder architectures,[0],[0]
+", hT ) to form a fixed-size vector, either by selecting the last hidden state of hT or by selecting the maximum value over each dimension of the hidden units.",3.1 Sentence encoder architectures,[0],[0]
+"The choice of these models are motivated by their demonstrated efficiency in seq2seq (Sutskever et al., 2014) and universal sentence representation learning (Conneau et al., 2017), respectively.2
+Gated ConvNet We also consider the nonrecurrent convolutional equivalent of LSTMs, based on stacked gated temporal convolutions.",3.1 Sentence encoder architectures,[0],[0]
+"Gated convolutional networks were shown to perform well as neural machine translation encoders (Gehring et al., 2017) and language modeling decoders (Dauphin et al., 2017).",3.1 Sentence encoder architectures,[0],[0]
+"The encoder is composed of an input word embedding table that is augmented with positional encodings (Sukhbaatar et al., 2015), followed by a stack of temporal convolutions with small kernel size.",3.1 Sentence encoder architectures,[0],[0]
+"The output of each convolutional layer is filtered by a gating mechanism, similar to the one of LSTMs.",3.1 Sentence encoder architectures,[0],[0]
+"Finally,
+2We also experimented with a unidirectional LSTM, with consistently poorer results.
+",3.1 Sentence encoder architectures,[0],[0]
+"max-pooling along the temporal dimension is performed on the output feature maps of the last convolution (Collobert and Weston, 2008).",3.1 Sentence encoder architectures,[0],[0]
+"Seq2seq systems have shown strong results in machine translation (Zhou et al., 2016).",3.2 Training tasks,[0],[0]
+"They consist of an encoder that encodes a source sentence into a fixed-size representation, and a decoder which acts as a conditional language model and that generates the target sentence.",3.2 Training tasks,[0],[0]
+"We train Neural Machine Translation systems on three language pairs using about 2M sentences from the Europarl corpora (Koehn, 2005).",3.2 Training tasks,[0],[0]
+"We pick English-French, which involves two similar languages, English-German, involving larger syntactic differences, and English-Finnish, a distant pair.",3.2 Training tasks,[0],[0]
+"We also train with an AutoEncoder objective (Socher et al., 2011) on Europarl source English sentences.",3.2 Training tasks,[0],[0]
+"Following Vinyals et al. (2015), we train a seq2seq architecture to generate linearized grammatical parse trees (see Table 1) from source sentences (Seq2Tree).",3.2 Training tasks,[0],[0]
+We use the Stanford parser to generate trees for Europarl source English sentences.,3.2 Training tasks,[1.0],['We use the Stanford parser to generate trees for Europarl source English sentences.']
+"We train SkipThought vectors (Kiros et al., 2015) by predicting the next sentence given the current one (Tang et al., 2017), on 30M sentences from the Toronto Book Corpus, excluding those in the probing sets.",3.2 Training tasks,[0],[0]
+"Finally, following Conneau et al. (2017), we train sentence encoders on Natural Language Inference using the concatenation of the SNLI (Bowman et al., 2015) and MultiNLI (Bowman et al., 2015) data sets (about 1M sentence pairs).",3.2 Training tasks,[0],[0]
+"In this task, a sentence encoder is trained to encode two sentences, which are fed to a classifier and whose role is to distinguish whether the sentences are contradictory, neutral or entailed.",3.2 Training tasks,[0],[0]
+"Finally, as in Conneau et al. (2017), we also include Untrained encoders with random weights, which act as random projections of pre-trained word embeddings.",3.2 Training tasks,[0],[0]
+"BiLSTM encoders use 2 layers of 512 hidden units (∼4M parameters), Gated ConvNet has 8 convolutional layers of 512 hidden units, kernel size 3 (∼12M parameters).",3.3 Training details,[0],[0]
+"We use pre-trained fastText word embeddings of size 300 (Mikolov et al., 2018) without fine-tuning, to isolate the impact of encoder architectures and to handle words outside the training sets.",3.3 Training details,[0],[0]
+Training task performance and further details are in Appendix.,3.3 Training details,[1.0],['Training task performance and further details are in Appendix.']
+Baselines Baseline and human-bound performance are reported in the top block of Table 2.,4 Probing task experiments,[1.0],['Baselines Baseline and human-bound performance are reported in the top block of Table 2.']
+Length is a linear classifier with sentence length as sole feature.,4 Probing task experiments,[1.0],['Length is a linear classifier with sentence length as sole feature.']
+"NB-uni-tfidf is a Naive Bayes classifier using words’ tfidf scores as features, NBbi-tfidf its extension to bigrams.",4 Probing task experiments,[0],[0]
+"Finally, BoVfastText derives sentence representations by averaging the fastText embeddings of the words they contain (same embeddings used as input to the encoders).3
+Except, trivially, for Length on SentLen and the NB baselines on WC, there is a healthy gap between top baseline performance and human upper bounds.",4 Probing task experiments,[0],[0]
+NB-uni-tfidf evaluates to what extent our tasks can be addressed solely based on knowledge about the distribution of words in the training sentences.,4 Probing task experiments,[0],[0]
+"Words are of course to some extent informative for most tasks, leading to relatively high performance in Tense, SubjNum and ObjNum.",4 Probing task experiments,[0],[0]
+"Recall that the words containing the probed features are disjoint between train and test partitions, so we are not observing a confound here, but rather the effect of the redundancies one expects in natural language data.",4 Probing task experiments,[0],[0]
+"For example, for Tense, since sentences often contain more than one verb in the same tense, NB-uni-tfidf can exploit nontarget verbs as cues: the NB features most associated to the past class are verbs in the past tense (e.g “sensed”, “lied”, “announced”), and similarly for present (e.g “uses”, “chuckles”, “frowns”).",4 Probing task experiments,[0],[0]
+"Using bigram features (NB-bi-tfidf) brings in general little or no improvement with respect to the unigram baseline, except, trivially, for the BShift
+3Similar results are obtained summing embeddings, and using GloVe embeddings (Pennington et al., 2014).
+task, where NB-bi-tfidf can easily detect unlikely bigrams.",4 Probing task experiments,[0],[0]
+"NB-bi-tfidf has below-random performance on SOMO, confirming that the semantic intruder is not given away by superficial bigram cues.
+",4 Probing task experiments,[0],[0]
+"Our first striking result is the good overall performance of Bag-of-Vectors, confirming early insights that aggregated word embeddings capture surprising amounts of sentence information (Pham et al., 2015; Arora et al., 2017; Adi et al., 2017).",4 Probing task experiments,[0],[0]
+BoV’s good WC and SentLen performance was already established by Adi et al. (2017).,4 Probing task experiments,[0],[0]
+"Not surprisingly, word-order-unaware BoV performs randomly in BShift and in the more sophisticated semantic tasks SOMO and CoordInv.",4 Probing task experiments,[0],[0]
+"More interestingly, BoV is very good at the Tense, SubjNum, ObjNum, and TopConst tasks (much better than the word-based baselines), and well above chance in TreeDepth.",4 Probing task experiments,[1.0],"['More interestingly, BoV is very good at the Tense, SubjNum, ObjNum, and TopConst tasks (much better than the word-based baselines), and well above chance in TreeDepth.']"
+"The good performance on Tense, SubjNum and ObjNum has a straightforward explanation we have already hinted at above.",4 Probing task experiments,[0],[0]
+"Many sentences are naturally “redundant”, in the sense that most tensed verbs in a sentence are in the same tense, and similarly for number in nouns.",4 Probing task experiments,[0],[0]
+"In 95.2% Tense, 75.9% SubjNum and 78.7% ObjNum test sentences, the target tense/number feature is also the majority one for the whole sentence.",4 Probing task experiments,[0],[0]
+"Word embeddings capture features such as number and tense (Mikolov et al., 2013), so aggregated word embeddings will naturally track these features’ majority values in a sentence.",4 Probing task experiments,[0],[0]
+BoV’s TopConst and TreeDepth performance is more surprising.,4 Probing task experiments,[0],[0]
+"Accuracy is well above NB, showing that BoV is exploiting cues beyond specific words strongly associated to the target classes.",4 Probing task experiments,[0],[0]
+"We conjecture that more abstract word features captured
+Task SentLen WC TreeDepth TopConst",4 Probing task experiments,[0],[0]
+BShift,4 Probing task experiments,[0],[0]
+Tense SubjNum ObjNum SOMO CoordInv Baseline representations Majority vote 20.0 0.5 17.9 5.0 50.0 50.0 50.0 50.0 50.0 50.0 Hum.,4 Probing task experiments,[0],[0]
+Eval.,4 Probing task experiments,[0],[0]
+"100 100 84.0 84.0 98.0 85.0 88.0 86.5 81.2 85.0 Length 100 0.2 18.1 9.3 50.6 56.5 50.3 50.1 50.2 50.0 NB-uni-tfidf 22.7 97.8 24.1 41.9 49.5 77.7 68.9 64.0 38.0 50.5 NB-bi-tfidf 23.0 95.0 24.6 53.0 63.8 75.9 69.1 65.4 39.9 55.7 BoV-fastText 66.6 91.6 37.1 68.1 50.8 89.1 82.1 79.8 54.2 54.8
+BiLSTM-last encoder Untrained 36.7 43.8 28.5 76.3 49.8 84.9 84.7 74.7 51.1 64.3 AutoEncoder 99.3 23.3 35.6 78.2 62.0 84.3 84.7 82.1 49.9 65.1 NMT En-Fr 83.5 55.6 42.4 81.6 62.3 88.1 89.7 89.5 52.0 71.2 NMT En-De 83.8 53.1 42.1 81.8 60.6 88.6 89.3 87.3 51.5 71.3 NMT En-Fi 82.4 52.6 40.8 81.3 58.8 88.4 86.8 85.3 52.1 71.0 Seq2Tree 94.0 14.0 59.6 89.4 78.6 89.9 94.4 94.7 49.6 67.8 SkipThought 68.1 35.9 33.5 75.4 60.1 89.1 80.5 77.1 55.6 67.7 NLI 75.9 47.3 32.7 70.5 54.5 79.7 79.3 71.3 53.3 66.5
+BiLSTM-max encoder Untrained 73.3 88.8 46.2 71.8 70.6 89.2 85.8 81.9 73.3 68.3 AutoEncoder 99.1 17.5 45.5 74.9 71.9 86.4 87.0 83.5 73.4 71.7 NMT En-Fr 80.1 58.3 51.7 81.9 73.7 89.5 90.3 89.1 73.2 75.4 NMT En-De 79.9 56.0 52.3 82.2 72.1 90.5 90.9 89.5 73.4 76.2 NMT En-Fi 78.5 58.3 50.9 82.5 71.7 90.0 90.3 88.0 73.2 75.4 Seq2Tree 93.3 10.3 63.8 89.6 82.1 90.9 95.1 95.1 73.2 71.9 SkipThought 66.0 35.7 44.6 72.5 73.8 90.3 85.0 80.6 73.6 71.0 NLI 71.7 87.3 41.6 70.5 65.1 86.7 80.7 80.3 62.1 66.8
+GatedConvNet encoder Untrained 90.3 17.1 30.3 47.5 62.0 78.2 72.2 70.9 61.4 59.6 AutoEncoder 99.4 16.8 46.3 75.2 71.9 87.7 88.5 86.5 73.5 72.4 NMT En-Fr 84.8 41.3 44.6 77.6 67.9 87.9 88.8 86.6 66.1 72.0 NMT En-De 89.6 49.0 50.5 81.7 72.3 90.4 91.4 89.7 72.8 75.1 NMT En-Fi 89.3 51.5 49.6 81.8 70.9 90.4 90.9 89.4 72.4 75.1 Seq2Tree 96.5 8.7 62.0 88.9 83.6 91.5 94.5 94.3 73.5 73.8 SkipThought 79.1 48.4 45.7 79.2 73.4 90.7 86.6 81.7 72.4 72.3 NLI 73.8 29.2 43.2 63.9 70.7 81.3 77.5 74.4 73.3 71.0
+Table 2: Probing task accuracies.",4 Probing task experiments,[0],[0]
+"Classification performed by a MLP with sigmoid nonlinearity, taking pre-learned sentence embeddings as input (see Appendix for details and logistic regression results).
+",4 Probing task experiments,[0.9999999927399267],"['Classification performed by a MLP with sigmoid nonlinearity, taking pre-learned sentence embeddings as input (see Appendix for details and logistic regression results).']"
+by the embeddings (such as the part of speech of a word) might signal different syntactic structures.,4 Probing task experiments,[0],[0]
+"For example, sentences in the “WHNP SQ .”",4 Probing task experiments,[0],[0]
+"top constituent class (e.g., “How long before you leave us again?”) must contain a wh word, and will often feature an auxiliary or modal verb.",4 Probing task experiments,[0],[0]
+"BoV can rely on this information to noisily predict the correct class.
+",4 Probing task experiments,[0.9999999778026679],['BoV can rely on this information to noisily predict the correct class.']
+"Encoding architectures Comfortingly, proper encoding architectures clearly outperform BoV.",4 Probing task experiments,[0],[0]
+"An interesting observation in Table 2 is that different encoder architectures trained with the same objective, and achieving similar performance on the training task,4 can lead to linguistically different embeddings, as indicated by the probing tasks.",4 Probing task experiments,[0],[0]
+"Coherently with the findings of Conneau et al. (2017) for the downstream tasks, this sug-
+4See Appendix for details on training task performance.
+",4 Probing task experiments,[0],[0]
+gests that the prior imposed by the encoder architecture strongly preconditions the nature of the embeddings.,4 Probing task experiments,[0],[0]
+"Complementing recent evidence that convolutional architectures are on a par with recurrent ones in seq2seq tasks (Gehring et al., 2017), we find that Gated ConvNet’s overall probing task performance is comparable to that of the best LSTM architecture (although, as shown in Appendix, the LSTM has a slight edge on downstream tasks).",4 Probing task experiments,[0],[0]
+We also replicate the finding of Conneau et al. (2017) that BiLSTM-max outperforms BiLSTM-last both in the downstream tasks (see Appendix) and in the probing tasks (Table 2).,4 Probing task experiments,[1.0],['We also replicate the finding of Conneau et al. (2017) that BiLSTM-max outperforms BiLSTM-last both in the downstream tasks (see Appendix) and in the probing tasks (Table 2).']
+"Interestingly, the latter only outperforms the former in SentLen, a task that captures a superficial aspect of sentences (how many words they contain), that could get in the way of inducing more useful linguistic knowledge.
+",4 Probing task experiments,[0],[0]
+"Training tasks We focus next on how different training tasks affect BiLSTM-max, but the patterns are generally representative across architectures.",4 Probing task experiments,[0],[0]
+"NMT training leads to encoders that are more linguistically aware than those trained on the NLI data set, despite the fact that we confirm the finding of Conneau and colleagues that NLI is best for downstream tasks (Appendix).",4 Probing task experiments,[0],[0]
+"Perhaps, NMT captures richer linguistic features useful for the probing tasks, whereas shallower or more adhoc features might help more in our current downstream tasks.",4 Probing task experiments,[0],[0]
+"Suggestively, the one task where NLI clearly outperforms NMT is WC.",4 Probing task experiments,[0],[0]
+"Thus, NLI training is better at preserving shallower word features that might be more useful in downstream tasks (cf.",4 Probing task experiments,[0],[0]
+"Figure 2 and discussion there).
+",4 Probing task experiments,[0],[0]
+"Unsupervised training (SkipThought and AutoEncoder) is not on a par with supervised tasks, but still effective.",4 Probing task experiments,[0],[0]
+"AutoEncoder training leads, unsurprisingly, to a model excelling at SentLen, but it attains low performance in the WC prediction task.",4 Probing task experiments,[1.0],"['AutoEncoder training leads, unsurprisingly, to a model excelling at SentLen, but it attains low performance in the WC prediction task.']"
+"This curious result might indicate that the latter information is stored in the embeddings in a complex way, not easily readable by our MLP.",4 Probing task experiments,[0],[0]
+"At the other end, Seq2Tree is trained to predict annotation from the same parser we used to create some of the probing tasks.",4 Probing task experiments,[0],[0]
+"Thus, its high performance on TopConst, Tense, SubjNum, ObjNum and TreeDepth is probably an artifact.",4 Probing task experiments,[0],[0]
+"Indeed, for most of these tasks, Seq2Tree performance is above the human bound, that is, Seq2Tree learned to mimic the parser errors in our benchmarks.",4 Probing task experiments,[0],[0]
+"For the more challenging SOMO and CoordInv tasks, that only indirectly rely on tagging/parsing information, Seq2Tree is comparable to NMT, that does not use explicit syntactic information.
+",4 Probing task experiments,[0],[0]
+"Perhaps most interestingly, BiLSTM-max already achieves very good performance without any training (Untrained row in Table 2).",4 Probing task experiments,[0],[0]
+Untrained BiLSTM-max also performs quite well in the downstream tasks (Appendix).,4 Probing task experiments,[0],[0]
+This architecture must encode priors that are intrinsically good for sentence representations.,4 Probing task experiments,[1.0],['This architecture must encode priors that are intrinsically good for sentence representations.']
+"Untrained BiLSTM-max exploits the input fastText embeddings, and multiplying the latter by a random recurrent matrix provides a form of positional encoding.",4 Probing task experiments,[0],[0]
+"However, good performance in a task such as SOMO, where BoV fails and positional information alone should not help (the intruder is randomly distributed across the sentence), suggests that other architectural biases are at work.",4 Probing task experiments,[0],[0]
+"In-
+triguingly, a preliminary comparison of untrained BiLSTM-max and human subjects on the SOMO sentences evaluated by both reveals that, whereas humans have a bias towards finding sentences acceptable (62% sentences are rated as untampered with, vs. 48% ground-truth proportion), the model has a strong bias in the opposite direction (it rates 83% of the sentences as modified).",4 Probing task experiments,[0],[0]
+"A cursory look at contrasting errors confirms, unsurprisingly, that those made by humans are perfectly justified, while model errors are opaque.",4 Probing task experiments,[0],[0]
+"For example, the sentence “I didn’t come here to reunite",4 Probing task experiments,[0.9603615976511587],"['For example, the sentence “I didn’t come here to reunite (orig.']"
+"(orig. undermine) you” seems perfectly acceptable in its modified form, and indeed subjects judged it as such, whereas untrained BiLSTM-max “correctly” rated it as a modified item.",4 Probing task experiments,[0],[0]
+"Conversely, it is difficult to see any clear reason for the latter tendency to rate perfectly acceptable originals as modified.",4 Probing task experiments,[0],[0]
+We leave a more thorough investigation to further work.,4 Probing task experiments,[0],[0]
+"See similar observations on the effectiveness of untrained ConvNets in vision by Ulyanov et al. (2017).
+",4 Probing task experiments,[0],[0]
+"Probing task comparison A good encoder, such as NMT-trained BiLSTM-max, shows generally good performance across probing tasks.",4 Probing task experiments,[0],[0]
+"At one extreme, performance is not particularly high on the surface tasks, which might be an indirect sign of the encoder extracting “deeper” linguistic properties.",4 Probing task experiments,[0],[0]
+"At the other end, performance is still far from the human bounds on TreeDepth, BShift, SOMO and CoordInv.",4 Probing task experiments,[0],[0]
+The last 3 tasks ask if a sentence is syntactically or semantically anomalous.,4 Probing task experiments,[0],[0]
+"This is a daunting job for an encoder that has not been explicitly trained on acceptability, and it is interesting that the best models are, at least to a certain extent, able to produce reasonable anomaly judgments.",4 Probing task experiments,[0],[0]
+The asymmetry between the difficult TreeDepth and easier TopConst is also interesting.,4 Probing task experiments,[0],[0]
+"Intuitively, TreeDepth requires more nuanced syntactic information (down to the deepest leaf of the tree) than TopConst, that only requires identifying broad chunks.
+",4 Probing task experiments,[0],[0]
+Figure 1 reports how probing task accuracy changes in function of encoder training epochs.,4 Probing task experiments,[0],[0]
+"The figure shows that NMT probing performance is largely independent of target language, with strikingly similar development patterns across French, German and Finnish.",4 Probing task experiments,[0],[0]
+"Note in particular the similar probing accuracy curves in French and Finnish, while the corresponding BLEU scores (in lavender) are consistently higher in the former lan-
+guage.",4 Probing task experiments,[0],[0]
+"For both NMT and SkipThought, WC performance keeps increasing with epochs.",4 Probing task experiments,[0],[0]
+"For the other tasks, we observe instead an early flattening of the NMT probing curves, while BLEU performance keeps increasing.",4 Probing task experiments,[0],[0]
+"Most strikingly, SentLen performance is actually decreasing, suggesting again that, as a model captures deeper linguistic properties, it will tend to forget about this superficial feature.",4 Probing task experiments,[0],[0]
+"Finally, for the challenging SOMO task, the curves are mostly flat, suggesting that what BiLSTM-max is able to capture about this task is already encoded in its architecture, and further training doesn’t help much.
+",4 Probing task experiments,[0],[0]
+"Probing vs. downstream tasks Figure 2 reports correlation between performance on our probing tasks and the downstream tasks available in the SentEval5 suite, which consists of classification (MR, CR, SUBJ, MPQA, SST2, SST5, TREC), natural language inference (SICK-E), semantic relatedness (SICK-R, STSB), paraphrase detection (MRPC) and semantic textual similarity (STS 2012 to 2017) tasks.",4 Probing task experiments,[0],[0]
+"Strikingly, WC is significantly positively correlated with all downstream tasks.",4 Probing task experiments,[0],[0]
+"This suggests that, at least for current models, the latter do not require extracting particularly abstract knowledge from the data.",4 Probing task experiments,[0],[0]
+"Just relying on the words contained in the input sentences
+5https://github.com/facebookresearch/ SentEval
+can get you a long way.",4 Probing task experiments,[1.0000000110127982],['Just relying on the words contained in the input sentences can get you a long way.']
+"Conversely, there is a significant negative correlation between SentLen and most downstream tasks.",4 Probing task experiments,[0],[0]
+The number of words in a sentence is not informative about its linguistic contents.,4 Probing task experiments,[0],[0]
+"The more models abstract away from such information, the more likely it is they will use their capacity to capture more interesting features, as the decrease of the SentLen curve along training (see Figure 1) also suggests.",4 Probing task experiments,[0],[0]
+"CoordInv and, especially, SOMO, the tasks requiring the most sophisticated semantic knowledge, are those that positively correlate with the largest number of downstream tasks after WC.",4 Probing task experiments,[0],[0]
+"We observe intriguing asymmetries: SOMO correlates with the SICK-E sentence entailment test, but not with SICK-R, which is about modeling sentence relatedness intuitions.",4 Probing task experiments,[0],[0]
+"Indeed, logical entailment requires deeper semantic analysis than modeling similarity judgments.",4 Probing task experiments,[0],[0]
+"TopConst and the number tasks negatively correlate with various similarity and sentiment data sets (SST, STS, SICK-R).",4 Probing task experiments,[0],[0]
+"This might expose biases in these tasks: SICK-R, for example, deliberately contains sentence pairs with opposite voice, that will have different constituent structure but equal meaning (Marelli et al., 2014).",4 Probing task experiments,[0],[0]
+"It might also mirrors genuine factors affecting similarity judgments (e.g., two sentences differing only in object number are very similar).",4 Probing task experiments,[0],[0]
+"Remarkably, TREC question type classification is the downstream task correlating with most probing tasks.",4 Probing task experiments,[0],[0]
+"Question classification is certainly an outlier among our downstream tasks, but we must leave a full understanding of this behaviour to future work (this is exactly the sort of analysis our probing tasks should stimulate).",4 Probing task experiments,[1.0],"['Question classification is certainly an outlier among our downstream tasks, but we must leave a full understanding of this behaviour to future work (this is exactly the sort of analysis our probing tasks should stimulate).']"
+"Adi et al. (2017) introduced SentLen, WC and a word order test, focusing on a bag-of-vectors baseline, an autoencoder and skip-thought (all trained on the same data used for the probing tasks).",5 Related work,[0],[0]
+"We recast their tasks so that they only require a sentence embedding as input (two of their tasks also require word embeddings, polluting sentencelevel evaluation), we extend the evaluation to more tasks, encoders and training objectives, and we relate performance on the probing tasks with that on downstream tasks.",5 Related work,[0],[0]
+"Shi et al. (2016) also use 3 probing tasks, including Tense and TopConst.",5 Related work,[0],[0]
+"It is not clear that they controlled for the same factors we considered (in particular, lexical overlap and
+sentence length), and they use much smaller training sets, limiting classifier-based evaluation to logistic regression.",5 Related work,[0],[0]
+"Moreover, they test a smaller set of models, focusing on machine translation.
+",5 Related work,[0],[0]
+"Belinkov et al. (2017a), Belinkov et al. (2017b) and Dalvi et al. (2017) are also interested in understanding the type of linguistic knowledge encoded in sentence and word embeddings, but their focus is on word-level morphosyntax and lexical semantics, and specifically on NMT encoders and decoders.",5 Related work,[0],[0]
+"Sennrich (2017) also focuses on NMT systems, and proposes a contrastive test to assess how they handle various linguistic phenomena.",5 Related work,[0],[0]
+"Other work explores the linguistic behaviour of recurrent networks and related models by using visualization, input/hidden representation deletion techniques or by looking at the word-by-word behaviour of the network (e.g., Nagamine et al., 2015; Hupkes et al., 2017; Li et al., 2016; Linzen et al., 2016; Kàdàr et al., 2017; Li et al., 2017).",5 Related work,[0],[0]
+"These methods, complementary to ours, are not agnostic to encoder architecture, and cannot be used for general-purpose cross-model evaluation.
+",5 Related work,[0],[0]
+"Finally, Conneau et al. (2017) propose a largescale, multi-task evaluation of sentence embeddings, focusing entirely on downstream tasks.",5 Related work,[0],[0]
+We introduced a set of tasks probing the linguistic knowledge of sentence embedding methods.,6 Conclusion,[0],[0]
+"Their purpose is not to encourage the development of ad-hoc models that attain top performance on them, but to help exploring what information is
+captured by different pre-trained encoders.",6 Conclusion,[0],[0]
+We performed an extensive linguistic evaluation of modern sentence encoders.,6 Conclusion,[0],[0]
+"Our results suggest that the encoders are capturing a wide range of properties, well above those captured by a set of strong baselines.",6 Conclusion,[0],[0]
+"We further uncovered interesting patterns of correlation between the probing tasks and more complex “downstream” tasks, and presented a set of intriguing findings about the linguistic properties of various embedding methods.",6 Conclusion,[0],[0]
+"For example, we found that Bag-of-Vectors is surprisingly good at capturing sentence-level properties, thanks to redundancies in natural linguistic input.",6 Conclusion,[1.0],"['For example, we found that Bag-of-Vectors is surprisingly good at capturing sentence-level properties, thanks to redundancies in natural linguistic input.']"
+"We showed that different encoder architectures trained with the same objective with similar performance can result in different embeddings, pointing out the importance of the architecture prior for sentence embeddings.",6 Conclusion,[0],[0]
+"In particular, we found that BiLSTM-max embeddings are already capturing interesting linguistic knowledge before training, and that, after training, they detect semantic acceptability without having been exposed to anomalous sentences before.",6 Conclusion,[0],[0]
+"We hope that our publicly available probing task set will become a standard benchmarking tool of the linguistic properties of new encoders, and that it will stir research towards a better understanding of what they learn.
+",6 Conclusion,[0],[0]
+"In future work, we would like to extend the probing tasks to other languages (which should be relatively easy, given that they are automatically generated), investigate how multi-task training affects probing task performance and leverage our probing tasks to find more linguistically-aware universal encoders.",6 Conclusion,[0],[0]
+"We thank David Lopez-Paz, Holger Schwenk, Hervé Jégou, Marc’Aurelio Ranzato and Douwe Kiela for useful comments and discussions.",Acknowledgments,[0],[0]
+"Although much effort has recently been devoted to training high-quality sentence embeddings, we still have a poor understanding of what they are capturing.",abstractText,[0],[0]
+"“Downstream” tasks, often based on sentence classification, are commonly used to evaluate the quality of sentence representations.",abstractText,[0],[0]
+The complexity of the tasks makes it however difficult to infer what kind of information is present in the representations.,abstractText,[0],[0]
+"We introduce here 10 probing tasks designed to capture simple linguistic features of sentences, and we use them to study embeddings generated by three different encoders trained in eight distinct ways, uncovering intriguing properties of both encoders and training methods.",abstractText,[0],[0]
+What you can cram into a single $&!#* vector: Probing sentence embeddings for linguistic properties,title,[0],[0]

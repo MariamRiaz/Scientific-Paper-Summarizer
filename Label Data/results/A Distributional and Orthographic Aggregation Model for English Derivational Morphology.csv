@@ -1,0 +1,311 @@
+0,1,label2,summary_sentences
+"Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics (Long Papers), pages 1938–1947 Melbourne, Australia, July 15 - 20, 2018. c©2018 Association for Computational Linguistics
+1938",text,[0],[0]
+"The explicit modeling of morphology has been shown to improve a number of tasks (Seeker and Çetinoglu, 2015; Luong et al., 2013).",1 Introduction,[0],[0]
+"In a large number of the world’s languages, many words are composed through morphological operations on subword units.",1 Introduction,[0],[0]
+"Some languages are rich in inflectional morphology, characterized by syntactic transformations like pluralization.",1 Introduction,[0],[0]
+"Similarly, languages like English are rich in derivational morphology, where the semantics of words are composed from
+∗These authors contributed equally; listed alphabetically.
+smaller parts.",1 Introduction,[0],[0]
+"The AGENT derivational transformation, for example, answers the question, what is the word for ‘someone who runs’?",1 Introduction,[0],[0]
+"with the answer, a runner.1 Here, AGENT is spelled out as suffixing -ner onto the root verb run.
+",1 Introduction,[0],[0]
+We tackle the task of derived word generation.,1 Introduction,[0],[0]
+"In this task, a root word x and a derivational transformation t are given to the learner.",1 Introduction,[0],[0]
+"The learner’s job is to produce the result of the transformation on the root word, called the derived word y. Table 1 gives examples of these transformations.
+",1 Introduction,[0],[0]
+"Previous approaches to derived word generation model the task as a character-level sequenceto-sequence (seq2seq) problem (Cotterell et al., 2017b).",1 Introduction,[0],[0]
+"The letters from the root word and some encoding of the transformation are given as input to a neural encoder, and the decoder is trained to produce the derived word, one letter at a time.",1 Introduction,[0],[0]
+"We identify the following problems with these approaches:
+First, because these models are unconstrained, they can generate sequences of characters that do
+1We use the verb run as a demonstrative example; the transformation can be applied to most verbs.
+",1 Introduction,[0],[0]
+not form actual words.,1 Introduction,[0],[0]
+"We argue that requiring the model to generate a known word is a reasonable constraint in the special case of English derivational morphology, and doing so avoids a large number of common errors.
+",1 Introduction,[0],[0]
+"Second, sequence-based models can only generalize string manipulations (such as “add -ment”) if they appear frequently in the training data.",1 Introduction,[0],[0]
+"Because of this, they are unable to generate derived words that do not follow typical patterns, such as generating truth as the nominative derivation of true.",1 Introduction,[0],[0]
+We propose to learn a function for each transformation in a low dimensional vector space that corresponds to mapping from representations of the root word to the derived word.,1 Introduction,[0],[0]
+"This eliminates the reliance on orthographic information, unlike related approaches to distributional semantics, which operate at the suffix level (Gupta et al., 2017).
+",1 Introduction,[0],[0]
+"We contribute an aggregation model of derived word generation that produces hypotheses independently from two separate learned models: one from a seq2seq model with only orthographic information, and one from a feed-forward network using only distributional semantic information in the form of pretrained word vectors.",1 Introduction,[0],[0]
+The model learns to choose between the hypotheses according to the relative confidence of each.,1 Introduction,[0],[0]
+This system can be interpreted as learning to decide between positing an orthographically regular form or a semantically salient word.,1 Introduction,[0],[0]
+"See Figure 1 for a diagram of our model.
+",1 Introduction,[0],[0]
+"We show that this model helps with two open problems with current state-of-the-art seq2seq derived word generation systems, suffix ambiguity and orthographic irregularity (Section 2).",1 Introduction,[0],[0]
+"We also
+improve the accuracy of seq2seq-only derived word systems by adding external information through constrained decoding and hypothesis rescoring.",1 Introduction,[0],[0]
+"These methods provide orthogonal gains to our main contribution.
+",1 Introduction,[0],[0]
+"We evaluate models in two categories: open vocabulary models that can generate novel words unattested in a preset vocabulary, and closedvocabulary models, which cannot.",1 Introduction,[0],[0]
+Our best openvocabulary and closed-vocabulary models demonstrate 22% and 37% relative error reductions over the current state of the art.,1 Introduction,[0],[0]
+Derivational transformations generate novel words that are semantically composed from the root word and the transformation.,2 Background: Derivational Morphology,[1.0],['Derivational transformations generate novel words that are semantically composed from the root word and the transformation.']
+"We identify two unsolved problems in derived word transformation, each of which we address in Sections 3 and 4.
+",2 Background: Derivational Morphology,[0],[0]
+"First, many plausible choices of suffix for a single pair of root word and transformation.",2 Background: Derivational Morphology,[0],[0]
+"For example, for the verb ground, the RESULT transformation could plausibly take as many forms as2
+(ground, RESULT)→ grounding (ground, RESULT)→ *groundation (ground, RESULT)→ *groundment (ground, RESULT)→ *groundal
+However, only one is correct, even though each suffix appears often in the RESULT transformation of other words.",2 Background: Derivational Morphology,[0.999999933759884],"['For example, for the verb ground, the RESULT transformation could plausibly take as many forms as2 (ground, RESULT)→ grounding (ground, RESULT)→ *groundation (ground, RESULT)→ *groundment (ground, RESULT)→ *groundal However, only one is correct, even though each suffix appears often in the RESULT transformation of other words.']"
+"We will refer to this problem as “suffix ambiguity.”
+",2 Background: Derivational Morphology,[0],[0]
+"Second, many derived words seem to lack a generalizable orthographic relationship to their root words.",2 Background: Derivational Morphology,[0],[0]
+"For example, the RESULT of the verb speak is speech.",2 Background: Derivational Morphology,[0],[0]
+"It is unlikely, given an orthographically similar verb creak, that the RESULT be creech instead of, say, creaking.",2 Background: Derivational Morphology,[1.0],"['It is unlikely, given an orthographically similar verb creak, that the RESULT be creech instead of, say, creaking.']"
+Seq2seq models must grapple with the problem of derived words that are the result of unlikely or potentially unseen string transformations.,2 Background: Derivational Morphology,[0],[0]
+We refer to this problem as “orthographic irregularity.”,2 Background: Derivational Morphology,[0],[0]
+"In this section, we introduce the prior state-of-theart model, which serves as our baseline system.",3 Sequence Models and Corpus Knowledge,[1.0],"['In this section, we introduce the prior state-of-theart model, which serves as our baseline system.']"
+"Then we build on top of this system by incorporating a dictionary constraint and rescoring the
+2The * indicates a non-word.
+model’s hypotheses with token frequency information to address the suffix ambiguity problem.",3 Sequence Models and Corpus Knowledge,[0],[0]
+We begin by formalizing the problem and defining some notation.,3.1 Baseline Architecture,[0],[0]
+"For source word x = x1, x2, . . .",3.1 Baseline Architecture,[0],[0]
+"xm, a derivational transformation t, and target word y = y1, y2, . . .",3.1 Baseline Architecture,[0],[0]
+"yn, our goal is to learn some function from the pair (x, t) to y. Here, xi and yj are the ith and jth characters of the input strings x and y.",3.1 Baseline Architecture,[0],[0]
+"We will sometimes use x1:i to denote x1, x2, . . .",3.1 Baseline Architecture,[0],[0]
+"xi, and similarly for y1:j .
+",3.1 Baseline Architecture,[0],[0]
+"The current state-of-the-art model for derivedform generation approaches this problem by learning a character-level encoder-decoder neural network with an attention mechanism (Cotterell et al., 2017b; Bahdanau et al., 2014).
+",3.1 Baseline Architecture,[0],[0]
+"The input to the bidirectional LSTM encoder (Hochreiter and Schmidhuber, 1997; Graves and Schmidhuber, 2005) is the sequence #, x1, x2, . . .",3.1 Baseline Architecture,[0],[0]
+"xm, #, t, where # is a special symbol to denote the start and end of a word, and the encoding of the derivational transformation t is concatenated to the input characters.",3.1 Baseline Architecture,[1.0],"['xm, #, t, where # is a special symbol to denote the start and end of a word, and the encoding of the derivational transformation t is concatenated to the input characters.']"
+The model is trained to minimize the cross entropy of the training data.,3.1 Baseline Architecture,[0],[0]
+"We refer to our reimplementation of this model as SEQ.
+",3.1 Baseline Architecture,[0],[0]
+"For a more detailed treatment of neural sequenceto-sequence models with attention, we direct the reader to Luong et al. (2015).",3.1 Baseline Architecture,[0],[0]
+The suffix ambiguity problem poses challenges for models which rely exclusively on input characters for information.,3.2 Dictionary Constraint,[1.0],['The suffix ambiguity problem poses challenges for models which rely exclusively on input characters for information.']
+"As previously demonstrated, words derived via the same transformation may take different suffixes, and it is hard to select among them based on character information alone.",3.2 Dictionary Constraint,[0],[0]
+"Here, we describe a process for restricting our inference procedure to only generate known English words, which we call a dictionary constraint.",3.2 Dictionary Constraint,[0],[0]
+"We believe that for English morphology, a large enough corpus will contain the vast majority of derived forms, so while this approach is somewhat restricting, it removes a significant amount of ambiguity from the problem.
+",3.2 Dictionary Constraint,[0],[0]
+"To describe how we implemented this dictionary constraint, it is useful first to discuss how decoding in a seq2seq model is equivalent to solving a shortest path problem.",3.2 Dictionary Constraint,[0],[0]
+"The notation is specific to our model, but the argument is applicable to seq2seq models in general.
+",3.2 Dictionary Constraint,[0],[0]
+"The goal of decoding is to find the most probable structure ŷ conditioned on some observation x and transformation t. That is, the problem is to solve
+ŷ =",3.2 Dictionary Constraint,[0],[0]
+"argmax y∈Y
+p(y | x, t) (1)
+= argmin y∈Y − log p(y | x, t) (2)
+where Y is the set of valid structures.",3.2 Dictionary Constraint,[0],[0]
+"Sequential models have a natural ordering y = y1, y2, . . .",3.2 Dictionary Constraint,[0],[0]
+"yn over which − log p(y | x, t) can be decomposed
+− log p(y | x, t) = n∑
+t=1
+− log p(yt | y1:t−1,x, t)
+(3)",3.2 Dictionary Constraint,[0],[0]
+Solving Equation 2 can be viewed as solving a shortest path problem from a special starting state to a special ending state via some path which uniquely represents y.,3.2 Dictionary Constraint,[0],[0]
+Each vertex in the graph represents some sequence y1,3.2 Dictionary Constraint,[0],[0]
+":i, and the weight of the edge from y1:i to y1:i+1 is given by
+− log p(yi+1 | y1:i−1,x, t) (4)
+",3.2 Dictionary Constraint,[0],[0]
+The weight of the path from the start state to the end state via the unique path that describes y is exactly equal to Equation 3.,3.2 Dictionary Constraint,[0],[0]
+"When the vocabulary size is too large, the exact shortest path is intractable, and approximate search methods, such as beam search, are used instead.
+",3.2 Dictionary Constraint,[0],[0]
+"In derived word generation, Y is an infinite set of strings.",3.2 Dictionary Constraint,[0],[0]
+"Since Y is unrestricted, almost all of the strings in Y are not valid words.",3.2 Dictionary Constraint,[0],[0]
+"Given a dictionary YD, the search space is restricted to only those words in the dictionary by searching over the trie induced from YD, which is a subgraph of the unrestricted graph.",3.2 Dictionary Constraint,[1.0],"['Given a dictionary YD, the search space is restricted to only those words in the dictionary by searching over the trie induced from YD, which is a subgraph of the unrestricted graph.']"
+"By limiting the search space to YD, the decoder is guaranteed to generate some known word.",3.2 Dictionary Constraint,[0],[0]
+Models which use this dictionaryconstrained inference procedure will be labeled with +DICT.,3.2 Dictionary Constraint,[0],[0]
+"Algorithm 1 has the pseudocode for our decoding procedure.
+",3.2 Dictionary Constraint,[0],[0]
+We discuss specific details of the search procedure and interesting observations of the search space in Section 6.,3.2 Dictionary Constraint,[0],[0]
+Section 5.2 describes how we obtained the dictionary of valid words.,3.2 Dictionary Constraint,[0],[0]
+"We also consider the inclusion of explicit word frequency information to help solve suffix ambiguity, using the intuition that “real” derived words
+are likely to be frequently attested.",3.3 Word Frequency Knowledge through Rescoring,[0],[0]
+"This permits a high-recall, potentially noisy dictionary.
+",3.3 Word Frequency Knowledge through Rescoring,[0],[0]
+"We are motivated by very high top-10 accuracy compared to top-1 accuracy, even among dictionary-constrained models.",3.3 Word Frequency Knowledge through Rescoring,[0],[0]
+"By rescoring the hypotheses of a model using word frequency (a word-global signal) as a feature, attempt to recover a portion of this top-10 accuracy.
+",3.3 Word Frequency Knowledge through Rescoring,[0],[0]
+"When a model has been trained, we query it for its top-10 most likely hypotheses.",3.3 Word Frequency Knowledge through Rescoring,[0],[0]
+The union of all hypotheses for a subset of the training observations forms the training set for a classifier that learns to predict whether a hypothesis generated by the model is correct.,3.3 Word Frequency Knowledge through Rescoring,[0],[0]
+"Each hypothesis is labelled with its correctness, a value in {±1}.",3.3 Word Frequency Knowledge through Rescoring,[0],[0]
+"We train a simple combination of two scores: the seq2seq model score for the hypothesis, and the log of the word frequency of the hypothesis.
+",3.3 Word Frequency Knowledge through Rescoring,[0.9999999501866873],"['We train a simple combination of two scores: the seq2seq model score for the hypothesis, and the log of the word frequency of the hypothesis.']"
+"To permit a nonlinear combination of word frequency and model score, we train a small multilayer perceptron with the model score and the frequency of a derived word hypothesis as features.
+",3.3 Word Frequency Knowledge through Rescoring,[0],[0]
+"At testing time, the 10 hypotheses generated by a single seq2seq model for a single observation are rescored.",3.3 Word Frequency Knowledge through Rescoring,[0],[0]
+"The new model top-1 hypothesis, then, is the argmax over the 10 hypotheses according to the rescorer.",3.3 Word Frequency Knowledge through Rescoring,[0],[0]
+"In this way, we are able to incorporate word-global information, e.g. word frequency, that is ill-suited for incorporation at each character prediction step of the seq2seq model.",3.3 Word Frequency Knowledge through Rescoring,[0],[0]
+We label models that are rescored in this way +FREQ.,3.3 Word Frequency Knowledge through Rescoring,[0],[0]
+"So far, we have presented models that learn derivational transformations as orthographic operations.",4 Distributional Models,[0],[0]
+"Such models struggle by construction with the orthographic irregularity problem, as they are trained to generalize orthographic information.",4 Distributional Models,[0],[0]
+"However, the semantic relationships between root words and derived words are the same even when the orthography is dissimilar.",4 Distributional Models,[1.0],"['However, the semantic relationships between root words and derived words are the same even when the orthography is dissimilar.']"
+"It is salient, for example, that irregular word speech is related to its root speak in about the same way as how exploration is related to the word explore.
+",4 Distributional Models,[0],[0]
+"We model distributional transformations as functions in dense distributional word embedding spaces, crucially learning a function per derivational transformation, not per suffix pair.",4 Distributional Models,[0],[0]
+"In this way, we aim to explicitly model the semantic transformation, not the othographic information.",4 Distributional Models,[0],[0]
+"For all source words x and all target words y, we look up static distributional embeddings vx, vy ∈ Rd.",4.1 Feed-forward derivational transformations,[0],[0]
+"For each derivational transformation t, we learn a function ft : Rd → Rd that maps vx to vy.",4.1 Feed-forward derivational transformations,[1.0],"['For each derivational transformation t, we learn a function ft : Rd → Rd that maps vx to vy.']"
+"ft is parametrized as two-layer perceptron, trained using a squared loss,
+L = bTb (5) b =",4.1 Feed-forward derivational transformations,[0],[0]
+"ft(vx)− vy (6)
+We perform inference by nearest neighbor search in the embedding space.",4.1 Feed-forward derivational transformations,[0],[0]
+"This inference strategy requires a subset of strings for our embedding dictionary, YV .
+",4.1 Feed-forward derivational transformations,[0],[0]
+"Upon receiving (x, t) at test time, we compute ft(vx) and find the most similar embeddings in YV .",4.1 Feed-forward derivational transformations,[0],[0]
+"Specifically, we find the top-k most similar embeddings, and take the most similar derived word that starts with the same 4 letters as the root word, and is not identical to it.",4.1 Feed-forward derivational transformations,[0],[0]
+"This heuristic filters out highly implausible hypotheses.
+",4.1 Feed-forward derivational transformations,[0],[0]
+"We use the single-word subset of the Google News vectors (Mikolov et al., 2013) as YV , so the size of the vocabulary is 929k words.",4.1 Feed-forward derivational transformations,[0],[0]
+The seq2seq and distributional models we have presented learn with disjoint information to solve separate problems.,4.2 SEQ and DIST Aggregation,[0],[0]
+"We leverage this intuition to build a model that chooses, for each observation, whether to generate according to orthographic information via the SEQ model, or produce a potentially irregular form via the DIST model.
+",4.2 SEQ and DIST Aggregation,[0.9999999153565926],"['We leverage this intuition to build a model that chooses, for each observation, whether to generate according to orthographic information via the SEQ model, or produce a potentially irregular form via the DIST model.']"
+"To train this model, we use a held-out portion of the training set, and filter it to only observations for which exactly one of the two models produces the correct derived form.",4.2 SEQ and DIST Aggregation,[1.0],"['To train this model, we use a held-out portion of the training set, and filter it to only observations for which exactly one of the two models produces the correct derived form.']"
+"Finally, we make the strong assumption that the probability of a derived form being generated correctly according to 1 model as opposed to the other is dependent only on the unnormalized model score from each.",4.2 SEQ and DIST Aggregation,[0],[0]
+"We model this as a logistic regression (t is omitted for clarity):
+P (·|yD,yS,x) = softmax(We [DIST(yD|x); SEQ(yS|x)]",4.2 SEQ and DIST Aggregation,[0],[0]
+"+ be)
+where We and be are learned parameters, yD and yS are the hypotheses of the distributional and seq2seq models, and DIST(·) and SEQ(·) are the models’ likelihood functions.",4.2 SEQ and DIST Aggregation,[0],[0]
+We denote this aggregate AGGR in our results.,4.2 SEQ and DIST Aggregation,[0],[0]
+In this section we describe the derivational morphology dataset used in our experiments and how we collected the dictionary and token frequencies used in the dictionary constraint and rescorer.,5 Datasets,[0],[0]
+"In our experiments, we use the derived word generation derivational morphology dataset released in Cotterell et al. (2017b).",5.1 Derivational Morphology,[0],[0]
+"The dataset, derived from NomBank (Meyers et al., 2004) , consists of 4,222 training, 905 validation, and 905 test triples of the form (x, t,y).",5.1 Derivational Morphology,[0],[0]
+"The transformations are from the following categories: ADVERB (ADJ→ ADV), RESULT (V→ N), AGENT (V→ N), and NOMINAL (ADJ→ N).",5.1 Derivational Morphology,[1.0],"['The transformations are from the following categories: ADVERB (ADJ→ ADV), RESULT (V→ N), AGENT (V→ N), and NOMINAL (ADJ→ N).']"
+Examples from the dataset can be found in Table 1.,5.1 Derivational Morphology,[0],[0]
+"The dictionary and token frequency statistics used in the dictionary constraint and frequency reranking come from the Google Books NGram corpus (Michel et al., 2011).",5.2 Dictionary and Token Frequency Statistics,[0],[0]
+"The unigram frequency counts were aggregated across years, and any tokens which appear fewer than approximately 2,000 times, do not end in a known possible suffix, or contain a character outside of our vocabulary were removed.
+",5.2 Dictionary and Token Frequency Statistics,[0],[0]
+"The frequency threshold was determined using development data, optimizing for high recall.",5.2 Dictionary and Token Frequency Statistics,[0],[0]
+We collect a set of known suffixes from the training data by removing the longest common prefix between the source and target words from the target word.,5.2 Dictionary and Token Frequency Statistics,[0],[0]
+"The result is a dictionary with frequency information for around 360k words, which covers 98% of the target words in the training data.3",5.2 Dictionary and Token Frequency Statistics,[0],[0]
+"In many sequence models where the vocabulary size is large, exact inference by finding the true shortest path in the graph discussed in Section 3.2 is intractable.",6 Inference Procedure Discussion,[1.0],"['In many sequence models where the vocabulary size is large, exact inference by finding the true shortest path in the graph discussed in Section 3.2 is intractable.']"
+"As a result, approximate inference techniques such as beam search are often used, or the size of the search space is reduced, for example, by using a Markov assumption.",6 Inference Procedure Discussion,[0],[0]
+"We, however, observed that exact inference via a shortest path algorithm is not only tractable in our model, but
+3 The remaining 2% is mostly words with hyphens or mistakes in the dataset.
+only slightly more expensive than greedy search and significantly less expensive than beam search.
+",6 Inference Procedure Discussion,[0],[0]
+"To quantify this claim, we measured the accuracy and number of states explored by greedy search, beam search, and shortest path with and without a dictionary constraint on the development data.",6 Inference Procedure Discussion,[0],[0]
+Table 2 shows the results averaged over 30 runs.,6 Inference Procedure Discussion,[0],[0]
+"As expected, beam search and shortest path have higher accuracies than greedy search and explore more of the search space.",6 Inference Procedure Discussion,[0],[0]
+"Surprisingly, beam search and shortest path have nearly identical accuracies, but shortest path explores significantly fewer hypotheses.
+",6 Inference Procedure Discussion,[0],[0]
+At least two factors contribute to the tractability of exact search in our model.,6 Inference Procedure Discussion,[0],[0]
+"First, our characterlevel sequence model has a vocabulary size of 63, which is significantly smaller than token-level models, in which a vocabulary of 50k words is not uncommon.",6 Inference Procedure Discussion,[0],[0]
+"The search space of sequence models is dependent upon the size of the vocabulary, so the model’s search space is dramatically smaller than for a token-level model.
+",6 Inference Procedure Discussion,[0],[0]
+"Second, the inherent structure of the task makes it easy to eliminate large subgraphs of the search space.",6 Inference Procedure Discussion,[0],[0]
+"The first several characters of the input word and output word are almost always the same, so the model assigns very low probability to any sequence with different starting characters than the input.",6 Inference Procedure Discussion,[0],[0]
+"Then, the rest of the search procedure is dedicated to deciding between suffixes.",6 Inference Procedure Discussion,[0],[0]
+"Any suffix which does not appear frequently in the training data receives a low score, leaving the search to decide between a handful of possible options.",6 Inference Procedure Discussion,[0],[0]
+The result is that the learned probability distribution is very spiked; it puts very high probability on just a few output sequences.,6 Inference Procedure Discussion,[0],[0]
+"It is empirically true that the top few most probable sequences have significantly higher scores than the next most probable sequences, which supports this hypothesis.
+",6 Inference Procedure Discussion,[0],[0]
+"In our subsequent experiments, we decode using
+Algorithm 1 The decoding procedure uses a shortest-path algorithm to find the most probable output sequence.",6 Inference Procedure Discussion,[0],[0]
+"The dictionary constraint is (optionally) implemented on line 9 by only considering prefixes that are contained in some trie T .
+1: procedure DECODE(x, t, V , T ) 2: H ← Heap() 3: H .insert(0, #) 4: while H is not empty",6 Inference Procedure Discussion,[0],[0]
+do 5: y← H .remove() 6: if y is a complete word then return y 7: for y ∈ V do 8: y′,6 Inference Procedure Discussion,[0],[0]
+"← y + y 9: if y′ ∈ T then
+10: s← FORWARD(x, t,y′) 11: H .insert(s, y′)
+exact inference by running a shortest path algorithm (see Algorithm 1).",6 Inference Procedure Discussion,[0],[0]
+"For reranking models, instead of typically using a beam of size k, we use the top k most probable sequences.",6 Inference Procedure Discussion,[0],[0]
+"In all of our experiments, we use the training, development, and testing splits provided by Cotterell et al. (2017b) and average over 30 random restarts.",7 Results,[0],[0]
+"Table 3 displays the accuracies and average edit distances on the test set of each of the systems presented in this work and the state-of-the-art model from Cotterell et al. (2017b).
+",7 Results,[0],[0]
+"First, we observed that SEQ outperforms the results reported in Cotterell et al. (2017b) by a large margin, despite the fact that the model architectures are the same.",7 Results,[0],[0]
+"We attribute this difference to better hyperparameter settings and improved learning rate annealing.
+",7 Results,[0],[0]
+"Then, it is clear that the accuracy of the distributional model, DIST, is significantly lower than any seq2seq model.",7 Results,[0],[0]
+"We believe the orthographyinformed models perform better because most observations in the dataset are orthographically regular, providing low-hanging fruit.
+",7 Results,[0],[0]
+"Open-vocabulary models Our open-vocabulary aggregation model AGGR improves performance by 3.8 points accuracy over SEQ, indicating that the sequence models and the distributional model are contributing complementary signals.",7 Results,[1.0],"['Open-vocabulary models Our open-vocabulary aggregation model AGGR improves performance by 3.8 points accuracy over SEQ, indicating that the sequence models and the distributional model are contributing complementary signals.']"
+"AGGR is an open-vocabulary model like Cotterell et al. (2017b) and improves upon it by 6.3 points, making it our best comparable model.",7 Results,[0],[0]
+"We provide an in-
+depth analysis of the strengths of SEQ and DIST in Section 7.1.
+",7 Results,[0],[0]
+Closed-vocabulary models We now consider closed-vocabulary models that improve upon the seq2seq model in AGGR.,7 Results,[0],[0]
+"First, we see that restricting the decoder to only generate known words is extremely useful, with SEQ+DICT improving over SEQ by 6.2 points.",7 Results,[0],[0]
+"Qualitatively, we note that this constraint helps solve the suffix ambiguity problem, since orthographically plausible incorrect hypotheses are pruned as non-words.",7 Results,[0],[0]
+See Table 6 for examples of this phenomenon.,7 Results,[0],[0]
+"Additionally, we observe that the dictionary-constrained model outperforms the unconstrained model according to top-10 accuracy (see Table 5).
+",7 Results,[0],[0]
+"Rescoring (+FREQ) provides further improvement of 0.8 points, showing that the decoding dictionary constraint provides a higher-quality beam that still has room for top-1 improvement.",7 Results,[0],[0]
+"All together, AGGR+FREQ+DICT provides a 4.4 point improvement over the best open-vocabulary model, AGGR.",7 Results,[0],[0]
+"This shows the disambiguating power of assuming a closed vocabulary.
+",7 Results,[0],[0]
+Edit Distance One interesting side effect of the dictionary constraint appears when comparing AGGR+FREQ with and without the dictionary constraint.,7 Results,[0],[0]
+"Although the accuracy of the dictionaryconstrained model is better, the average edit distance is worse.",7 Results,[0],[0]
+"The unconstrained model is free to put invalid words which are orthographically similar to the target word in its top-k, however the constrained model can only choose valid words.",7 Results,[0],[0]
+"This means it is easier for the unconstrained model to generate words which have a low edit distance to the ground truth, whereas the constrained model
+can only do that if such a word exists.",7 Results,[0],[0]
+"The result is a more accurate, yet more orthographically diverse, set of hypotheses.
+",7 Results,[0],[0]
+"Results by Transformation Next, we compare our best open vocabulary and closed vocabulary models to previous work across each derivational transformation.",7 Results,[1.0],"['Results by Transformation Next, we compare our best open vocabulary and closed vocabulary models to previous work across each derivational transformation.']"
+"These results are in Table 4.
+",7 Results,[0],[0]
+"The largest improvement over the baseline system is for NOMINAL transformations, in which the AGGR has a 49% reduction in error.",7 Results,[1.0],"['The largest improvement over the baseline system is for NOMINAL transformations, in which the AGGR has a 49% reduction in error.']"
+We attribute most of this gain to the difficulty of this particular transformation.,7 Results,[0],[0]
+"NOMINAL is challenging because there are several plausible endings (e.g. -ity, -ness, -ence) which occur at roughly the same rate.",7 Results,[0],[0]
+"Additionally, NOMINAL examples are the least frequent transformation in the dataset, so it is challenging for a sequential model to learn to generalize.",7 Results,[0],[0]
+"The distributional model, which does not rely on suffix information, does not have this same weakness, so the aggregation AGGR model has better results.
+",7 Results,[0.9999999568655632],"['The distributional model, which does not rely on suffix information, does not have this same weakness, so the aggregation AGGR model has better results.']"
+"The performance of AGGR+FREQ+DICT is worse than AGGR, however.",7 Results,[0],[0]
+"This is surprising because, in all other transformations, adding dictionary information improves the accuracies.",7 Results,[0],[0]
+"We believe this is due to the ambiguity of the ground truth: Many root words have seemingly multiple plausible nominal transformations, such as rigid → {rigidness, rigidity} and equivalent → {equivalence, equivalency}.",7 Results,[1.0],"['We believe this is due to the ambiguity of the ground truth: Many root words have seemingly multiple plausible nominal transformations, such as rigid → {rigidness, rigidity} and equivalent → {equivalence, equivalency}.']"
+"The dictionary constraint produces a better set of hypotheses to rescore, as demonstrated in Table 5.",7 Results,[0],[0]
+"Therefore, the dictionary-constrained model is likely to have more of these ambiguous cases, which makes the task more difficult.",7 Results,[0],[0]
+In this subsection we explore why AGGR improves consistently over SEQ even though it maintains an open vocabulary.,7.1 Strengths of SEQ and DIST,[0],[0]
+"We have argued that DIST is able to correctly produce derived words that are
+orthographically irregular or infrequent in the training data.",7.1 Strengths of SEQ and DIST,[1.0000000026600082],['We have argued that DIST is able to correctly produce derived words that are orthographically irregular or infrequent in the training data.']
+"Figure 2 quantifies this phenomenon, analyzing the difference in accuracy between the two models, and plotting this in relationship to the frequency of the suffix in the training data.",7.1 Strengths of SEQ and DIST,[0],[0]
+"The plot shows that SEQ excels at generating derived words ending in -ly, -ion, and other suffixes that appeared frequently in the training data.",7.1 Strengths of SEQ and DIST,[0],[0]
+"DIST’s improvements over SEQ are generally much less frequent in the training data, or as in the case of -ment, are less frequent than other suffixes for the same transformation (like -ion.)",7.1 Strengths of SEQ and DIST,[1.0],"['DIST’s improvements over SEQ are generally much less frequent in the training data, or as in the case of -ment, are less frequent than other suffixes for the same transformation (like -ion.)']"
+"By producing derived words whose suffixes show up rarely in the training data, DIST helps solve the orthographic irregularity problem.",7.1 Strengths of SEQ and DIST,[0],[0]
+"There has been much work on the related task of inflected word generation (Durrett and DeNero,
+2013; Rastogi et al., 2016; Hulden et al., 2014).",8 Prior Work,[0.9999999623616718],"['There has been much work on the related task of inflected word generation (Durrett and DeNero, 2013; Rastogi et al., 2016; Hulden et al., 2014).']"
+"It is a structurally similar task to ours, but does not have the same difficulty of challenges (Cotterell et al., 2017a,b), which we have addressed in our work.",8 Prior Work,[1.0],"['It is a structurally similar task to ours, but does not have the same difficulty of challenges (Cotterell et al., 2017a,b), which we have addressed in our work.']"
+The paradigm completion for derivational morphology dataset we use in this work was introduced in Cotterell et al. (2017b).,8 Prior Work,[0],[0]
+"They apply the model that won the 2016 SIGMORPHON shared task on inflectional morphology to derivational morphology (Kann and Schütze, 2016; Cotterell et al., 2016).",8 Prior Work,[0],[0]
+"We use this as our baseline.
+",8 Prior Work,[0],[0]
+Our implementation of the dictionary constraint is an example of a special constraint which can be directly incorporated into the inference algorithm at little additional cost.,8 Prior Work,[1.0],['Our implementation of the dictionary constraint is an example of a special constraint which can be directly incorporated into the inference algorithm at little additional cost.']
+"Roth and Yih (2004, 2007) propose a general inference procedure that naturally incorporates constraints through recasting inference as solving an integer linear program.
+Beam or hypothesis rescoring to incorporate an expensive or non-decomposable signal into search has a history in machine translation (Huang and Chiang, 2007).",8 Prior Work,[0],[0]
+"In inflectional morphology, Nicolai et al. (2015) use this idea to rerank hypotheses using orthographic features and Faruqui et al. (2016) use a character-level language model.",8 Prior Work,[1.0],"['In inflectional morphology, Nicolai et al. (2015) use this idea to rerank hypotheses using orthographic features and Faruqui et al. (2016) use a character-level language model.']"
+"Our approach is similar to Faruqui et al. (2016) in that we use statistics from a raw corpus, but at the token level.
+",8 Prior Work,[0],[0]
+There have been several attempts to use distributional information in morphological generation and analysis.,8 Prior Work,[0],[0]
+"Soricut and Och (2015) collect pairs of words related by any morphological change in an unsupervised manner, then select a vector offset which best explains their observations.",8 Prior Work,[0],[0]
+"There has been subsequent work exploring the vector offset method, finding it unsuccessful in captur-
+ing derivational transformations (Gladkova et al., 2016).",8 Prior Work,[0],[0]
+"However, we use more expressive, nonlinear functions to model derivational transformations and report positive results.",8 Prior Work,[0],[0]
+Gupta et al. (2017) then learn a linear transformation per orthographic rule to solve a word analogy task.,8 Prior Work,[0],[0]
+"Our distributional model learns a function per derivational transformation, not per orthographic rule, which allows it to generalize to unseen orthography.",8 Prior Work,[0],[0]
+"Our models are implemented in Python using the DyNet deep learning library (Neubig et al., 2017).",9 Implementation Details,[0],[0]
+"The code is freely available for download.4
+Sequence Model The sequence-to-sequence model uses character embeddings of size 20, which are shared across the encoder and decoder, with a vocabulary size of 63.",9 Implementation Details,[0],[0]
+"The hidden states of the LSTMs are of size 40.
+",9 Implementation Details,[0],[0]
+"For training, we use Adam with an initial learning rate of 0.005, a batch size of 5, and train for a maximum of 30 epochs.",9 Implementation Details,[0],[0]
+"If after one epoch of the training data, the loss on the validation set does not decrease, we anneal the learning rate by half and revert to the previous best model.
+",9 Implementation Details,[0],[0]
+"During decoding, we find the top 1 most probable sequence as discussed in Section 6 unless rescoring is used, in which we use the top 10.
+",9 Implementation Details,[0],[0]
+Rescorer The rescorer is a 1-hidden-layer perceptron with a tanh nonlinearity and 4 hidden units.,9 Implementation Details,[0],[0]
+"It is trained for a maximum of 5 epochs.
+",9 Implementation Details,[0],[0]
+Distributional Model,9 Implementation Details,[0],[0]
+"The DIST model is a 1- hidden-layer perceptron with a tanh nonlinearity
+4https://github.com/danieldeutsch/ acl2018
+and 100 hidden units.",9 Implementation Details,[0],[0]
+It is trained for a maximum of 25 epochs.,9 Implementation Details,[0],[0]
+"In this work, we present a novel aggregation model for derived word generation.",10 Conclusion,[0],[0]
+This model learns to choose between the predictions of orthographicallyand distributionally-informed models.,10 Conclusion,[0],[0]
+"This ameliorates suffix ambiguity and orthographic irregularity, the salient problems of the generation task.",10 Conclusion,[0],[0]
+"Concurrently, we show that derivational transformations can be usefully modeled as nonlinear functions on distributional word embeddings.",10 Conclusion,[0],[0]
+"The distributional and orthographic models aggregated contribute orthogonal information to the aggregate, as shown by substantial improvements over state-of-the-art results, and qualitative analysis.",10 Conclusion,[0],[0]
+Two ways of incorporating corpus knowledge – constrained decoding and rescoring – demonstrate further improvements to our main contribution.,10 Conclusion,[0],[0]
+"We would like to thank Shyam Upadhyay, Jordan Kodner, and Ryan Cotterell for insightful discussions about derivational morphology.",Acknowledgements,[0],[0]
+"We would also like to thank our anonymous reviewers for helpful feedback on clarity and presentation.
+",Acknowledgements,[0],[0]
+This work was supported by Contract HR001115-2-0025 with the US Defense Advanced Research Projects Agency (DARPA).,Acknowledgements,[0],[0]
+"Approved for Public Release, Distribution Unlimited.",Acknowledgements,[0],[0]
+The views expressed are those of the authors and do not reflect the official policy or position of the Department of Defense or the U.S. Government.,Acknowledgements,[0],[0]
+"Modeling derivational morphology to generate words with particular semantics is useful in many text generation tasks, such as machine translation or abstractive question answering.",abstractText,[0],[0]
+"In this work, we tackle the task of derived word generation.",abstractText,[0],[0]
+"That is, given the word “run,” we attempt to generate the word “runner” for “someone who runs.”",abstractText,[0],[0]
+We identify two key problems in generating derived words from root words and transformations: suffix ambiguity and orthographic irregularity.,abstractText,[0],[0]
+We contribute a novel aggregation model of derived word generation that learns derivational transformations both as orthographic functions using sequence-to-sequence models and as functions in distributional word embedding space.,abstractText,[0],[0]
+"Our best open-vocabulary model, which can generate novel words, and our best closed-vocabulary model, show 22% and 37% relative error reductions over current state-of-the-art systems on the same dataset.",abstractText,[0],[0]
+A Distributional and Orthographic Aggregation Model for English Derivational Morphology,title,[0],[0]

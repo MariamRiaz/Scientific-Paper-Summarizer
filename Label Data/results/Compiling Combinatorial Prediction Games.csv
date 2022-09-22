@@ -1,0 +1,699 @@
+0,1,label2,summary_sentences
+"Proceedings of the 2015 Conference on Empirical Methods in Natural Language Processing, pages 2357–2366, Lisbon, Portugal, 17-21 September 2015. c©2015 Association for Computational Linguistics.",text,[0],[0]
+"As science advances, scientists around the world continue to produce a large number of research articles, which provide the technological basis for worldwide dissemination of scientific discoveries.",1 Introduction,[0],[0]
+"Online digital libraries such as Google Scholar, CiteSeerx, and PubMed store and index millions of such research articles and their metadata, and make it easier for researchers to search for scientific information.",1 Introduction,[0],[0]
+These libraries require effective and efficient methods for topic classification of research articles in order to facilitate the retrieval of content that is tailored to the interests of specific individuals or groups.,1 Introduction,[0],[0]
+"Supervised approaches for topic classification of research articles have been developed, which generally use either the content of the articles (Caragea et al., 2011), or take into account the citation relation between research articles (Lu and Getoor, 2003).
+",1 Introduction,[0],[0]
+"To be successful, these supervised approaches assume the availability of large amounts of labeled
+data, which require intensive human labeling effort.",1 Introduction,[0],[0]
+"In this paper, we explore a semi-supervised approach that can exploit large amounts of unlabeled data together with small amounts of labeled data for accurate topic classification of research articles, while minimizing the human effort required for data labeling.",1 Introduction,[0],[0]
+"In the scholarly domain, research articles (or papers) are highly interconnected in giant citation networks, in which papers cite or are cited by other papers.",1 Introduction,[0],[0]
+"We posit that, in addition to a document’s textual content and its local neighborhood in the citation network, other information exists that has the potential to improve topic classification.",1 Introduction,[0],[0]
+"For example, in a citation network, information flows from one paper to another via the citation relation (Shi et al., 2010).",1 Introduction,[0],[0]
+"This information flow and the topical influence of one paper on another are specifically captured by means of citation contexts, i.e., short text segments surrounding a citation’s mention.
+",1 Introduction,[0],[0]
+"These contexts are not arbitrary, but they often serve as brief summaries of a cited paper.",1 Introduction,[0],[0]
+"We therefore hypothesize that these micro-summaries can be successfully used as an independent view of a research article in a co-training framework to reduce the amount of labeled data needed for the task of topic classification.
+",1 Introduction,[0],[0]
+"The idea of using terms from citation contexts stems from the analysis of hyperlinks and the graph structure of the Web, which are instrumental in Web search (Manning et al., 2008).",1 Introduction,[0],[0]
+"Many search engines follow the intuition that the anchor text pointing to a page is a good descriptor of its content, and thus anchor text terms are used as additional index terms for a target webpage.",1 Introduction,[0],[0]
+"The use of links and anchor text was thoroughly researched for information retrieval (Koolen and Kamps, 2010), broadening a user’s search (Chakrabarti et al., 1998), query refinement (Kraft and Zien, 2004), and enriching document representations (Metzler et al., 2009).",1 Introduction,[0],[0]
+"Blum and
+2357
+Mitchell (1998) introduced the co-training algorithm using hyperlinks and anchor text as a second, independent view of the data for classifying webpages, in addition to a webpage content.
+",1 Introduction,[0],[0]
+Contributions and Organization.,1 Introduction,[0],[0]
+"We present a co-training approach to topic classification of research papers that effectively incorporates information from a citation network, in addition to the information contained in each paper.",1 Introduction,[0],[0]
+"The result of this classification task will aid indexing of documents in digital libraries, and hence, will lead to improved organization, search, retrieval, and recommendation of scientific documents.",1 Introduction,[0],[0]
+"Our contributions are as follows:
+• We propose the use of citation contexts as an additional view in a co-training approach, which results in high accuracy classifiers.",1 Introduction,[0],[0]
+"To our knowledge, this has not been addressed in the literature.",1 Introduction,[0],[0]
+"• We show experimentally that our co-training
+classifiers significantly outperform: (1) supervised classifiers trained using either content or citation contexts independently, for the same fraction of labeled data; and (2) several other semi-supervised classifiers, trained on the same fractions of labeled and unlabeled data as co-training.",1 Introduction,[0],[0]
+"• We also show that using the citation context
+information available in citation networks, the human effort involved in data labeling for training accurate classifiers can be largely reduced.",1 Introduction,[0],[0]
+"Our co-training classifiers trained on a very small sample of labeled data and a large sample of unlabeled data yield accurate topic classification of research articles.
+",1 Introduction,[0],[0]
+The rest of the paper is organized as follows.,1 Introduction,[0],[0]
+"In Section 2, we discuss related work.",1 Introduction,[0],[0]
+"Section 3 describes our data and its characteristics, followed by the presentation of our proposed co-training approach in Section 4.",1 Introduction,[0],[0]
+"We present experiments and results in Section 5, and conclude the paper and present future directions of our work in Section 6.",1 Introduction,[0],[0]
+We discuss here the most relevant works to our study.,2 Related Work,[0],[0]
+A large variety of methods have been proposed in the literature with regard to automatic text classification and topic prediction.,2 Related Work,[0],[0]
+"Different classifiers have been applied on the Vector Space Model (VSM), in which a document is represented as a vector of words or phrases asso-
+ciated with their TF-IDF score, i.e. term frequency - inverse document frequency (Zhang et al., 2011; Kansheng et al., 2011).",2 Related Work,[0],[0]
+"VSM is the most used method due to its simple, efficient and easy to understand implementation.",2 Related Work,[0],[0]
+"Another widely used model is the Latent Semantic Indexing (LSI) where co-occurrences are analyzed to find semantic relationships between words or phrases (Zhang et al., 2011; Ganiz et al., 2011).",2 Related Work,[0],[0]
+"Moreover, a great range of classifiers were used for this task, including: Naı̈ve Bayes (Lewis and Ringuette, 1994), Knearest neighbors (Yang, 1999) and Support Vector Machines (Joachims, 1998).",2 Related Work,[0],[0]
+"These techniques, however, all require a large number of labeled documents in order to build accurate classifiers.",2 Related Work,[0],[0]
+"In contrast, we propose a co-training algorithm that only requires a small amount of labeled data in order to make accurate topic classification.
+Semi-supervised methods essentially involve different means of transferring labels from labeled to unlabeled samples in the process of learning a classifier that can generalize well on new unseen data.",2 Related Work,[0],[0]
+"Co-training was originally introduced in (Blum and Mitchell, 1998) where it was used to classify web pages into academic course home page or not.",2 Related Work,[0],[0]
+"This approach has two views of the data as follows: the content of a web page, and the words found in the anchor text of the hyperlinks that point to the web page.",2 Related Work,[0],[0]
+"Wan (2009) used co-training for cross-lingual sentiment classification of product reviews, where English and Chinese features were considered as two independent views of the data.",2 Related Work,[0],[0]
+"Furthermore, Gollapalli et al. (2013) used co-training to identify authors’ homepages from the current-day university websites.",2 Related Work,[0],[0]
+"The paper presents novel features, extracted from the URL of a page, that were used in conjunction with content features, forming two complementary views of the data.
+",2 Related Work,[0],[0]
+Citation networks have been used before in other problems.,2 Related Work,[0],[0]
+Caragea et al. (2014) used citation contexts to extract informative features for keyphrase extraction.,2 Related Work,[0],[0]
+"Lu and Getoor (2003) proposed an approach for document classification that used only citation links, without any textual data from the citation contexts.",2 Related Work,[0],[0]
+Ritchie et al. (2006) used a combination of terms from citation contexts and existing index terms of a paper to improve indexing of cited papers.,2 Related Work,[0],[0]
+"Citation contexts were also used to improve the performance of citation recommendation systems (Kataria et al., 2010) and to study author influence in document networks
+(Kataria et al., 2011).",2 Related Work,[0],[0]
+"Moreover, citation contexts were used for scientific paper summarization (Abu-Jbara and Radev, 2011; Qazvinian et al., 2010; Qazvinian and Radev, 2008; Mei and Zhai, 2008; Lehnert et al., 1990)",2 Related Work,[0],[0]
+"For example, in Qazvinian et al. (2010), a set of important keyphrases is extracted first from the citation contexts in which the paper to be summarized is cited by other papers and then the “best” subset of sentences that contain such keyphrases is returned as the summary.",2 Related Work,[0],[0]
+Mei and Zhai (2008) used information from citation contexts to determine what sentences of a paper are of high impact (as measured by the influence of a target paper on further studies of similar or related topics).,2 Related Work,[0],[0]
+"These sentences constitute the impact-based summary of the paper.
+",2 Related Work,[0],[0]
+"Despite the use of citation contexts and anchor text in many information retrieval and natural language processing tasks, to our knowledge, we are the first to propose the incorporation of citation context information available in citation networks in a co-training framework for topic classification of research papers.",2 Related Work,[0],[0]
+The dataset used in our experiments is a subset sampled from the CiteSeerx digital library1 and labeled by Dr. Lise Getoor’s research group at the University of Maryland.,3 Data,[0],[0]
+"This subset was previously used in several studies including (Lu and Getoor, 2003) and (Kataria et al., 2010).",3 Data,[0],[0]
+"The dataset consists of 3186 labeled papers, with each paper being categorized into one of six classes: Agents, Artificial Intelligence (AI), Information Retrieval (IR), Machine Learning (ML), HumanComputer Interaction (HCI) and Databases (DB).",3 Data,[0],[0]
+"For each paper, we acquire the citation contexts directly from CiteSeerx.",3 Data,[0],[0]
+A citation context is defined as a window of n words surrounding a citation mention.,3 Data,[0],[0]
+"We differentiate between cited and citing contexts for a paper as follows: let d be a target paper and C be a citation network such that d ∈ C. A cited context for d is a context in which d is cited by some paper di in C. A citing context for d is a context in which d is citing some paper dj in C. If a paper is cited in multiple contexts within another paper, the contexts are aggregated into a single context.",3 Data,[0],[0]
+"For each paper in the dataset, we have at least one cited or one citing context.",3 Data,[0],[0]
+"A summary of the dataset is provided in Table 1.
+",3 Data,[0],[0]
+"1http://citeseerx.ist.psu.edu/
+As expected, we have a higher number of cited contexts than citing contexts.",3 Data,[0],[0]
+This is due to the page restrictions often imposed to research articles that can limit the number of papers each article can cite.,3 Data,[0],[0]
+"On the other hand, a good research paper can accumulate hundreds of citations, and hence, cited contexts over the years.
+",3 Data,[0],[0]
+Context lengths.,3 Data,[0],[0]
+"In CiteSeerx, citation contexts have about 50 words on each side of a citation mention.",3 Data,[0],[0]
+A previous study by Ritchie et al. (2008) shows that a fixed window length of about 100 words around a citation mention is generally effective for information retrieval tasks.,3 Data,[0],[0]
+"For this reason, we use the contexts provided by CiteSeerx directly.",3 Data,[0],[0]
+"In future, it would be interesting to study more sophisticated approaches to identifying the text that is relevant to a target citation (Abu-Jbara and Radev, 2012; Teufel, 1999) and study the influence of context lengths on our task.
+",3 Data,[0],[0]
+"For all experiments, our labeled dataset is split in train, validation and test sets.",3 Data,[0],[0]
+The validation and test sets have about 200 papers each.,3 Data,[0],[0]
+"We sampled another set of papers from the labeled dataset in order to simulate the existence of unlabeled data, with a fixed size of around 2000 papers.",3 Data,[0],[0]
+The remaining 786 papers are used as labeled training data.,3 Data,[0],[0]
+Each experiment was repeated 10 times with 10 different random seeds and the results were averaged.,3 Data,[0],[0]
+Blum and Mitchell (1998) proposed the cotraining algorithm in the context of webpage classification.,4 Co-Training for Topic Classification,[0],[0]
+"In co-training, the idea is that two classifiers trained on two different views of the data teach one another by re-training each classifier on the data enriched with predicted examples that the other classifier is most confident about.",4 Co-Training for Topic Classification,[0],[0]
+"In Blum and Mitchell (1998), webpages are represented using two different views: (1) using terms from webpages’ content and (2) using terms from the anchor text of hyperlinks pointing to these pages.
+",4 Co-Training for Topic Classification,[0],[0]
+"Algorithm 1 Co-Training Input: L, U , ‘s’
+L1 ← L, L2 ← L while U 6= ∅",4 Co-Training for Topic Classification,[0],[0]
+"do
+Train classifier C1 on L1 Train classifier C2 on L2 S ← ∅",4 Co-Training for Topic Classification,[0],[0]
+"Move ‘s’ examples from U to S U ← U\S S1, S2 ← GetMostConfidentExamples(S,
+C1, C2) L1 ← L1 ∪ S1, L2 ← L2 ∪ S2 U ← U ∪",4 Co-Training for Topic Classification,[0],[0]
+"[S\(S1 ∪ S2)]
+end while Ouput: The combined classifier C of C1 and C2
+In this paper, we study the applicability and extension of the co-training algorithm to the task of topic classification of research papers, which are embedded in large citation networks.",4 Co-Training for Topic Classification,[0],[0]
+"Here, in addition to the information contained in a paper itself, citing and cited papers capture different aspects (e.g., topicality, domain of study,",4 Co-Training for Topic Classification,[0],[0]
+"algorithms used) about the target paper (Teufel et al., 2006), with citation contexts playing an instrumental role.",4 Co-Training for Topic Classification,[0],[0]
+"We conjecture that citation contexts, which act as brief summaries about a cited paper, provide important clues in predicting the topicality of a target paper.",4 Co-Training for Topic Classification,[0],[0]
+These clues give rise to the design of our co-training based model for topic classification of research papers.,4 Co-Training for Topic Classification,[0],[0]
+"In our model, we use the content of a paper as one view and the citation contexts as another view of our data.",4 Co-Training for Topic Classification,[0],[0]
+"In particular, for the content of a paper, we use its title and abstract as it is commonly used in the literature (Lu and Getoor, 2003); for the citation contexts, we use both the cited and citing contexts, as described in the previous section.
+",4 Co-Training for Topic Classification,[0],[0]
+Our co-training procedure is described in Algorithm 1.,4 Co-Training for Topic Classification,[0],[0]
+L and U represent the labeled and unlabeled datasets and contain instances from both views.,4 Co-Training for Topic Classification,[0],[0]
+The fractions of the training set are obtained from the 786 papers by selecting k% random examples from each class.,4 Co-Training for Topic Classification,[0],[0]
+"For a round of co-training, we train classifiers C1 and C2 on the two views.",4 Co-Training for Topic Classification,[0],[0]
+"Next, s examples are sampled from the unlabeled data into S, and C1, C2 are used to obtain predictions for these s examples.",4 Co-Training for Topic Classification,[0],[0]
+"The GetMostConfidentExamples method is a generic placeholder that stands for a function that deter-
+mines what examples from S are chosen to be added into training.",4 Co-Training for Topic Classification,[0],[0]
+"Finally, at the end of an iteration, the examples left into S are moved back to U , and the algorithm iterates until there are no more unlabeled examples in U .",4 Co-Training for Topic Classification,[0],[0]
+The final classifier C is obtained by combining C1 and C2 using the product of their class probability distributions.,4 Co-Training for Topic Classification,[0],[0]
+"The class with the highest posterior probability (of the product of the two distributions) is chosen as the predicted class.
+",4 Co-Training for Topic Classification,[0],[0]
+"Unlike the original co-training algorithm described by Blum and Mitchell (1998), which tackled a binary classification task (course vs. noncourse page classification), we address a multiclass classification problem, where each example (i.e., research paper) is classified into one of six different classes.",4 Co-Training for Topic Classification,[0],[0]
+"Moreover, in Blum and Mitchell (1998), the co-training algorithm moves p highest confidence positive examples and n highest confidence negative examples from S to L, where p : n represents the class distribution in the original labeled training set (i.e., if there are 10 positive examples and 90 negative examples in the labeled set L, then p = 1 positive and n = 9 negative examples are moved to the labeled set at each iteration of co-training).",4 Co-Training for Topic Classification,[0],[0]
+"Unlike, this approach that preserves the class distribution of the original labeled training set, we move into L all examples that are classified with a confidence above a certain threshold.",4 Co-Training for Topic Classification,[0],[0]
+"First, the proposed method is evaluated on the validation set.",5 Results and Discussion,[0],[0]
+We first compare it against various supervised and semi-supervised baselines.,5 Results and Discussion,[0],[0]
+"Next, we report the performance of our co-training algorithm under different scenarios, where either cited or citing contexts are used.",5 Results and Discussion,[0],[0]
+We also show the most informative words for each classifier.,5 Results and Discussion,[0],[0]
+"Finally, with the best parameters obtained on the validation set, we report the precision, recall and F1-score, obtained by each method, on the test set.
+",5 Results and Discussion,[0],[0]
+"In experiments, the sample size ‘s’ from Algorithm 1 is set to 300, i.e. the number of documents sampled from the unlabeled pool at each iteration; the confidence threshold is set to 0.95, i.e. if both classifiers agree on the class label and have a confidence ≥ 0.95, the instance is labeled and moved into the labeled training set.",5 Results and Discussion,[0],[0]
+"These parameters are estimated on the validation set, but the results are not shown due to space limitation.
+",5 Results and Discussion,[0],[0]
+Evaluation Measures.,5 Results and Discussion,[0],[0]
+We report results averaged over ten different runs with random splits.,5 Results and Discussion,[0],[0]
+"For each random split, we return the weighted average precision, recall and F1-score.",5 Results and Discussion,[0],[0]
+"In all the experiments, we use the Naı̈ve Bayes Multinomial classifier and its Weka implementation2, with term-frequencies as feature values.",5 Results and Discussion,[0],[0]
+"We experimented with both TF and TF-IDF scores, using different classifiers (Support Vector Machine, Naı̈ve Bayes Multinomial, and simple Naı̈ve Bayes classifiers), but Naive Bayes Multinomial with TF performed best.",5 Results and Discussion,[0],[0]
+How does co-training compare with supervised learning techniques?,5.1 Baseline Comparisons,[0],[0]
+"In this experiment, we compare our co-training method with two supervised baselines: (1) when only document content is used and (2) when only citation contexts are used.
+",5.1 Baseline Comparisons,[0],[0]
+Figure 1 shows the F1-scores achieved using different initial training sizes.,5.1 Baseline Comparisons,[0],[0]
+"We can see that overall, the citation contexts are better at predicting the topic of a document compared with the content, outperforming them in 9 out of 10 experimental settings.",5.1 Baseline Comparisons,[0],[0]
+"The only exception to this trend is when a small number (5%) of training instances is available, in which case the supervised content view performs better, reaching an F1-score of 0.534.",5.1 Baseline Comparisons,[0],[0]
+"Regardless, the co-training method shows significant improvement over both baselines, in all experiments.",5.1 Baseline Comparisons,[0],[0]
+"Starting with an F1-score of 0.572, it continues to improve its performance as the training percentage is increasing.",5.1 Baseline Comparisons,[0],[0]
+"The maximum F1score, i.e. 0.742, is reached when 30% of the labeled training set is used.",5.1 Baseline Comparisons,[0],[0]
+"Note that the difference in performance between co-training and the two supervised baselines is statistically significant for
+2http://www.cs.waikato.ac.nz/ml/weka/
+a p value of 0.05.
+",5.1 Baseline Comparisons,[0],[0]
+A fully supervised baseline that uses 100% of the training set achieves an F1-score of 0.720 (using content) and 0.738 (using citation contexts).,5.1 Baseline Comparisons,[0],[0]
+"In contrast, co-training requires only 15% of the labeled training set to outperform the fully supervised content baseline and 30% of the training set to outperform the fully supervised citation contexts baseline.",5.1 Baseline Comparisons,[0],[0]
+"Consequently, using a co-training approach that includes citation contexts as well as the document content can not only increase the performance, but will also significantly reduce the need of expensive labeled instances.
+",5.1 Baseline Comparisons,[0],[0]
+"Figure 2 illustrates the confusion matrices of three experiments: (a) supervised content view, i.e. the title and abstract, (b) supervised citation contexts view, and (c) co-training that uses both views.",5.1 Baseline Comparisons,[0],[0]
+These experiments use 10% of the training set.,5.1 Baseline Comparisons,[0],[0]
+"Each of the matrices are represented by a heat map, i.e. the redder the color, the higher the value assigned to that position.",5.1 Baseline Comparisons,[0],[0]
+An accuracy of 1 will be represented by a matrix with red blocks on the main diagonal and white blocks everywhere else.,5.1 Baseline Comparisons,[0],[0]
+"This experiment was performed 10 times with 10 different seeds and the results have been averaged.
+",5.1 Baseline Comparisons,[0],[0]
+"As can be seen, the matrix that uses only titles and abstracts, i.e. left side, is showing the highest percentage of misclassified documents, classifying correctly about 58.8% instances, on average.",5.1 Baseline Comparisons,[0],[0]
+"Using only citation contexts in a supervised framework, i.e. center matrix, we reach a higher accuracy of 60.7%.",5.1 Baseline Comparisons,[0],[0]
+"The co-training method, which uses the content of the paper and citations as two independent views, significantly increases the average accuracy to 67.3%.",5.1 Baseline Comparisons,[0],[0]
+This experiment shows that citation contexts are better than titles and abstracts at predicting the topic of a document.,5.1 Baseline Comparisons,[0],[0]
+"Furthermore, our proposed approach, which uses the content of the paper as well as citation contexts, achieves higher results than each view used separately.",5.1 Baseline Comparisons,[0],[0]
+"The difference in accuracy is statistically significant across all three experiments for a p value of 0.05.
+",5.1 Baseline Comparisons,[0],[0]
+"Overall, the Agents class seem to be the easiest to classify, reaching an accuracy value of 91.6% when using co-training.",5.1 Baseline Comparisons,[0],[0]
+"On the other hand, the AI class is the hardest to classify.",5.1 Baseline Comparisons,[0],[0]
+One reason for this is that the AI class contains the lowest number of instances in the dataset.,5.1 Baseline Comparisons,[0],[0]
+"Another can be that the AI class is the most general among all classes and therefore, classifying documents with this la-
+Left: using titles and abstracts; Center: using citation contexts;",5.1 Baseline Comparisons,[0],[0]
+"Right: using co-training.
+bel can be a difficult task even for a human.",5.1 Baseline Comparisons,[0],[0]
+"Other common misclassifications occur between classes like HCI and Agents, ML and IR or AI and ML, due to their similarity.
+",5.1 Baseline Comparisons,[0],[0]
+How does our co-training method compare with other supervised approaches?,5.1 Baseline Comparisons,[0],[0]
+"In this experiment, we compare the performance of co-training against two other methods: early and late fusion.",5.1 Baseline Comparisons,[0],[0]
+"In early fusion, the feature vectors of the two views are concatenated, creating a single representation of the data.",5.1 Baseline Comparisons,[0],[0]
+"In contrast, late fusion trains two separate classifiers and then combines them by taking the label with the highest confidence.
+",5.1 Baseline Comparisons,[0],[0]
+Figure 3 shows this comparison over different training sizes.,5.1 Baseline Comparisons,[0],[0]
+"The results show that the cotraining method is more accurate than all others, performing best in all 10 experimental settings.",5.1 Baseline Comparisons,[0],[0]
+"Late fusion has an overall lower performance compared with co-training, but is in a tight correlation with it.",5.1 Baseline Comparisons,[0],[0]
+"On the other hand, early fusion achieves the lowest F1-score across the experiments.",5.1 Baseline Comparisons,[0],[0]
+"The reported results are statistically significant at p value of 0.05, when the training percentage is between 5 and 35.",5.1 Baseline Comparisons,[0],[0]
+"Therefore, we can say that train-
+ing two separate classifiers, one of each view, yields higher performance compared with training a single classifier that incorporates both views.",5.1 Baseline Comparisons,[0],[0]
+"Moreover, using a co-training approach that incorporates information from unlabeled data into the model, will help the two classifiers increase their confidences and minimize the error rate.
+",5.1 Baseline Comparisons,[0],[0]
+How does co-training compare with semisupervised methods?,5.1 Baseline Comparisons,[0],[0]
+"Here, we present results comparing co-training with two other wellknown semi-supervised techniques: self-training and Naı̈ve Bayes with Expectation Maximization.
+Self-Training.",5.1 Baseline Comparisons,[0],[0]
+"First, we show results of the comparison of co-training with two variations of selftraining: (1) self-training using only document content, and (2) self-training using only citation contexts.",5.1 Baseline Comparisons,[0],[0]
+Figure 4 shows the results of this experiment.,5.1 Baseline Comparisons,[0],[0]
+"Self-training is similar to co-training, except that it uses only one view of the data (Zhu, 2005).",5.1 Baseline Comparisons,[0],[0]
+"Self-training parameters, e.g., sample size ‘s’ or number of iterations, are estimated as in cotraining.
+",5.1 Baseline Comparisons,[0],[0]
+"Although the document content version of selftraining outperforms co-training when using 5%
+of the training instances, we can see that overall, there is a significant difference in terms of F1score values in the favor of co-training.",5.1 Baseline Comparisons,[0],[0]
+"In 9 out of 10 experiments, our co-training approach is superior to both self-training methods.",5.1 Baseline Comparisons,[0],[0]
+"The results are statistically significant across all experimental setups for a p value of 0.05.
+",5.1 Baseline Comparisons,[0],[0]
+Expectation Maximization.,5.1 Baseline Comparisons,[0],[0]
+"Figure 5 shows the F1-score values obtained after running NBM with EM with the same training, unlabeled and test sets.",5.1 Baseline Comparisons,[0],[0]
+"The EM algorithm uses the same classifier, i.e. NBM, and the weight for each unlabeled instance is set to 1, as this setting achieved the highest results.",5.1 Baseline Comparisons,[0],[0]
+"Two different experiments were performed using EM: (1) using only document content, and (2) using only citation contexts.",5.1 Baseline Comparisons,[0],[0]
+"As can be seen in the figure, overall, the co-training approach significantly outperforms both variations of EM.",5.1 Baseline Comparisons,[0],[0]
+"However, the co-training method falls short when using 5% of the training instances, where EM Content and EM Citations methods are achieving higher F1-score values.",5.1 Baseline Comparisons,[0],[0]
+"Nonetheless, both EM variations tend to achieve an F1-score value below or equal to 0.710, whereas co-training reaches performance values of 0.74 or higher.",5.1 Baseline Comparisons,[0],[0]
+"Again, the comparison results between co-training and both variations of EM are statistically significant for training sizes between 10% and 50%, for a p value of 0.05.",5.1 Baseline Comparisons,[0],[0]
+Which of the two types of citation contexts (cited or citing) help the task of topic classification more and how does co-training perform in the absence of either one?,5.2 Using Different Citation Context Types,[0],[0]
+The answer to this question is important as there are cases in which citation contexts are not readily available.,5.2 Using Different Citation Context Types,[0],[0]
+"One frequently encountered example includes newly published research papers that have no cited contexts.
+",5.2 Using Different Citation Context Types,[0],[0]
+"In this case, it is important to know how our method performs when we only have one type of citation contexts.",5.2 Using Different Citation Context Types,[0],[0]
+"Figure 6 shows the difference in performance when using: (1) only cited contexts, (2) only citing contexts, and (3) both context types.",5.2 Using Different Citation Context Types,[0],[0]
+"Note that the content view remains the same across all three experiments.
+",5.2 Using Different Citation Context Types,[0],[0]
+The plot is showing that citing contexts are bringing in a significantly higher margin of knowledge compared with cited contexts.,5.2 Using Different Citation Context Types,[0],[0]
+"This is consistent over different training set sizes, as shown in the figure, with a more prominent impact when a small training size is used, i.e. 5-30%.",5.2 Using Different Citation Context Types,[0],[0]
+"The fact that the citing contexts achieve higher F1-score than cited contexts is consistent with the intuition that when citing a paper y, an author generally summarizes the main ideas from y using important words from a target paper x, making the citing contexts to have higher overlap with words from x.",5.2 Using Different Citation Context Types,[0],[0]
+"In turn, a paper z that cites x may use paraphrasing to summarize ideas from x with words more similar to those from the content of z.
+When the two types of contexts are used, cotraining achieves higher results compared with cases when only one context type is used.",5.2 Using Different Citation Context Types,[0],[0]
+This experiment shows that our method can be applied for both old and new research articles.,5.2 Using Different Citation Context Types,[0],[0]
+Citing contexts will be available in the text of the target paper and are independent of the existence of the cited contexts.,5.2 Using Different Citation Context Types,[0],[0]
+What are the most informative words from each view: document content and citation contexts?,5.3 Informative Features,[0],[0]
+Figure 7 shows the words from each view that are most useful for our topic classification task.,5.3 Informative Features,[0],[0]
+"The larger the word, the more informative is for our
+task.",5.3 Informative Features,[0],[0]
+"To determine the informativeness of a word, we used its Information Gain score.",5.3 Informative Features,[0],[0]
+"For these experiments, we used training sets consisting of 30% of the instances, setting in which we achieved the best results on the validation and test sets using our proposed co-training approach.
+",5.3 Informative Features,[0],[0]
+"As can be seen, the two word clouds have a high word overlap.",5.3 Informative Features,[0],[0]
+"Words such as agent, database or query are almost equally important in the two views, dominating both clouds.",5.3 Informative Features,[0],[0]
+"However, differences can be observed.",5.3 Informative Features,[0],[0]
+"For example, words like learning, multi-agent or interface are more important in the content view.",5.3 Informative Features,[0],[0]
+"On the other hand, words such as document or text achieve a higher information gain score for the citation contexts view.",5.3 Informative Features,[0],[0]
+"Table 2 summarizes the results obtained by all the baselines used so far, in comparison with our proposed co-training method.",5.4 Co-Training vs. All Other Approaches,[0],[0]
+"For this experiment, we show the training percentage used, the precision, recall and F1-score for each method, in the setting in which it returned the best results.",5.4 Co-Training vs. All Other Approaches,[0],[0]
+"All mea-
+sures were averaged after 10 runs with 10 different seeds.
+",5.4 Co-Training vs. All Other Approaches,[0],[0]
+"The results in Table 2 show that the proposed co-training method outperforms all compared models, reaching the highest F1-score of 0.742, while using the smallest amount of labeled documents, i.e. 30%.",5.4 Co-Training vs. All Other Approaches,[0],[0]
+"Using only the citing contexts, the performance is similar to that of co-training when both context types are used.",5.4 Co-Training vs. All Other Approaches,[0],[0]
+"However, using only the cited contexts, the performance decreases compared to that of the full model that uses both context types.",5.4 Co-Training vs. All Other Approaches,[0],[0]
+"We see that the citing contexts perform better, reaching an F1-score value of 0.740 compared against 0.714 when only cited contexts are used.",5.4 Co-Training vs. All Other Approaches,[0],[0]
+"Moreover, the method that uses only the citing contexts is using 10% less labeled data.
+",5.4 Co-Training vs. All Other Approaches,[0],[0]
+Self-training and EM show decreased performance compared with co-training.,5.4 Co-Training vs. All Other Approaches,[0],[0]
+"Late Fusion outperforms Early Fusion, i.e., 0.738 vs. 0.714, both obtaining lower results than co-training, while using significantly more labeled data.
+",5.4 Co-Training vs. All Other Approaches,[0],[0]
+"The last two lines of the table show the results when all documents (except those in the validation and test), are used for training, in a supervised framework.",5.4 Co-Training vs. All Other Approaches,[0],[0]
+"As can be seen, a supervised method that uses only citations will achieve a higher performance, compared against a method that uses titles and abstracts.",5.4 Co-Training vs. All Other Approaches,[0],[0]
+"Nonetheless, co-training obtains higher results than both fully supervised approaches, while using only 30% of the labeled data.",5.4 Co-Training vs. All Other Approaches,[0],[0]
+"In this paper, we studied the problem of using citation contexts in order to predict more accurately the topic of a research article.",6 Conclusion and Future Work,[0],[0]
+"We showed that a co-training technique, which uses the paper content and its citation contexts as two conditionally independent and sufficient views of the data, can effectively incorporate cheap, unlabeled data to improve the classification performance and to reduce the need of labeled examples to only a fraction.",6 Conclusion and Future Work,[0],[0]
+"The results of the experiments showed that the proposed approach performs better than other semi-supervised and supervised methods.
+",6 Conclusion and Future Work,[0],[0]
+This study also shows that citation contexts are rich sources of information that can be successfully used in various IR and NLP tasks.,6 Conclusion and Future Work,[0],[0]
+We showed that document content and citation contexts unified under the same algorithm can dramatically decrease the annotation costs as well.,6 Conclusion and Future Work,[0],[0]
+"In the future, we plan to extend co-training to include active learning for more robust classification.",6 Conclusion and Future Work,[0],[0]
+"Moreover, it would be interesting to extend the co-training approach to multi-views that could potentially handle more than two feature spaces, e.g., it could include topics by Latent Dirichlet Allocation (Blei et al., 2003) as an additional view.",6 Conclusion and Future Work,[0],[0]
+We are thankful to Dr. Lise Getoor for making the Citeseerx labeled subset publicly available.,Acknowledgments,[0],[0]
+"We are also grateful to Dr. C. Lee Giles for the CiteSeerx data, which helped extract the citation contexts of the research papers in the collection.",Acknowledgments,[0],[0]
+We very much thank our anonymous reviewers for their constructive feedback.,Acknowledgments,[0],[0]
+This research is supported in part by the NSF award #1423337 to Cornelia Caragea.,Acknowledgments,[0],[0]
+"Any opinions, findings, and conclusions expressed here are those of the authors and do not necessarily reflect the views of NSF.",Acknowledgments,[0],[0]
+"With the exponential growth of scholarly data during the past few years, effective methods for topic classification are greatly needed.",abstractText,[0],[0]
+Current approaches usually require large amounts of expensive labeled data in order to make accurate predictions.,abstractText,[0],[0]
+"In this paper, we posit that, in addition to a research article’s textual content, its citation network also contains valuable information.",abstractText,[0],[0]
+We describe a co-training approach that uses the text and citation information of a research article as two different views to predict the topic of an article.,abstractText,[0],[0]
+"We show that this method improves significantly over the individual classifiers, while also bringing a substantial reduction in the amount of labeled data required for training accurate classifiers.",abstractText,[0],[0]
+Co-Training for Topic Classification of Scholarly Data,title,[0],[0]
+"Combinatorial optimization is a important topic of computer science and discrete mathematics, with a wide spectrum of applications ranging from resource allocation and job scheduling, to automated planning and configuration softwares.",1. Introduction,[0],[0]
+"A common problem is to minimize a modular loss function ` over a discrete space S ⊆ {0, 1}d of feasible solutions represented in a concise manner by a set of combinatorial constraints.",1. Introduction,[0],[0]
+"In the offline version of this problem, all information necessary to define the optimization task is available beforehand, and the challenge is to develop algorithms which are provably or practically better than enumerating all feasible solutions.",1. Introduction,[0],[0]
+"Contrastingly, in the online version of this problem (Audibert et al., 2014), the objective function ` is subject to change over time.",1. Introduction,[0],[0]
+"The challenge here is more acute, since the optimization algorithm is required to perform repeated choices on S so as to minimize their average cost in the long run.
+",1. Introduction,[0],[0]
+"*Equal contribution 1CRIL, CNRS UMR 8188, Université d’Artois, France.",1. Introduction,[0],[0]
+"Correspondence to: Frederic Koriche <koriche@cril.fr>.
+",1. Introduction,[0],[0]
+"Proceedings of the 35 th International Conference on Machine Learning, Stockholm, Sweden, PMLR 80, 2018.",1. Introduction,[0],[0]
+"Copyright 2018 by the author(s).
+",1. Introduction,[0],[0]
+"Conceptually, an online combinatorial optimization problem can be cast as a repeated prediction game between a learning algorithm and its environment (Audibert et al., 2011; 2014).",1. Introduction,[1.0],"['Conceptually, an online combinatorial optimization problem can be cast as a repeated prediction game between a learning algorithm and its environment (Audibert et al., 2011; 2014).']"
+"During each trial t, the learner chooses a feasible solution st from its decision set S and, simultaneously, the environment selects a loss vector `t ∈",1. Introduction,[0],[0]
+"[0, 1]d.",1. Introduction,[0],[0]
+"Then, the learner incurs the loss 〈`t, st〉 = ∑d i=1",1. Introduction,[0],[0]
+"`t(i)st(i) and, in light of the feedback provided by its environment, updates its strategy in order to improve the chance of selecting better solutions on subsequent trials.
+",1. Introduction,[0],[0]
+"Several classes of combinatorial prediction games can be distinguished, depending on the type of decision set, and the type of observed feedback.",1. Introduction,[0],[0]
+"In this paper, we focus on full information games in which it is assumed that the feedback supplied at trial t by the environment is the entire vector `t. On the other hand, we make very few assumptions about the decision set: S may be described by an arbitrary SAT formula, that is, any set of combinatorial constraints representable by Boolean clauses.",1. Introduction,[0],[0]
+"As SAT encodings of discrete solution spaces are frequently used in academic and industrial applications (Biere et al., 2009), our setting covers an important class of combinatorial prediction games.
+",1. Introduction,[0],[0]
+"As usual, the performance of an online learning algorithm is measured according to two metrics.",1. Introduction,[0],[0]
+"The first, called regret, measures the difference in cumulative loss between the algorithm and the best solution in hindsight.",1. Introduction,[1.0],"['The first, called regret, measures the difference in cumulative loss between the algorithm and the best solution in hindsight.']"
+"In this study, we make no assumption about the sequence of loss vectors; in particular `t may depend on the previous decisions s1, · · · , st−1 made by the learner.",1. Introduction,[0],[0]
+"In such non-oblivious or adversarial environments, the learner is generally allowed to make decisions in a randomized way, and its predictive performance is measured by the expected regret:
+RT = E",1. Introduction,[0],[0]
+"[ T∑ t=1 〈`t, st〉 ] −min",1. Introduction,[0],[0]
+"s∈S T∑ t=1 〈`t, s〉
+The second metric is computational complexity, i.e. the amount of resources required to compute st at each round t, given the sequence of feedbacks observed so far.
+",1. Introduction,[0],[0]
+Related Work.,1. Introduction,[0],[0]
+"In the literature of combinatorial prediction games, three main strategies have been proposed to attain an expected regret that is sublinear in the game horizon T and polynomial in the input dimension d. The
+first, and arguably simplest strategy, is to Follow the Perturbed Leader (FPL): on each trial t, the learner draws at random a perturbation vector zt ∈ Rd, and then selects in S a minimizer of ηLt + zt, where η ∈ (0, 1] is a step-size parameter, andLt is the cumulative lossLt = `1 + · · ·+`t−1.",1. Introduction,[0.999999998275056],"['In the literature of combinatorial prediction games, three main strategies have been proposed to attain an expected regret that is sublinear in the game horizon T and polynomial in the input dimension d. The first, and arguably simplest strategy, is to Follow the Perturbed Leader (FPL): on each trial t, the learner draws at random a perturbation vector zt ∈ Rd, and then selects in S a minimizer of ηLt + zt, where η ∈ (0, 1] is a step-size parameter, andLt is the cumulative lossLt = `1 + · · ·+`t−1.']"
+"Based on the pioneering work of Hannan (1957), refined in (Hutter & Poland, 2005; Kalai & Vempala, 2005), the FPL algorithm achieves an expected regret of O(d 32 √ T ).
+",1. Introduction,[0],[0]
+"The second strategy is based on the popular exponentially weighted average forecaster in the framework of prediction with expert advice (Cesa-Bianchi & Lugosi, 2006).",1. Introduction,[0],[0]
+"The overall idea is to maintain a weight for each feasible solution s ∈ S, which decays exponentially according to the estimated cumulative loss of s. Specifically, on each trial t, the learner draws a solution st ∈ S at random from the exponential family pt(s) ∼ exp(−η〈Lt, s〉).",1. Introduction,[0],[0]
+"This strategy, referred to as Expanded Hedge (EH) in (Koolen et al., 2010), attains an expected regret of O(d 32 √ T ).
+",1. Introduction,[0],[0]
+"Finally, the third strategy is to Follow the Regularized Leader, a paradigm often advocated in online convex optimization (Hazan, 2016).",1. Introduction,[0],[0]
+"Here, the learner operates on the convex hull of S, denoted conv(S).",1. Introduction,[0],[0]
+"On each trial t, the learner starts by choosing a point pt ∈ conv(S) that minimizes η〈L̂t,p〉 + F (p), where F is a regularization function.",1. Introduction,[0],[0]
+"Next, pt is decomposed as a convex composition of feasible solutions in S, and then, a decision st is picked at random according to the resulting distribution.",1. Introduction,[1.0],"['Next, pt is decomposed as a convex composition of feasible solutions in S, and then, a decision st is picked at random according to the resulting distribution.']"
+"For modular loss functions, this strategy is equivalent to the Online Stochastic Mirror Descent (OSMD) algorithm (Audibert et al., 2014; Rajkumar & Agarwal, 2014), which iteratively performs a gradient descent in the dual space of conv(S) under F , and projects back to the primal space according to the Bregman divergence defined from F .",1. Introduction,[0],[0]
+"Notably, when F is the Euclidean regularizer, OSMD coincides with the popular stochastic gradient descent (SGD) algorithm (Robbins & Monro, 1951).",1. Introduction,[0],[0]
+"Alternatively, when F is the entropic regularizer, OSMD corresponds to the Component Hedge (CH) algorithm (Koolen et al., 2010), which achieves an optimal expected regret of O(d √ T ).
+",1. Introduction,[0],[0]
+"From the viewpoint of regret, the results outlined above indicate that few improvements remain to be made in full information games.",1. Introduction,[0],[0]
+"However, we get a different picture if computational considerations are taken into account: all aforementioned algorithms rely on powerful oracles for making decisions in spaces S represented by combinatorial constraints.",1. Introduction,[1.0],"['However, we get a different picture if computational considerations are taken into account: all aforementioned algorithms rely on powerful oracles for making decisions in spaces S represented by combinatorial constraints.']"
+"Namely, the EH algorithm is required, at each iteration, to sample a solution according to an exponential family over S , a problem which is generally #P-hard (Dyer et al., 2009).",1. Introduction,[0],[0]
+"Similarly, the FPL strategy has to repeatedly solve a linear optimization task over S, which is generally NP-hard (Creignou et al., 2001).",1. Introduction,[0],[0]
+"For the OSMD algorithm, and its specializations SGD and CH, the computational issue
+is exacerbated by the fact that, even if the learner has access to a linear optimization oracle, it still has to perform, at each trial, a Bregman projection step for which the best known algorithms run in O(d6) time (Suehiro et al., 2012).
+",1. Introduction,[0],[0]
+"Although combinatorial prediction games are generally intractable, efficient implementations of sampling and optimization oracles may be obtained for several decision sets S. For example, when the feasible solutions in S coincide with the bases of a binary matroid, or the perfect matchings of a bipartite graph, linear optimization can be performed in polynomial time, and tractable forms of FPL and OSMD may be derived (Helmbold & Warmuth, 2009; Koolen et al., 2010; Takimoto & Hatano, 2013; Rajkumar & Agarwal, 2014).",1. Introduction,[0],[0]
+"On the other hand, when the feasible solutions in S correspond to the paths or multi-paths of a rooted Directed Acyclic Graph (DAG), the sampling oracle may be implemented by the weight pushing technique (Mohri, 1998), that recursively evaluates the partition function of an exponential family over the edges of the input DAG.",1. Introduction,[0],[0]
+"Based on this technique, tractable forms of EH can be derived (Takimoto & Warmuth, 2003; Rahmanian & Warmuth, 2017).
+",1. Introduction,[1.0000000143102987],"['Based on this technique, tractable forms of EH can be derived (Takimoto & Warmuth, 2003; Rahmanian & Warmuth, 2017).']"
+Our Results.,1. Introduction,[0],[0]
+Viewing feasible solutions as paths in a DAG is only one of many abstractions that have been proposed in the literature of circuit complexity for representing combinatorial spaces.,1. Introduction,[0],[0]
+"In the related field of knowledge compilation (Darwiche & Marquis, 2002), various classes of Boolean circuits have been identified, each associated with a set of inference tasks which can be performed in polynomial time.",1. Introduction,[0],[0]
+These theoretical results naturally motivate the following question: can we compile a set of constraints representing a combinatorial space S into a compact and Boolean circuit for which both solution sampling and linear optimization are tractable?,1. Introduction,[1.0],['These theoretical results naturally motivate the following question: can we compile a set of constraints representing a combinatorial space S into a compact and Boolean circuit for which both solution sampling and linear optimization are tractable?']
+"By viewing the compilation process as a “pre-processing step”, we may get for free efficient implementations of sampling and optimization oracles, provided that the size of the resulting circuit is not too large.
+",1. Introduction,[0],[0]
+"The present study aims at solving combinatorial prediction games, by compiling decision sets into deterministic Decomposable Negation Normal Form (dDNNF) circuits (Darwiche, 2001).",1. Introduction,[0],[0]
+"This class comes with generic compilers which take as input a SAT formula representing a decision set S, and return a dDNNF circuit C that encodes S (Darwiche, 2002; Lagniez & Marquis, 2017).",1. Introduction,[0],[0]
+"Although the size of C may grow exponentially in the treewidth of the input formula, it is usually much smaller in practice; existing compilers are able to compress combinatorial spaces defined over thousands of variables and constraints.
+",1. Introduction,[0.9999999873036781],"['Although the size of C may grow exponentially in the treewidth of the input formula, it is usually much smaller in practice; existing compilers are able to compress combinatorial spaces defined over thousands of variables and constraints.']"
+"With these compilation tools in hand, our contributions are threefold: (i) we show that for dDNNF circuits, the sampling oracle in EH and the linear optimization oracle in FPL, run in linear time using a simple variant of the weight-
+pushing technique; (ii) for the SGD and CH strategies, we develop a Bregman projection-decomposition method that uses O(d2 ln(dT ))",1. Introduction,[0],[0]
+"calls to the linear optimization oracle; (iii) we experimentally show on online configuration and planning tasks that EH and FPL are fast, but our variants of SGD and CH are more efficient to minimize the empirical regret.
+",1. Introduction,[0],[0]
+"Before proceeding to the core of the paper, we emphasize that the compilation approach to online optimization is not entirely new.",1. Introduction,[0],[0]
+"Recently, Sakaue et.",1. Introduction,[0],[0]
+"al. (2018) used the class of Ordered Binary Decision Diagrams (OBDDs) (Bryant, 1986) for implementing the EWA forecaster in combinatorial bandits.",1. Introduction,[0],[0]
+"Here, S is described by a graph over d edges, together with a constraint specifying the type of objects we desire (e.g. paths or cliques).",1. Introduction,[0],[0]
+"By contrast, our study assumes that S is described with an arbitrary set of Boolean constraints.",1. Introduction,[0],[0]
+"So, both studies are targeting different classes of combinatorial prediction games.",1. Introduction,[0],[0]
+"Moreover, it is known that dDNNF is strictly more succinct than OBDD (Darwiche & Marquis, 2002).",1. Introduction,[0],[0]
+"Namely, any OBDD can be transformed in linear time and space into an equivalent dDNNF circuit, but the converse is not true: dDNNF includes simple circuits which require an exponential size representation in OBDD.",1. Introduction,[0],[0]
+"In fact, the key point of compiling combinatorial prediction games is to use both tractable and succinct languages, for allowing prediction strategies to be efficient on a wide variety of combinatorial domains.",1. Introduction,[0],[0]
+"For the combinatorial prediction games considered in this paper, we assume that the input decision space S is defined from a set of n binary-valued attributes, and we use X = {x1, · · · , xd}, where d = 2n, to denote the set of all “attribute-value” pairs, called literals.",2. Tractable Inference via Compilation,[0],[0]
+"A solution is a vector s ∈ {0, 1}d such that s(i) + s(j) = 1 for every pair of distinct literals xi, xj ∈ X defined on the same attribute.",2. Tractable Inference via Compilation,[0],[0]
+"Thus, ‖s‖1 = n for any feasible solution s ∈ S.
+An NNF circuit over X is a rooted DAG, whose internal nodes are labeled by ∨ (or-node) or ∧ (and-node), and whose leaves are labeled by either a literal in X , or a constant in {0, 1}.",2. Tractable Inference via Compilation,[0],[0]
+"The size of C, denoted |C|, is given by the number of its edges.",2. Tractable Inference via Compilation,[0],[0]
+"The set of attributes occurring in the subgraph of C rooted at some node c is denoted att(c).
+",2. Tractable Inference via Compilation,[0],[0]
+"For the sake of clarity, we assume that any NNF circuit C satisfies two basic properties, namely (i) any internal node c in C has exactly two children, denoted cl and cr, and (ii) att(cl) = att(cr) 6=",2. Tractable Inference via Compilation,[0],[0]
+∅ for any or-node c of C. An NNF circuit satisfying both conditions is called smooth.,2. Tractable Inference via Compilation,[0],[0]
+"As shown in (Darwiche, 2001), any Boolean circuitC can be transformed in to an equivalent smooth NNF circuit of size linear in |C|.
+",2. Tractable Inference via Compilation,[0],[0]
+"By viewing literals as “input gates”, and nodes as “output gates”, we may specify various inference tasks on Boolean
+circuits, depending on the type of input values and the semantics of nodes.",2. Tractable Inference via Compilation,[0],[0]
+"As suggested by Friesen & Domingos for sum-product functions (2016), inference tasks can be captured through semiring operations.",2. Tractable Inference via Compilation,[0],[0]
+"To this point, recall that a commutative semiring is a tuple (R,⊕,⊗,⊥,>) such that R is a set including the elements ⊥ and >, ⊕ is a associative and commutative binary operation on R with identity element ⊥, ⊗ is an associative binary operation on R with identity element > and absorbing element ⊥, and the operator ⊗ left and right distributes over the operator ⊕.
+Inference tasks on an NNF circuit C are defined using a commutative semiring Q = (R,⊕,⊗,⊥,>) and an input vector w ∈ Rd.",2. Tractable Inference via Compilation,[0],[0]
+"The output of a node c in C for Q given w is denoted Q(c |w), and recursively defined by
+Q(c |w) =  w(i) if c is the literal xi, > if c is the constant 1, ⊥ if c is the constant 0, Q(cl |w)⊕Q(cr |w) if c is a node ∨, and Q(cl |w)⊗Q(cr |w) if c is a node ∧
+By Q(C |w), we denote the output of the root of C for Q givenw.",2. Tractable Inference via Compilation,[0],[0]
+"Of particular interest in this study are the semirings described in Table 1; maxmin, minsum, and sumprod, and used to capture the inference tasks of model checking, linear optimization, and model sampling, respectively.",2. Tractable Inference via Compilation,[0],[0]
+"Given an NNF circuit C over X , the task of model checking is to decide whether a Boolean input s ∈ {0, 1}d is true in C according to the propositional semantics of nodes.",2.1. Model Checking,[0],[0]
+"Obviously, s is a model of C iff maxmin(C | s) = 1, which can be determined in O(|C|) time.",2.1. Model Checking,[0],[0]
+"An NNF circuit C is called a representation of a set of feasible solutions S ⊆ {0, 1}d if sol(C) = S, where sol(C) is the set of models of C.
+Apart from model checking, virtually all inference tasks in NNF circuits are NP-hard.",2.1. Model Checking,[0],[0]
+"Indeed, the NNF language covers the class of SAT formulas.",2.1. Model Checking,[0],[0]
+"So, we need to refine this class in order to get tractable forms of optimization and sampling.",2.1. Model Checking,[0],[0]
+"A Boolean circuit C is decomposable if for every and-node c of C, we have att(cl) ∩ att(cr) = ∅.",2.2. Decomposability and Optimization,[0],[0]
+The class of decomposable NNF circuits is denoted DNNF.,2.2. Decomposability and Optimization,[0],[0]
+"For such circuits, which are similar to Boolean sum-product networks (Poon & Domingos, 2011), we can get an efficient implementation of the linear optimization oracle.
+",2.2. Decomposability and Optimization,[0],[0]
+Proposition 1.,2.2. Decomposability and Optimization,[0],[0]
+"Let S ⊆ {0, 1}d be a (nonempty) decision set represented by a DNNF circuit C, and let w ∈ Rd be a modular objective.",2.2. Decomposability and Optimization,[0],[0]
+"Then, finding a minimizer of w in S can be done in O(|C|) time.
+",2.2. Decomposability and Optimization,[0],[0]
+Proof.,2.2. Decomposability and Optimization,[0],[0]
+"Based on the minsum semiring, we have
+min s∈S 〈w, s〉 = min s∈sol(C) 〈w, s〉 = minsum(C |w)
+",2.2. Decomposability and Optimization,[0],[0]
+This observation suggests a two-pass weight pushing method for finding a minimizer s of w in S in O(|C|) time.,2.2. Decomposability and Optimization,[0],[0]
+"Given a topological ordering of C, the first pass stores the value Q(c |w) of each node c ∈ C, using Q = minsum.",2.2. Decomposability and Optimization,[0],[0]
+"The second pass performs a top-down search over C, by selecting all children of a visited and-node, and by selecting exactly one child c′ ∈ {cl, cr} of a visited or-node c such that Q(c′ | w) = Q(c | w).",2.2. Decomposability and Optimization,[0],[0]
+"Let T be the corresponding search tree, and let s ∈ {0, 1}d be the indicator vector of the set of literals occurring in T .",2.2. Decomposability and Optimization,[0],[0]
+"By construction, we have Q(T |w) = Q(C |w), which implies that s is a minimizer ofw.",2.2. Decomposability and Optimization,[0],[0]
+"Since S is not empty, we know that Q(C |w) <",2.2. Decomposability and Optimization,[0],[0]
+"+∞. This, together with the fact",2.2. Decomposability and Optimization,[0],[0]
+that minmax(T,2.2. Decomposability and Optimization,[0],[0]
+| s) = 1,2.2. Decomposability and Optimization,[0],[0]
+"whenever Q(T |w) < +∞, implies that s ∈ S.",2.2. Decomposability and Optimization,[0],[0]
+"As the problem of counting the number of models in a DNNF circuit is #P-hard (Darwiche & Marquis, 2002), we need to refine this class in order to get an efficient implementation of the sampling oracle.",2.3. Determinism and Sampling,[0],[0]
+"To this end, an NNF circuit C is called deterministic if minmax(cl | s) +",2.3. Determinism and Sampling,[0],[0]
+minmax(cr | s) ≤ 1 for every or-node c ∈ C and every feasible solution s.,2.3. Determinism and Sampling,[0],[0]
+"The class of deterministic DNNF circuits is denoted dDNNF.
+",2.3. Determinism and Sampling,[0],[0]
+Proposition 2.,2.3. Determinism and Sampling,[0],[0]
+"Let S ⊆ {0, 1}d be a decision set represented by a dDNNF circuit C, and for a vector w ∈ Rd, let Pw be the exponential family on S given by:
+Pw(s) = exp〈w, s〉∑
+s′∈S exp〈w, s′〉
+Then, sampling s ∼ Pw can be done in O(|C|) time.
+",2.3. Determinism and Sampling,[0],[0]
+Proof.,2.3. Determinism and Sampling,[0],[0]
+"Based on the sumprod semiring, we have
+Pw(s) = exp〈w, s〉∑
+s′∈sol(C) exp〈w, s′〉 =
+exp〈w, s〉 sumprod(C |w′)
+wherew′",2.3. Determinism and Sampling,[0],[0]
+"= (ew(1), · · · , ew(d)).",2.3. Determinism and Sampling,[0],[0]
+"Again, such an equivalence suggests a two-pass weight pushing method for sampling a solution s according to Pw in O(|C|) time.",2.3. Determinism and Sampling,[0],[0]
+"Using a topological ordering of C, the first pass stores the values Q(c |w′), where Q = sumprod.",2.3. Determinism and Sampling,[0],[0]
+"The second pass performs a top-down randomized search over C, by selecting all children of a visited and-node, and by drawing at random one of the children of a visited or-node c according to the distribution p(cl) =",2.3. Determinism and Sampling,[0],[0]
+Q(cl | w′)/Q(c | w′) and p(cr),2.3. Determinism and Sampling,[0],[0]
+= 1− p(cl).,2.3. Determinism and Sampling,[0],[0]
+"Let T be the tree of visited nodes, and s be the indicator vector of the literals in T .",2.3. Determinism and Sampling,[0],[0]
+"Since S 6= ∅, we must have Q(C |w) > 0.",2.3. Determinism and Sampling,[0],[0]
+"Thus, each Bernoulli test performed in T is valid, and hence, s ∈ S .",2.3. Determinism and Sampling,[0],[0]
+"For any literal xi occurring in T , let p(xi) denote the probability of the (unique) path connecting the root to xi.",2.3. Determinism and Sampling,[0],[0]
+"By a telescoping product of Bernoulli distributions, we get that p(xi) = ew(i)/Q(C |w′).",2.3. Determinism and Sampling,[0],[0]
+"Therefore, p(s) = ∏",2.3. Determinism and Sampling,[0],[0]
+"i:s(i)=1 p(xi) = Pw(s), as desired.
+",2.3. Determinism and Sampling,[0],[0]
+We close this section by highlighting some interesting subclasses of dDNNF.,2.3. Determinism and Sampling,[0],[0]
+"A decision node is an or-node of the form (xi ∧ c′l) ∨ (xi ∧ c′r), where xi and xi are opposite literals, and c′l and c ′",2.3. Determinism and Sampling,[0],[0]
+r are arbitrary nodes.,2.3. Determinism and Sampling,[0],[0]
+"The class of Free Binary Decision Diagrams (FBDD) is the subset of dDNNF in which every or-node is a decision node, and at least one child of any and-node is a literal (Wegener, 2000).",2.3. Determinism and Sampling,[1.0],"['The class of Free Binary Decision Diagrams (FBDD) is the subset of dDNNF in which every or-node is a decision node, and at least one child of any and-node is a literal (Wegener, 2000).']"
+"For example, if in the dDNNF circuit of Figure 1, we replace the or-node (in blue) by a simple literal, say x3, then we get an FBDD circuit.",2.3. Determinism and Sampling,[0],[0]
+The family of Ordered Binary Decision Diagrams (OBDD) is the subclass of FBDD obtained by imposing a fixed ordering on the decision variables.,2.3. Determinism and Sampling,[0],[0]
+"Alternatively, the well-known family of (Binary) Decision Trees (DT) is the subclass of FBDD circuits for which the primal graph is cycle-free.",2.3. Determinism and Sampling,[0],[0]
+"Since all these classes are (strict) subsets of dDNNF, they admit linear-time algorithms for linear optimization and model sampling.",2.3. Determinism and Sampling,[0],[0]
+"After an excursion into compilation languages, we are now ready to provide efficient characterizations of combinatorial prediction strategies.",3. Tractable Prediction via Compilation,[0],[0]
+"Our results are summarized in Table 2.
+",3. Tractable Prediction via Compilation,[0],[0]
+"Notably, using the fact that ‖s‖1 = d/2, the regret bounds for EH and FPL can easily be derived from (Audibert et al., 2011) and (Hutter & Poland, 2005), respectively.",3. Tractable Prediction via Compilation,[1.0],"['Notably, using the fact that ‖s‖1 = d/2, the regret bounds for EH and FPL can easily be derived from (Audibert et al., 2011) and (Hutter & Poland, 2005), respectively.']"
+Both strategies are straightforward to implement on dDNNF circuits.,3. Tractable Prediction via Compilation,[0],[0]
+"Indeed, recall that EH draws, at each trial t, a feasible solution st ∈ S at random according to the distribution P−ηLt , where Lt = `1 + · · ·+ `t−1.",3. Tractable Prediction via Compilation,[0],[0]
+"So, by direct application of Proposition 2, this strategy runs in O(|C|) time per round, using a dDNNF representation C of the decision set S. For the FPL strategy, each round t is performed by choosing a minimizer st ∈ S of the objective function ηLt − zt, where zt ∈ Rd is a perturbation vector whose components are independent exponentially distributed random variables.",3. Tractable Prediction via Compilation,[0],[0]
+"By Proposition 1, the FPL strategy also runs inO(|C|) time per round, using a dDNNF encoding C of S, and the fact that |C| is in Ω(d).
+",3. Tractable Prediction via Compilation,[0.9999999925587334],"['By Proposition 1, the FPL strategy also runs inO(|C|) time per round, using a dDNNF encoding C of S, and the fact that |C| is in Ω(d).']"
+"However, the OSMD strategy and its specializations, SGD and CH, require more attention, due to the projectiondecomposition step involved at each iteration.",3. Tractable Prediction via Compilation,[0],[0]
+"The overall idea of Online Mirror Descent (OMD) is to “follow the regularized leader” through a primal-dual approach (Nemirovski & Yudin, 1983; Beck & Teboulle, 2003).",3.1. Online Stochastic Mirror Descent,[1.0],"['The overall idea of Online Mirror Descent (OMD) is to “follow the regularized leader” through a primal-dual approach (Nemirovski & Yudin, 1983; Beck & Teboulle, 2003).']"
+"Let K be a convex set, and let int(K) denotes its interior.",3.1. Online Stochastic Mirror Descent,[0],[0]
+"Given a regularization function F defined on K, OMD iteratively performs a gradient descent in the interior of the dual space K∗, and projects back the dual point into the primal space K.",3.1. Online Stochastic Mirror Descent,[0],[0]
+"The connection between K and K∗ is ensured using the gradients ∇F and ∇F ∗, where F ∗ is the convex conjugate of F , defined on K∗.",3.1. Online Stochastic Mirror Descent,[0],[0]
+"The projection step is captured by the Bregman divergence of F , which is a function BF : K × int(K)→ R given by:
+BF (p, q) = F (p)− F (q)− 〈∇F (q),p− q〉
+In the stochastic variant of OMD, introduced by Audibert et.",3.1. Online Stochastic Mirror Descent,[0.9999999718896277],"['The projection step is captured by the Bregman divergence of F , which is a function BF : K × int(K)→ R given by: BF (p, q) = F (p)− F (q)− 〈∇F (q),p− q〉 In the stochastic variant of OMD, introduced by Audibert et.']"
+"al. (2011; 2014), and specified in Algorithm 1, each projection is performed onto the subset conv(S) of K, and the resulting point pt is decomposed into a convex combination of feasible solutions in S, from which one is picked at random for the prediction task.
+",3.1. Online Stochastic Mirror Descent,[0],[0]
+"Algorithm 1 OSMD
+Input: decision set S ⊆ {0, 1}d, horizon T ∈ Z+ Parameters: regularizer F on K ⊇ conv(S), step-size η ∈ (0, 1]
+set u1 = 0 for t",3.1. Online Stochastic Mirror Descent,[0],[0]
+"= 1 to T do
+set pt ∈ Argminp∈conv(S)BF (p,∇F ∗(ut))",3.1. Online Stochastic Mirror Descent,[0],[0]
+"play st ∼ pt and observe `t set ut+1 = ∇F (pt)− η`t
+end for
+For common regularizers, the gradient∇F (pt) and its dual ∇F ∗(ut) are easily calculable, and we shall assume that the time spent for their construction is negligible compared with the running time of the linear optimization oracle.",3.1. Online Stochastic Mirror Descent,[0],[0]
+"In fact, the computational bottleneck of OSMD is to find a minimizer pt of BF (p,∇F ∗(ut)) in the convex hull of S, and to decompose pt into a convex combination of solutions in S. Fortunately, under reasonable assumptions about the curvature of BF , this projection-decomposition step can be efficiently computed, using recent results in projection-free convex optimization algorithms.
+",3.1. Online Stochastic Mirror Descent,[0],[0]
+"To this end, we need additional definitions.",3.1. Online Stochastic Mirror Descent,[0],[0]
+"For a convex set K, a differentiable function f : K → R is called α-strongly convex with respect to a norm ‖ · ‖ if
+f(p′)− f(p) ≥ 〈∇f(p),p′ − p〉+ α 2 ‖p′",3.1. Online Stochastic Mirror Descent,[0],[0]
+"− p‖2
+",3.1. Online Stochastic Mirror Descent,[0],[0]
+"Furthermore, f is called β-smooth1 with respect to ‖ · ‖ if
+f(p′)− f(p) ≤",3.1. Online Stochastic Mirror Descent,[0],[0]
+"〈∇f(p),p′ − p〉+ β 2 ‖p′",3.1. Online Stochastic Mirror Descent,[0],[0]
+"− p‖2
+Based on these notions, we say that a Bregman divergence BF has the condition number β/α if BF is both α-strongly convex and β-smooth with respect to the Euclidean norm ‖ · ‖2 in its first argument.",3.1. Online Stochastic Mirror Descent,[0],[0]
+"For such regularizers, the next result states that the projection-decomposition step can be approximated in low polynomial time, by exploiting the Pairwise Conditional Gradient (PCG) method, a variant of the Frank-Wolfe convex optimization algorithm, whose convergence rate has been analyzed in (Lacoste-Julien & Jaggi, 2015; Garber & Meshi, 2016; Bashiri & Zhang, 2017).
+",3.1. Online Stochastic Mirror Descent,[1.000000011725372],"['For such regularizers, the next result states that the projection-decomposition step can be approximated in low polynomial time, by exploiting the Pairwise Conditional Gradient (PCG) method, a variant of the Frank-Wolfe convex optimization algorithm, whose convergence rate has been analyzed in (Lacoste-Julien & Jaggi, 2015; Garber & Meshi, 2016; Bashiri & Zhang, 2017).']"
+Lemma 1.,3.1. Online Stochastic Mirror Descent,[0],[0]
+"Let S ⊆ {0, 1}d be a decision set represented by a dDNNF circuit C, and F be a regularizer onK ⊇ conv(S) such that BF has condition number β/α.",3.1. Online Stochastic Mirror Descent,[0],[0]
+"Then, for any q ∈ int(K) and ∈ (0, 1), one can find inO(βαd
+2|C|ln βd ) time a convex decomposition of p ∈ conv(S) such that
+BF (p, q)− min p′∈conv(C) BF (p ′, q) ≤
+1This notion of geometric smoothness should not be confused with the structural smoothness of NNF circuits in Section 2.
+",3.1. Online Stochastic Mirror Descent,[0],[0]
+"Algorithm 2 PCG
+Input: S ⊆ {0, 1}d, f : K → R, m ∈ Z+",3.1. Online Stochastic Mirror Descent,[0],[0]
+"Parameters: step-sizes {ηj}mj=1
+let p1 be some point in S for j",3.1. Online Stochastic Mirror Descent,[0],[0]
+"= 1 to m do
+let ∑j i=1",3.1. Online Stochastic Mirror Descent,[0],[0]
+"αisi be the convex decomposition of pj set s+j ∈ Argminp∈conv(S)〈∇f(pj),p〉 set s−j ∈ Argmins∈{s1,···,sj}〈−∇f(pj), s〉 set pj+1 = pj +",3.1. Online Stochastic Mirror Descent,[0],[0]
+"ηj(s+j − s − j )
+end for
+Proof.",3.1. Online Stochastic Mirror Descent,[0],[0]
+"Observe that conv(S) is a simplex-like polytope (Bashiri & Zhang, 2017), defined by the linear constraints p ≥ 0, ∑N i=1",3.1. Online Stochastic Mirror Descent,[0],[0]
+"αisi = p, α ≥ 0, and ∑N i=1",3.1. Online Stochastic Mirror Descent,[0],[0]
+"αi = 1, where N = |S|.",3.1. Online Stochastic Mirror Descent,[0],[0]
+"So, conv(S) and BF satisfy the conditions of Theorem 1 in (Garber & Meshi, 2016), and using the step-sizes advocated by the authors, we get that
+BF (pm, q)−BF (p∗, q) ≤ βd
+2 exp
+( − α
+8βd2 m ) where pm is the point obtained at the last iteration of PCG, and p∗ is the (unique) minimizer of BF (p, q) on conv(S).",3.1. Online Stochastic Mirror Descent,[0],[0]
+"Therefore, after m ≥ (8d2β/α) ln(βd/(2 )) iterations, we haveBF (pm, q)−BF (p∗, q) ≤ .",3.1. Online Stochastic Mirror Descent,[0],[0]
+"Finally, since each iteration of PCG makes one call to the linear optimization oracle, the runtime complexity follows from Proposition 1.
+",3.1. Online Stochastic Mirror Descent,[0],[0]
+"By OSMD+PCG, we denote the refined version of the OSMD algorithm that uses the PCG method at each trial t in order to approximate the Bregman projection-decomposition step.",3.1. Online Stochastic Mirror Descent,[0],[0]
+"In addition to a regularizer F and a step-size η, OSMD+PCG takes as parameters a sequence { t}Tt=1 such that
+BF (pt, qt)−BF (p∗t , qt) ≤ t
+where pt is the point returned by PCG, qt = ∇F ∗(ut), and p∗t is the minimizer of BF (p, qt) over conv(S).
+",3.1. Online Stochastic Mirror Descent,[0],[0]
+Theorem 1.,3.1. Online Stochastic Mirror Descent,[0],[0]
+"Suppose that OSMD+PCG takes as input a dDNNF representation C of a decision set S ⊆ {0, 1}d, and a horizon T , and uses a regularizer F on K ⊇ conv(S) such thatBF has condition number β/α, together with a stepsize η ∈ (0, 1] and a sequence of { t}Tt=1 such that t = γ/t2 for γ > 0.",3.1. Online Stochastic Mirror Descent,[0],[0]
+"Then, OSMD+PCG attains the expected regret
+(1) RT ≤
+√ 2γd
+α (lnT + 1) +
+1 η max s∈S BF (s,p ∗ 1)
++ 1
+η T∑ t=1 BF∗(∇F (p∗t )− η`t,∇F (pt))
+with a per-round running time in O ( β
+α d2|C|ln βdT γ
+) .
+",3.1. Online Stochastic Mirror Descent,[0],[0]
+Proof.,3.1. Online Stochastic Mirror Descent,[0],[0]
+Let s∗ ∈ S be the optimal solution chosen with the benefit of hindsight.,3.1. Online Stochastic Mirror Descent,[0],[0]
+"By decomposing the regret, we have
+RT = T∑ t=1 〈`t,p∗t − s∗〉+ T∑ t=1",3.1. Online Stochastic Mirror Descent,[0],[0]
+"E〈`t, st − p∗t 〉 (2)
+",3.1. Online Stochastic Mirror Descent,[0],[0]
+"By Theorem 2 in (Audibert et al., 2014), the first term in (2) is bounded by the last two terms in (1).",3.1. Online Stochastic Mirror Descent,[0],[0]
+"For the second term in (2), we get from the Cauchy-Schwarz inequality that
+E〈`t, st − p∗t 〉 ≤ ‖`t‖2‖pt − p∗t ‖2≤",3.1. Online Stochastic Mirror Descent,[0],[0]
+"√ d‖pt − p∗t ‖2
+Moreover, by applying the Generalized Pythagorean Theorem (Cesa-Bianchi & Lugosi, 2006), we know that BF (p, qt) ≥ BF (p,p∗t ) + BF (p∗t , qt), for any p ∈ conv(S).",3.1. Online Stochastic Mirror Descent,[0],[0]
+"Using p = pt and rearranging,
+BF (pt,p ∗ t ) ≤ BF (pt, qt)−BF (p∗t , qt) ≤ t (3)
+Since BF is α-strongly convex with respect to ‖ · ‖2 in its first argument, we also have α2 ‖pt",3.1. Online Stochastic Mirror Descent,[0],[0]
+"− p ∗ t ‖22≤ BF (pt,p∗t ).",3.1. Online Stochastic Mirror Descent,[0],[0]
+"Thus by plugging this inequality into (3), we get that E〈`t, st − p∗t 〉 ≤ √ 2d t/α.",3.1. Online Stochastic Mirror Descent,[0],[0]
+"Finally, by substituting t with ρ/t2, summing other T , and applying the logarithmic bound on harmonic series, we obtain the desired result.",3.1. Online Stochastic Mirror Descent,[0],[0]
+The (online) SGD algorithm is derived from OSMD using the Euclidean regularizer F (p) = 12 ‖p‖ 2 2.,3.2. Stochastic Gradient Descent,[0],[0]
+"In this simple framework, the primal and dual spaces coincide with Rd, and hence, F ∗(u) = u, ∇F (p) = p, and ∇F ∗(u) =",3.2. Stochastic Gradient Descent,[0.9988743886294394],"['In this simple framework, the primal and dual spaces coincide with Rd, and hence, F ∗(u) = u, ∇F (p) = p, and ∇F ∗(u) = u.']"
+"u. Furthermore, BF has the condition number 1/1, since BF (p, q) = 1 2 ‖p− q‖ 2 2.",3.2. Stochastic Gradient Descent,[0],[0]
+"We denote by SGD+PCG the instance of OSMD+PCG defined on the Euclidean regularizer.
+",3.2. Stochastic Gradient Descent,[0],[0]
+Proposition 3.,3.2. Stochastic Gradient Descent,[0],[0]
+"The SGD+PCG algorithm achieves an expected regret bounded by d( √ T + lnT + 1) with a per-round runtime complexity in O(d2|C|ln(dT )) using η = 1/ √ T and γ = d/2.
+Proof.",3.2. Stochastic Gradient Descent,[0],[0]
+"This simply follows from Theorem 1, together with the fact that maxs∈S BF (s,p∗1) ≤",3.2. Stochastic Gradient Descent,[0],[0]
+d and ‖`t‖22≤ d.,3.2. Stochastic Gradient Descent,[0],[0]
+The CH algorithm is derived from OSMD using the entropic regularizer F (p) = ∑d i=1,3.3. Component Hedge,[0],[0]
+"p(i)(ln p(i)− 1), for which the
+conjugate is F ∗(u) = ∑d i=1",3.3. Component Hedge,[0],[0]
+expu(i).,3.3. Component Hedge,[0],[0]
+"Here, we cannot find a finite condition number for the associated divergence BF (p, q) = ∑d i=1",3.3. Component Hedge,[0],[0]
+p(i),3.3. Component Hedge,[0],[0]
+ln p(i) q(i),3.3. Component Hedge,[0],[0]
+− (p(i),3.3. Component Hedge,[0],[0]
+"− q(i)), since its gradient is unbounded.",3.3. Component Hedge,[0],[0]
+"This issue may, however, be circumvented using a simple trick advocated in (Krichene et al., 2015), which consists in replacing the entropic regularizer with the function Fδ(p) = F (p + δ), where
+δ ∈ (0, 1) and δ = (δ, · · · , δ).",3.3. Component Hedge,[0],[0]
+"For this function, the primal space is (−δ,+∞), and since F ∗δ (u) = F ∗(u) − 〈u, δ〉, the dual space is Rd.",3.3. Component Hedge,[0],[0]
+"It is easy to show that
+∂Fδ(p)
+∂p(i) = ln(p(i)",3.3. Component Hedge,[0],[0]
+"+ δ)
+∂F ∗δ",3.3. Component Hedge,[0],[0]
+"(u)
+∂u(i) = eu(i)",3.3. Component Hedge,[0],[0]
+"− δ
+BFδ(p, q) = BF (p+δ, q+δ) B ∗",3.3. Component Hedge,[0],[0]
+"Fδ (u,v) =",3.3. Component Hedge,[0],[0]
+"B∗F (u,v)
+where B∗F (u,v) = ∑d i=1",3.3. Component Hedge,[0],[0]
+"e
+v(i)(ev(i)−u(i) +v(i)−u(i)−1).",3.3. Component Hedge,[0],[0]
+"Furthermore, since the first and second order partial derivatives of B∗Fδ(p, q) at the coordinate p(i) are
+∂BFδ(p, q)
+∂p(i) =",3.3. Component Hedge,[0],[0]
+"ln
+p(i)",3.3. Component Hedge,[0],[0]
+"+ δ
+q(i) + δ
+∂2BFδ(p, q)
+∂2p(i)",3.3. Component Hedge,[0],[0]
+"= ln
+1
+p(i)",3.3. Component Hedge,[0],[0]
+"+ δ
+it follows that BFδ has the condition number 1+δ/δ.",3.3. Component Hedge,[0],[0]
+"Indeed, given an arbitrary point q ∈ int(−δ,+∞), let Hq(p) denote the the Hessian matrix of BFδ(p, q) at p ∈ conv(S).",3.3. Component Hedge,[0],[0]
+"Then, for any z ∈ Rd, the diagonal entries of Hq(p) satisfy
+1 1 + δ ≤ ∂
+2BF (p, q)
+∂2p(i) z(i)2 ≤ 1 δ
+using the fact that p(i) ∈",3.3. Component Hedge,[0],[0]
+"[0, 1].",3.3. Component Hedge,[0],[0]
+"Thus, αI 4 Hq(p) 4 βI for α = 1/1+δ and β = 1/δ.",3.3. Component Hedge,[0],[0]
+"In what follows, the instance of OSMD+PCG that uses Fδ as regularizer is called δ-CH+PCG.
+Proposition 4.",3.3. Component Hedge,[0],[0]
+"The δ-CH+PCG algorithm achieves an expected regret bounded by d(1 + 2δ)( √ T + lnT + 1)
+with a per-round runtime complexity in O ( d2|C|/δ ln dT/δ ) using η = 1/√T and γ = 2d(1/2 + δ)/(1 + δ).
+",3.3. Component Hedge,[0],[0]
+Proof.,3.3. Component Hedge,[0],[0]
+The runtime complexity simply follows from Theorem 1.,3.3. Component Hedge,[0],[0]
+"The regret bound is obtained by bounding the second and third terms of (1), and using the above values for η and γ.",3.3. Component Hedge,[0],[0]
+"Using s∗1 as a maximizer of the second term of (1), we have BFδ(s ∗ 1,p ∗ 1) = Fδ(s ∗ 1)",3.3. Component Hedge,[0],[0]
+− Fδ(p∗1).,3.3. Component Hedge,[0],[0]
+"Using the notation p̃1 = p∗1 + δ and r = d(1/2 + δ), we get that
+Fδ(s ∗ 1)− Fδ(p∗1) ≤ d∑ i=1",3.3. Component Hedge,[0],[0]
+p̃1(i),3.3. Component Hedge,[0],[0]
+ln 1 p̃1(i) ≤,3.3. Component Hedge,[0],[0]
+"r ln d r
+which is bounded by r.",3.3. Component Hedge,[0],[0]
+"For the third term of (1), observe that Fδ is 1(1+δ)d -strongly convex with respect to the norm ‖ · ‖1, since ‖p",3.3. Component Hedge,[0],[0]
+− p′‖21≤ d‖p,3.3. Component Hedge,[0],[0]
+− p′‖22.,3.3. Component Hedge,[0],[0]
+"By Theorem 3 in (Kakade et al., 2012), it follows that F ∗δ is (1 + δ)d-smooth with respect to the norm ‖ · ‖∞.",3.3. Component Hedge,[0],[0]
+"Therefore,
+1 η BF∗(∇F (p∗t )− η`t,∇F (pt)) ≤",3.3. Component Hedge,[0],[0]
+η 2,3.3. Component Hedge,[0],[0]
+d(1,3.3. Component Hedge,[0],[0]
+"+ δ)‖`t‖2∞
+",3.3. Component Hedge,[0],[0]
+which is bounded by ηr.,3.3. Component Hedge,[0],[0]
+"In order to evaluate the performance of the different online combinatorial optimization strategies examined in Section 3, we have considered 16 instances of the SAT Library,2 described in Table 3.",4. Experiments,[1.0],"['In order to evaluate the performance of the different online combinatorial optimization strategies examined in Section 3, we have considered 16 instances of the SAT Library,2 described in Table 3.']"
+"Namely, the first six rows of the table are (car) configuration tasks, while the remaining rows are planning problems.",4. Experiments,[0],[0]
+"In the first four columns of the table are reported the name of the SAT instance, the number of attributes (d/2), the number of constraints (|SAT|), and the number |S| of feasible solutions.",4. Experiments,[1.0],"['In the first four columns of the table are reported the name of the SAT instance, the number of attributes (d/2), the number of constraints (|SAT|), and the number |S| of feasible solutions.']"
+"We have used the recent D4 compiler 3 (Lagniez & Marquis, 2017) for transforming SAT instances into dDNNF circuits.",4. Experiments,[1.0],"['We have used the recent D4 compiler 3 (Lagniez & Marquis, 2017) for transforming SAT instances into dDNNF circuits.']"
+"The size |C| of the compiled circuit is reported in the fifth column.
+",4. Experiments,[0],[0]
+"In order to simulate combinatorial prediction games, we have used the following protocol.",4. Experiments,[0],[0]
+"Suppose that the set X = {x1, · · · , xd} of literals is sorted in a lexicographic way, so that for each odd integer i, the pair (xi, xi+1) encodes both configurations of the same binary attribute.",4. Experiments,[1.0],"['Suppose that the set X = {x1, · · · , xd} of literals is sorted in a lexicographic way, so that for each odd integer i, the pair (xi, xi+1) encodes both configurations of the same binary attribute.']"
+"First, we construct a vector µ0 of d/2 independent Bernoulli variables.",4. Experiments,[1.0],"['First, we construct a vector µ0 of d/2 independent Bernoulli variables.']"
+"At each round t ∈ {1, · · · , T}, µt is set to µt−1 with probability 0.9, or picked uniformly at random from [0, 1]d/2 with probability 0.1.",4. Experiments,[0],[0]
+"Then, the feedback supplied to the learner is a vector `t ∈ {0, 1}d such that `t(i) + `t(i + 1) = 1, and `t(i) = 1 with probability µt(i+1/2) for each odd integer i.",4. Experiments,[0],[0]
+"So, `t(i + 1) = 1 with probability 1 − µt(i+1/2).",4. Experiments,[0],[0]
+"Although this protocol is essentially stochastic, the environment secretly resets µt with probability 0.1 at each round to foil the learner.
+",4. Experiments,[0],[0]
+"The combinatorial prediction strategies were implemented in C++ and tested on a six-core Intel i7-5930K with 32 GiB RAM.4 For the FPL and EH algorithms, we used the step-size η reported in (Audibert et al., 2011) and (Hutter & Poland, 2005), respectively.",4. Experiments,[0],[0]
+"Concerning the SGD+PCG and δ-CH+PCG algorithms, we used for η and γ the values determined by our theoretical analysis; the step-sizes {ηt} of PCG were computed from binary search as advocated by Garber & Meshi (2016) in their experiments, and the value of δ was fixed to 1/ln d",4. Experiments,[0],[0]
+in order to keep a quadratic runtime complexity for δ-CH+PCG.,4. Experiments,[0],[0]
+"Finally, the horizon T was set to 103, and a timeout of one day was fixed for learning.
+",4. Experiments,[1.0000000216341405],"['Finally, the horizon T was set to 103, and a timeout of one day was fixed for learning.']"
+"In our experiments, the regret is measured by the difference in cumulative loss between the algorithm and the best feasible solution in hindsight, which is obtained using the linear optimization oracle at horizon T .",4. Experiments,[1.0],"['In our experiments, the regret is measured by the difference in cumulative loss between the algorithm and the best feasible solution in hindsight, which is obtained using the linear optimization oracle at horizon T .']"
+"This measure is averaged on 10 simulations, and divided by T to yield an average empirical regret.",4. Experiments,[0],[0]
+"Similarly, the per-round runtimes (in seconds) are averaged on 10 simulations.",4. Experiments,[0],[0]
+"The corresponding results are reported in the last four columns of Table 3.
+2www.cs.ubc.ca/˜hoos/SATLIB/ 3www.cril.univ-artois.fr/KC/d4.html 4www.github.com/frederic-koriche/ccpg.git
+Here, the symbol “−” indicates that the learner was not able to perform the T rounds in one day.",4. Experiments,[0],[0]
+"From the viewpoint of regret, SGD+PCG and δ-CH+PCG outperform EH and FPL, which confirms our theoretical results.",4. Experiments,[0],[0]
+We mention in passing that SGD+PCG and δ-CH+PCG are remarkably stable.,4. Experiments,[0],[0]
+"Contrastingly, FPL exhibits a larger variance.
+",4. Experiments,[0],[0]
+"Concerning runtimes, EH and FPL are unsurprisingly faster than SGD+PCG and δ-CH+PCG.",4. Experiments,[0],[0]
+"Notably, for the hard-to-compile instances c140-fc and c163-fw, both EH and FPL were able to perform each trial in few tens of seconds, while OSMD+PCG algorithms took several minutes per-round (and hence, they were unable to process 103 rounds in one day), due to the time spent in approximating the Bregman projection step.",4. Experiments,[0],[0]
+"Yet, it is important to emphasize that the convergence rate of PCG is, in practice, much faster than the theoretical bound of Õ(d2|C|).",4. Experiments,[0],[0]
+Both SGD+PCG and δ-CH+PCG were able to process nearly all instances in few seconds per round.,4. Experiments,[0],[0]
+"For circuits of moderate size, all algorithms run in less than one second per trial.",4. Experiments,[0],[0]
+"We also observed that SGD+PCG is slightly faster than δ-CH+PCG, especially for large domains where small values of δ have a significant impact on the the runtime complexity.",4. Experiments,[0],[0]
+"In essence, SGD+PCG offers the best compromise between predictive performance and running time; since all feasible solutions are dense (‖s‖1= d/2), there is no significant difference in accuracy between SGD+PCG and δ-CH+PCG.",4. Experiments,[0],[0]
+"We have proposed a general framework for compiling online combinatorial optimization problems, whose space of feasible solutions is described using a set of Boolean constraints.",5. Conclusions,[0],[0]
+"Namely, we have focused on the class of dDNNF circuits which is endowed with fast inference algorithms for the linear optimization oracle and the sampling oracle.",5. Conclusions,[0],[0]
+"Based on
+this framework, we have shown than both EH and FPL admit fast implementation for tackling large scale online combinatorial problems.",5. Conclusions,[0],[0]
+"A particular attention was devoted to the generic OSMD strategy, which involves a computationally expensive projection-decomposition step at each iteration.",5. Conclusions,[0],[0]
+"To this point, we made use of projection-free algorithms, and in particular the PCG method, for approximating this operation.",5. Conclusions,[0],[0]
+"The resulting algorithms, SGD+PCG and δ-CH-PCG, are inevitably slower than EH and FPL, but achieve a better regret performance, as corroborated by our experiments.
+",5. Conclusions,[0],[0]
+We conclude with a few remarks.,5. Conclusions,[0],[0]
+"In light of the current results, a natural perspective of research is to extend our framework to other classes of combinatorial prediction games.",5. Conclusions,[0],[0]
+"Notably, the semi-bandit setting seems within reach.",5. Conclusions,[0],[0]
+"Indeed, the semi-bandit variant of EH, often referred to as EXP2 (Audibert et al., 2014), uses importance weights for estimating the loss at each iteration.",5. Conclusions,[0],[0]
+"By simple adaptation of Proposition 2, such weights can be computed in linear time.",5. Conclusions,[0],[0]
+"Similarly, the semi-bandit extension of FPL exploits the geometric sampling method for estimating loss vectors (Neu & Bartók, 2016).",5. Conclusions,[0],[0]
+"Again, this iterative method can be implemented in linear time (per iteration) using Proposition 1.",5. Conclusions,[0],[0]
+"Less obvious, however, is the extension of OSMD to semi-bandits: although the extension of CH achieves an optimal expected regret in this setting, its practical use remain limited due to projection-decomposition step.",5. Conclusions,[0],[0]
+"An interesting open question is to determine whether a combination of CH with PCG is able, in the semi-bandit case, to achieve a quasi-optimal regret in low-polynomial time.",5. Conclusions,[0],[0]
+"Of course, the bandit setting is even more challenging.",5. Conclusions,[0],[0]
+"To this point, Sakaue et.",5. Conclusions,[0],[0]
+"al. (2018) have paved the way using OBDDs for an efficient implementation of the COMBBAND algorithm (Cesa-Bianchi & Lugosi, 2012), Extending their approach to dDNNF, which is more succinct than OBDD, is a promising direction of future research.",5. Conclusions,[0],[0]
+"In online optimization, the goal is to iteratively choose solutions from a decision space, so as to minimize the average cost over time.",abstractText,[0],[0]
+"As long as this decision space is described by combinatorial constraints, the problem is generally intractable.",abstractText,[0],[0]
+"In this paper, we consider the paradigm of compiling the set of combinatorial constraints into a deterministic and Decomposable Negation Normal Form (dDNNF) circuit, for which the tasks of linear optimization and solution sampling take linear time.",abstractText,[0],[0]
+"Based on this framework, we provide efficient characterizations of existing combinatorial prediction strategies, with a particular attention to mirror descent techniques.",abstractText,[0],[0]
+These strategies are compared on several real-world benchmarks for which the set of Boolean constraints is preliminarily compiled into a dDNNF circuit.,abstractText,[0],[0]
+Compiling Combinatorial Prediction Games,title,[0],[0]

@@ -1,0 +1,462 @@
+0,1,label2,summary_sentences
+Neural networks trained through stochastic gradient descent (SGD) can memorize their training data.,1. Introduction,[1.0],['Neural networks trained through stochastic gradient descent (SGD) can memorize their training data.']
+"Although practitioners have long been aware of this phenomenon, Zhang et al. (2017) recently brought attention to it by showing that standard SGD-based training on AlexNet gets close to zero training error on a modification of the ImageNet dataset even when the labels are randomly permuted.",1. Introduction,[1.0],"['Although practitioners have long been aware of this phenomenon, Zhang et al. (2017) recently brought attention to it by showing that standard SGD-based training on AlexNet gets close to zero training error on a modification of the ImageNet dataset even when the labels are randomly permuted.']"
+"This leads to an interesting question: If neural nets have sufficient capacity to memorize random training sets why do
+1Two Sigma, New York, NY, USA.",1. Introduction,[0],[0]
+"Correspondence to: Satrajit Chatterjee <satrajit.chatterjee@twosigma.com>.
+",1. Introduction,[0],[0]
+"Proceedings of the 35 th International Conference on Machine Learning, Stockholm, Sweden, PMLR 80, 2018.",1. Introduction,[0],[0]
+"Copyright 2018 by the author(s).
+",1. Introduction,[0],[0]
+they generalize on real data?,1. Introduction,[0],[0]
+A natural hypothesis is that nets behave differently on real data than on random data.,1. Introduction,[1.0],['A natural hypothesis is that nets behave differently on real data than on random data.']
+Arpit et al. (2017) study this question experimentally and show that there are apparent differences in behavior.,1. Introduction,[1.0],['Arpit et al. (2017) study this question experimentally and show that there are apparent differences in behavior.']
+"They conclude that generalization and memorization depend not just on the network architecture and optimization procedure but on the dataset itself.
+",1. Introduction,[0],[0]
+"But what if networks fundamentally do not behave differently on real data than on random data, and, in both cases, are simply memorizing?",1. Introduction,[1.0],"['But what if networks fundamentally do not behave differently on real data than on random data, and, in both cases, are simply memorizing?']"
+This is a difficult question to explore for two reasons.,1. Introduction,[0],[0]
+"First, it is hard to provide a direct answer.",1. Introduction,[0],[0]
+Whereas it is easy to tell when a net is memorizing random data (the training error goes to zero!),1. Introduction,[0],[0]
+", there is no easy way to tell when a network is memorizing real data as opposed to “learning”.",1. Introduction,[0.9925880792099805],"['), there is no easy way to tell when a network is memorizing real data as opposed to “learning”.']"
+"Second, and perhaps more importantly, it contradicts the intuitive notion—inherent in the preceding discussion—that memorization and generalization are at odds.",1. Introduction,[1.0],"['Second, and perhaps more importantly, it contradicts the intuitive notion—inherent in the preceding discussion—that memorization and generalization are at odds.']"
+This work attempts to shed light on this second difficulty by investigating the following: How much can you learn if memorization is all you can do?,1. Introduction,[0],[0]
+"Is generalization even possible in this setting?
+",1. Introduction,[1.0000000404428144],['Is generalization even possible in this setting?']
+"At first, generalization in such a setting of pure memorization may seem hopeless: the simplest way to memorize would be to build a lookup table from the training data.",1. Introduction,[1.0],"['At first, generalization in such a setting of pure memorization may seem hopeless: the simplest way to memorize would be to build a lookup table from the training data.']"
+"Although this approach works for special cases where the input population is finite and small, it fails in general since the examples seen during training are unlikely to match test examples.",1. Introduction,[0],[0]
+One way to get around this limitation is to use k-Nearest Neighbors (k-NN) or any of its variants at test time.,1. Introduction,[1.0],['One way to get around this limitation is to use k-Nearest Neighbors (k-NN) or any of its variants at test time.']
+"While k-NNs work well on many problems, they fail on problems where it is not easy to construct a semantically meaningful distance function on the input space.",1. Introduction,[0],[0]
+"In such cases, the obvious syntactic distance functions (e.g., say Euclidean distance between images viewed as vectors in Rd) do not work well.",1. Introduction,[0],[0]
+"Indeed some of the most interesting results from deep learning have been the discovery—through learning—of semantically meaningful distance functions (via embeddings).
+",1. Introduction,[0.9999999825606432],['Indeed some of the most interesting results from deep learning have been the discovery—through learning—of semantically meaningful distance functions (via embeddings).']
+"Therefore, in this work we do not allow ourselves a distance function.",1. Introduction,[0],[0]
+"Instead, we get around the problem by applying the notion of depth, which has been wildly successful in improving the performance of neural networks, to direct memorization.",1. Introduction,[0],[0]
+"We build a network of lookup tables (also
+called “luts”) where the luts are arranged in successive layers much like a neural network.",1. Introduction,[0.999999985009856],['We build a network of lookup tables (also called “luts”) where the luts are arranged in successive layers much like a neural network.']
+"However, unlike a neural network, training happens through memorization and does not involve backpropagation, gradient descent, or any explicit search.",1. Introduction,[0],[0]
+"Now, since in contrast to a neuron, the function implemented by a lut can be arbitrarily complex, without some means to control the complexity, the notion of depth is vacuous.",1. Introduction,[0.9577150946342933],"['To summarize, the procedure described to learn a single lookup table in this section is essentially memorization in the presence of Bayes error, where the idea is to simply remember the output that is most commonly associated with an input in the training set.']"
+We control the complexity of a function learned by a lut in the simplest possible way: we limit the support (and thereby the size) of the lut.,1. Introduction,[0],[0]
+"Each lut in a layer receives inputs from only a few luts in the previous layer, which are picked at random when the network is constructed.",1. Introduction,[0],[0]
+This kind of restriction on local function complexity is similar to what is found to work well in deep neural networks.,1. Introduction,[0],[0]
+"For example, a convolutional filter is obviously support-limited, and a fully connected layer although not support-limited is nevertheless limited in expressivity.",1. Introduction,[0],[0]
+"Furthermore, the learned weight matrices in neural networks are often sparse or can be made so with no loss in accuracy (Han et al., 2015).
+",1. Introduction,[0],[0]
+We need two restrictions before we can proceed to an algorithm.,1. Introduction,[0],[0]
+"First, for simplicity, we focus our attention on binary classification problems.",1. Introduction,[0],[0]
+"Second, because lookup tables work naturally with discrete inputs, in this work we limit ourselves to discrete signals.",1. Introduction,[0],[0]
+"In fact, the inputs and all intermediate signals in the network of lookup tables are binary.",1. Introduction,[0],[0]
+The restriction is not as extreme as it may appear.,1. Introduction,[0],[0]
+"There are a number of results in quantized and binary neural networks showing that limited precision is often sufficient (e.g. Rastegari et al., 2016).",1. Introduction,[0],[0]
+"Furthermore, even in real-valued neural networks, we need mechanisms such as convolution and pooling to ensure that certain types of small changes in the inputs (e.g., a small displacement) do not lead to large changes in output.",1. Introduction,[0],[0]
+"In principle, similar mechanisms could be used in a fully discrete setting to handle real-valued quantities.
+",1. Introduction,[0],[0]
+"With these restrictions in place, we are now ready to proceed.",1. Introduction,[0],[0]
+"Let B = {0, 1} and consider the problem of learning a function f :",2. A Single Lookup Table,[0],[0]
+"Bk → B from a list of training examples where each example is an (x, y) pair.",2. A Single Lookup Table,[0],[0]
+"Since we want to learn by memorizing, we construct a lookup table with 2k rows (one for each possible bit pattern p ∈",2. A Single Lookup Table,[0.9662272505405665],"['Since we want to learn by memorizing, we construct a lookup table with 2k rows (one for each possible bit pattern p ∈ Bk that can appear at the input) and two columns y0 and y1.']"
+Bk that can appear at the input) and two columns y0 and y1.,2. A Single Lookup Table,[0],[0]
+"The y0 entry for the row corresponding to pattern p (denoted by cp0) counts how many times p is associated with output 0 in the training set, i.e., the number of occurrences of (p, 0) in the training set.",2. A Single Lookup Table,[0],[0]
+"Similarly, the y1 entry for row p (denoted by cp1) counts how many times the pattern p is associated with the output 1 in the training set, i.e., the number of occurrences of (p, 1)
+in the training set.",2. A Single Lookup Table,[0],[0]
+"Note that for a pattern p it is possible for both cp0 and cp1 to be greater than zero since due to Bayes error both (p, 0) and (p, 1) may be present in the training examples.",2. A Single Lookup Table,[0],[0]
+It is also possible for both cp0 and cp1 to be zero if the input p never appears in the training examples.,2. A Single Lookup Table,[0],[0]
+"We call such a lookup table a k-input lookup table or a k-lut since the inputs are bit vectors of length k.1
+Next, we associate a boolean function f̂ : Bk → B with the lookup table in the following manner:
+f̂(p) =  1 if cp1 > cp0,0 if cp1 < cp0, b if cp1 = cp0
+where b ∈ B is picked uniformly at random when fixing f̂ in order to break ties.",2. A Single Lookup Table,[0],[0]
+"In other words, f̂ maps an input p to the output that is most often associated with it in the training set (breaking ties randomly).",2. A Single Lookup Table,[0],[0]
+"We say that f̂ is the function learned by the lookup table.
+",2. A Single Lookup Table,[0],[0]
+Example 1.,2. A Single Lookup Table,[0],[0]
+Let k = 3 and consider learning a function f : B3 → B from 7 examples shown on the left below.,2. A Single Lookup Table,[0],[0]
+"The lookup table that we learn is shown in the middle, and the truth table of the learned function f̂ is shown on the right.",2. A Single Lookup Table,[0],[0]
+"The entries in the truth table which have been picked randomly to break ties are indicated by an asterisk.
+",2. A Single Lookup Table,[0],[0]
+"x x0x1x2
+y
+000 0 000 1 000 1 001 1 100 0 110 0 110 1
+p x0x1x2
+y0 y1
+000 1 2 001 0 1 010 0 0 011 0 0 100 1 0 101 0 0 110 1 1 111 0 0
+p f̂
+000 1 001 1 010 0∗ 011 1∗ 100 0 101 1∗ 110 1∗ 111 0∗
+Note that f̂ gets all training examples correct except for the first and sixth.",2. A Single Lookup Table,[0],[0]
+"This is the best we can do on this set of training examples because the Bayes error rate is non-zero.
+",2. A Single Lookup Table,[0],[0]
+"If we measure training error as the average 0–1 loss on the training set, this procedure to learn f̂ has the following properties:
+1.",2. A Single Lookup Table,[0],[0]
+Optimality.,2. A Single Lookup Table,[0],[0]
+"The learned function f̂ is Bayes-optimal on the training set, i.e., there is no function g :",2. A Single Lookup Table,[0],[0]
+Bk → B with training error strictly less than that of f̂ .,2. A Single Lookup Table,[0],[0]
+"In particular, the training error is zero iff the training set has zero Bayes error.
+2.",2. A Single Lookup Table,[0.9793053215932557],"['In particular, the training error is zero iff the training set has zero Bayes error.']"
+Monotonicity.,2. A Single Lookup Table,[0],[0]
+"If we have more information for each x in the training set, i.e., we augment each training
+1 Typically k is small (less than 10) and so the the table can be stored explicitly.",2. A Single Lookup Table,[0],[0]
+"The input bit vector (viewed as an integer) can be used to directly index into the table.
+example with m extra bits of information (keeping the labels fixed) and use the above procedure to now learn a new function ĝ : Bk+m → B, then the training error of ĝ is no more than that of f̂ .
+",2. A Single Lookup Table,[0],[0]
+Proof Sketch.,2. A Single Lookup Table,[0],[0]
+Optimality is easy to see since the total training error is the sum of the training error for each possible pattern p which is minimized by choosing the majority class for each p.,2. A Single Lookup Table,[0],[0]
+"Monotonicity holds since if not, then we can compose the obvious projection Bk+m",2. A Single Lookup Table,[0],[0]
+"→ Bk with f̂ to get a contradiction with the optimality of ĝ.
+Note that monotonicity implies in particular that the training accuracy at the output of a lut is no worse than that at any of its inputs.",2. A Single Lookup Table,[0],[0]
+"Furthermore, as we make the luts larger, the training error cannot increase but only decrease.",2. A Single Lookup Table,[0],[0]
+This is interesting since there are no restrictions on the m extra bits: they could be completely non-informative.,2. A Single Lookup Table,[0],[0]
+"These properties will prove useful in the next section as we consider networks of luts.
+",2. A Single Lookup Table,[0],[0]
+"To summarize, the procedure described to learn a single lookup table in this section is essentially memorization in the presence of Bayes error, where the idea is to simply remember the output that is most commonly associated with an input in the training set.",2. A Single Lookup Table,[0],[0]
+"Now consider a binary classification task on MNIST (LeCun & Cortes, 2010) of separating the digits ‘0’ through ‘4’ (we map these to the 0 class) from the digits ‘5’ through ‘9’ (the 1 class) where the pixels are 1-bit quantized.",3. A Network of Lookup Tables,[0],[0]
+"Thus the task is to learn a function f : B28×28 → B. We call this the Binary-MNIST task (overloading binary here to mean both binary classification and binary inputs).
+",3. A Network of Lookup Tables,[0],[0]
+"In principle, we could use the procedure in Section 2 to learn this function.",3. A Network of Lookup Tables,[0],[0]
+"However, since we have only 60,000 training examples in MNIST, most of the 228×28 rows in the lookup table would have 0 entries in both columns, and hence the function learned would be mostly random and have very poor generalization to inputs outside the training set.
+",3. A Network of Lookup Tables,[0],[0]
+"As discussed in the introduction, we get around this problem by introducing depth.",3. A Network of Lookup Tables,[0],[0]
+"Instead of learning a giant lookup table with 228×28 entries, we learn a network of (much) smaller lookup tables.",3. A Network of Lookup Tables,[0],[0]
+The network consists of d layers with each layer l (1 ≤ l ≤ d) having nl k-input lookup tables.,3. A Network of Lookup Tables,[0],[0]
+Each lut in first layer (l = 1) receives its inputs from a krandom subset of the network inputs.,3. A Network of Lookup Tables,[0],[0]
+A lut in a layer,3. A Network of Lookup Tables,[0],[0]
+l > 1 receives inputs from a k-random subset of the luts in layer l − 1.,3. A Network of Lookup Tables,[0],[0]
+The connectivity is fixed at network creation time and does not change during training or inference.,3. A Network of Lookup Tables,[0],[0]
+"The final layer of the network has a single lookup table (i.e., nd = 1) which is the output of the network.",3. A Network of Lookup Tables,[0],[0]
+"By analogy with neural
+networks, we call the final layer the output layer and the other layers hidden layers.
+",3. A Network of Lookup Tables,[0],[0]
+"We train the lookup tables layer by layer, where the target of each lookup table is the final output.",3. A Network of Lookup Tables,[1.0],"['We train the lookup tables layer by layer, where the target of each lookup table is the final output.']"
+We start from the first layer and work our way to the output.,3. A Network of Lookup Tables,[0],[0]
+"Once a layer has been learned, we use the functions associated with its luts (the f̂s of Section 2) to map its inputs to outputs.",3. A Network of Lookup Tables,[0],[0]
+"These outputs serve as the inputs for the next layer, which is learned next.",3. A Network of Lookup Tables,[0],[0]
+"Continuing our analogy with neural networks, we call the output values of a layer activations.
+",3. A Network of Lookup Tables,[0],[0]
+"Inference is similar to training: We start from the inputs and evaluate each layer in order using the functions learned at each lut to map inputs to outputs.
+",3. A Network of Lookup Tables,[0],[0]
+Example 2.,3. A Network of Lookup Tables,[0],[0]
+We modify Example 1.,3. A Network of Lookup Tables,[0],[0]
+"Instead of learning a single lut with k = 3 inputs, we learn a network of k = 2 luts.",3. A Network of Lookup Tables,[0],[0]
+The network shown in Figure 1 has d = 2 layers.,3. A Network of Lookup Tables,[0],[0]
+"The first layer has 2 luts (i.e., n1 = 2) which are connected to inputs x0 and x1 of the network.",3. A Network of Lookup Tables,[0],[0]
+"The second layer (which is also the output layer) has 1 lut (i.e., n2 = 1) which is connected to the outputs of the two luts in the first layer.",3. A Network of Lookup Tables,[0],[0]
+(The connections were made randomly when the network was created.),3. A Network of Lookup Tables,[0],[0]
+"Using the procedure in Section 2, the two lookup tables learned in the first layer (using y as the target) along with their corresponding functions f̂10 and f̂11 are:
+p x0x1
+y0 y1 f̂10
+00 1 3 1 01 0 0 1∗ 10 1 0 0 11 1 1 1∗
+p x0x2
+y0 y1 f̂11
+00 1 2 1 01 0 1 1 10 2 1 0 11 0 0 1∗
+Let the output of the luts in the first layer be w10 and w11, i.e., w10 = f̂10(x0x1) and w11 = f̂11(x0x2).",3. A Network of Lookup Tables,[0.9999999918341499],"['Using the procedure in Section 2, the two lookup tables learned in the first layer (using y as the target) along with their corresponding functions f̂10 and f̂11 are: p x0x1 y0 y1 f̂10 00 1 3 1 01 0 0 1∗ 10 1 0 0 11 1 1 1∗ p x0x2 y0 y1 f̂11 00 1 2 1 01 0 1 1 10 2 1 0 11 0 0 1∗ Let the output of the luts in the first layer be w10 and w11, i.e., w10 = f̂10(x0x1) and w11 = f̂11(x0x2).']"
+The learning problem for the lut in the second layer is shown in the tables below.,3. A Network of Lookup Tables,[0],[0]
+"For convenience, on the left we show the primary inputs x0, x1 and x2, the first layer activations w10 and w11 (which are the inputs of the lut), and the target output y.",3. A Network of Lookup Tables,[0],[0]
+"On the right we show the table and the learned function f̂20:
+x x0x1x2
+w10w11 y
+000 11 0 000 11 1 000 11 1 001 11 1 100 00 0 110 10 0 110 10 1
+p w10w11
+y0 y1 f̂20
+00 1 0 0 01 0 0 1∗ 10 1 1 0∗ 11 1 3 1
+In this case the function implemented by the network of 2-luts has the same performance on the training set as the function learned by the 3-lut in Example 1.",3. A Network of Lookup Tables,[0],[0]
+"Since there are fewer possible patterns in the case of smaller luts, we expect better pattern coverage during training and hence better generalization.
+",3. A Network of Lookup Tables,[0],[0]
+Implementation.,3. A Network of Lookup Tables,[0],[0]
+"The memorization procedure described here is linear in the size of the training data, requiring two passes over the training set.",3. A Network of Lookup Tables,[0],[0]
+It is computationally efficient since it only involves counting and dense table lookups and does not require floating point.,3. A Network of Lookup Tables,[0],[0]
+"It is also easy to parallelize since each lut in a given layer is independent, and the counts can be computed on disjoint subsets of the training data and then combined (using, for example, a reduction tree).",3. A Network of Lookup Tables,[0],[0]
+Note that using this property it is possible to execute the algorithm on extremely large datasets where all the training examples may not fit on a single machine with only the summary statistics of the data (the counts in the lookup tables) being exchanged across machines.,3. A Network of Lookup Tables,[0],[0]
+Experiment 1.,4. Experiments,[0],[0]
+"In the first experiment, we apply the above procedure to the Binary-MNIST task (as defined in Section 3) to see if this approach to memorization can generalize.",4. Experiments,[0],[0]
+"For this experiment, we construct a network with 5 hidden layers of 1024 luts and 1 lut in the output layer.",4. Experiments,[0],[0]
+"We set k = 8, i.e., each lut in the network takes 8 inputs.
+",4. Experiments,[0],[0]
+"The network achieves a training accuracy of 0.89 on this task, which is perhaps not so surprising since we are memorizing the training data after all.",4. Experiments,[0],[0]
+"But what is surprising is that the network achieves an accuracy of 0.87 on a heldout set (the 10,000 test images in MNIST) which indicates generalization.
+",4. Experiments,[0.999999972479095],"['But what is surprising is that the network achieves an accuracy of 0.87 on a heldout set (the 10,000 test images in MNIST) which indicates generalization.']"
+"This result is not state-of-the-art on this variant of MNIST (see Experiment 4), but that is not the point.",4. Experiments,[0],[0]
+"It is significantly above the 0.5 accuracy that would be expected by chance, and this is achieved by an algorithm that only memorizes and performs no explicit search.
+",4. Experiments,[0],[0]
+The training and test accuracies are stable: there is very little variation from run to run.,4. Experiments,[0],[0]
+"In other words, very little depends on the actual random choices made when deciding the topology of the network.",4. Experiments,[0],[0]
+"To understand why this is
+the case, we look at training accuracies of the luts in the network.",4. Experiments,[0],[0]
+"Since the target for each lut in the network is the final classification target, we can examine the accuracy of a lut as a function of its layer.
+",4. Experiments,[0],[0]
+Table 1 shows the summary statistics for the accuracies of luts in each layer.,4. Experiments,[0],[0]
+We observe that as depth increases the average accuracy of the luts in a layer goes up.,4. Experiments,[0],[0]
+"In other words, depth helps.",4. Experiments,[0],[0]
+"Some intuition for this is provided by the monotonicity property of the luts: the output of a lut cannot have lower accuracy than any of its inputs (Section 2).
+",4. Experiments,[0],[0]
+"Furthermore, we observe in Table 1 the dispersion in accuracy across the luts (measured either by standard deviation (std) or the difference between max and min) goes down.",4. Experiments,[0],[0]
+"Therefore, as depth increases the specifics of the connectivity matters less and the network automatically becomes more stable with respect to the random choices made during construction.",4. Experiments,[0],[0]
+"Indeed we can say something stronger: we have seen in our experiments (not shown in Table 1) that as depth increases the activations of the luts in a layer become more correlated with each other, and hence become more interchangeable.",4. Experiments,[0],[0]
+"While this correlation is good for stability with respect to connectivity, it causes diminishing returns with additional depth.
+",4. Experiments,[0],[0]
+Remark.,4. Experiments,[0],[0]
+The perceptive reader looking at Table 1 will also notice that we are wasting computation: the single output lut in layer 6 receives input from only 8 of the 1024 luts in layer 5 and these in turn can at most receive inputs from 64 luts from layer 4.,4. Experiments,[0],[0]
+"Although a different topology would be more computationally efficient, this specific choice allows us to compare the different layers more easily.",4. Experiments,[0],[0]
+"We have not optimized this aspect since it typically takes less than 30 seconds using a single threaded unoptimized implementation (Python with NumPy) to run an experiment.
+",4. Experiments,[0],[0]
+Experiment 2.,4. Experiments,[0],[0]
+"As discussed in the introduction and in Section 3, we do not expect unbridled memorization in the form of a large lookup table (say k = 28 × 28 in the case of Binary-MNIST) to generalize at all.",4. Experiments,[0],[0]
+"This motivated our
+exploration of a network of smaller lookup tables parameterized by k (the number of inputs of each lut).",4. Experiments,[0],[0]
+We now vary k to see if we can control the amount of memorization and to see the effect it has on generalization.,4. Experiments,[1.0],['We now vary k to see if we can control the amount of memorization and to see the effect it has on generalization.']
+"To avoid changing too much at once, we keep the number of layers and the number of luts per layer the same as in Experiment 1.
+",4. Experiments,[0.9999999820136211],"['To avoid changing too much at once, we keep the number of layers and the number of luts per layer the same as in Experiment 1.']"
+The results are shown in the first 3 columns of Table 2.,4. Experiments,[0],[0]
+"With small values of k, the network finds it difficult to memorize the training data.",4. Experiments,[0],[0]
+"As intuitively expected (see also the monotonicity property in Section 2), as k increases the training accuracy goes up with perfect memorization at k = 14, i.e., long before 28×28.",4. Experiments,[0],[0]
+"However, larger luts generalize less well, and the best test accuracy of 0.90 is achieved at k = 12 though with substantially good memorization of the training data (0.99).",4. Experiments,[1.0],"['However, larger luts generalize less well, and the best test accuracy of 0.90 is achieved at k = 12 though with substantially good memorization of the training data (0.99).']"
+"Interestingly, there is a clear monotonic increase in the generalization gap measured as the difference between training and test accuracy with increasing k.
+Experiment 3.",4. Experiments,[0],[0]
+In this experiment—along the lines of those performed in Zhang et al. (2017)—we randomly permute the labels in the training set and repeat Experiment 2 on this “random” dataset.,4. Experiments,[0],[0]
+The results are shown in columns 4 and 5 of Table 2.,4. Experiments,[0],[0]
+"As expected, with increasing k the network gets better at memorizing the training data, and the test accuracy hovers around chance (0.5) though with significant variation (± 0.05).",4. Experiments,[0],[0]
+"This may be viewed as empirical evidence that the Rademacher complexity goes up with k.
+However, and this may be surprising for a pure memorization algorithm, memorizing random data turns out to be harder than memorizing real data (columns 2 and 3 of Table 2) in the sense that a larger k is required to get the same accuracy with random data than with real data.",4. Experiments,[0.999999994641546],"['This may be viewed as empirical evidence that the Rademacher complexity goes up with k. However, and this may be surprising for a pure memorization algorithm, memorizing random data turns out to be harder than memorizing real data (columns 2 and 3 of Table 2) in the sense that a larger k is required to get the same accuracy with random data than with real data.']"
+"For example, it takes until k = 12 to get comparable training accuracy on random data as k = 4 gets on real data.",4. Experiments,[1.0],"['For example, it takes until k = 12 to get comparable training accuracy on random data as k = 4 gets on real data.']"
+"This result corroborates the findings in Arpit et al. (2017, §3 and §4) that real data is easier to fit than random data.",4. Experiments,[0],[0]
+But it also means that we cannot conclude that any such difference observed in neural networks is because they do not use brute force memorization on real data.,4. Experiments,[1.0],['But it also means that we cannot conclude that any such difference observed in neural networks is because they do not use brute force memorization on real data.']
+"As this experiment shows, such
+differences can appear even with brute force memorization.
+",4. Experiments,[1.0000000057222642],"['As this experiment shows, such differences can appear even with brute force memorization.']"
+"Finally, at k = 12 we have a network that is able to memorize random data (random training accuracy of 0.82) and yet generalizes to test data when trained on real data (real test accuracy of 0.90).",4. Experiments,[1.0],"['Finally, at k = 12 we have a network that is able to memorize random data (random training accuracy of 0.82) and yet generalizes to test data when trained on real data (real test accuracy of 0.90).']"
+This is very similar to findings of Zhang et al. (2017) in the context of neural networks.,4. Experiments,[0],[0]
+"Kawaguchi et al. (2017, §3) argue that this phenomenon is universal and our result may be viewed as further empirical evidence for their claim showing that this phenomenon can happen even in the simplified setting of just memorization.
+",4. Experiments,[0],[0]
+Experiment 4.,4. Experiments,[0],[0]
+"For completeness, we compare memorization with several standard methods and the results are shown in Table 3.",4. Experiments,[0],[0]
+We have not specifically tuned the other methods since our goal is not to beat the state-of-the-art but to get a sense of how memorization alone does when compared to the standard methods.,4. Experiments,[1.0],['We have not specifically tuned the other methods since our goal is not to beat the state-of-the-art but to get a sense of how memorization alone does when compared to the standard methods.']
+"The best performance is obtained by a LENET-style convolutional network with 2 convolutions (64 and 32 filters respectively) each followed by a corresponding max pool layer, and 3 fully connected layers (256, 128 and 2 units respectively) with softmax output.",4. Experiments,[0],[0]
+"The net is trained for 6 epochs with stochastic gradient descent and dropout.
+",4. Experiments,[0],[0]
+"Once again, compared to random guessing which has 0.50 test accuracy, memorization does quite well with a test accuracy of 0.90 (using the k = 12 configuration from Experiment 2) and beats logistic regression and naı̈ve Bayes.",4. Experiments,[0],[0]
+"Interestingly, 1- and 5-Nearest Neighbors do well too (test accuracy of 0.97) though recall that they are provided with a distance function which memorization does not have access to and must in a sense discover.
+",4. Experiments,[0],[0]
+Experiment 5.,4. Experiments,[0],[0]
+"We now consider the task of separating the i-th digit in MNIST from the j-th digit, which gives us( 10 2 ) = 45 binary classification tasks, which we collectively call Pairwise-MNIST.",4. Experiments,[1.0],"['We now consider the task of separating the i-th digit in MNIST from the j-th digit, which gives us( 10 2 ) = 45 binary classification tasks, which we collectively call Pairwise-MNIST.']"
+"The images are binarized as before.
+",4. Experiments,[0],[0]
+"Figure 2 shows the training accuracy and the test accuracy for each of those 45 experiments for 8 different values of k.
+As in Experiment 2, we find that as k increases, the training accuracy increases (reaching 1.0), but the test accuracy falls off.",4. Experiments,[0],[0]
+"If we look at the best test accuracies for a given task (across k), on 31 out of the 45 tasks, we do better than 0.98.",4. Experiments,[0],[0]
+The worst of these is 0.95 which is the best memorization can do for separating ‘4’ and ‘9’.,4. Experiments,[1.0],['The worst of these is 0.95 which is the best memorization can do for separating ‘4’ and ‘9’.']
+This is still significantly better than the 0.5 we would expect by chance.,4. Experiments,[0],[0]
+"Typically the best test accuracies are achieved at k = 6 and k = 8.
+",4. Experiments,[0],[0]
+Experiment 6.,4. Experiments,[0],[0]
+In Experiment 5 we notice that the variation is quite high for k = 2.,4. Experiments,[0],[0]
+This indicates that the depth of the network is insufficient for proper mixing.,4. Experiments,[0],[0]
+"To investigate this further, we keep k = 2 and vary the number of hidden layers from 20 to 25.",4. Experiments,[0],[0]
+Each hidden layer still has 1024 luts.,4. Experiments,[0],[0]
+Figure 3 shows how the training and test accuracies vary with the depth of the network.,4. Experiments,[0],[0]
+"It is interesting to note that the test accuracy continues to improve even for relatively deep networks (16 or 32 hidden layers), and we get very high test accuracies even with such small lookup tables.",4. Experiments,[0],[0]
+"Furthermore, we note that the variation in the generalization error (difference between training and test accuracies) decreases with increasing depth.
+",4. Experiments,[0],[0]
+Experiment 7.,4. Experiments,[0],[0]
+Next we look at memorization on CIFAR-10 which is a collection of 32 pixel by 32 pixel color images belonging to 10 classes.,4. Experiments,[0],[0]
+"As with Binary-MNIST, we quantize each color channel to 1 bit and try to separate the classes 0 through 4 from classes 5 through 9.",4. Experiments,[0],[0]
+"This gives us the Binary-CIFAR-10 task where we have to learn a function f : B3×32×32 → B from 50,000 images.",4. Experiments,[0],[0]
+"Incidentally, the quantization of each color channel to 1-bit significantly degrades the signal making it a difficult task for humans.
+",4. Experiments,[0],[0]
+"For this task, we construct a network with 5 hidden layers each with 1024 luts and one output layer with 1 output.",4. Experiments,[0],[0]
+We set k = 10 for the luts.,4. Experiments,[0],[0]
+This network is able to achieve a training accuracy of 0.79 and a test accuracy of 0.63.,4. Experiments,[0],[0]
+"Although not as impressive in absolute terms as the memoriza-
+tion result on Binary-MNIST, it is still significantly above chance (0.50).",4. Experiments,[0],[0]
+"Furthermore, as before, the result is very stable and does not depend on a specific random topology chosen when the network is constructed.
+",4. Experiments,[0],[0]
+We compare memorization with several standard methods in Table 4.,4. Experiments,[0],[0]
+By comparing Table 4 with Table 3 it is clear that Binary-CIFAR-10 is a harder task than Binary-MNIST since all the methods perform significantly worse on it.,4. Experiments,[0],[0]
+"The best test accuracy of 0.71 is again from a LENET-style network similar to the one used in Experiment 4, but with 40 epochs of training.",4. Experiments,[0],[0]
+"We believe a ResNet-style architecture (He et al., 2016) may potentially do better here but since our goal is not to achieve state-of-the-art but see how memorization does, we leave this to future work.",4. Experiments,[0],[0]
+"For the same reason we don’t explore data augmentation here which is a standard technique for CIFAR-10.
+Once again, memorization compares favorably on test accuracy with the other methods, and compared to Binary-MNIST it does relatively better here since it ties with the nearest neighbor searches.
+",4. Experiments,[0],[0]
+Experiment 8.,4. Experiments,[0],[0]
+"In this experiment, we consider the Pairwise-CIFAR-10 tasks which are defined analogously to Pairwise-MNIST.",4. Experiments,[0],[0]
+We use the same network architecture as in Experiment 7 instead of optimizing specifically for these tasks.,4. Experiments,[0],[0]
+Training accuracies are generally 0.95 and above whereas the test accuracies range from 0.61 (CAT v/s DOG) to 0.85,4. Experiments,[0],[0]
+"(FROG v/s SHIP) with an average test accuracy of 0.76 which is significantly above chance.
+",4. Experiments,[0],[0]
+Experiment 9.,4. Experiments,[0],[0]
+"To get qualitative insight into the decision boundaries learned with different levels of memorization, we classify points in the region [−2, 2] ×",4. Experiments,[0],[0]
+"[−2, 2] ∈ R2 as being inside or outside the circle",4. Experiments,[0],[0]
+x2,4. Experiments,[0],[0]
++,4. Experiments,[0],[0]
+y2 ≤ 1.62.,4. Experiments,[0],[0]
+"Our dataset consists of points on a 100 × 100 grid in this region which has been partitioned into equal test and training sets (Figure 4, leftmost column).",4. Experiments,[0],[0]
+To make this a hard problem we encode each point as pair of 10-bit fixed-point numbers.,4. Experiments,[0],[0]
+"We learn this function f : B20 → B using networks with 32 layers each with 2048 luts and vary k. With k = 10 (rightmost column), the training set is memorized perfectly but (as seen on test)",4. Experiments,[0],[0]
+the concept is not learned.,4. Experiments,[0],[0]
+"However, memorizing with k = 2, we learn a simpler concept that is not faithful around the “corners” (as can be seen by zooming in) but one that generalizes almost perfectly to test.",4. Experiments,[0],[0]
+"Finally, k = 6 provides a satisfactory compromise between the two extremes.",4. Experiments,[0],[0]
+"Thus, once again, we see that memorization if done carefully can lead to good generalization.",4. Experiments,[0],[0]
+"It is instructive to compare our memorization procedure with a few commonly used procedures for learning.
+",5. Comparison with Other Methods,[0],[0]
+k-Nearest Neighbors.,5. Comparison with Other Methods,[0],[0]
+"The key difference, as noted in the introduction, is that k-NNs require a user-specified distance function which is often syntactic notion of distance such that induced by treating an image as a vector in Rd.",5. Comparison with Other Methods,[0],[0]
+These syntactic notions of distance do not work well on more challenging tasks and one may view such a learning problem as essentially that of discovering a semantically meaningful distance function.,5. Comparison with Other Methods,[0],[0]
+"We see this in our experiments: the
+tr ai
+ni ng
+−2.0 −1.5",5. Comparison with Other Methods,[0],[0]
+−1.0,5. Comparison with Other Methods,[0],[0]
+"−0.5 0.0 0.5 1.0 1.5 2.0
+−2.0
+−1.5
+−1.0
+−0.5
+0.0
+0.5
+1.0
+1.5
+2.0
+−2.0 −1.5 −1.0",5. Comparison with Other Methods,[0],[0]
+"−0.5 0.0 0.5 1.0 1.5 2.0
+−2.0
+−1.5
+−1.0
+−0.5
+0.0
+0.5
+1.0
+1.5
+2.0
+−2.0 −1.5 −1.0",5. Comparison with Other Methods,[0],[0]
+"−0.5 0.0 0.5 1.0 1.5 2.0
+−2.0
+−1.5
+−1.0
+−0.5
+0.0
+0.5
+1.0
+1.5
+2.0
+−2.0 −1.5 −1.0",5. Comparison with Other Methods,[0],[0]
+"−0.5 0.0 0.5 1.0 1.5 2.0
+−2.0
+−1.5
+−1.0
+−0.5
+0.0
+0.5
+1.0
+1.5
+2.0
+te st
+−2.0 −1.5",5. Comparison with Other Methods,[0],[0]
+−1.0,5. Comparison with Other Methods,[0],[0]
+"−0.5 0.0 0.5 1.0 1.5 2.0
+−2.0
+−1.5
+−1.0
+−0.5
+0.0
+0.5
+1.0
+1.5
+2.0
+−2.0 −1.5 −1.0",5. Comparison with Other Methods,[0],[0]
+"−0.5 0.0 0.5 1.0 1.5 2.0
+−2.0
+−1.5
+−1.0
+−0.5
+0.0
+0.5
+1.0
+1.5
+2.0
+−2.0 −1.5 −1.0",5. Comparison with Other Methods,[0],[0]
+"−0.5 0.0 0.5 1.0 1.5 2.0
+−2.0
+−1.5
+−1.0
+−0.5
+0.0
+0.5
+1.0
+1.5
+2.0
+−2.0 −1.5 −1.0",5. Comparison with Other Methods,[0],[0]
+−0.5,5. Comparison with Other Methods,[0],[0]
+"0.0 0.5 1.0 1.5 2.0
+−2.0
+−1.5
+−1.0
+−0.5
+0.0
+0.5
+1.0
+1.5
+2.0
+ground truth k = 2 k = 6 k = 10
+Figure 4.",5. Comparison with Other Methods,[0],[0]
+"The decision boundaries learned in Experiment 9.
+distance function helps more with Binary-MNIST (Experiment 4) than it does with Binary-CIFAR-10 (Experiment 7).",5. Comparison with Other Methods,[0],[0]
+"Furthermore, in a separate experiment we found that augmenting the table lookup with 1-NN search at test time did not significantly improve test accuracy for Binary-CIFAR-10 where memorization was already tied with k-NNs.
+Additionally, k-NN requires storing the entire training set and is typically computationally more expensive at test time.",5. Comparison with Other Methods,[0],[0]
+"For example, on Binary-MNIST the standard k-NN implementation in scikit-learn (Pedregosa et al., 2011) took more than an hour to evaluate performance on the training and test sets (as opposed to seconds with memorization).",5. Comparison with Other Methods,[0],[0]
+"There has been work on speeding up nearest neighbor search by using locality sensitive hashing (Indyk & Motwani, 1998) and, more recently, with random projections (Li & Malik, 2016).",5. Comparison with Other Methods,[0],[0]
+"In that context, one may view each lookup table as implementing a trivial locality sensitive hash function where the distance metric arises from exact equality, and the network as an ensemble through cascading of such nearest neighbors classifiers.
+",5. Comparison with Other Methods,[0],[0]
+Neural Networks.,5. Comparison with Other Methods,[0],[0]
+"The initial motivation for this work was to understand neural networks better; particularly to explore with a model the idea that perhaps SGD is a sophisticated way to memorize training data in a manner that generalizes and that perhaps there are simpler ways to memorize data
+as well that may yet generalize.",5. Comparison with Other Methods,[0],[0]
+"However, a key difference is that gradient descent-based training can learn useful intermediate representations or targets for hidden layers.",5. Comparison with Other Methods,[0],[0]
+"In this work we have side stepped that question, by simply setting the intermediate target to be the final output.",5. Comparison with Other Methods,[0],[0]
+It is an interesting line of research to see if we can find a way to learn useful intermediate signals in this setting perhaps by purely combinatorial methods.,5. Comparison with Other Methods,[0],[0]
+"Practically, that would give us a method to learn purely binary neural networks without using floating point at all, which is useful in resource constrained environments.
+",5. Comparison with Other Methods,[0],[0]
+Random Forests.,5. Comparison with Other Methods,[0],[0]
+"Trees in a random forest are constructed over a subset of the data by iteratively evaluating different input variables to optimize purity after splitting on the variable (Breiman, 2001).",5. Comparison with Other Methods,[0],[0]
+"In contrast, memorization uses the whole dataset and does not solve any optimization problem (which makes it more computationally efficient).",5. Comparison with Other Methods,[0],[0]
+"Furthermore, random forests combine the tree predictions using voting whereas memorization uses cascading.
+",5. Comparison with Other Methods,[0],[0]
+Cascading and Stacked Generalization.,5. Comparison with Other Methods,[0],[0]
+"A recent extension of random forests are Deep Forests (Zhi-Hua Zhou, 2017) where multiple random forests are constructed at each level and then cascaded using the idea of stacked generalization (Wolpert, 1992) which is a generalization of cross-validation.",5. Comparison with Other Methods,[0],[0]
+"In contrast, layers of luts are far simpler, and memorization propagates outputs based on what has been memorized over the entire training data.",5. Comparison with Other Methods,[0],[0]
+"Due to the manner in which we construct the lookup tables and the corresponding functions (using the counts of the patterns) it is not clear to us that stacked generalization will help.
+",5. Comparison with Other Methods,[0],[0]
+Spectral Methods.,5. Comparison with Other Methods,[0],[0]
+"There is a rich literature on the theory of learning boolean functions (f : Bk → B in our notation) (Mansour, 1994) which looks at theoretical learning guarantees under assumptions on the input distribution (typically uniform) and on the spectrum of the function (e.g. f can be approximated by a sparse and low degree polynomial in the boolean fourier basis).",5. Comparison with Other Methods,[0],[0]
+"Recently, Hazan et al. (2017) have used these techniques in hyperparameter optimization where they find them to be practically useful (the distributional assumption is not fatal for this application).",5. Comparison with Other Methods,[0],[0]
+"This line of work does not deal with depth, but only linear combinations of the basis functions.",5. Comparison with Other Methods,[0],[0]
+"However, there is similarity in having a low degree in the fourier basis and our notion of support-limited memorization.",5. Comparison with Other Methods,[0],[0]
+"These are similar structural priors and our results and those of Hazan et al. may be viewed as evidence that real world functions satisfy these priors.
+",5. Comparison with Other Methods,[0],[0]
+Learning Boolean Circuits.,5. Comparison with Other Methods,[0],[0]
+"There is relatively little prior work in directly learning boolean circuits (Oliveira & Sangiovanni-Vincentelli, 1994; Tapp, 2014).",5. Comparison with Other Methods,[0],[0]
+"However, it is interesting to note that the memorization algorithm in Section 3 although developed independently and from different
+considerations is similar to the greedy algorithm described by Tapp.2",5. Comparison with Other Methods,[0],[0]
+"An important difference is that instead of learning a single tree, we learn a network which makes learning more stable (as seen in Experiment 1).",5. Comparison with Other Methods,[0],[0]
+"The experiments of Zhang et al. (2017) and Arpit et al. (2017) on training with random data lead naturally to the question that if neural networks can memorize random data and yet generalize on real data, are they perhaps doing something different in the two cases.",6. Conclusion,[0],[0]
+This work started with the opposite thought: What if in both cases they are simply memorizing?,6. Conclusion,[0],[0]
+"This, in turn, leads to the question of whether it is even possible to generalize from pure memorization.",6. Conclusion,[0],[0]
+Naı̈ve memorization with a lookup table is too simplistic a model,6. Conclusion,[0],[0]
+"but, as we saw, a slightly more complex model in the form of a network of support-limited lookup tables does significantly better than chance and is closer to the standard algorithms on a number of binary classification problems from MNIST and CIFAR-10.",6. Conclusion,[0],[0]
+"(To investigate if this result holds on other datasets is an important area of future work.)
+",6. Conclusion,[0],[0]
+"Furthermore, this model replicates some of the key observations with neural networks: the performance of a network improves with depth; it memorizes random data and yet generalizes on real data; and memorizing random data is harder than real data.",6. Conclusion,[0],[0]
+"In particular, the last observation implies that we cannot rule out memorization based on differences in the hardness of learning between real and random data.
+",6. Conclusion,[0],[0]
+"For future work, we would like to understand why memorization generalizes.",6. Conclusion,[0],[0]
+"Now, since the size of the hypothesis space is bounded by 2n2 k
+(where n is the number of k-luts in the network), we can use results from PAC-learning to bound the generalization gap, but these bounds are typically weak or vacuous.3 Rademacher complexity may be useful for small k (say 2), but for moderate k—where the Rademacher complexity is high yet there is generalization— we would need a different approach, perhaps one based on stability (Bousquet & Elisseeff, 2002).",6. Conclusion,[0],[0]
+"In this connection, we expect the results in Devroye & Wagner (1979) to apply to a single lut, but extensions are needed to handle networks of luts, i.e., depth.",6. Conclusion,[0],[0]
+"Furthermore, these would have to incorporate details of the construction since not every network of luts generalizes (even for k = 2).
+",6. Conclusion,[0],[0]
+"Finally, given the computational efficiency of memorization, we would like to extend it to a practically useful algorithm for learning, but that would likely involve introducing some form of explicit optimization or search.
+",6. Conclusion,[0],[0]
+2We thank David Krueger for noticing the connection.,6. Conclusion,[0],[0]
+3,6. Conclusion,[0],[0]
+"For example, using Theorem 2.2 in Mohri et al. (2012) for the experiments in Table 2 (with δ = 0.01 for concreteness) bounds the gap to 0.34 for k = 2.",6. Conclusion,[0],[0]
+The bound doubles as k increases by 2.,6. Conclusion,[0],[0]
+"I thank Ben Rossi, Vinod Valsalam, Rhys Ulerich, and Eric Allen for many useful discussions and Larry Rudolph and Steve Heller for their feedback on the paper.",Acknowledgments,[0],[0]
+"In the machine learning research community, it is generally believed that there is a tension between memorization and generalization.",abstractText,[0],[0]
+"In this work, we examine to what extent this tension exists, by exploring if it is possible to generalize by memorizing alone.",abstractText,[0],[0]
+"Although direct memorization with a lookup table obviously does not generalize, we find that introducing depth in the form of a network of support-limited lookup tables leads to generalization that is significantly above chance and closer to those obtained by standard learning algorithms on several tasks derived from MNIST and CIFAR-10.",abstractText,[0],[0]
+"Furthermore, we demonstrate through a series of empirical results that our approach allows for a smooth tradeoff between memorization and generalization and exhibits some of the most salient characteristics of neural networks: depth improves performance; random data can be memorized and yet there is generalization on real data; and memorizing random data is harder in a certain sense than memorizing real data.",abstractText,[0],[0]
+The extreme simplicity of the algorithm and potential connections with generalization theory point to several interesting directions for future research.,abstractText,[0],[0]
+Learning and Memorization,title,[0],[0]

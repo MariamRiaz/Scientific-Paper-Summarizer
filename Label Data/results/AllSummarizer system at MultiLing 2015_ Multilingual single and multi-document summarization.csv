@@ -1,0 +1,1169 @@
+0,1,label2,summary_sentences
+"Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics, pages 603–612 Vancouver, Canada, July 30 - August 4, 2017. c©2017 Association for Computational Linguistics
+https://doi.org/10.18653/v1/P17-1056",text,[0],[0]
+Entering a new group is rarely easy.,1 Introduction,[0],[0]
+"Adjusting to unfamiliar behavioral norms and donning a new identity can be cognitively and emotionally taxing, and failure to do so can lead to exclusion.",1 Introduction,[0],[0]
+"But successful enculturation to the group often yields significant rewards, especially in organizational contexts.",1 Introduction,[0],[0]
+"Fitting in has been tied to positive career outcomes such as faster time-to-promotion, higher performance ratings, and reduced risk of being fired (O’Reilly et al., 1991; Goldberg et al., 2016).
+",1 Introduction,[0],[0]
+"A major challenge for enculturation research is distinguishing between internalization and self-
+regulation.",1 Introduction,[0],[0]
+"Internalization, a more inwardly focused process, involves identifying as a group member and accepting group norms, while selfregulation, a more outwardly oriented process, entails deciphering the group’s normative code and adjusting one’s behavior to comply with it.",1 Introduction,[0],[0]
+"Existing approaches, which generally rely on selfreports, are subject to various forms of reporting bias and typically yield only static snapshots of this process.",1 Introduction,[0],[0]
+"Recent computational approaches that use language as a behavioral signature of group integration uncover dynamic traces of enculturation but cannot distinguish between internalization and self-regulation.
+",1 Introduction,[0],[0]
+"To overcome these limitations, we introduce a dynamic measure of directed linguistic accommodation between a newcomer and existing group members.",1 Introduction,[0],[0]
+Our approach differentiates between an individual’s (1) base rate of word use and (2) linguistic alignment to interlocutors.,1 Introduction,[0],[0]
+"The former corresponds to internalization of the group’s linguistic norms, whereas the latter reflects the capacity to regulate one’s language in response to peers’ language use.",1 Introduction,[0],[0]
+"We apply this language model to a corpus of internal email communications and personnel records, spanning a seven-year period, from a mid-sized technology firm.",1 Introduction,[0],[0]
+"We show that changes in base rates and alignment, especially with respect to pronoun use, are consistent with successful assimilation into a group and can predict eventual employment outcomes— continued employment, involuntary exit, or voluntary exit—at levels above chance.",1 Introduction,[0],[0]
+We use this predictive problem to investigate the nature of linguistic alignment.,1 Introduction,[0],[0]
+"Our results suggest that the common formulation of alignment as a lexical-level phenomenon is incomplete.
+603",1 Introduction,[0],[0]
+Linguistic alignment Linguistic alignment is the tendency to use the same or similar words as one’s conversational partner.,2 Linguistic Alignment and Group Fit,[0],[0]
+"Alignment is an instance of a widespread and socially important human behavior: communication accommodation, the tendency of two interacting people to nonconsciously adopt similar behaviors.",2 Linguistic Alignment and Group Fit,[0],[0]
+"Evidence of accommodation appears in many behavioral dimensions, including gestures, postures, speech rate, self-disclosure, and language or dialect choice (see Giles et al. (1991) for a review).",2 Linguistic Alignment and Group Fit,[0],[0]
+"More accommodating people are rated by their interlocutors as more intelligible, attractive, and cooperative (Feldman, 1968; Ireland et al., 2011; Triandis, 1960).",2 Linguistic Alignment and Group Fit,[0],[0]
+"These perceptions have material consequences—for example, high accommodation requests are more likely to be fulfilled, and pairs who accommodate more in how they express uncertainty perform better in lab-based tasks (Buller and Aune, 1988; Fusaroli et al., 2012).
+",2 Linguistic Alignment and Group Fit,[0],[0]
+"Although accommodation is ubiquitous, individuals vary in their levels of accommodation in ways that are socially informative.",2 Linguistic Alignment and Group Fit,[0],[0]
+"Notably, more powerful people are accommodated more strongly in many settings, including trials (Gnisci, 2005), online forums (Danescu-Niculescu-Mizil et al., 2012), and Twitter (Doyle et al., 2016).",2 Linguistic Alignment and Group Fit,[0],[0]
+"Most relevant for this work, speakers may increase their accommodation to signal camaraderie or decrease it to differentiate from the group.",2 Linguistic Alignment and Group Fit,[0],[0]
+"For example, Bourhis and Giles (1977) found that Welsh English speakers increased their use of the Welsh accent and language in response to an English speaker who dismissed it.
+",2 Linguistic Alignment and Group Fit,[0],[0]
+Person-group fit and linguistic alignment These findings suggest that linguistic alignment is a useful avenue for studying how people assimilate into a group.,2 Linguistic Alignment and Group Fit,[0],[0]
+"Whereas traditional approaches to studying person-group fit rely on self-reports that are subject to various forms of reporting bias and cannot feasibly be collected with high granularity across many points in time, recent studies have proposed language-based measures as a means to tracing the dynamics of person-group fit without having to rely on self-reports.",2 Linguistic Alignment and Group Fit,[0],[0]
+"Building on Danescu-Niculescu-Mizil et al. (2013)’s research into language use similarities as a proxy for social distance between individuals, Srivastava et al. (forthcoming) and Goldberg et al. (2016) devel-
+oped a measure of cultural fit based on the similarity in linguistic style between individuals and their colleagues in an organization.",2 Linguistic Alignment and Group Fit,[0],[0]
+"Their timevarying measure highlights linguistic compatibility as an important facet of cultural fit and reveals distinct trajectories of enculturation for employees with different career outcomes.
+",2 Linguistic Alignment and Group Fit,[0],[0]
+"While this approach can help uncover the dynamics and consequences of an individual’s fit with her colleagues in an organization, it cannot disentangle the underlying reasons for this alignment.",2 Linguistic Alignment and Group Fit,[0],[0]
+"For two primary reasons, it cannot distinguish between fit that arises from internalization and fit produced by self-regulation.",2 Linguistic Alignment and Group Fit,[0],[0]
+"First, Goldberg et al. (2016) and Srivastava et al. (forthcoming) define fit using a symmetric measure, the Jensen-Shannon divergence, which does not take into account the direction of alignment.",2 Linguistic Alignment and Group Fit,[0],[0]
+Yet the distinction between an individual adapting to peers versus peers adapting to the individual would appear to be consequential.,2 Linguistic Alignment and Group Fit,[0],[0]
+"Second, this prior work considers fit across a wide range of linguistic categories but does not interrogate the role of particular categories, such as pronouns, that can be especially informative about enculturation.",2 Linguistic Alignment and Group Fit,[0],[0]
+"For example, a person’s base rate use of the first-person singular (I) or plural (we) might indicate the degree of group identity internalization, whereas adjustment to we usage in response to others’ use of the pronoun might reveal the degree of self-regulation to the group’s normative expectations.
+",2 Linguistic Alignment and Group Fit,[0],[0]
+"Modeling fit with WHAM To address these limitations, we build upon and extend the WHAM alignment framework (Doyle and Frank, 2016) to analyze the dynamics of internalization and selfregulation using the complete corpus of email communications and personnel records from a mid-sized technology company over a seven-year period.",2 Linguistic Alignment and Group Fit,[0],[0]
+"WHAM uses a conditional measure of alignment, separating overall homophily (unconditional similarity in people’s language use, driven by internalized similarity) from in-the-moment adaptation (adjusting to another’s usage, corresponding to self-regulation).",2 Linguistic Alignment and Group Fit,[0],[0]
+"WHAM also provides a directed measure of alignment, in that it estimates a replier’s adaptation to the other conversational participant separately from the participant’s adaptation to the replier.
+Level(s) of alignment The convention within linguistic alignment research, dating back to early
+work on Linguistic Style Matching (Niederhoffer and Pennebaker, 2002), is to look at lexical alignment: the repetition of the same or similar words across conversation participants.",2 Linguistic Alignment and Group Fit,[0],[0]
+"From a communication accommodation standpoint, this is justified by assuming that one’s choice of words represents a stylistic signal that is partially independent of the meaning one intends to express—similar to the accommodation on paralinguistic signals discussed above.",2 Linguistic Alignment and Group Fit,[0],[0]
+"The success of previous linguistic alignment research shows that this is valid.
+",2 Linguistic Alignment and Group Fit,[0],[0]
+"However, words are difficult to divorce from their meanings, and sometimes repeating a word conflicts with repeating its referent.",2 Linguistic Alignment and Group Fit,[0],[0]
+"In particular, pronouns often refer to different people depending on who uses the pronoun.",2 Linguistic Alignment and Group Fit,[0],[0]
+"While there is evidence that one person using a first-person singular pronoun increases the likelihood that her conversation partner will as well (Chung and Pennebaker, 2007), we may also expect that one person using first-person singular pronouns may cause the other to use more second-person pronouns, so that both people are referring to the same person.",2 Linguistic Alignment and Group Fit,[0],[0]
+"This is especially important under the Interactive Alignment Model view (Pickering and Garrod, 2004), where conversants align their entire mental representations, which predicts both lexical and referential alignment behaviors will be observed.",2 Linguistic Alignment and Group Fit,[0],[0]
+"Discourse-strategic explanations for alignment also predict alignment at multiple levels (Doyle and Frank, 2016).
+",2 Linguistic Alignment and Group Fit,[0],[0]
+"Since we have access to a high-quality corpus with meaningful outcome measures, we can investigate the relative importance of these two types of alignment.",2 Linguistic Alignment and Group Fit,[0],[0]
+"We will show that referential alignment is more predictive of employment outcomes than is lexical alignment, suggesting a need for alignment research to consider both levels rather than just the latter.",2 Linguistic Alignment and Group Fit,[0],[0]
+"We use the complete corpus of internal emails exchanged among full-time employees at a midsized US-based technology company between 2009 to 2014 (Srivastava et al., forthcoming).",3 Data: Corporate Email Corpus,[0],[0]
+Each email was summarized as a count of word categories in its text.,3 Data: Corporate Email Corpus,[0],[0]
+"These categories are a subset of the Linguistic Information and Word Count system (Pennebaker et al., 2007).",3 Data: Corporate Email Corpus,[0],[0]
+"The categories were chosen because they are likely to be indica-
+tive of one’s standing/role within a group.1
+We divided email chains into message-reply pairs to investigate conditional alignment between a message and its reply.",3 Data: Corporate Email Corpus,[0],[0]
+"To limit these pairs to cases where the reply was likely related to the preceding message, we removed all emails with more than one sender or recipient (including CC/BCC), identical sender and recipient, or where the sender or recipient was an automatic notification system or any other mailbox that was not specific to a single employee.",3 Data: Corporate Email Corpus,[0],[0]
+"We also excluded emails with no body text or more than 500 words in the body text, and pairs with more than a week’s latency between message and reply.
+",3 Data: Corporate Email Corpus,[0],[0]
+"Finally, because our analyses involve enculturation dynamics over the first six months of employment, we excluded replies sent by an employee whose overall tenure was less than six months.",3 Data: Corporate Email Corpus,[0],[0]
+"This resulted in a collection of 407,779 messagereply pairs, with 485 distinct replying employees.",3 Data: Corporate Email Corpus,[0],[0]
+We combined this with monthly updates of employees joining and leaving the company and whether they left voluntarily or involuntarily.,3 Data: Corporate Email Corpus,[0],[0]
+"Of the 485, 66 left voluntarily, 90 left involuntarily, and 329 remained employed at the end of the observation period.
+",3 Data: Corporate Email Corpus,[0],[0]
+Privacy protections and ethical considerations Research based on employees’ archived electronic communications in organizational settings poses potential threats to employee privacy and company confidentiality.,3 Data: Corporate Email Corpus,[0],[0]
+"To address these concerns, and following established ethical guidelines for the conduct of such research (Borgatti and Molina, 2003), we implemented the following procedures: (a) raw data were stored on secure research servers behind the company’s firewall; (b) messages exchanged with individuals outside the firm were eliminated; (c) all identifying information such as email addresses was transformed into hashed identifiers, with the company retaining access to the key code linking identifying information to hashed identifiers; and (d) raw message content was transformed into linguistic categories so that identities could not be inferred from message content.",3 Data: Corporate Email Corpus,[0],[0]
+"Per terms of the non-disclosure agreement we signed with the firm, we are not able to share the data underlying the analyses reported below.
+",3 Data: Corporate Email Corpus,[0],[0]
+"1Six pronoun categories (first singular (I), first plural (we), second (you), third singular personal (he, she), third singular impersonal (it, this), and third plural (they)) and five time/certainty categories (past tense, present tense, future tense, certainty, and tentativity).
+",3 Data: Corporate Email Corpus,[0],[0]
+"We can, however, share the code and dummy test data, both of which can be accessed at http: //github.com/gabedoyle/acl2017.",3 Data: Corporate Email Corpus,[0],[0]
+"To assess alignment, we use the Word-Based Hierarchical Alignment Model (WHAM) framework (Doyle and Frank, 2016).",4 Model: An Extended WHAM Framework,[0],[0]
+"The core principle of WHAM is that alignment is a change, usually an increase, in the frequency of using a word category in a reply when the word category was used in the preceding message.",4 Model: An Extended WHAM Framework,[0],[0]
+"For instance, a reply to the message What will we discuss at the meeting?, is likely to have more instances of future tense than a reply to the message What did we discuss at the meeting?",4 Model: An Extended WHAM Framework,[0],[0]
+"Under this definition, alignment is the log-odds shift from the baseline reply frequency, the frequency of the word in a reply when the preceding message did not contain the word.
+",4 Model: An Extended WHAM Framework,[0],[0]
+"WHAM is a hierarchical generative modeling framework, so it uses information from related observations (e.g., multiple repliers with similar demographics) to improve its robustness on sparse data (Doyle et al., 2016).",4 Model: An Extended WHAM Framework,[0],[0]
+"There are two key parameters, shown in Figure 2: ηbase, the log-odds of a given word category c when the preceding message did not contain c, and ηalign, the increase in the log-odds of c when the preceding message did contain c.
+A dynamic extension To understand enculturation, we need to track changes in both the alignment and baseline over time.",4 Model: An Extended WHAM Framework,[0],[0]
+"We add a month-bymonth change term to WHAM, yielding a piecewise linear model of these factors over the course of an employee’s tenure.",4 Model: An Extended WHAM Framework,[0],[0]
+"Each employee’s tenure is broken into two or three segments: their first six months after being hired, their last six months before leaving (if they leave), and the rest of their tenure.2 The linear segments for their alignment are fit as an intercept term ηalign, based at their first month (for the initial period) or their last month (for the final period), and per-month slopes α.",4 Model: An Extended WHAM Framework,[0],[0]
+"Baseline segments are fit similarly, with parameters ηbase and β.3",4 Model: An Extended WHAM Framework,[0],[0]
+"To visualize the align-
+2Within each segment, the employee’s alignment model is similar to that of Yurovsky et al. (2016), who introduced a constant by-month slope parameter to model changes in parent-child alignment during early linguistic development.
+3The six month timeframe was chosen as previous research has found it to be a critical period for early enculturation (Bauer et al., 1998).",4 Model: An Extended WHAM Framework,[0],[0]
+"Pilot investigations into the change
+ment behaviors and the parameter values, we create “sawhorse” plots, with an example in Figure 1.
+",4 Model: An Extended WHAM Framework,[0],[0]
+"In our present work, we are focused on changes in cultural fit during the transitions into or out of the group, so we collapse observations outside the first/last six months into a stable point estimate, constraining their slopes to be zero.",4 Model: An Extended WHAM Framework,[0],[0]
+"This simplification also circumvents the issue of different employees having different middle-period lengths.4
+Model structure The graphical model for our instantiation of WHAM is shown in Figure 2.",4 Model: An Extended WHAM Framework,[0],[0]
+"For each word category c, WHAM’s generative model represents each reply as a series of tokenby-token independent draws from a binomial distribution.",4 Model: An Extended WHAM Framework,[0],[0]
+"The binomial probability µ is dependent on whether the preceding message did (µalign) or did not (µbase) contain a word from category c, and the inferred alignment value is the difference between these probabilities in log-odds space (ηalign).
+",4 Model: An Extended WHAM Framework,[0],[0]
+"The specific values of these variables depend on three hierarchical features: the word category c, the group g that a given employee falls into, and the time period t (a piece of the piece-wise
+in baseline usage over time showed roughly linear changes over the first/last six months, but our linearity assumption may mask interesting variation in the enculturation trajectories.
+",4 Model: An Extended WHAM Framework,[0],[0]
+"4As shown in Figure 1, the pieces do not need to define a continuous function.",4 Model: An Extended WHAM Framework,[0],[0]
+"Alignment behaviors continue to change in the middle of an employee’s tenure (Srivastava et al., forthcoming), so alignment six months in to the job is unlikely to be equal to alignment six months from leaving, or the average alignment over the middle tenure.
+linear function: beginning, middle, or end).",4 Model: An Extended WHAM Framework,[0],[0]
+"Note that the hierarchical ordering is different for the η chains and the α/β chains; c is above g and t for the η chains, but below them for the α/β chains.",4 Model: An Extended WHAM Framework,[0],[0]
+"This is because we expect the static (η) values for a given word category to be relatively consistent across different groups and at different times, but we expect the values to be independent across the different word categories.",4 Model: An Extended WHAM Framework,[0],[0]
+"Conversely, we expect that the enculturation trajectories across word categories (α/β) will be similar, while the trajectories may vary substantially across different groups and different times.",4 Model: An Extended WHAM Framework,[0],[0]
+"Lastly, the month m in which a reply is written (measured from the start of the time period t) has a linear effect on the η value, as described below.
+",4 Model: An Extended WHAM Framework,[0],[0]
+"To estimate alignment, we first divide the replies up by group, time period, and calendar month.",4 Model: An Extended WHAM Framework,[0],[0]
+We separate the replies into two sets based on whether the preceding message contained the category c (the “alignment” set) or not (the “baseline” set).,4 Model: An Extended WHAM Framework,[0],[0]
+"All replies within a set are then aggregated in a single bag-of-words representation, with category token counts Calignc,g,t,m and C base c,g,t,m, and total token counts N basec,g,t,m and N base c,g,t,m comprising the observed variables on the far right of the model.",4 Model: An Extended WHAM Framework,[0],[0]
+"Moving from right to left, these counts are assumed to come from binomial draws with prob-
+ability µalignc,g,t,m or µ base c,g,t,m. The µ values are then in turn generated from η values in log-odds space by an inverse-logit transform, similar to linear predictors in logistic regression.
+",4 Model: An Extended WHAM Framework,[0],[0]
+"The ηbase variables are representations of the baseline frequency of a marker in log-odds space, and µbase is simply a conversion of ηbase to probability space, the equivalent of an intercept term in a logistic regression.",4 Model: An Extended WHAM Framework,[0],[0]
+"ηalign is an additive value, with µalign = logit−1(ηbase + ηalign), the equivalent of a binary feature coefficient in a logistic regression.",4 Model: An Extended WHAM Framework,[0],[0]
+"The specific month’s η variables are calculated as a linear function: ηalignc,g,t,m = η align c,g,t +",4 Model: An Extended WHAM Framework,[0],[0]
+"mαc,g,t, and similarly with β for the baseline.",4 Model: An Extended WHAM Framework,[0],[0]
+The remainder of the model is a hierarchy of normal distributions that integrate social structure into the analysis.,4 Model: An Extended WHAM Framework,[0],[0]
+"In the present work, we have three levels in the hierarchy: category, group, and time period.",4 Model: An Extended WHAM Framework,[0],[0]
+"In Analysis 1, employees are grouped by their employment outcome (stay, leave voluntarily, leave involuntarily); in Analyses 2 & 3, where we predict the employment outcomes, each group is a single employee.",4 Model: An Extended WHAM Framework,[0],[0]
+The normal distributions that connect these levels have identical standard deviations σ2 = .25.5,4 Model: An Extended WHAM Framework,[0],[0]
+"The hierarchies
+5The deviation is not a theoretically motivated choice, and was chosen as a good empirical balance between reasonable parameter convergence (improved by smaller σ2) and good model log-probability (improved by larger σ2).
+are headed by a normal distribution centered at 0, except for the ηbase hierarchy, which has a Cauchy(0, 2.5) distribution.6
+",4 Model: An Extended WHAM Framework,[0],[0]
+Message and reply length can affect alignment estimates; the WHAM model was developed in part to reduce this effect.,4 Model: An Extended WHAM Framework,[0],[0]
+"As different employees had different email length distributions, we further accounted for length by dividing all replies into five quintile length bins, and treated each bin as separate observations for each employee.",4 Model: An Extended WHAM Framework,[0],[0]
+"This design choice adds an additional control factor, but results were qualitatively similar without it.",4 Model: An Extended WHAM Framework,[0],[0]
+"All of our analyses are based on parameter estimates from RStan fits of WHAM with 500 iterations over four chains.
+",4 Model: An Extended WHAM Framework,[0],[0]
+"While previous research on cultural fit has emphasized either its internalization (O’Reilly et al., 1991) or self-regulation (Goldberg et al., 2016) components, our extension to the WHAM framework helps disentangle them by estimating them as separate baseline and alignment trajectories.",4 Model: An Extended WHAM Framework,[0],[0]
+"For example, we can distinguish between an archetypal individual who initially aligns to her colleagues and then internalizes this style of communication such that her baseline use also shifts and another archetypal person who aligns to her colleagues but does not change her baseline usage.",4 Model: An Extended WHAM Framework,[0],[0]
+"The former exhibits high correspondence between internalization and self-regulation, whereas the latter demonstrates an ability to decouple them.",4 Model: An Extended WHAM Framework,[0],[0]
+We perform three analyses on this data.,5 Analyses,[0],[0]
+"First, we examine the qualitative behaviors of pronoun alignment and how they map onto employee outcomes in the data.",5 Analyses,[0],[0]
+"Second, we show that these qualitative differences in early enculturation are meaningful, with alignment behaviors predicting employment outcome above chance.",5 Analyses,[0],[0]
+"Lastly, we consider lexical versus referential levels of alignment and show that predictions are improved under the referential formulation, suggesting that alignment is not limited to low-level wordrepetition effects.
+",5 Analyses,[0],[0]
+"6As ηbase is the log-odds of each word in a reply being a part of the category c, it is expected to be substantially negative.",5 Analyses,[0],[0]
+"For example, second person pronouns (you), are around 2% of the words in replies, approximately −4 in log-odds space.",5 Analyses,[0],[0]
+We follow Gelman et al. (2008)’s recommendation of the Cauchy prior as appropriate for parameter estimation in logistic regression.,5 Analyses,[0],[0]
+"We begin with descriptive analyses of the behavior of pronouns, which are likely to reflect incorporation into the company.",5.1 Analysis 1: Dynamic Qualitative Changes,[0],[0]
+"In particular, we look at first-person singular (I), first-person plural (we), and second-person pronouns (you).",5.1 Analysis 1: Dynamic Qualitative Changes,[0],[0]
+"We expect that increases in we usage will occur as the employee is integrated into the group, while I and you usage will decrease, and want to understand whether these changes manifest on baseline usage (i.e., internalization), alignment (i.e., self-regulation), or both.
+",5.1 Analysis 1: Dynamic Qualitative Changes,[0],[0]
+"Design We divided each employee’s emails by calendar month, and separated them into the employee’s first six months, their last six months (if an employee left the company within the observation period), and the middle of their tenure.",5.1 Analysis 1: Dynamic Qualitative Changes,[0],[0]
+"Employees with fewer than twelve months at the company were excluded from this analysis, so that their first and last months did not overlap.
+",5.1 Analysis 1: Dynamic Qualitative Changes,[0],[0]
+We fit two WHAM models in this analysis.,5.1 Analysis 1: Dynamic Qualitative Changes,[0],[0]
+"The first aggregated all employees, regardless of employment outcome, to minimize noise; the second separated them by outcome to analyze cultural fit differences.
+",5.1 Analysis 1: Dynamic Qualitative Changes,[0],[0]
+"Outcome-aggregated model We start with the aggregated behavior of all employees, shown in Figure 3.",5.1 Analysis 1: Dynamic Qualitative Changes,[0],[0]
+"For baselines, we see decreased use of I
+and you over the first six months, with we usage increasing over the same period, confirming the expected result that incorporating into the group is accompanied by more inclusive pronoun usage.",5.1 Analysis 1: Dynamic Qualitative Changes,[0],[0]
+"Despite the baseline changes, alignment is fairly stable through the first six months.",5.1 Analysis 1: Dynamic Qualitative Changes,[0],[0]
+"Alignment on first-person singular and second-person pronouns is lower than first-person plural pronouns, likely due to the fact that I or you have different referents when used by the two conversants, while both conversants could use we to refer to the same group.",5.1 Analysis 1: Dynamic Qualitative Changes,[0],[0]
+We will consider this referential alignment in more detail in Analysis 3.,5.1 Analysis 1: Dynamic Qualitative Changes,[0],[0]
+"Since employees with different outcomes have much different experiences over their last six months, we will not discuss them in aggregate, aside from noting the sharp decline in we alignment near the end of the employees’ tenures.
+",5.1 Analysis 1: Dynamic Qualitative Changes,[0],[0]
+"Outcome-separated model Figure 4 shows outcome-specific trajectories, with green lines showing involuntary leavers (i.e., those who are fired or downsized), blue showing voluntary leavers, and orange showing employees who remained at the company through the final month of the data.",5.1 Analysis 1: Dynamic Qualitative Changes,[0],[0]
+"The use of I and you is similar to the aggregates in Figure 3, regardless of group.",5.1 Analysis 1: Dynamic Qualitative Changes,[0],[0]
+"The last six months of I usage show an interesting difference, where involuntary leavers align more on I but retain a stable baseline while voluntary leavers retain a stable alignment but increase I overall, which is consistent with group separation.
+",5.1 Analysis 1: Dynamic Qualitative Changes,[0],[0]
+"The most compelling result we see here, though, is the changes in we usage by different groups of employees.",5.1 Analysis 1: Dynamic Qualitative Changes,[0],[0]
+"Employees who eventually leave the
+company involuntarily show signs of more selfregulation than internalization over the first six months, increasing their alignment while decreasing their baseline use (though they return to more similar levels as other employees later in their tenure).",5.1 Analysis 1: Dynamic Qualitative Changes,[0],[0]
+"Employees who stay at the company, as well as those who later leave voluntarily, show signs of internalization, increasing their baseline usage to the company average, as well as adapting their alignment levels to the mean.",5.1 Analysis 1: Dynamic Qualitative Changes,[0],[0]
+"This finding suggests that how quickly the employees internalize culturally-standard language use predicts their eventual employment outcome, even if they eventually end up near the average.",5.1 Analysis 1: Dynamic Qualitative Changes,[0],[0]
+"This analysis tests the hypothesis that there are meaningful differences in employees’ initial enculturation, captured by alignment behaviors.",5.2 Analysis 2: Predicting Outcomes,[0],[0]
+We examine the first six months of communications and attempt to predict whether the employee will leave the company.,5.2 Analysis 2: Predicting Outcomes,[0],[0]
+"We find that, even with a simple classifier, alignment behaviors are predictive of employment outcome.
+",5.2 Analysis 2: Predicting Outcomes,[0],[0]
+Design We fit the WHAM model to only the first six months of email correspondence for all employees who had at least six months of email.,5.2 Analysis 2: Predicting Outcomes,[0],[0]
+"The model estimated the initial level of baseline use (ηbase) and alignment (ηalign) for each employee, as well as the slope (α, β) for baseline and alignment over those first six months, over all 11 word categories mentioned in Section 3.
+",5.2 Analysis 2: Predicting Outcomes,[0],[0]
+"We then created logistic regression classifiers, using the parameter estimates to predict whether an employee would leave the company.",5.2 Analysis 2: Predicting Outcomes,[0],[0]
+We fit separate classifiers for leaving voluntarily or involuntarily.,5.2 Analysis 2: Predicting Outcomes,[0],[0]
+"Our results show that early alignment behaviors are better at identifying employees who will leave involuntarily than voluntarily, consistent with Srivastava et al.’s (forthcoming) findings that voluntary leavers are similar to stayers until late in their tenure.",5.2 Analysis 2: Predicting Outcomes,[0],[0]
+"We fit separate classifiers using the alignment parameters and the baseline parameters to investigate their relative informativity.
+",5.2 Analysis 2: Predicting Outcomes,[0],[0]
+"For each model, we report the area under the curve (AUC).",5.2 Analysis 2: Predicting Outcomes,[0],[0]
+"This value is estimated from the receiver operating characteristic (ROC) curve, which plots the true positive rate against the false positive rate over different classification thresholds.",5.2 Analysis 2: Predicting Outcomes,[0],[0]
+An AUC of 0.5 represents chance performance.,5.2 Analysis 2: Predicting Outcomes,[0],[0]
+"We use balanced, stratified cross-
+validation to reduce AUC misestimation due to unbalanced outcome frequencies and high noise (Parker et al., 2007).
+",5.2 Analysis 2: Predicting Outcomes,[0],[0]
+"Results The left column of Figure 5 shows the results over 10 runs of 10-fold balanced logistic classifiers with stratified cross-validation in R. The alignment-based classifiers are both above chance at predicting that an employee will leave the company, whether involuntarily or voluntarily.",5.2 Analysis 2: Predicting Outcomes,[0],[0]
+"The baseline-based classifiers perform worse, especially on voluntary leavers.",5.2 Analysis 2: Predicting Outcomes,[0],[0]
+"This finding is consistent with the idea that voluntary leavers resemble stayers (who form the bulk of the employees) until late in their tenure when their cultural fit declines.
+",5.2 Analysis 2: Predicting Outcomes,[0],[0]
+"We fit a model using both alignment and baseline parameters, but this model yielded an AUC value below the alignment-only classifier.",5.2 Analysis 2: Predicting Outcomes,[0],[0]
+"This suggests that where alignment and baseline behaviors are both predictive, they do not provide substantially different predictive power and lead to overfitting.",5.2 Analysis 2: Predicting Outcomes,[0],[0]
+A more sophisticated classifier may overcome these challenges; our goal here was not to achieve maximal classification performance but to test whether alignment provided any useful information about employment outcomes.,5.2 Analysis 2: Predicting Outcomes,[0],[0]
+"Our final analysis investigates the nature of linguistic alignment: specifically, whether there is an effect of referential alignment beyond that of the more commonly used lexical alignment.
+",5.3 Analysis 3: Types of Alignment,[0],[0]
+Testing this hypothesis requires a small change to the alignment calculations.,5.3 Analysis 3: Types of Alignment,[0],[0]
+"Lexical alignment is based on the conditional probability of the replier using a word category c given that the preceding message used that same category c. For referential alignment, we examine the conditional probability of the replier using a word category cj given that the preceding message used the category ci, where ci and cj are likely to be referentially linked.",5.3 Analysis 3: Types of Alignment,[0],[0]
+"We also consider cases where ci is likely to transition to cj throughout the course of the conversation, such as present tense verbs turning into past tense as the event being described recedes into the past.",5.3 Analysis 3: Types of Alignment,[0],[0]
+"The pairs of categories that are likely to be referentially or transitionally linked are: (you, I); (we, I); (you, we); (past, present); (present, future); and (certainty, tentativity).",5.3 Analysis 3: Types of Alignment,[0],[0]
+"We include both directions of these pairs, so this provides approximately the same number of predictor variables for both situa-
+tions to maximize comparability (12 for the referential alignments, 11 for the lexical).",5.3 Analysis 3: Types of Alignment,[0],[0]
+"This modification does not change the structure of the WHAM model, but rather changes its C and N counts by reclassifying replies between the baseline or alignment pathways.
+",5.3 Analysis 3: Types of Alignment,[0],[0]
+Results Figure 5 plots the differences in predictive model performance using lexical versus referential alignment parameters.,5.3 Analysis 3: Types of Alignment,[0],[0]
+We find that the semantic parameters provide more accurate classification than the lexical both for voluntarily and involuntarily-leaving employees.,5.3 Analysis 3: Types of Alignment,[0],[0]
+"This suggests that while previous work looking at lexical alignment successfully captures social structure, referential alignment may reflect a deeper and more accurate representation of the social structure.",5.3 Analysis 3: Types of Alignment,[0],[0]
+"It is unclear if this behavior holds in less formal situations or with weaker organizational structure and shared goals, but these results suggest that the traditional alignment approach of only measuring lexical alignment should be augmented with referential alignment measures for a more complete analysis.",5.3 Analysis 3: Types of Alignment,[0],[0]
+"A key finding from this work is that pronoun usage behaviors in employees’ email communication are consistent with social integration into the group; employees use “I” pronouns less and
+“we” pronouns more as they integrate.",6 Discussion,[0],[0]
+"Furthermore, we see the importance of using an alignment measure such as WHAM for distinguishing the base rate and alignment usage of words.",6 Discussion,[0],[0]
+"Employees who leave the company involuntarily show increased “we” usage through greater alignment, using “we” more when prompted by a colleague, but introducing it less of their own accord.",6 Discussion,[0],[0]
+"This suggests that these employees do not feel fully integrated into the group, although they are willing to identify as a part of it when a more fully-integrated group member includes them, corresponding to self-regularization over internalization.",6 Discussion,[0],[0]
+"The fact that these alignment measures alone, without any job productivity or performance metrics, have some predictive capability for employees’ leaving the company suggests the potential for support or intervention programs to help highperforming but poorly-integrated employees integrate into the company better.
+",6 Discussion,[0],[0]
+"More generally, the prominence of pronominally-driven communication changes suggest that alignment analyses can provide insight into a range of social integration settings.",6 Discussion,[0],[0]
+"This may be especially helpful in cases where there is great pressure to integrate smoothly, and people would be likely to adopt a self-regulating approach even if they do not internalize their group membership.",6 Discussion,[0],[0]
+"Such settings not only include the high-stakes situation of keeping one’s job, but of transitioning from high school to college or moving to a new country or region.",6 Discussion,[0],[0]
+Maximizing the chances for new members to become comfortable within a group is critical both for spreading useful aspects of the group’s existing culture to new members and for integrating new ideas from the new members’ knowledge and practices.,6 Discussion,[0],[0]
+Alignment-based approaches can be a useful tool in separating effective interventions that cause internalization of the group dynamics from those that lead to more superficial self-regularization changes.,6 Discussion,[0],[0]
+This paper described an effort to use directed linguistic alignment as a measure of cultural fit within an organization.,7 Conclusions,[0],[0]
+"We adapted a hierarchical alignment model from previous work to estimate fit within corporate email communications, focusing on changes in language during employees’ entry to and exit from the company.",7 Conclusions,[0],[0]
+"Our results
+showed substantial changes in the use of pronouns, with pronoun patterns varying by employees’ outcomes within the company.",7 Conclusions,[0],[0]
+The use of the firstperson plural “we” during an employee’s first six months is particularly instructive.,7 Conclusions,[0],[0]
+"Whereas stayers exhibited increased baseline use, indicating internalization, those eventually departing involuntarily were on the one hand decreasingly likely to introduce “we” into conversation, but increasingly responsive to interlocutors’ use of the pronoun.",7 Conclusions,[0],[0]
+"While not internalizing a shared identity with their peers, involuntarily departed employees were overly self-regulating in response to its invocation by others.
+",7 Conclusions,[0],[0]
+"Quantitatively, rates of usage and alignment in the first six months of employment carried information about whether employees left involuntarily, pointing towards fit within the company culture early on as an indicator of eventual employment outcomes.",7 Conclusions,[0],[0]
+"Finally, we saw ways in which the application of alignment to cultural fit might help to refine ideas about alignment itself: preliminary analysis suggested that referential, rather than lexical, alignment was more predictive of employment outcomes.",7 Conclusions,[0],[0]
+"More broadly, these results suggest ways that quantitative methods can be used to make precise application of concepts like “cultural fit” at scale.",7 Conclusions,[0],[0]
+"This work was supported by NSF Grant #1456077; The Garwood Center for Corporate Innovation at the Haas School of Business, University of California, Berkeley; the Stanford Data Science Initiative; and the Stanford Graduate School of Business.",8 Acknowledgments,[0],[0]
+Cultural fit is widely believed to affect the success of individuals and the groups to which they belong.,abstractText,[0],[0]
+"Yet it remains an elusive, poorly measured construct.",abstractText,[0],[0]
+Recent research draws on computational linguistics to measure cultural fit but overlooks asymmetries in cultural adaptation.,abstractText,[0],[0]
+"By contrast, we develop a directed, dynamic measure of cultural fit based on linguistic alignment, which estimates the influence of one person’s word use on another’s and distinguishes between two enculturation mechanisms: internalization and selfregulation.",abstractText,[0],[0]
+"We use this measure to trace employees’ enculturation trajectories over a large, multi-year corpus of corporate emails and find that patterns of alignment in the first six months of employment are predictive of individuals downstream outcomes, especially involuntary exit.",abstractText,[0],[0]
+Further predictive analyses suggest referential alignment plays an overlooked role in linguistic alignment.,abstractText,[0],[0]
+Alignment at Work: Using Language to Distinguish the Internalization and Self-Regulation Components of Cultural Fit in Organizations,title,[0],[0]
+"Proceedings of the 2015 Conference on Empirical Methods in Natural Language Processing, pages 1165–1174, Lisbon, Portugal, 17-21 September 2015. c©2015 Association for Computational Linguistics.",text,[0],[0]
+"In instruction-following tasks, an agent executes a sequence of actions in a real or simulated environment, in response to a sequence of natural language commands.",1 Introduction,[0],[0]
+Examples include giving navigational directions to robots and providing hints to automated game-playing agents.,1 Introduction,[0],[0]
+Plans specified with natural language exhibit compositionality both at the level of individual actions and at the overall sequence level.,1 Introduction,[0],[0]
+"This paper describes a framework for learning to follow instructions by leveraging structure at both levels.
+",1 Introduction,[0],[0]
+"Our primary contribution is a new, alignmentbased approach to grounded compositional semantics.",1 Introduction,[0],[0]
+"Building on related logical approaches (Reddy et al., 2014; Pourdamghani et al., 2014), we recast instruction following as a pair of nested, structured alignment problems.",1 Introduction,[0],[0]
+"Given instructions and a candidate plan, the model infers a sequenceto-sequence alignment between sentences and
+atomic actions.",1 Introduction,[0],[0]
+"Within each sentence–action pair, the model infers a structure-to-structure alignment between the syntax of the sentence and a graphbased representation of the action.
+",1 Introduction,[0],[0]
+"At a high level, our agent is a block-structured, graph-valued conditional random field, with alignment potentials to relate instructions to actions and transition potentials to encode the environment model (Figure 3).",1 Introduction,[0],[0]
+"Explicitly modeling sequenceto-sequence alignments between text and actions allows flexible reasoning about action sequences, enabling the agent to determine which actions are specified (perhaps redundantly) by text, and which actions must be performed automatically (in order to satisfy pragmatic constraints on interpretation).",1 Introduction,[0],[0]
+"Treating instruction following as a sequence prediction problem, rather than a series of independent decisions (Branavan et al., 2009; Artzi and Zettlemoyer, 2013), makes it possible to use general-purpose planning machinery, greatly increasing inferential power.
+",1 Introduction,[0],[0]
+"The fragment of semantics necessary to complete most instruction-following tasks is essentially predicate–argument structure, with limited influence from quantification and scoping.",1 Introduction,[0],[0]
+Thus the problem of sentence interpretation can reasonably be modeled as one of finding an alignment between language and the environment it describes.,1 Introduction,[0],[0]
+We allow this structure-to-structure alignment— an “overlay” of language onto the world—to be mediated by linguistic structure (in the form of dependency parses) and structured perception (in what we term grounding graphs).,1 Introduction,[0],[0]
+"Our model thereby reasons directly about the relationship between language and observations of the environment, without the need for an intermediate logical representation of sentence meaning.",1 Introduction,[0],[0]
+"This, in turn, makes it possible to incorporate flexible feature representations that have been difficult to integrate with previous work in semantic parsing.
+",1 Introduction,[0],[0]
+"We apply our approach to three established
+1165
+2 1 3
+instruction-following benchmarks: the map reading task of Vogel and Jurafsky (2010), the maze navigation task of MacMahon et al. (2006), and the puzzle solving task of Branavan et al. (2009).",1 Introduction,[0],[0]
+An example from each is shown in Figure 1.,1 Introduction,[0],[0]
+"These benchmarks exhibit a range of qualitative properties—both in the length and complexity of their plans, and in the quantity and quality of accompanying language.",1 Introduction,[0],[0]
+"Each task has been studied in isolation, but we are unaware of any published approaches capable of robustly handling all three.",1 Introduction,[0],[0]
+"Our general model outperforms strong, task-specific baselines in each case, achieving relative error reductions of 15–20% over several state-of-the-art results.",1 Introduction,[0],[0]
+Experiments demonstrate the importance of our contributions in both compositional semantics and search over plans.,1 Introduction,[0],[0]
+We have released all code for this project at github.com/jacobandreas/instructions.,1 Introduction,[0],[0]
+"Existing work on instruction following can be roughly divided into two families: semantic parsers and linear policy estimators.
+",2 Related work,[0],[0]
+"Semantic parsers Parser-based approaches (Chen and Mooney, 2011; Artzi and Zettlemoyer, 2013; Kim and Mooney, 2013) map from text into a formal language representing commands.",2 Related work,[0],[0]
+"These take familiar structured prediction models for semantic parsing (Zettlemoyer and Collins, 2005; Wong and Mooney, 2006), and train them with task-provided supervision.",2 Related work,[0],[0]
+"Instead of attempting to match the structure of a manually-annotated semantic parse, semantic parsers for instruction following are trained to maximize a reward signal
+provided by black-box execution of the predicted command in the environment.",2 Related work,[0],[0]
+"(It is possible to think of response-based learning for question answering (Liang et al., 2013) as a special case.)
+",2 Related work,[0],[0]
+"This approach uses a well-studied mechanism for compositional interpretation of language, but is subject to certain limitations.",2 Related work,[0],[0]
+"Because the environment is manipulated only through black-box execution of the completed semantic parse, there is no way to incorporate current or future environment state into the scoring function.",2 Related work,[0],[0]
+It is also in general necessary to hand-engineer a task-specific formal language for describing agent behavior.,2 Related work,[0],[0]
+"Thus it is extremely difficult to work with environments that cannot be modeled with a fixed inventory of predicates (e.g. those involving novel strings or arbitrary real quantities).
+",2 Related work,[0],[0]
+Much of contemporary work in this family is evaluated on the maze navigation task introduced by MacMahon et al. (2006).,2 Related work,[0],[0]
+"Dukes (2013) also introduced a “blocks world” task for situated parsing of spatial robot commands.
+",2 Related work,[0],[0]
+"Linear policy estimators An alternative family of approaches is based on learning a policy over primitive actions directly (Branavan et al., 2009; Vogel and Jurafsky, 2010).1 Policybased approaches instantiate a Markov decision process representing the action domain, and apply standard supervised or reinforcement-learning approaches to learn a function for greedily selecting among actions.",2 Related work,[0],[0]
+"In linear policy approximators, natural language instructions are incorporated directly into state observations, and reading order
+1This is distinct from semantic parsers in which greedy inference happens to have an interpretation as a policy (Vlachos and Clark, 2014).
+becomes part of the action selection process.",2 Related work,[0],[0]
+"Almost all existing policy-learning approaches make use of an unstructured parameterization, with a single (flat) feature vector representing all text and observations.",2 Related work,[0],[0]
+Such approaches are thus restricted to problems that are simple enough (and have small enough action spaces) to be effectively characterized in this fashion.,2 Related work,[0],[0]
+"While there is a great deal of flexibility in the choice of feature function (which is free to inspect the current and future state of the environment, the whole instruction sequence, etc.), standard linear policy estimators have no way to model compositionality in language or actions.
+",2 Related work,[0],[0]
+"Agents in this family have been evaluated on a variety of tasks, including map reading (Anderson et al., 1991) and gameplay (Branavan et al., 2009).
+",2 Related work,[0],[0]
+"Though both families address the same class of instruction-following problems, they have been applied to a totally disjoint set of tasks.",2 Related work,[0],[0]
+"It should be emphasized that there is nothing inherent to policy learning that prevents the use of compositional structure, and nothing inherent to general compositional models that prevents more complicated dependence on environment state.",2 Related work,[0],[0]
+"Indeed, previous work (Branavan et al., 2011; Narasimhan et al., 2015) uses aspects of both to solve a different class of gameplay problems.",2 Related work,[0],[0]
+"In some sense, our goal in this paper is simply to combine the strengths of semantic parsers and linear policy estimators for fully general instruction following.",2 Related work,[0],[0]
+"As we shall see, however, this requires changes to many aspects of representation, learning and inference.",2 Related work,[0],[0]
+We wish to train a model capable of following commands in a simulated environment.,3 Representations,[0],[0]
+"We do so by presenting the model with a sequence of training pairs (x,y), where each x is a sequence of natural language instructions (x1, x2, . . .",3 Representations,[0],[0]
+", xm), e.g.:
+(Go down the yellow hall., Turn left., . . . )
+",3 Representations,[0],[0]
+"and each y is a demonstrated action sequence (y1, y2, . . .",3 Representations,[0],[0]
+", yn), e.g.:
+(rotate(90), move(2), . . . )
+",3 Representations,[0],[0]
+"Given a start state, y can equivalently be characterized by a sequence of (state, action, state)
+triples resulting from execution of the environment model.",3 Representations,[0],[0]
+An example instruction is shown in Figure 2a.,3 Representations,[0],[0]
+"An example action, situated in the environment where it occurs, is shown in Figure 2e.
+",3 Representations,[0],[0]
+Our model performs compositional interpretation of instructions by leveraging existing structure inherent in both text and actions.,3 Representations,[0],[0]
+"Thus we interpret xi and yj not as raw strings and primitive actions, but rather as structured objects.
+",3 Representations,[0],[0]
+"Linguistic structure We assume access to a pretrained parser, and in particular that each of the instructions xi is represented by a tree-structured dependency parse.",3 Representations,[0],[0]
+"An example is shown in Figure 2b.
+",3 Representations,[0],[0]
+"Action structure By analogy to the representation of instructions as parse trees, we assume that each (state, action, state) triple (provided by the environment model) can be characterized by a grounding graph.",3 Representations,[0],[0]
+The structure and content of this representation is task-specific.,3 Representations,[0],[0]
+"An example grounding graph for the maze navigation task is
+shown in Figure 2d.",3 Representations,[0],[0]
+"The example contains a node corresponding to the primitive action move(2) (in the upper left), and several nodes corresponding to locations in the environment that are visible after the action is performed.
+",3 Representations,[0],[0]
+"Each node in the graph (and, though not depicted, each edge) is decorated with a list of features.",3 Representations,[0],[0]
+"These features might be simple indicators (e.g. whether the primitive action performed was move or rotate), real values (the distance traveled) or even string-valued (English-language names of visible landmarks, if available in the environment description).",3 Representations,[0],[0]
+"Formally, a grounding graph consists of a tuple (V,E,L, fV , fE), with
+– V a set of vertices
+– E ∈ V × V a set of (directed) edges – L a space of labels (numbers, strings, etc.) – fV : V → 2L a vertex feature function – fE : E → 2L an edge feature function In this paper we have tried to remain agnostic to details of graph construction.",3 Representations,[0],[0]
+Our goal with the grounding graph framework is simply to accommodate a wider range of modeling decisions than allowed by existing formalisms.,3 Representations,[0],[0]
+"Graphs might be constructed directly, given access to a structured virtual environment (as in all experiments in this paper), or alternatively from outputs of a perceptual system.",3 Representations,[0],[0]
+"For our experiments, we have remained as close as possible to task representations described in the existing literature.",3 Representations,[0],[0]
+"Details for each task can be found in the accompanying software package.
+",3 Representations,[0],[0]
+"Graph-based representations are extremely common in formal semantics (Jones et al., 2012; Reddy et al., 2014), and the version presented here corresponds to a simple generalization of familiar formal methods.",3 Representations,[0],[0]
+"Indeed, if L is the set of all atomic entities and relations, fV returns a unique label for every v ∈ V , and fE always returns a vector with one active feature, we recover the existentially-quantified portion of first order logic exactly, and in this form can implement large parts of classical neo-Davidsonian semantics (Parsons, 1990) using grounding graphs.
+",3 Representations,[0],[0]
+"Crucially, with an appropriate choice of L this formalism also makes it possible to go beyond settheoretic relations, and incorporate string-valued features (like names of entities and landmarks) and real-valued features (like colors and positions) as well.
+",3 Representations,[0],[0]
+Lexical semantics We must eventually combine features provided by parse trees with features provided by the environment.,3 Representations,[0],[0]
+"Examples here might include simple conjunctions (word=yellow ∧ rgb=(0.5, 0.5, 0.0)) or more complicated computations like edit distance between landmark names and lexical items.",3 Representations,[0],[0]
+"Features of the latter kind make it possible to behave correctly in environments containing novel strings or other features unseen during training.
+",3 Representations,[0],[0]
+"This aspect of the syntax–semantics interface has been troublesome for some logic-based approaches: while past work has used related machinery for selecting lexicon entries (Berant and Liang, 2014) or for rewriting logical forms (Kwiatkowski et al., 2013), the relationship between text and the environment has ultimately been mediated by a discrete (and indeed finite) inventory of predicates.",3 Representations,[0],[0]
+"Several recent papers have investigated simple grounded models with realvalued output spaces (Andreas and Klein, 2014; McMahan and Stone, 2015), but we are unaware of any fully compositional system in recent literature that can incorporate observations of these kinds.
+",3 Representations,[0],[0]
+"Formally, we assume access to a joining feature function φ : (2L × 2L)→ Rd.",3 Representations,[0],[0]
+"As with grounding graphs, our goal is to make the general framework as flexible as possible, and for individual experiments have chosen φ to emulate modeling decisions from previous work.",3 Representations,[0],[0]
+"As noted in the introduction, we approach instruction following as a sequence prediction problem.",4 Model,[0],[0]
+Thus we must place a distribution over sequences of actions conditioned on instructions.,4 Model,[0],[0]
+"We decompose the problem into two components, describing interlocking models of “path structure” and “action structure”.",4 Model,[0],[0]
+"Path structure captures how sequences of instructions give rise to sequences of actions, while action structure captures the compositional relationship between individual utterances and the actions they specify.
+",4 Model,[0],[0]
+"Path structure: aligning utterances to actions
+The high-level path structure in the model is depicted in Figure 3.",4 Model,[0],[0]
+"Our goal here is to permit both under- and over-specification of plans, and to expose a planning framework which allows plans to be computed with lookahead (i.e. non-greedily).
+",4 Model,[0],[0]
+These goals are achieved by introducing a sequence of latent alignments between instructions and actions.,4 Model,[0],[0]
+Consider the multi-step example in Figure 1b.,4 Model,[0],[0]
+"If the first instruction go down the yellow hall were interpreted immediately, we would have a presupposition failure—the agent is facing a wall, and cannot move forward at all.",4 Model,[0],[0]
+"Thus an implicit rotate action, unspecified by text, must be performed before any explicit instructions can be followed.
+",4 Model,[0],[0]
+"To model this, we take the probability of a (text, plan, alignment) triple to be log-proportional to the sum of two quantities:
+1.",4 Model,[0],[0]
+"a path-only score ψ(n; θ) + ∑
+j ψ(yj ; θ)
+2.",4 Model,[0],[0]
+"a path-and-text score, itself the sum of all pair scores ψ(xi, yj ; θ) licensed by the alignment
+(1) captures our desire for pragmatic constraints on interpretation, and provides a means of encoding the inherent plausibility of paths.",4 Model,[0],[0]
+"We take ψ(n; θ) and ψ(y; θ) to be linear functions of θ. (2) provides context-dependent interpretation of text by means of the structured scoring function ψ(x, y; θ), described in the next section.
+",4 Model,[0],[0]
+"Formally, we associate with each instruction xi a sequence-to-sequence alignment variable ai ∈ 1 . . .",4 Model,[0],[0]
+n,4 Model,[0],[0]
+"(recalling that n is the number of actions).
+",4 Model,[0],[0]
+"Then we have2 p(y,a|x; θ) ∝ exp { ψ(n) + n∑ j=1 ψ(yj)
++",4 Model,[0],[0]
+"m∑ i=1 n∑ j=1 1[aj = i] ψ(xi, yj) } (1)
+We additionally place a monotonicity constraint on the alignment variables.",4 Model,[0],[0]
+"This model is globally normalized, and for a fixed alignment is equivalent to a linear-chain CRF.",4 Model,[0],[0]
+"In this sense it is analogous to IBM Model I (Brown et al., 1993), with the structured potentials ψ(xi, yj) taking the place of lexical translation probabilities.",4 Model,[0],[0]
+"While alignment models from machine translation have previously been used to align words to fragments of semantic parses (Wong and Mooney, 2006; Pourdamghani et al., 2014), we are unaware of such models being used to align entire instruction sequences to demonstrations.
+",4 Model,[0],[0]
+"Action structure: aligning words to percepts Intuitively, this scoring function ψ(x, y) should capture how well a given utterance describes an action.",4 Model,[0],[0]
+"If neither the utterances nor the actions had structure (i.e. both could be represented with simple bags of features), we would recover something analogous to the conventional policy-learning approach.",4 Model,[0],[0]
+"As structure is essential for some of our tasks, ψ(x, y) must instead fill the role of a semantic parser in a conventional compositional model.
+",4 Model,[0],[0]
+"Our choice of ψ(x, y) is driven by the following fundamental assumptions: Syntactic relations approximately represent semantic relations.",4 Model,[0],[0]
+Syntactic proximity implies relational proximity.,4 Model,[0],[0]
+"In this view, there is an additional hidden structure-tostructure alignment between the grounding graph and the parsed text describing it.",4 Model,[0],[0]
+"3 Words line up with nodes, and dependencies line up with relations.",4 Model,[0],[0]
+"Visualizations are shown in Figure 2c and the zoomed-in portion of Figure 3.
+",4 Model,[0],[0]
+"As with the top-level alignment variables, this approach can viewed as a simple relaxation of a familiar model.",4 Model,[0],[0]
+"CCG-based parsers assume that syntactic type strictly determines semantic type,
+2Here and the remainder of this paper, we suppress the dependence of the various potentials on θ in the interest of readability.
+",4 Model,[0],[0]
+3It is formally possible to regard the sequence-tosequence and structure-to-structure alignments as a single (structured) random variable.,4 Model,[0],[0]
+"However, the two kinds of alignments are treated differently for purposes of inference, so it is useful to maintain a notational distinction.
+and that each lexical item is associated with a small set of functional forms.",4 Model,[0],[0]
+"Here we simply allow all words to license all predicates, multiple words to specify the same predicate, and some edges to be skipped.",4 Model,[0],[0]
+We instead rely on a scoring function to impose soft versions of the hard constraints typically provided by a grammar.,4 Model,[0],[0]
+"Related models have previously been used for question answering (Reddy et al., 2014; Pasupat and Liang, 2015).
+",4 Model,[0],[0]
+For the moment let us introduce variables b to denote these structure-to-structure alignments.,4 Model,[0],[0]
+"(As will be seen in the following section, it is straightforward to marginalize over all choices of b.",4 Model,[0],[0]
+"Thus the structure-to-structure alignments are never explicitly instantiated during inference, and do not appear in the final form of ψ(x, y).)",4 Model,[0],[0]
+"For a fixed alignment, we define ψ(x, y, b) according to a recurrence relation.",4 Model,[0],[0]
+"Let xi be the ith word of the sentence, and let yj be the jth node in the action graph (under some topological ordering).",4 Model,[0],[0]
+Let c(i) and c(j) give the indices of the dependents of xi and children of yj respectively.,4 Model,[0],[0]
+"Finally, let xik and yjl denote the associated dependency type or relation.",4 Model,[0],[0]
+"Define a “descendant” function:
+d(i, j) = { (k, l) : k ∈ c(i), l ∈ c(j), (k, l) ∈ b}
+Then, ψ(xi, yj , b) = exp { θ>φ(xi, yj)
++ ∑
+(k,l)∈d(x,y)
+",4 Model,[0],[0]
+"[ θ>φ ( xik, yjl ) · ψ(xk, yl, b)]}
+This is just an unnormalized synchronous derivation between x and y—at any aligned (node, word) pair, the score for the entire derivation is the score produced by combining that word and node, times the scores at all the aligned descendants.",4 Model,[0],[0]
+"Observe that as long as there are no cycles in the dependency parse, it is perfectly acceptable for the relation graph to contain cycles and even self-loops— the recurrence still bottoms out appropriately.",4 Model,[0],[0]
+"Given a sequence of training pairs (x,y), we wish to find a parameter setting that maximizes p(y|x; θ).",5 Learning and inference,[0],[0]
+"If there were no latent alignments a or b, this would simply involve minimization of a convex objective.",5 Learning and inference,[0],[0]
+The presence of latent variables complicates things.,5 Learning and inference,[0],[0]
+"Ideally, we would like
+Algorithm 1 Computing structure-to-structure alignments
+xi are words in reverse topological order yj are grounding graph nodes (root last) chart is an m× n array for i = 1 to |x| do
+for j = 1 to |y| do score← exp{θ>φ(xi, yj)} for (k, l) ∈ d(i, j) do
+s←∑l∈c(j) [ exp{θ>φ(xik, yjl)} · chart[k, l]
+]",5 Learning and inference,[0],[0]
+"score← score · s
+end for chart[i, j]← score
+end for end for return chart[n,m]
+to sum over the latent variables, but that sum is intractable.",5 Learning and inference,[0],[0]
+"Instead we make a series of variational approximations: first we replace the sum with a maximization, then perform iterated conditional modes, alternating between maximization of the conditional probability of a and θ.",5 Learning and inference,[0],[0]
+"We begin by initializing θ randomly.
+",5 Learning and inference,[0],[0]
+"As noted in the preceding section, the variable b does not appear in these equations.",5 Learning and inference,[0],[0]
+"Conditioned on a, the sum over structure-to-structure ψ(x, y) = ∑ b ψ(x, y, b) can be performed exactly using a simple dynamic program which runs in time O(|x||y|)",5 Learning and inference,[0],[0]
+"(assuming out-degree bounded by a constant, and with |x| and |y| the number of words and graph nodes respectively).",5 Learning and inference,[0],[0]
+"This is Algorithm 1.
+",5 Learning and inference,[0],[0]
+"In our experiments, θ is optimized using LBFGS (Liu and Nocedal, 1989).",5 Learning and inference,[0],[0]
+"Calculation of the gradient with respect to θ requires computation of a normalizing constant involving the sum over p(x,y′,a) for all y′.",5 Learning and inference,[0],[0]
+"While in principle the normalizing constant can be computed using the forward algorithm, in practice the state spaces under consideration are so large that even this is intractable.",5 Learning and inference,[0],[0]
+"Thus we make an additional approximation, constructing a set Ỹ of alternative actions and taking p(y,a|x)",5 Learning and inference,[0],[0]
+≈ n∑ j=1 exp { ψ(yj)+ ∑m i=1,5 Learning and inference,[0],[0]
+"1[ai=j]ψ(xi,yi) } ∑ ỹ∈Ỹ exp { ψ(ỹ)+ ∑m i=1",5 Learning and inference,[0],[0]
+"1[ai=j]ψ(xi,ỹ) }
+Ỹ is constructed by sampling alternative actions from the environment model.",5 Learning and inference,[0],[0]
+"Meanwhile, maximization of a can be performed exactly using the Viterbi algorithm, without computation of normalizers.
+",5 Learning and inference,[0],[0]
+Inference at test time involves a slightly different pair of optimization problems.,5 Learning and inference,[0],[0]
+"We again perform iterated conditional modes, here on the alignments a and the unknown output path y. Maximization of a is accomplished with the Viterbi algorithm, exactly as before; maximization of y also uses the Viterbi algorithm, or a beam search when this is computationally infeasible.",5 Learning and inference,[0],[0]
+"If bounds on path length are known, it is straightforward to adapt these dynamic programs to efficiently consider paths of all lengths.",5 Learning and inference,[0],[0]
+"As one of the main advantages of this approach is its generality, we evaluate on several different benchmark tasks for instruction following.",6 Evaluation,[0],[0]
+These exhibit great diversity in both environment structure and language use.,6 Evaluation,[0],[0]
+We compare our full system to recent state-of-the-art approaches to each task.,6 Evaluation,[0],[0]
+"In the introduction, we highlighted two core aspects of our approach to semantics: compositionality (by way of grounding graphs and structure-to-structure alignments) and planning (by way of inference with lookahead and sequence-to-sequence alignments).",6 Evaluation,[0],[0]
+"To evaluate these, we additionally present a pair of ablation experiments: no grounding graphs (an agent with an unstructured representation of environment state), and no planning (a reflex agent with no lookahead).
+",6 Evaluation,[0],[0]
+"Map reading Our first application is the map navigation task established by Vogel and Jurafsky (2010), based on data collected for a psychological experiment by Anderson et al. (1991) (Figure 1a).",6 Evaluation,[0],[0]
+"Each training datum consists of a map with a designated starting position, and a collection of landmarks, each labeled with a spatial coordinate and a string name.",6 Evaluation,[0],[0]
+"Names are not always unique, and landmarks in the test set are never observed during training.",6 Evaluation,[0],[0]
+This map is accompanied by a set of instructions specifying a path from the starting position to some (unlabeled) destination point.,6 Evaluation,[0],[0]
+"These instruction sets are informal and redundant, involving as many as a hundred utterances.",6 Evaluation,[0],[0]
+"They are transcribed from spoken text, so grammatical errors, disfluencies, etc. are common.",6 Evaluation,[0],[0]
+"This is a
+prime example of a domain that does not lend itself to logical representation—grammars may be too rigid, and previously-unseen landmarks and real-valued positions are handled more easily with feature machinery than predicate logic.
+",6 Evaluation,[0],[0]
+"The map task was previously studied by Vogel and Jurafsky (2010), who implemented SARSA with a simple set of features.",6 Evaluation,[0],[0]
+"By combining these features with our alignment model and search procedure, we achieve state-of-the-art results on this task by a substantial margin (Table 1).
+",6 Evaluation,[0],[0]
+Some learned feature values are shown in Table 2.,6 Evaluation,[0],[0]
+The model correctly infers cardinal directions (the example shows the preferred side of a destination landmark modified by the word top).,6 Evaluation,[0],[0]
+"Like Vogel et al., we see support for both allocentric references (you are on top of the hill) and egocentric references (the hill is on top of you).",6 Evaluation,[0],[0]
+"We can also see pragmatics at work: the model learns useful text-independent constraints—in this case, that near destinations should be preferred to far ones.
+",6 Evaluation,[0],[0]
+Maze navigation The next application we consider is the maze navigation task of MacMahon et al. (2006) (Figure 1b).,6 Evaluation,[0],[0]
+"Here, a virtual agent is sit-
+uated in a maze (whose hallways are distinguished with various wallpapers, carpets, and the presence of a small set of standard objects), and again given instructions for getting from one point to another.",6 Evaluation,[0],[0]
+"This task has been the subject of focused attention in semantic parsing for several years, resulting in a variety of sophisticated approaches.
+",6 Evaluation,[0],[0]
+"Despite superficial similarity to the previous navigation task, the language and plans required for this task are quite different.",6 Evaluation,[0],[0]
+"The proportion of instructions to actions is much higher (so redundancy much lower), and the interpretation of language is highly compositional.
+",6 Evaluation,[0],[0]
+"As can be seen in Table 3, we outperform a number of systems purpose-built for this navigation task.",6 Evaluation,[0],[0]
+"We also outperform both variants of our system, most conspicuously the variant without grounding graphs.",6 Evaluation,[0],[0]
+This highlights the importance of compositional structure.,6 Evaluation,[0],[0]
+"Recent work by Kim and Mooney (2013) and Artzi et al. (2014) has achieved better results; these systems make use of techniques and resources (respectively, discriminative reranking and a seed lexicon of handannotated logical forms) that are largely orthogonal to the ones used here, and might be applied to improve our own results as well.
+",6 Evaluation,[0],[0]
+Puzzle solving The last task we consider is the Crossblock task studied by Branavan et al. (2009) (Figure 1c).,6 Evaluation,[0],[0]
+"Here, again, natural language is used to specify a sequence of actions, in this case the solution to a simple game.",6 Evaluation,[0],[0]
+"The environment is simple enough to be captured with a flat feature
+4We specifically targeted the single-sentence version of this evaluation, as an alternative full-sequence evaluation does not align precisely with our data condition.
+",6 Evaluation,[0],[0]
+"representation, so there is no distinction between the full model and the variant without grounding graphs.
+",6 Evaluation,[0],[0]
+"Unlike the other tasks we consider, Crossblock is distinguished by a challenging associated search problem.",6 Evaluation,[0],[0]
+Here it is nontrivial to find any sequence that eliminates all the blocks (the goal of the puzzle).,6 Evaluation,[0],[0]
+"Thus this example allows us measure the effectiveness of our search procedure.
+",6 Evaluation,[0],[0]
+Results are shown in Table 4.,6 Evaluation,[0],[0]
+"As can be seen, our model achieves state-of-the-art performance on this task when attempting to match the humanspecified plan exactly.",6 Evaluation,[0],[0]
+"If we are purely concerned with task completion (i.e. solving the puzzle, perhaps not with the exact set of moves specified in the instructions) we can measure this directly.",6 Evaluation,[0],[0]
+"Here, too, we substantially outperform a no-text baseline.",6 Evaluation,[0],[0]
+"Thus it can be seen that text induces a useful heuristic, allowing the model to solve a considerable fraction of problem instances not solved by naı̈ve beam search.
+",6 Evaluation,[0],[0]
+"The problem of inducing planning heuristics from side information like text is an important one in its own right, and future work might focus specifically on coupling our system with a more sophisticated planner.",6 Evaluation,[0],[0]
+"Even at present, the results in this section demonstrate the importance of lookahead and high-level reasoning in instruction following.",6 Evaluation,[0],[0]
+"We have described a new alignment-based compositional model for following sequences of natural language instructions, and demonstrated the effectiveness of this model on a variety of tasks.",7 Conclusion,[0],[0]
+"A fully general solution to the problem of contextual interpretation must address a wide range of wellstudied problems, but the work we have described
+here provides modular interfaces for the study of a number of fundamental linguistic issues from a machine learning perspective.",7 Conclusion,[0],[0]
+"These include:
+Pragmatics How do we respond to presupposition failures, and choose among possible interpretations of an instruction disambiguated only by context?",7 Conclusion,[0],[0]
+"The mechanism provided by the sequence-prediction architecture we have described provides a simple answer to this question, and our experimental results demonstrate that the learned pragmatics aid interpretation of instructions in a number of concrete ways: ambiguous references are resolved by proximity in the map reading task, missing steps are inferred from an environment model in the maze navigation task, and vague hints are turned into real plans by knowledge of the rules in Crossblock.",7 Conclusion,[0],[0]
+"A more comprehensive solution might explicitly describe the process by which instruction-givers’ own beliefs (expressed as distributions over sequences) give rise to instructions.
+",7 Conclusion,[0],[0]
+Compositional semantics,7 Conclusion,[0],[0]
+"The graph alignment model of semantics presented here is an expressive and computationally efficient generalization of classical logical techniques to accommodate environments like the map task, or those explored in our previous work (Andreas and Klein, 2014).",7 Conclusion,[0],[0]
+"More broadly, our model provides a compositional approach to semantics that does not require an explicit formal language for encoding sentence meaning.",7 Conclusion,[0],[0]
+"Future work might extend this approach to tasks like question answering, where logicbased approaches have been successful.
+",7 Conclusion,[0],[0]
+Our primary goal in this paper has been to explore methods for integrating compositional semantics and the pragmatic context provided by sequential structures.,7 Conclusion,[0],[0]
+"While there is a great deal of work left to do, we find it encouraging that this general approach results in substantial gains across multiple tasks and contexts.",7 Conclusion,[0],[0]
+The authors would like to thank S.R.K. Branavan for assistance with the Crossblock evaluation.,Acknowledgments,[0],[0]
+The first author is supported by a National Science Foundation Graduate Fellowship.,Acknowledgments,[0],[0]
+This paper describes an alignment-based model for interpreting natural language instructions in context.,abstractText,[0],[0]
+"We approach instruction following as a search over plans, scoring sequences of actions conditioned on structured observations of text and the environment.",abstractText,[0],[0]
+"By explicitly modeling both the low-level compositional structure of individual actions and the high-level structure of full plans, we are able to learn both grounded representations of sentence meaning and pragmatic constraints on interpretation.",abstractText,[0],[0]
+"To demonstrate the model’s flexibility, we apply it to a diverse set of benchmark tasks.",abstractText,[0],[0]
+"On every task, we outperform strong task-specific baselines, and achieve several new state-of-the-art results.",abstractText,[0],[0]
+Alignment-Based Compositional Semantics for Instruction Following,title,[0],[0]
+"Proceedings of the 2016 Conference on Empirical Methods in Natural Language Processing, pages 1348–1358, Austin, Texas, November 1-5, 2016. c©2016 Association for Computational Linguistics",text,[0],[0]
+"With more than one hundred thousand new scholarly articles being published each year, there is a rapid growth in the number of citations for the relevant scientific articles.",1 Introduction,[0],[0]
+"In this context, we highlight the following interesting facts about the process of citing scientific articles: (i) the most commonly cited paper by Gerard Salton, titled “A Vector Space Model for Information Retrieval” (alleged to have been published in 1975) does not actually exist in reality (Dubin, 2004), (ii) the scientific authors read only 20% of the works they cite (Simkin and Roychowdhury, 2003), (iii) one third of the refer-
+ences in a paper are redundant and 40% are perfunctory (Moravcsik and Murugesan, 1975), (iv) 62.7% of the references could not be attributed a specific function (definition, tool etc.)",1 Introduction,[0],[0]
+"(Teufel et al., 2006).",1 Introduction,[0],[0]
+"Despite these facts, the existing bibliographic metrics consider that all citations are equally significant.
+",1 Introduction,[0],[0]
+"In this paper, we would emphasize the fact that all the references of a paper are not equally influential.",1 Introduction,[0],[0]
+"For instance, we believe that for our current paper, (Wan and Liu, 2014) is more influential reference than (Garfield, 2006), although the former has received lower citations (9) than the latter (1650) so far1.",1 Introduction,[0],[0]
+"Therefore the influence of a cited paper completely depends upon the context of the citing paper, not the overall citation count of the cited paper.",1 Introduction,[0],[0]
+"We further took the opinion of the original authors of few selective papers and realized that around 16% of the references in a paper are highly influential, and the rest are trivial (Section 4).",1 Introduction,[0],[0]
+"This motivates us to design a prediction model, GraLap to automatically label the influence of a cited paper with respect to a citing paper.",1 Introduction,[0],[0]
+"Here, we label paper-reference pairs rather than references alone, because a reference that is influential for one citing paper may not be influential with equal extent for another citing paper.
+",1 Introduction,[0],[0]
+"We experiment with ACL Anthology Network (AAN) dataset and show that GraLap along with the novel feature set, quite efficiently, predicts the intensity of references of papers, which achieves (Pearson) correlation of 0.90 with the human annotations.",1 Introduction,[0],[0]
+"Finally, we present four interesting appli-
+1The statistics are taken from Google Scholar on June 2, 2016.
+1348
+cations to show the efficacy of considering unequal intensity of references, compared to the uniform intensity.
+",1 Introduction,[0],[0]
+"The contributions of the paper are four-fold: (i) we acquire a rich annotated dataset where paperreference pairs are labeled based on the influence scores (Section 4), which is perhaps the first goldstandard for this kind of task; (ii) we propose a graph-based label propagation model GraLap for semi-supervised learning which has tremendous potential for any task where the training set is less in number and labels are non-uniformly distributed (Section 3); (iii) we propose a diverse set of features (Section 3.3); most of them turn out to be quite effective to fit into the prediction model and yield improved results (Section 5); (iv) we present four applications to show how incorporating the reference intensity enhances the performance of several stateof-the-art systems (Section 6).",1 Introduction,[0],[0]
+All the references of a paper usually do not carry equal intensity/strength with respect to the citing paper because some papers have influenced the research more than others.,2 Defining Intensity of References,[0],[0]
+"To pin down this intuition, here we discretize the reference intensity by numerical values within the range of 1 to 5, (5: most influential, 1: least influential).",2 Defining Intensity of References,[0],[0]
+"The appropriate definitions of different labels of reference intensity are presented in Figure 1, which are also the basis of building the annotated dataset (see Section 4):
+Note that “reference intensity” and “reference similarity” are two different aspects.",2 Defining Intensity of References,[0],[0]
+It might happen that two similar reference are used with different intensity levels in a citing paper – while one is just mentioned somewhere in the paper and other is used as a baseline.,2 Defining Intensity of References,[0],[0]
+"Here, we address the former problem as a semi-supervised learning problem with clues taken from content of the citing and cited papers.",2 Defining Intensity of References,[0],[0]
+"In this section, we formally define the problem and introduce our prediction model.",3 Reference Intensity Prediction Model,[0],[0]
+"We are given a set of papers P = {P1, P2, ..., PM} and a sets of references R = {R1, R2, ..., RM}, where Ri corresponds to the set of references (or cited papers) of Pi.",3.1 Problem Definition,[0],[0]
+"There is a set of papers PL ∈ P whose references RL ∈ R are already labeled by ` ∈ L = {1, ..., 5} (each reference is labeled with exactly one value).",3.1 Problem Definition,[0],[0]
+"Our objective is to define a predictive function f that labels the references RU ∈ {R \ RL} of the papers PU ∈ {P \ PL} whose reference intensities are unknown, i.e., f : (P,R, PL, RL, PU , RL) −→ L.
+Since the size of the annotated (labeled) data is much smaller than unlabeled data (|PL| |PU |), we consider it as a semi-supervised learning problem.
+",3.1 Problem Definition,[0],[0]
+Definition 1.,3.1 Problem Definition,[0],[0]
+(Semi-supervised Learning),3.1 Problem Definition,[0],[0]
+"Given a set of entries X and a set of possible labels YL, let us assume that (x1, y1), (x2, y2),..., (xl, yl) be the set of labeled data where xi is a data point and yi ∈ YL is its corresponding label.",3.1 Problem Definition,[0],[0]
+"We assume that at least one instance of each class label
+is present in the labeled dataset.",3.1 Problem Definition,[0],[0]
+"Let (xl+1, yl+1), (xl+2, yl+2),..., (xl+n, yl+u) be the unlabeled data points where YU = {yl+1, yl+2, ...yl+u} are unknown.",3.1 Problem Definition,[0],[0]
+"Each entry x ∈ X is represented by a set of features {f1, f2, ..., fD}.",3.1 Problem Definition,[0],[0]
+"The problem is to determine the unknown labels using X and YL.
+3.2 GraLap: A Prediction Model We propose GraLap, a variant of label propagation (LP) model proposed by (Zhu et al., 2003) where a node in the graph propagates its associated label to its neighbors based on the proximity.",3.1 Problem Definition,[0],[0]
+We intend to assign same label to the vertices which are closely connected.,3.1 Problem Definition,[0],[0]
+"However unlike the traditional LP model where the original values of the labels continue to fade as the algorithm progresses, we systematically handle this problem in GraLap.",3.1 Problem Definition,[0],[0]
+"Additionally, we follow a post-processing in order to handle “classimbalance problem”.",3.1 Problem Definition,[0],[0]
+Graph Creation.,3.1 Problem Definition,[0],[0]
+"The algorithm starts with the creation of a fully connected weighted graph G = (X,E) where nodes are data points and the weight wij of each edge eij ∈ E is determined by the radial basis function as follows:
+wij = exp
+( − ∑D
+d=1(x",3.1 Problem Definition,[0],[0]
+d i,3.1 Problem Definition,[0],[0]
+"− xdj )2 σ2
+) (1)
+The weight is controlled by a parameter σ.",3.1 Problem Definition,[0],[0]
+"Later in this section, we shall discuss how σ is selected.",3.1 Problem Definition,[0],[0]
+"Each node is allowed to propagate its label to its neighbors through edges (the more the edge weight, the easy to propagate).",3.1 Problem Definition,[0],[0]
+Transition Matrix.,3.1 Problem Definition,[0],[0]
+"We create a probabilistic transition matrix T|X|×|X|, where each entry Tij indicates the probability of jumping from j to i based on the following: Tij = P (j → i) =",3.1 Problem Definition,[0],[0]
+"wij∑|X|
+k=1",3.1 Problem Definition,[0],[0]
+"wkj .
+",3.1 Problem Definition,[0],[0]
+Label Matrix.,3.1 Problem Definition,[0],[0]
+"Here, we allow a soft label (interpreted as a distribution of labels) to be associated with each node.",3.1 Problem Definition,[0],[0]
+"We then define a label matrix Y|X|×|L|, where ith row indicates the label distribution for node xi.",3.1 Problem Definition,[0],[0]
+"Initially, Y contains only the values of the labeled data; others are zero.",3.1 Problem Definition,[0],[0]
+Label Propagation Algorithm.,3.1 Problem Definition,[0],[0]
+"This algorithm works as follows:
+After initializing Y and T , the algorithm starts by disseminating the label from one node to its neighbors (including self-loop) in one step (Step 3).",3.1 Problem Definition,[0],[0]
+"Then we normalize each entry of Y by the sum of its cor-
+1: Initialize T and Y 2: while (Y does not converge) do 3: Y ← TY 4: Normalize rows of Y , yij =
+yij∑ k yik
+5: Reassign original labels to XL
+responding row in order to maintain the interpretation of label probability (Step 4).",3.1 Problem Definition,[0],[0]
+Step 5 is crucial; here we want the labeled sources XL to be persistent.,3.1 Problem Definition,[0],[0]
+"During the iterations, the initial labeled nodes XL may fade away with other labels.",3.1 Problem Definition,[0],[0]
+"Therefore we forcefully restore their actual label by setting yil = 1 (if xi ∈ XL is originally labeled as l), and other entries (∀j 6=lyij) by zero.",3.1 Problem Definition,[0],[0]
+We keep on “pushing” the labels from the labeled data points which in turn pushes the class boundary through high density data points and settles in low density space.,3.1 Problem Definition,[0],[0]
+"In this way, our approach intelligently uses the unlabeled data in the intermediate steps of the learning.",3.1 Problem Definition,[0],[0]
+Assigning Final Labels.,3.1 Problem Definition,[0],[0]
+"Once YU is computed, one may take the most likely label from the label distribution for each unlabeled data.",3.1 Problem Definition,[0],[0]
+"However, this approach does not guarantee the label proportion observed in the annotated data (which in this case is not well-separated as shown in Section 4).",3.1 Problem Definition,[0],[0]
+"Therefore, we adopt a label-based normalization technique.",3.1 Problem Definition,[0],[0]
+"Assume that the label proportions in the labeled data are c1, ..., c|L| (s.t. ∑|L| i=1",3.1 Problem Definition,[0],[0]
+ci = 1).,3.1 Problem Definition,[0],[0]
+"In case of YU , we try to balance the label proportion observed in the ground-truth.",3.1 Problem Definition,[0],[0]
+"The label mass is the column sum of YU , denoted by YU.1 , ..., YU.|L| , each of which is scaled in such a way that YU.1 : ... : YU.|L| = c1 : ... : c|L|.",3.1 Problem Definition,[0],[0]
+The label of an unlabeled data point is finalized as the label with maximum value in the row of Y .,3.1 Problem Definition,[0],[0]
+Convergence.,3.1 Problem Definition,[0],[0]
+Here we briefly show that our algorithm is guaranteed to converge.,3.1 Problem Definition,[0],[0]
+"Let us combine Steps 3 and 4 as Y ← T̂ Y , where T̂ = Tij/ ∑ k Tik.",3.1 Problem Definition,[0],[0]
+"Y is composed of YLl×|L| and YUu×|L| , where YU never changes because of the reassignment.",3.1 Problem Definition,[0],[0]
+"We can split T̂ at the boundary of labeled and unlabeled data as follows:
+F̂ =",3.1 Problem Definition,[0],[0]
+"[ T̂ll T̂lu T̂ul T̂uu ]
+Therefore, YU ← T̂uuYU+ T̂ulYL, which can lead to YU = limn→∞ T̂nuuY 0",3.1 Problem Definition,[0],[0]
++,3.1 Problem Definition,[0],[0]
+[ ∑n i=1,3.1 Problem Definition,[0],[0]
+"T̂ (i−1) uu ]T̂ulYL, where Y 0 is the shape of Y at iteration 0.",3.1 Problem Definition,[0],[0]
+"We need
+to show T̂nuuijY 0",3.1 Problem Definition,[0],[0]
+← 0.,3.1 Problem Definition,[0],[0]
+"By construction, T̂ij ≥ 0, and since T̂ is row-normalized, and T̂uu is a part of T̂ , it leads to the following condition: ∃γ < 1, ∑u
+j=1 T̂uuij ≤",3.1 Problem Definition,[0],[0]
+"γ, ∀i = 1, ..., u.",3.1 Problem Definition,[0],[0]
+"So, ∑
+j
+T̂nuuij = ∑
+j
+∑
+k
+T̂ (n−1) uuik T̂uukj
+= ∑
+k
+T̂ (n−1) uuik
+∑
+j
+T̂uuik
+≤ ∑
+k
+T̂ (n−1) uuik",3.1 Problem Definition,[0],[0]
+"γ
+≤ γn
+Therefore, the sum of each row in T̂nuuij converges to zero, which indicates T̂nuuijY
+0",3.1 Problem Definition,[0],[0]
+← 0.,3.1 Problem Definition,[0],[0]
+Selection of σ.,3.1 Problem Definition,[0],[0]
+"Assuming a spatial representation of data points, we construct a minimum spanning tree using Kruskal’s algorithm (Kruskal, 1956) with distance between two nodes measured by Euclidean distance.",3.1 Problem Definition,[0],[0]
+"Initially, no nodes are connected.",3.1 Problem Definition,[0],[0]
+We keep on adding edges in increasing order of distance.,3.1 Problem Definition,[0],[0]
+"We choose the distance (say, df ) of the first edge which connects two components with different labeled points in them.",3.1 Problem Definition,[0],[0]
+"We consider df as a heuristic to the minimum distance between two classes, and arbitrarily set σ = d0/3, following 3σ rule of normal distribution (Pukelsheim, 1994).",3.1 Problem Definition,[0],[0]
+"We use a wide range of features that suitably represent a paper-reference pair (Pi, Rij), indicating Pi refers to Pj through reference Rij .",3.3 Features for Learning Model,[0],[0]
+These features can be grouped into six general classes.,3.3 Features for Learning Model,[0],[0]
+"3.3.1 Context-based Features (CF)
+",3.3 Features for Learning Model,[0],[0]
+The “reference context” of Rij in Pi is defined by three-sentence window (sentence where Rij occurs and its immediate previous and next sentences).,3.3 Features for Learning Model,[0],[0]
+"For multiple occurrences, we calculate its average score.",3.3 Features for Learning Model,[0],[0]
+We refer to “reference sentence” to indicate the sentence where Rij appears.,3.3 Features for Learning Model,[0],[0]
+(i) CF:Alone.,3.3 Features for Learning Model,[0],[0]
+It indicates whether Rij is mentioned alone in the reference context or together with other references.,3.3 Features for Learning Model,[0],[0]
+(ii) CF:First.,3.3 Features for Learning Model,[0],[0]
+"When Rij is grouped with others, this feature indicates whether it is mentioned first (e.g., “[2]” is first in “[2,4,6]”).
+",3.3 Features for Learning Model,[0],[0]
+"Next four features are based on the occurrence of words in the corresponding lists created manually (see Table 1) to understand different aspects.
+",3.3 Features for Learning Model,[0],[0]
+(iii) CF:Relevant.,3.3 Features for Learning Model,[0],[0]
+It indicates whether Rij is explicitly mentioned as relevant in the reference context (Rel in Table 1).,3.3 Features for Learning Model,[0],[0]
+(iv) CF:Recent.,3.3 Features for Learning Model,[0],[0]
+It tells whether the reference context indicates that Rij is new (Rec in Table 1).,3.3 Features for Learning Model,[0],[0]
+(v) CF:Extreme.,3.3 Features for Learning Model,[0],[0]
+It implies that Rij is extreme in some way (Ext in Table 1).,3.3 Features for Learning Model,[0],[0]
+(vi) CF:Comp.,3.3 Features for Learning Model,[0],[0]
+"It indicates whether the reference context makes some kind of comparison with Rij (Comp in Table 1).
+",3.3 Features for Learning Model,[0],[0]
+"Note we do not consider any sentiment-based features as suggested by (Zhu et al., 2015).",3.3 Features for Learning Model,[0],[0]
+"3.3.2 Similarity-based Features (SF)
+",3.3 Features for Learning Model,[0],[0]
+It is natural that the high degree of semantic similarity between the contents of Pi and Pj indicates the influence of Pj in Pi.,3.3 Features for Learning Model,[0],[0]
+"We assume that although the full text of Pi is given, we do not have access to the full text of Pj (may be due to the subscription charge or the unavailability of the older papers).",3.3 Features for Learning Model,[0],[0]
+"Therefore, we consider only the title of Pj as a proxy of its full text.",3.3 Features for Learning Model,[0],[0]
+Then we calculate the cosine-similarity2 between the title (T) of Pj and (i) SF:TTitle.,3.3 Features for Learning Model,[0],[0]
+"the title, (ii) SF:TAbs.",3.3 Features for Learning Model,[0],[0]
+"the abstract, SF:TIntro.",3.3 Features for Learning Model,[0],[0]
+"the introduction, (iv) SF:TConcl.",3.3 Features for Learning Model,[0],[0]
+"the conclusion, and (v) SF:TRest.",3.3 Features for Learning Model,[0],[0]
+"the rest of the sections (sections other than abstract, introduction and conclusion) of Pi.
+",3.3 Features for Learning Model,[0],[0]
+We further assume that the “reference context” (RC) of Pj in Pi might provide an alternate way of summarizing the usage of the reference.,3.3 Features for Learning Model,[0],[0]
+"Therefore, we take the same similarity based approach mentioned above, but replace the title of Pj with its RC and obtain five more features: (vi) SF:RCTitle, (vii) SF:RCAbs, (viii) SF:RCIntro, (ix) SF:RCConcl and (x) SF:RCRest.",3.3 Features for Learning Model,[0],[0]
+"If a reference appears multiple times in a citing paper, we consider the aggregation of all RCs together.",3.3 Features for Learning Model,[0],[0]
+"The underlying assumption of these features is that a reference which occurs more frequently in a citing paper is more influential than a single occurrence (Singh et al., 2015).",3.3.3 Frequency-based Feature (FF),[0],[0]
+We count the frequency of Rij in (i),3.3.3 Frequency-based Feature (FF),[0],[0]
+FF:Whole.,3.3.3 Frequency-based Feature (FF),[0],[0]
+"the entire content, (ii) FF:Intro.",3.3.3 Frequency-based Feature (FF),[0],[0]
+"the introduction, (iii) FF:Rel. the related work, (iv) FF:Rest.",3.3.3 Frequency-based Feature (FF),[0],[0]
+"the rest of the sections (as
+2We use the vector space based model (Turney and Pantel, 2010) after stemming the words using Porter stammer (Porter, 1997).
+mentioned in Section 3.3.2) of Pi.",3.3.3 Frequency-based Feature (FF),[0],[0]
+We also introduce (v) FF:Sec. to measure the fraction of different sections of Pi where Rij occurs (assuming that appearance of Rij in different sections is more influential).,3.3.3 Frequency-based Feature (FF),[0],[0]
+These features are further normalized using the number of sentences in Pi in order to avoid unnecessary bias on the size of the paper.,3.3.3 Frequency-based Feature (FF),[0],[0]
+"Position of a reference in a paper might be a predictive clue to measure the influence (Zhu et al., 2015).",3.3.4 Position-based Features (PF),[0],[0]
+"Intuitively, the earlier the reference appears in the paper, the more important it seems to us.",3.3.4 Position-based Features (PF),[0],[0]
+"For the first two features, we divide the entire paper into two parts equally based on the sentence count and then see whether Rij appears (i) PF:Begin.",3.3.4 Position-based Features (PF),[0],[0]
+in the beginning or (ii) PF:End.,3.3.4 Position-based Features (PF),[0],[0]
+in the end of Pi.,3.3.4 Position-based Features (PF),[0],[0]
+"Importantly, if Rij appears multiple times in Pi, we consider the fraction of times it occurs in each part.
+",3.3.4 Position-based Features (PF),[0],[0]
+"For the other two features, we take the entire paper, consider sentences as atomic units, and measure position of the sentences where Rij appears, including (iii) PF:Mean.",3.3.4 Position-based Features (PF),[0],[0]
+"mean position of appearance, (iv) PF:Std. standard deviation of different appearances.",3.3.4 Position-based Features (PF),[0],[0]
+"These features are normalized by the total length (number of sentences) of Pi. , thus ranging from 0 (indicating beginning of Pi) to 1 (indicating the end of Pi).",3.3.4 Position-based Features (PF),[0],[0]
+The linguistic evidences around the context ofRij sometimes provide clues to understand the intrinsic influence of Pj on Pi.,3.3.5 Linguistic Features (LF),[0],[0]
+Here we consider word level and structural features.,3.3.5 Linguistic Features (LF),[0],[0]
+(i) LF:NGram.,3.3.5 Linguistic Features (LF),[0],[0]
+"Different levels of n-grams (1- grams, 2-grams and 3-grams) are extracted from the reference context to see the effect of different word combination (Athar and Teufel, 2012).
+",3.3.5 Linguistic Features (LF),[0],[0]
+(ii) LF:POS.,3.3.5 Linguistic Features (LF),[0],[0]
+"Part-of-speech (POS) tags of the words in the reference sentence are used as features (Jochim and Schütze, 2012).",3.3.5 Linguistic Features (LF),[0],[0]
+(iii) LF:Tense.,3.3.5 Linguistic Features (LF),[0],[0]
+"The main verb of the reference sentence is used as a feature (Teufel et al., 2006).",3.3.5 Linguistic Features (LF),[0],[0]
+(iv) LF:Modal.,3.3.5 Linguistic Features (LF),[0],[0]
+"The presence of modal verbs (e.g., “can”, “may”) often indicates the strength of the claims.",3.3.5 Linguistic Features (LF),[0],[0]
+"Hence, we check the presence of the modal verbs in the reference sentence.",3.3.5 Linguistic Features (LF),[0],[0]
+(v) LF:MainV. We use the main-verb of the reference sentence as a direct feature in the model.,3.3.5 Linguistic Features (LF),[0],[0]
+(vi) LF:hasBut.,3.3.5 Linguistic Features (LF),[0],[0]
+"We check the presence of conjunction “but”, which is another clue to show less confidence on the cited paper.",3.3.5 Linguistic Features (LF),[0],[0]
+(vii) LF:DepRel.,3.3.5 Linguistic Features (LF),[0],[0]
+"Following (Athar and Teufel, 2012)",3.3.5 Linguistic Features (LF),[0],[0]
+"we use all the dependencies present in the reference context, as given by the dependency parser (Marneffe et al., 2006).",3.3.5 Linguistic Features (LF),[0],[0]
+(viii) LF:POSP.,3.3.5 Linguistic Features (LF),[0],[0]
+"(Dong and Schfer, 2011) use seven regular expression patterns of POS tags to capture syntactic information; then seven boolean features mark the presence of these patterns.",3.3.5 Linguistic Features (LF),[0],[0]
+"We also utilize the same regular expressions as shown below 3 with the examples (the empty parenthesis in each example indicates the presence of a reference token Rij in the corresponding sentence; while few examples are complete sentences, few are not):
+• “.*\\(\\) VV[DPZN].*”: Chen () showed that cohesion is held in the vast majority of cases for English-French.
+",3.3.5 Linguistic Features (LF),[0],[0]
+• “.*(VHP|VHZ),3.3.5 Linguistic Features (LF),[0],[0]
+"VV.*”: while Cherry and Lin () have shown it to be a strong feature for word alignment...
+• “.*VH(D|G|N|P|Z) (RB )*VBN.*”: Inducing features for taggers by clustering has been tried by several researchers ().
+",3.3.5 Linguistic Features (LF),[0],[0]
+"• “.*MD (RB )*VB(RB )* VVN.*”: For example, the likelihood of those generative procedures can be accumulated to get the likelihood of the phrase pair ().
+3The meaning of each POS tag can be found in http://nlp.stanford.edu/software/tagger.",3.3.5 Linguistic Features (LF),[0],[0]
+"shtml(Toutanova and Manning, 2000).
+",3.3.5 Linguistic Features (LF),[0],[0]
+"• “[ IW.]*VB(D|P|Z) (RB )*VV[ND].*”: Our experimental set-up is modeled after the human evaluation presented in ().
+",3.3.5 Linguistic Features (LF),[0],[0]
+• “(RB )*PP (RB )*V.*”: We use CRF () to perform this tagging.,3.3.5 Linguistic Features (LF),[0],[0]
+• “.*VVG (NP )*(CC )*(NP ).,3.3.5 Linguistic Features (LF),[0],[0]
+"*”: Following (), we provide the an-
+notators with only short sentences: those with source sentences between 10 and 25 tokens long.
+",3.3.5 Linguistic Features (LF),[0],[0]
+These are all considered as Boolean features.,3.3.5 Linguistic Features (LF),[0],[0]
+"For each feature, we take all the possible evidences from all paper-reference pairs and prepare a vector.",3.3.5 Linguistic Features (LF),[0],[0]
+"Then for each pair, we check the presence (absence) of tokens for the corresponding feature and mark the vector accordingly (which in turn produces a set of Boolean features).",3.3.5 Linguistic Features (LF),[0],[0]
+This group provides other factors to explain why is a paper being cited.,3.3.6 Miscellaneous Features (MS),[0],[0]
+(i) MS:GCount.,3.3.6 Miscellaneous Features (MS),[0],[0]
+"To answer whether a highly-cited paper has more academic influence on the citing paper than the one which is less cited, we measure the number of other papers (except Pi) citing Pj .",3.3.6 Miscellaneous Features (MS),[0],[0]
+"(ii) MS:SelfC. To see the effect of self-citation, we check whether at least one author is common in both Pi and Pj .",3.3.6 Miscellaneous Features (MS),[0],[0]
+(iii) MG:Time.,3.3.6 Miscellaneous Features (MS),[0],[0]
+"The fact that older papers are rarely cited, may not stipulate that these are less influential.",3.3.6 Miscellaneous Features (MS),[0],[0]
+"Therefore, we measure the difference of the publication years of Pi and Pj .",3.3.6 Miscellaneous Features (MS),[0],[0]
+(iv) MG:CoCite.,3.3.6 Miscellaneous Features (MS),[0],[0]
+"It measures the co-citation counts of Pi and Pj defined by
+|Ri∩Rj | |Ri∪Rj | , which in turn an-
+swers the significance of reference-based similarity driving the academic influence (Small, 1973).
+",3.3.6 Miscellaneous Features (MS),[0],[0]
+"Following (Witten and Frank, 2005), we further make one step normalization and divide each feature by its maximum value in all the entires.",3.3.6 Miscellaneous Features (MS),[0],[0]
+"We use the AAN dataset (Radev et al., 2009) which is an assemblage of papers included in ACL related venues.",4 Dataset and Annotation,[0],[0]
+"The texts are preprocessed where sentences, paragraphs and sections are properly separated using different markers.",4 Dataset and Annotation,[0],[0]
+"The filtered dataset contains 12,843 papers (on average 6.21 references per paper) and 11,092 unique authors.
+",4 Dataset and Annotation,[0],[0]
+"Next we use Parscit (Councill et al., 2008) to identify the reference contexts from the dataset and then extract the section headings from all the papers.",4 Dataset and Annotation,[0],[0]
+"Then each section heading is mapped into one
+of the following broad categories using the method proposed by (Liakata et al., 2012):",4 Dataset and Annotation,[0],[0]
+"Abstract, Introduction, Related Work, Conclusion and Rest.",4 Dataset and Annotation,[0],[0]
+Dataset Labeling.,4 Dataset and Annotation,[0],[0]
+The hardest challenge in this task is that there is no publicly available dataset where references are annotated with the intensity value.,4 Dataset and Annotation,[0],[0]
+"Therefore, we constructed our own annotated dataset in two different ways.",4 Dataset and Annotation,[0],[0]
+(i) Expert Annotation: we requested members of our research group4 to participate in this survey.,4 Dataset and Annotation,[0],[0]
+"To facilitate the labeling process, we designed a portal where all the papers present in our dataset are enlisted in a drop-down menu.",4 Dataset and Annotation,[0],[0]
+"Upon selecting a paper, its corresponding references were shown with five possible intensity values.",4 Dataset and Annotation,[0],[0]
+The citing and cited papers are also linked to the original texts so that the annotators can read the original papers.,4 Dataset and Annotation,[0],[0]
+A total of 20 researchers participated and they were asked to label as many paperreference pairs as they could based on the definitions of the intensity provided in Section 2.,4 Dataset and Annotation,[0],[0]
+The annotation process went on for one month.,4 Dataset and Annotation,[0],[0]
+"Out of total 1640 pairs annotated, 1270 pairs were taken such that each pair was annotated by at least two annotators, and the final intensity value of the pair was considered to be the average of the scores.",4 Dataset and Annotation,[0],[0]
+The Pearson correlation and Kendell’s τ among the annotators are 0.787 and 0.712 respectively.,4 Dataset and Annotation,[0],[0]
+(ii) Author Annotation: we believe that the authors of a paper are the best experts to judge the intensity of references present in the paper.,4 Dataset and Annotation,[0],[0]
+"With this intension, we launched a survey where we requested the authors whose papers are present in our dataset with significant numbers.",4 Dataset and Annotation,[0],[0]
+We designed a web portal in similar fashion mentioned earlier; but each author was only shown her own papers in the drop-down menu.,4 Dataset and Annotation,[0],[0]
+"Out of 35 requests, 22 authors responded and total 196 pairs are annotated.",4 Dataset and Annotation,[0],[0]
+This time we made sure that each paper-reference pair was annotated by only one author.,4 Dataset and Annotation,[0],[0]
+"The percentages of labels in the overall annotated dataset are as follows: 1: 9%, 2: 74%, 3: 9%, 4: 3%, 5: 4%.",4 Dataset and Annotation,[0],[0]
+"In this section, we start with analyzing the importance of the feature sets in predicting the reference
+4All were researchers with the age between 25-45 working on document summarization, sentiment analysis, and text mining in NLP.
+intensity, followed by the detailed results.",5 Experimental Results,[0],[0]
+Feature Analysis.,5 Experimental Results,[0],[0]
+"In order to determine which features highly determine the gold-standard labeling, we measure the Pearson correlation between various features and the ground-truth labels.",5 Experimental Results,[0],[0]
+"Figure 2(a) shows the average correlation for each feature group, and in each group the rank of features based on the correlation is shown in Figure 2(b).",5 Experimental Results,[0],[0]
+"Frequencybased features (FF) turn out to be the best, among which FF:Rest is mostly correlated.",5 Experimental Results,[0],[0]
+This set of features is convenient and can be easily computed.,5 Experimental Results,[0],[0]
+Both CF and LF seem to be equally important.,5 Experimental Results,[0],[0]
+"However, PF tends to be less important in this task.
+",5 Experimental Results,[0],[0]
+Results of Predictive Models.,5 Experimental Results,[0],[0]
+"For the purpose of evaluation, we report the average results after 10- fold cross-validation.",5 Experimental Results,[0],[0]
+"Here we consider five baselines to compare with GraLap: (i) Uniform: assign 3 to all the references assuming equal intensity, (ii) SVR+W: recently proposed Support Vector Regression (SVR) with the feature set mentioned in (Wan and Liu, 2014), (iii) SVR+O:",5 Experimental Results,[0],[0]
+"SVR model with our feature set, (iv) C4.5SSL: C4.5 semisupervised algorithm with our feature set (Quinlan, 1993), and (v) GLM: the traditional graph-based LP model with our feature set (Zhu et al., 2003).",5 Experimental Results,[0],[0]
+"Three metrics are used to compare the results of the competing models with the annotated labels: Root Mean Square Error (RMSE), Pearson’s correlation coeffi-
+cient (ρ), and coefficient of determination (R2)5.",5 Experimental Results,[0],[0]
+Table 2 shows the performance of the competing models.,5 Experimental Results,[0],[0]
+We incrementally include each feature set into GraLap greedily on the basis of ranking shown in Figure 2(a).,5 Experimental Results,[0],[0]
+We observe that GraLap with only FF outperforms SVR+O with 41% improvement of ρ.,5 Experimental Results,[0],[0]
+"As expected, the inclusion of PF into the model improves the model marginally.",5 Experimental Results,[0],[0]
+"However, the overall performance of GraLap is significantly higher than any of the baselines (p < 0.01).",5 Experimental Results,[0],[0]
+"In this section, we provide four different applications to show the use of measuring the intensity of references.",6 Applications of Reference Intensity,[0],[0]
+"To this end, we consider all the labeled entries for training and run GraLap to predict the intensity of rest of the paper-reference pairs.",6 Applications of Reference Intensity,[0],[0]
+Influential papers in a particular area are often discovered by considering equal weights to all the citations of a paper.,6.1 Discovering Influential Articles,[0],[0]
+We anticipate that considering the reference intensity would perhaps return more meaningful results.,6.1 Discovering Influential Articles,[0],[0]
+"To show this, Here we use the following measures individually to compute the influence of a paper: (i) RawCite: total number of citations per paper, (ii) RawPR: we construct a citation network (nodes: papers, links: citations), and measure PageRank (Page et al., 1998) of each node n: PR(n) = 1−qN + q ∑ m∈M(n) PR(m)",6.1 Discovering Influential Articles,[0],[0]
+"|L(m)| ; where, q, the damping factor, is set to 0.85, N is the total number of nodes, M(n) is the set of nodes that have edges to n, and L(m) is the set of nodes that m has an edge to, (iii) InfCite: the weighted version of RawCite, measured by the sum of intensities of all citations of a paper, (iv) InfPR: the weighted version of RawPR: PR(n) =",6.1 Discovering Influential Articles,[0],[0]
+"1−qN + q ∑
+m∈M(n) Inf(m→n)PR(m)∑
+a∈L(m)Inf(m→a) , where Inf indicates
+the influence of a reference.",6.1 Discovering Influential Articles,[0],[0]
+We rank all the articles based on these four measures separately.,6.1 Discovering Influential Articles,[0],[0]
+Table 3(a) shows the Spearman’s rank correlation between pair-wise measures.,6.1 Discovering Influential Articles,[0],[0]
+"As expected, (i) and (ii) have high correlation (same for (iii) and (iv)), whereas across two types of measures the correlation is less.",6.1 Discovering Influential Articles,[0],[0]
+"Further, in order to know which mea-
+5The less (resp. more) the value of RMSE and R2 (resp.",6.1 Discovering Influential Articles,[0],[0]
+"ρ), the better the performance of the models.
+",6.1 Discovering Influential Articles,[0],[0]
+"sure is more relevant, we conduct a subjective study where we select top ten papers from each measure and invite the experts (not authors) who annotated the dataset, to make a binary decision whether a recommended paper is relevant.",6.1 Discovering Influential Articles,[0],[0]
+6.,6.1 Discovering Influential Articles,[0],[0]
+"The average pairwise inter-annotator’s agreement (based on Cohen’s kappa (Cohen, 1960)) is 0.71.",6.1 Discovering Influential Articles,[0],[0]
+"Table 3(b) presents that out of 10 recommendations of InfPR, 7 (5) papers are marked as influential by majority (all) of the annotators, which is followed by InfCite.",6.1 Discovering Influential Articles,[0],[0]
+These results indeed show the utility of measuring reference intensity for discovering influential papers.,6.1 Discovering Influential Articles,[0],[0]
+Top three papers based on InfPR from the entire dataset are shown in Table 4.,6.1 Discovering Influential Articles,[0],[0]
+"H-index, a measure of impact/influence of an author, considers each citation with equal weight (Hirsch, 2005).",6.2 Identifying Influential Authors,[0],[0]
+"Here we incorporate the notion of reference intensity into it and define hif-index.
+",6.2 Identifying Influential Authors,[0],[0]
+Definition 2.,6.2 Identifying Influential Authors,[0],[0]
+"An author A with a set of papers P (A) has an hif-index equals to h, if h is the largest value such that |{p ∈ P (A)|Inf(p) ≥ h}| ≥ h; where Inf(p) is the sum of intensities of all citations of p.
+",6.2 Identifying Influential Authors,[0],[0]
+We consider 37 ACL fellows as the list of goldstandard influential authors.,6.2 Identifying Influential Authors,[0],[0]
+"For comparative evaluation, we consider the total number of papers (TotP), total number of citations (TotC) and average citations per paper (AvgC) as three competing measures along with h-index and hif-index.",6.2 Identifying Influential Authors,[0],[0]
+We arrange all the authors in our dataset in decreasing order of each measure.,6.2 Identifying Influential Authors,[0],[0]
+Figure 3(a) shows the Spearman’s rank correlation among the common elements across pair-wise rankings.,6.2 Identifying Influential Authors,[0],[0]
+Figure 3(b) shows the Precision@k for five competing measures at identifying ACL fellows.,6.2 Identifying Influential Authors,[0],[0]
+"We observe that hif-index performs significantly well with an overall precision of 0.54, followed by AvgC (0.37),
+6We choose papers from the area of “sentiment analysis” on which experts agree on evaluating the papers.
+",6.2 Identifying Influential Authors,[0],[0]
+"h-index (0.35), TotC (0.32) and TotP (0.34).",6.2 Identifying Influential Authors,[0],[0]
+This result is an encouraging evidence that the referenceintensity could improve the identification of the influential authors.,6.2 Identifying Influential Authors,[0],[0]
+Top three authors based on hif-index are shown in Table 4.,6.2 Identifying Influential Authors,[0],[0]
+Here we show the effectiveness of referenceintensity by applying it to a real paper recommendation system.,6.3 Effect on Recommendation System,[0],[0]
+"To this end, we consider FeRoSA7 (Chakraborty et al., 2016), a new (probably the first) framework of faceted recommendation for scientific articles, where given a query it provides facetwise recommendations with each facet representing the purpose of recommendation (Chakraborty et al., 2016).",6.3 Effect on Recommendation System,[0],[0]
+The methodology is based on random walk with restarts (RWR) initiated from a query paper.,6.3 Effect on Recommendation System,[0],[0]
+The model is built on AAN dataset and considers both the citation links and the content information to produce the most relevant results.,6.3 Effect on Recommendation System,[0],[0]
+"Instead of using the unweighted citation network, here we use the weighted network with each edge labeled by the intensity score.",6.3 Effect on Recommendation System,[0],[0]
+The final recommendation of FeRoSA is obtained by performing RWR with the transition probability proportional to the edge-weight (we call it Inf-FeRoSA).,6.3 Effect on Recommendation System,[0],[0]
+"We observe that Inf-FeRoSA achieves an average precision of 0.81 at top 10 recommendations, which is 14% higher then FeRoSA while considering the flat version and 12.34% higher than FeRoSA while considering the faceted version.",6.3 Effect on Recommendation System,[0],[0]
+"Recently, Thomson Reuters began screening for journals that exchange large number of anomalous citations with other journals in a cartel-like arrangement, often known as “citation stacking” (Jump, 2013; Hardcastle, 2015).",6.4 Detecting Citation Stacking,[0],[0]
+"This sort of citation stacking is much more pernicious and difficult to detect.
+",6.4 Detecting Citation Stacking,[0],[0]
+"7www.ferosa.org
+We anticipate that this behavior can be detected by the reference intensity.",6.4 Detecting Citation Stacking,[0],[0]
+"Since the AAN dataset does not have journal information, we use DBLP dataset (Singh et al., 2015) where the complete metadata information (along with reference contexts and abstract) is available, except the full content of the paper (559,338 papers and 681 journals; more details in (Chakraborty et al., 2014)).",6.4 Detecting Citation Stacking,[0],[0]
+"From this dataset, we extract all the features mentioned in Section 3.3 except the ones that require full text, and run our model using the existing annotated dataset as training instances.",6.4 Detecting Citation Stacking,[0],[0]
+We measure the traditional impact factor (IF ) of the journals and impact factor after considering the reference intensity (IFif ).,6.4 Detecting Citation Stacking,[0],[0]
+"Figure 4(a) shows that there are few journals whose IFif significantly deviates (3σ from the mean) from IF ; out of the suspected journals 70% suffer from the effect of self-journal citations as well (shown in Figure 4(b)), example including Expert Systems with Applications (current IF of 2.53).",6.4 Detecting Citation Stacking,[0],[0]
+One of the future work directions would be to predict such journals as early as possible after their first appearance.,6.4 Detecting Citation Stacking,[0],[0]
+"Although the citation count based metrics are widely accepted (Garfield, 2006; Hirsch, 2010), the belief that mere counting of citations is dubious has also been a subject of study (Chubin and Moitra, 1975).",7 Related Work,[0],[0]
+"(Garfield, 1964) was the first who explained the reasons of citing a paper.",7 Related Work,[0],[0]
+"(Pham and Hoffmann, 2003) introduced a method for the rapid development of complex rule bases for classifying text segments.
+",7 Related Work,[0],[0]
+"(Dong and Schfer, 2011) focused on a less manual approach by learning domain-insensitive features from textual, physical, and syntactic aspects To address concerns about h-index, different alternative measures are proposed (Waltman and van Eck, 2012).",7 Related Work,[0],[0]
+However they too could benefit from filtering or weighting references with a model of influence.,7 Related Work,[0],[0]
+"Several research have been proposed to weight citations based on factors such as the prestige of the citing journal (Ding, 2011; Yan and Ding, 2010), prestige of an author (Balaban, 2012), frequency of citations in citing papers (Hou et al., 2011).",7 Related Work,[0],[0]
+"Recently, (Wan and Liu, 2014) proposed a SVR based approach to measure the intensity of citations.",7 Related Work,[0],[0]
+"Our methodology differs from this approach in at lease four significant ways: (i) they used six very shallow level features; whereas we consider features from different dimensions, (ii) they labeled the dataset by the help of independent annotators; here we additionally ask the authors of the citing papers to identify the influential references which is very realistic (Gilbert, 1977); (iii) they adopted SVR for labeling, which does not perform well for small training instances; here we propose GraLap , designed specifically for small training instances; (iv) four applications of reference intensity mentioned here are completely new and can trigger further to reassessing the existing bibliometrics.",7 Related Work,[0],[0]
+"We argued that the equal weight of all references might not be a good idea not only to gauge success of a research, but also to track follow-up work or recommending research papers.",8 Conclusion,[0],[0]
+The annotated dataset would have tremendous potential to be utilized for other research.,8 Conclusion,[0],[0]
+"Moreover, GraLap can be used for any semi-supervised learning problem.",8 Conclusion,[0],[0]
+Each application mentioned here needs separate attention.,8 Conclusion,[0],[0]
+"In future, we shall look into more linguistic evidences to improve our model.",8 Conclusion,[0],[0]
+"Research accomplishment is usually measured by considering all citations with equal importance, thus ignoring the wide variety of purposes an article is being cited for.",abstractText,[0],[0]
+"Here, we posit that measuring the intensity of a reference is crucial not only to perceive better understanding of research endeavor, but also to improve the quality of citation-based applications.",abstractText,[0],[0]
+"To this end, we collect a rich annotated dataset with references labeled by the intensity, and propose a novel graph-based semisupervised model, GraLap to label the intensity of references.",abstractText,[0],[0]
+Experiments with AAN datasets show a significant improvement compared to the baselines to achieve the true labels of the references (46% better correlation).,abstractText,[0],[0]
+"Finally, we provide four applications to demonstrate how the knowledge of reference intensity leads to design better real-world applications.",abstractText,[0],[0]
+All Fingers are not Equal: Intensity of References in Scientific Articles,title,[0],[0]
+"Proceedings of the SIGDIAL 2015 Conference, pages 237–244, Prague, Czech Republic, 2-4 September 2015. c©2015 Association for Computational Linguistics
+Our method involves clustering the document sentences into topics using a fuzzy clustering algorithm. Then each sentence is scored according to how well it covers the various topics. This is done using statistical features such as TF, sentence length, etc. Finally, the summary is constructed from the highest scoring sentences, while avoiding overlap between the summary sentences. This makes it language-independent, but we have to afford preprocessed data first (tokenization, stemming, etc.).",text,[0],[0]
+"A document summary can be regarded as domainspecific or general-purpose, using the specificity as classification criterion (Hovy and Lin, 1998).",1 Introduction,[1.0],"['A document summary can be regarded as domainspecific or general-purpose, using the specificity as classification criterion (Hovy and Lin, 1998).']"
+"We can, also, look at this criterion from language angle: language-specific or language-independent summarization.",1 Introduction,[1.0],"['We can, also, look at this criterion from language angle: language-specific or language-independent summarization.']"
+Language-independent systems can handle more than one language.,1 Introduction,[1.0],['Language-independent systems can handle more than one language.']
+"They can be partially language-independent, which means they use language-related resources, and therefore you can’t add a new language so easily.",1 Introduction,[0],[0]
+"Inversely, they can be fully language-independent.
+",1 Introduction,[0],[0]
+"Recently, multilingual summarization has received the attention of the summarization community, such as Text Analysis Conference (TAC).",1 Introduction,[0],[0]
+"The TAC 2011 workshop included a task called “MultiLing task”, which aims to evaluate languageindependent summarization algorithms on a variety of languages (Giannakopoulos et al., 2011).",1 Introduction,[0],[0]
+"In
+the task’s pilot, there were seven languages covering news texts: Arabic, Czech, English, French, Greek, Hebrew and Hindi, where each system has to participate for at least two languages.",1 Introduction,[1.0000000206802497],"['In the task’s pilot, there were seven languages covering news texts: Arabic, Czech, English, French, Greek, Hebrew and Hindi, where each system has to participate for at least two languages.']"
+MultiLing 2013 workshop is a community-driven initiative for testing and promoting multilingual summarization methods.,1 Introduction,[0],[0]
+It aims to evaluate the application of (partially or fully) language-independent summarization algorithms on a variety of languages.,1 Introduction,[0],[0]
+"There were three tasks: “Multi-document multilingual summarization”(Giannakopoulos, 2013), “Multilingual single document summarization” (Kubina et al., 2013) and “Multilingual summary evaluation”.",1 Introduction,[0],[0]
+"The multi-document task uses the 7 past languages along with three new languages: Chinese, Romanian and Spanish.",1 Introduction,[0],[0]
+"The single document task introduces 40 languages.
+",1 Introduction,[0],[0]
+"This paper contains a description of our method (Aries et al., 2013) which uses sentences’ clustering to define topics, and then trains on these topics to score each sentence.",1 Introduction,[0],[0]
+"We will explain each task in the system (AllSummarizer), especially the preprocessing task which is languagedependent.",1 Introduction,[0],[0]
+"Then, we will discuss how we fixed the summarization’s hyper-parameters (threshold and features) for each language.",1 Introduction,[0],[0]
+The next section (Section 5) is reserved to discuss the experiments conducted in the MultiLing workshop.,1 Introduction,[0],[0]
+"Finally, we will conclude by discussing possible improvements.",1 Introduction,[0],[0]
+"Clustering has been used for summarization in many systems, either using documents as units, sentences or words.",2 Related works,[0],[0]
+The resulted clusters are used to extract the summary.,2 Related works,[0],[0]
+Some systems use just the biggest cluster to score sentences and get the top ones.,2 Related works,[0],[0]
+"Others take from each cluster a representative sentence, in order to cover all topics.",2 Related works,[0],[0]
+"While there are systems, like ours, which score sentences according to all clusters.
+237
+“CIST” (Liu et al., 2011; Li et al., 2013) is a system which uses hierarchical Latent Dirichlet Allocation topic (hLDA) model to cluster sentences into sub-topics.",2 Related works,[0],[0]
+A sub,2 Related works,[0],[0]
+-topic containing more sentences is more important and therefore those containing just one or two sentences can be neglected.,2 Related works,[0],[0]
+The sentences are scored using hLDA model combined with some traditional features.,2 Related works,[0],[0]
+"The system participated for multi-document summarization task, where all documents of the same topic are merged into a big text document.
+",2 Related works,[0],[0]
+"Likewise, “UoEssex” (El-Haj et al., 2011) uses a clustering method (K-Means) to regroup similar sentences.",2 Related works,[0],[0]
+"The biggest cluster is used to extract the summary, while other clusters are ignored.",2 Related works,[0],[0]
+"Then, the sentences are scored using their cosine similarities to the cluster’s centroid.",2 Related works,[0],[0]
+"The use of the biggest cluster is justified by the assumption that a single cluster will give a coherent summary.
+",2 Related works,[0],[0]
+"The scoring functions of these two systems are based on statistical features like frequencies of words, cosine similarity, etc.",2 Related works,[0],[0]
+"In the contrary, systems like those of Conroy et al. (2011) (“CLASSY”), Varma et al. (2011) (“SIEL IIITH”), El-Haj and Rayson (2013), etc. are corpus-based summarizers, which can make it hard to introduce new languages.",2 Related works,[0],[0]
+“CLASSY” uses naı̈ve Bayes to estimate the probability that a term may be included in the summary.,2 Related works,[0],[0]
+The classifier was trained on DUC 2005-2007 data.,2 Related works,[0],[0]
+"As for backgrounds of each language, Wikinews are used to compute Dunning G-statistic.",2 Related works,[0],[0]
+“SIEL IIITH” uses a probabilistic Hyperspace Analogue to Language model.,2 Related works,[0],[0]
+"Given a word, it estimates the probability of observing another word with it in a window of size K, using a sufficiently large corpus.",2 Related works,[0],[0]
+El-Haj and Rayson (2013) calculate the log-likelihood of each word using a corpus of words frequencies and the multiLing’13 dataset.,2 Related works,[0],[0]
+"The score of each sentence is the sum of its words’ log-likelihoods.
+",2 Related works,[0],[0]
+"In our method (Aries et al., 2013), we use a simple fuzzy clustering algorithm.",2 Related works,[0],[0]
+"We assume that a sentence can express many topics, and therefore it can belong to many clusters.",2 Related works,[0],[0]
+"Also, we believe that a summary must take in consideration other topics than the main one (the biggest cluster).",2 Related works,[0],[0]
+"To score sentences, we use a scoring function based on Naı̈ve Bayes classification.",2 Related works,[0],[0]
+"It uses the clusters for training rather than a corpus, in order to avoid the problem of language dependency.",2 Related works,[0],[0]
+One of multilingual summarization’s problem is the lack of resources such as labeled corpus used for learning.,3 System overview,[0],[0]
+"Learning algorithms were used either to select the sentences that should be in the summary, or to estimate the features’ weights.",3 System overview,[0],[0]
+Both cases need a training corpus given the language and the domain we want to adapt the summarizer to.,3 System overview,[0],[0]
+"To design a language-neutral summarization system, either we adapt a system for input languages (Partly language-neutral), or we design a system that can process any language (Fully language-neutral).
+",3 System overview,[0],[0]
+"Our sentence extraction method can be applied to any language without any modifications, affording the pre-process step of the input language.",3 System overview,[0],[0]
+"To do this, we had to find a new method to train our system other than using a corpus (language and topic dependent).",3 System overview,[0],[0]
+The idea was to find different topics in the input text using similarity between sentences.,3 System overview,[0],[0]
+"Then, we train the system using a scoring function based on Bayes classification algorithm and a set of features to find the probability of a feature given the topic.",3 System overview,[0],[0]
+"Finally, we calculate for each sentence a score that reflects how it can represent all the topics.
+",3 System overview,[0],[0]
+"In our previous work (Aries et al., 2013), our system used only two features which have the same nature (TF: uni-grams and bi-grams).",3 System overview,[0],[0]
+"When we add new features, this can affect the final result (summary).",3 System overview,[0],[0]
+"Also, our clustering method lies on the clustering threshold which has to be estimated somehow.",3 System overview,[0],[0]
+"To handle multi-document summarization, we just fuse all documents in the same topic and consider them as one document.",3 System overview,[0],[0]
+Figure 1 represents the general architecture of AllSummarizer1.,3 System overview,[1.0],['Figure 1 represents the general architecture of AllSummarizer1.']
+"This is the language-dependent part, which can be found in many information retrieval (IR) works.",3.1 Preprocessing,[1.0],"['This is the language-dependent part, which can be found in many information retrieval (IR) works.']"
+"In our system, we are interested in four preprocessing tasks:
+• Normalizer: in this step, we can delete special characters.",3.1 Preprocessing,[0],[0]
+"For Arabic, we can delete diacritics (Tashkiil) if we don’t need them in the process (which is our case).
+",3.1 Preprocessing,[0],[0]
+"• Segmenter: The segmenter defines two func1 https://github.com/kariminf/AllSummarizer
+tions: sentence segmentation and word tokenization.
+",3.1 Preprocessing,[0],[0]
+•,3.1 Preprocessing,[0],[0]
+"Stemmer: The role of this task is to delete suffixes and prefixes so we can get the stem of a word.
+",3.1 Preprocessing,[0],[0]
+"• Stop-Words eliminator: It is used to remove the stop words, which are the words having no signification added to the text.
+",3.1 Preprocessing,[0],[0]
+"In this work, normalization is used just for Arabic and Persian to delete diacritics (Tashkiil).",3.1 Preprocessing,[0],[0]
+"Concerning stop-word elimination, we use precompiled word-lists available on the web.",3.1 Preprocessing,[1.0],"['Concerning stop-word elimination, we use precompiled word-lists available on the web.']"
+Table 1 shows each language and the tools used in the remaining pre-processing tasks.,3.1 Preprocessing,[0],[0]
+"Each text contains many topics, where a topic is a set of sentences having some sort of relationship between each other.",3.2 Topics clustering,[1.0],"['Each text contains many topics, where a topic is a set of sentences having some sort of relationship between each other.']"
+"In our case, this relationship is the cosine similarity between each two sentences.",3.2 Topics clustering,[0],[0]
+"It means, the sentences that have many terms in common are considered in the same topic.",3.2 Topics clustering,[0],[0]
+"Given two sentences X and Y , the cosine similar-
+2 https://opennlp.apache.org/ 3 https://github.com/mojtaba-khallash/JHazm 4 https://lucene.apache.org/ 5 http://zeus.cs.pacificu.edu/shereen/research.htm 6 http://code972.com/hebmorph 7 http://snowball.tartarus.org/
+ity between them is expressed by equation 1.
+",3.2 Topics clustering,[0],[0]
+"cos(X,Y )",3.2 Topics clustering,[0],[0]
+=,3.2 Topics clustering,[0],[0]
+"∑ i xi.yi√∑
+i(xi)2.",3.2 Topics clustering,[0],[0]
+"√∑ i(yi)2 (1)
+Where xi (yi) denotes frequencies for each term in the sentence X (Y ).
+",3.2 Topics clustering,[0],[0]
+"To generate topics, we use a simple algorithm (see algorithm 1) which uses cosine similarity and a clustering threshold th to cluster n sentences.
+",3.2 Topics clustering,[0.9999999353060716],"['To generate topics, we use a simple algorithm (see algorithm 1) which uses cosine similarity and a clustering threshold th to cluster n sentences.']"
+Algorithm 1: clustering method Data: Pre-processed sentences Result: clusters of sentences (C) foreach sentence,3.2 Topics clustering,[0],[0]
+"Si / i = 1 to n do
+Ci += Si ; // Ci: ith cluster foreach sentence",3.2 Topics clustering,[0],[0]
+"Sj / j = i + 1 to n do
+Sim = cosine similarity(Si, Sj) ; if sim > th then
+Ci += Sj ; end
+end C += Ci ;
+end foreach cluster Ci / i=n to 1 do
+foreach cluster Cj / j=i-1 to 1 do if Ci is included in Cj then
+C -= Ci ; break ;
+end end
+end",3.2 Topics clustering,[0],[0]
+"A summary is a short text that is supposed to represent most information in the source text, and cover most of its topics.",3.3 Scoring function,[0],[0]
+"Therefore, we assume that a sentence si can be in the summary when it is most probable to represent all topics (clusters) cj ∈ C using a set of features fk ∈ F .",3.3 Scoring function,[0],[0]
+"We used Naı̈ve Bayes, assuming independence between different classes and different features (a sentence can have multiple classes).",3.3 Scoring function,[0],[0]
+"So, the score of a sentence si is the product over classes of the product over features of its score in a specific class and feature (see equation. 2).
+",3.3 Scoring function,[0],[0]
+"Score(si, ⋂ j cj , F ) = ∏ j ∏ k Score(si, cj , fk)
+(2)
+",3.3 Scoring function,[0],[0]
+The score of a sentence si in a specific class cj and feature fk is the sum of probability of the feature’s observations when si ∈ cj (see equation. 3).,3.3 Scoring function,[0],[0]
+"We add one to the sum, to avoid multiplying by a features’ score of zero.
+Score(si, cj , fk) = 1 + ∑ φ∈si
+P (fk = φ|si ∈ cj) (3)
+Where φ is an observation of the feature fk in the sentence si.",3.3 Scoring function,[0],[0]
+"For example, assuming the feature f1 is term frequency, and we have a sentence: “I am studying at home.”.",3.3 Scoring function,[0],[0]
+"The sentence after pre-processing would be: s1 = {“studi”(stem of “study”), “home”}.",3.3 Scoring function,[0],[0]
+"So, φ may be “studi” or “home”, or any other term.",3.3 Scoring function,[0],[0]
+"If we take another feature f2 which is sentence position, the observation φ may take 1st, 2nd, 3rd, etc. as values.",3.3 Scoring function,[0],[0]
+"We use 5 statistical features to score the sentences: unigram term frequency (TFU), bigram term frequency (TFB), sentence position (Pos) and sentence length (Rleng, PLeng).
+",3.4 Statistical features,[0.9999999968586204],"['We use 5 statistical features to score the sentences: unigram term frequency (TFU), bigram term frequency (TFB), sentence position (Pos) and sentence length (Rleng, PLeng).']"
+Each feature divides the sentences to several categories.,3.4 Statistical features,[0],[0]
+"For example, if we have a text written just with three characters: a, b and c, and the feature is the characters of the text, then we will have three categories.",3.4 Statistical features,[0],[0]
+"Each category has a probability to occur in a cluster, which is the number of its appearance in this cluster divided by all cluster’s terms, as shown in equation 4.
+",3.4 Statistical features,[0.9999999793895847],"['Each category has a probability to occur in a cluster, which is the number of its appearance in this cluster divided by all cluster’s terms, as shown in equation 4.']"
+Pf (f = φ|cj) =,3.4 Statistical features,[0],[0]
+|φ ∈ cj |∑,3.4 Statistical features,[0],[0]
+"cl∈C |φ′ ∈ cl|
+(4)
+",3.4 Statistical features,[0],[0]
+Where f is a given feature.,3.4 Statistical features,[0],[0]
+φ and φ′ are observations (categories) of the feature f .,3.4 Statistical features,[0],[0]
+C is the set of clusters.,3.4 Statistical features,[0],[0]
+This feature is used to calculate the sentence pertinence depending on its terms.,3.4.1 Unigram term frequency,[0],[0]
+Each term is considered as a category.,3.4.1 Unigram term frequency,[0],[0]
+"This feature is similar to unigram term frequency, but instead of one term we use two consecutive terms.",3.4.2 Bigram term frequency,[0],[0]
+We want to use sentence positions in the original texts as a feature.,3.4.3 Sentence position,[0],[0]
+"The position feature used by Osborne (2002) divides the sentences into three
+sets: the ones in the 8 first paragraphs, those in last 3 paragraphs and the others in between.",3.4.3 Sentence position,[0],[0]
+"Following the assumption that the first sentences and last ones are more important than the others.
+",3.4.3 Sentence position,[0],[0]
+Three categories of sentence positions seem very small to express the diversity between the clusters.,3.4.3 Sentence position,[0],[0]
+"Instead of just three categories, we divided the position space into 10 categories.",3.4.3 Sentence position,[0],[0]
+"So, if we have 20 sentences, we will have 2 sentences per category.",3.4.3 Sentence position,[0],[0]
+"One other feature applied in our system is the sentence length (number of words), which is used originally to penalize the short sentences.",3.4.4 Sentence length,[0],[0]
+"Following a sentence’s length, we can put it in one of three categories: sentences with length less than 6 words, those with length more than 20 words, and those with length in between Osborne (2002).
+",3.4.4 Sentence length,[0],[0]
+"Like sentence position, three categories is a small number.",3.4.4 Sentence length,[0],[0]
+"Therefore, we used each length as a category.",3.4.4 Sentence length,[0],[0]
+"Suppose we have 4 sentences which the lengths are: 5, 6, 5 and 7, then we will have 3 categories of lengths: 5, 6 and 7.
+",3.4.4 Sentence length,[0],[0]
+"In our work, we use two types of sentence length:
+• Real length (RLeng): which is the length of the sentence without removing stop-words.
+",3.4.4 Sentence length,[0],[0]
+• Pre-processed length (PLeng): which is the length of the sentence after pre-processing.,3.4.4 Sentence length,[0],[0]
+"To extract sentences, we reorder them decreasingly using their scores.",3.5 Summary extraction,[0],[0]
+Then we extract the first non similar sentences until we get the wanted size (see algorithm 2).,3.5 Summary extraction,[0],[0]
+"In this section, we describe how the summarization parameters have been chosen.
+",4 Summarization parameters,[0],[0]
+"The first parameter is the clustering threshold, which will lead to few huge clusters if it is small, and inversely.",4 Summarization parameters,[0],[0]
+The clustering threshold is used with sentences’ similarities to decide if two sentences are similar or not.,4 Summarization parameters,[1.0],['The clustering threshold is used with sentences’ similarities to decide if two sentences are similar or not.']
+Our idea is to use statistic measures over those similarities to estimate the clustering threshold.,4 Summarization parameters,[1.0],['Our idea is to use statistic measures over those similarities to estimate the clustering threshold.']
+"Eight measures have been used:
+• The median
+Algorithm 2: extraction method Data: input text Result: a summary add the first sentence to the summary; foreach sentence in the text do
+calculate cosine similarity between this sentence and the last accepted one; if the simularity is under the threshold then
+add this sentence to the summary; end if the sum of the summary size and the current sentence’s is above the maximum size then
+delete this sentence from the summary;
+end end
+•",4 Summarization parameters,[0],[0]
+The mean •,4 Summarization parameters,[0],[0]
+"The mode which can be divided to two: lower
+mode and higher mode, since we can have many modes.
+",4 Summarization parameters,[0],[0]
+"• The variance • sDn = ∑ |s|
+|D|∗n
+• Dsn = |D| n∗ ∑ |s|
+• Ds = |D|∑ |s|",4 Summarization parameters,[0],[0]
+"Where, |s| is the number of different terms in a sentence s. |D| is the number of different terms in the document D. n is the number of sentences in this document.
+",4 Summarization parameters,[0],[0]
+"The second parameter is the features’ set, which is the combination of at least one of the five features described in section 3.4.",4 Summarization parameters,[0],[0]
+"We want to know which features are useful and which are not for a given language.
+",4 Summarization parameters,[0],[0]
+"To fix the problem of the clustering threshold and the set of features, we used the training sets provided by the workshop organizers.",4 Summarization parameters,[0],[0]
+"For each document (or topic in multi-document), we generated summaries using the 8 measures of th, and different combinations of the scoring features.",4 Summarization parameters,[1.0],"['For each document (or topic in multi-document), we generated summaries using the 8 measures of th, and different combinations of the scoring features.']"
+"Then, we calculated the average ROUGE-2 score for each language.",4 Summarization parameters,[1.0],"['Then, we calculated the average ROUGE-2 score for each language.']"
+"The threshold measure and the set of features that maximize this average will be used as parameters for the trained language.
+",4 Summarization parameters,[0],[0]
+Table 2 represents an example of the 10 languages and their parameters used for both tasks: MSS and MMS.,4 Summarization parameters,[0],[0]
+We have to point out that the average is not always the best choice for the individual documents (or topic in multi-document).,4 Summarization parameters,[0],[0]
+"For example, in MSS, there is a document which gives a ROUGE-2 score of 0.28 when we use the parameters based on average scores.",4 Summarization parameters,[0],[0]
+"When we use the mean as threshold and just TFB as feature for the same document, we get a ROUGE-2 score of 0.31.",4 Summarization parameters,[0],[0]
+"We participated in all workshop’s languages, either in single document or multi-document tasks.",5 Experiments,[0],[0]
+"To compare our system to others participated systems, we followed these steps (for every evaluation metric):
+• For each system, calculate the average scores of all used languages.
+",5 Experiments,[0.9999999426563477],"['To compare our system to others participated systems, we followed these steps (for every evaluation metric): • For each system, calculate the average scores of all used languages.']"
+"• For our system, calculate the average scores of used languages by others.",5 Experiments,[0],[0]
+"For example, BGU-SCE-M team uses Arabic, English and Hebrew; We calculate the average of scores of these languages for this system and ours.
+",5 Experiments,[0],[0]
+"• Then, we calculate the relative improvement using the averages oursystem−othersystemothersystem .",5 Experiments,[1.0],"['• Then, we calculate the relative improvement using the averages oursystem−othersystemothersystem .']"
+"In “Single document summarization” task, ROUGE (Recall-Oriented Understudy for Gisting Evaluation) (Lin, 2004) is used to evaluate the participated systems.",5.1 Evaluation metrics,[0],[0]
+It allows us to evaluate automatic text summaries against human made abstracts.,5.1 Evaluation metrics,[0],[0]
+The principle of this method is to compare N-grams of two summaries based on the number of matches between these two based on the recall measure.,5.1 Evaluation metrics,[0],[0]
+"Five metrics are used: ROUGE-1, ROUGE-2, ROUGE-3, ROUGE-4 and ROUGE-SU4.
+",5.1 Evaluation metrics,[0],[0]
+"In “Multi-document summarization” task, Three metrics are officially used: AutoSummENG, MeMoG (Giannakopoulos and Karkaletsis, 2011) and NPowER (Giannakopoulos and Karkaletsis, 2013).",5.1 Evaluation metrics,[0],[0]
+"Besides our system (AllSummarizer), there are two more systems which participated in all 38 languages (EXB and CCS).",5.2 Single document summarization,[0],[0]
+"Table 3 shows the comparison between our system and the other systems
+in single document task, using the relative improvement.
+",5.2 Single document summarization,[0],[0]
+"Looking at these results, our system took the fifth place out of seven participants.",5.2 Single document summarization,[1.0],"['Looking at these results, our system took the fifth place out of seven participants.']"
+It outperforms the Lead baseline.,5.2 Single document summarization,[0],[0]
+It took the last place out of three participants in all 38 languages.,5.2 Single document summarization,[0],[0]
+"Besides our system (AllSummarizer), there are 4 systems that participated with all the 10 languages.",5.3 Multi-document summarization,[0],[0]
+"Table 4 shows a comparison between our system and the other systems in multi-document task, using the relative improvement.",5.3 Multi-document summarization,[1.0],"['Table 4 shows a comparison between our system and the other systems in multi-document task, using the relative improvement.']"
+"We used the parameters fixed for single document summarization to see if the same parameters are applicable for both single and multi-document summarizations.
+",5.3 Multi-document summarization,[0.999999984516931],['We used the parameters fixed for single document summarization to see if the same parameters are applicable for both single and multi-document summarizations.']
+"Looking to the results, our system took the seventh place out of ten participants.",5.3 Multi-document summarization,[1.0],"['Looking to the results, our system took the seventh place out of ten participants.']"
+"When we use single document parameters, we can see that it doesn’t outperform the results when using the parameters fixed for multi-document summarization.",5.3 Multi-document summarization,[0],[0]
+This shows that we can’t use the same parameters for both single and multi-document summarization.,5.3 Multi-document summarization,[0],[0]
+Our intension is to create a method which is language and domain independent.,6 Conclusion,[0],[0]
+"So, we consider the input text as a set of topics, where a sentence can belong to many topics.",6 Conclusion,[1.0],"['So, we consider the input text as a set of topics, where a sentence can belong to many topics.']"
+We calculated how much a sentence can represent all the topics.,6 Conclusion,[1.0],['We calculated how much a sentence can represent all the topics.']
+"Then, the score is used to reorder the sentences and extract the first non redundant ones.
+",6 Conclusion,[0.9999999948257583],"['Then, the score is used to reorder the sentences and extract the first non redundant ones.']"
+"We tested our system using the average score of all languages, in single and multi-document summarization.",6 Conclusion,[0],[0]
+"Compared to other systems, it affords fair results, but more improvements have to be done in the future.",6 Conclusion,[1.0],"['Compared to other systems, it affords fair results, but more improvements have to be done in the future.']"
+We have to point out that our system participated in all languages.,6 Conclusion,[0],[0]
+"Also, it is easy to add new languages when you can afford tokenization and stemming.
+",6 Conclusion,[0],[0]
+We fixed the parameters (threshold and features) based on the average score of ROUGE-2 of all training documents.,6 Conclusion,[1.0],['We fixed the parameters (threshold and features) based on the average score of ROUGE-2 of all training documents.']
+Further investigations must be done to estimate these parameters for each document based on statistical criteria.,6 Conclusion,[1.0],['Further investigations must be done to estimate these parameters for each document based on statistical criteria.']
+We want to investigate the effect of the preprocessing step and the clustering methods on the resulted summaries.,6 Conclusion,[1.0],['We want to investigate the effect of the preprocessing step and the clustering methods on the resulted summaries.']
+"Finally, readability remains a challenge for extractive methods, especially when we want to use a multilingual method.",6 Conclusion,[1.0],"['Finally, readability remains a challenge for extractive methods, especially when we want to use a multilingual method.']"
+"In this paper, we evaluate our automatic text summarization system in multilingual context.",abstractText,[0],[0]
+We participated in both single document and multi-document summarization tasks of MultiLing 2015 workshop.,abstractText,[0],[0]
+Our method involves clustering the document sentences into topics using a fuzzy clustering algorithm.,abstractText,[0],[0]
+Then each sentence is scored according to how well it covers the various topics.,abstractText,[0],[0]
+"This is done using statistical features such as TF, sentence length, etc.",abstractText,[0],[0]
+"Finally, the summary is constructed from the highest scoring sentences, while avoiding overlap between the summary sentences.",abstractText,[0],[0]
+"This makes it language-independent, but we have to afford preprocessed data first (tokenization, stemming, etc.).",abstractText,[0],[0]
+AllSummarizer system at MultiLing 2015: Multilingual single and multi-document summarization,title,[0],[0]

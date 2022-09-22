@@ -1,0 +1,478 @@
+0,1,label2,summary_sentences
+"Proceedings of NAACL-HLT 2018, pages 1907–1918 New Orleans, Louisiana, June 1 - 6, 2018. c©2018 Association for Computational Linguistics",text,[0],[0]
+Deep Learning (DL) has radically changed the rules of the game in NLP by dramatically boosting performance figures in almost all applications areas.,1 Introduction,[0],[0]
+"Yet, one of the major premises of highperformance DL engines is their dependence on huge amounts of training data.",1 Introduction,[0],[0]
+"As such, DL seems ill-suited for areas where training data are scarce, such as in the field of word emotion induction.
+",1 Introduction,[0],[0]
+"We will use the terms polarity and emotion here to distinguish between research focusing on “semantic orientation” (Hatzivassiloglou and McKeown, 1997) (the positiveness or negativeness) of affective states, on the one hand, and approaches which provide predictions based on some of the many more elaborated representational systems for affective states, on the other hand.
+",1 Introduction,[0],[0]
+"Originally, research activities focused on polarity alone.",1 Introduction,[0],[0]
+"In the meantime, a shift towards more expressive representation models for emotion can be observed that heavily draws inspirations from psychological theory, e.g., Basic Emotions (Ekman, 1992) or the Valence-Arousal-Dominance model (Bradley and Lang, 1994).
+",1 Introduction,[0],[0]
+"Though this change turned out to be really beneficial for sentiment analysis in NLP, a large variety of mutually incompatible encodings schemes for emotion and, consequently, annotation formats for emotion metadata in corpora have emerged that hinder the interoperability of these resources and their subsequent reuse, e.g., on the basis of alignments or mergers (Buechel and Hahn, 2017).
+",1 Introduction,[0.9528079900254172],"['Syntactic structure, selective restrictions, subcategorization, and discourse considerations are among the many factors which join together to fix the order in which words occur.']"
+"As an alternative way of dealing with thus unwarranted heterogeneity, we here examine the potential of multi-task learning (MTL; Caruana (1997)) for word-level emotion prediction.",1 Introduction,[0],[0]
+"In MTL for neural networks, a single model is fitted to solve multiple, independent tasks (in our case, to predict different emotional dimensions) which typically results in learning more robust and meaningful intermediate representations.",1 Introduction,[0],[0]
+"MTL has been shown to greatly decrease the risk of overfitting (Baxter, 1997), work well for various NLP tasks (Setiawan et al., 2015; Liu et al., 2015; Søgaard and Goldberg, 2016; Cummins et al., 2016; Liu et al., 2017; Peng et al., 2017), and practically increases sample size, thus making it a natural choice for small-sized data sets typically found in the area of word emotion induction.
+1907
+After a discussion of related work in Section 2, we will introduce several reference methods and describe our proposed deep MTL model in Section 3.",1 Introduction,[0.9578892289950693],"['We address the task of recovering the original word order of a shuffled sentence, referred to as bag generation (Brown et al., 1990), shake-and-bake generation (Brew, 1992), or more recently, linearization, as standardized in a recent line of research as a method useful for isolating the performance of text-to-text generation models (Zhang and Clark, 2011; Liu et al., 2015; Liu and Zhang, 2015; Zhang and Clark, 2015).']"
+"In our experiments (Section 4), we will first validate our claim that MTL is superior to single-task learning for word emotion induction.",1 Introduction,[0],[0]
+"After that, we will provide a large-scale evaluation of our model featuring 9 typologically diverse languages and multiple publicly available embedding models for a total of 15 conditions.",1 Introduction,[0],[0]
+"Our MTL model surpasses the current state-of-the-art for each of them, and even performs competitive relative to human reliability.",1 Introduction,[0],[0]
+"Most notably however, our approach yields the largest benefit on the smallest data sets, comprising merely one thousand samples.",1 Introduction,[0],[0]
+"This finding, counterintuitive as it may be, strongly suggests that MTL is particularly beneficial for solving the word emotion induction problem.",1 Introduction,[0],[0]
+Our code base as well as the resulting experimental data is freely available.1,1 Introduction,[0],[0]
+"This section introduces the emotion representation format underlying our study and describes external resources we will use for evaluation before we discuss previous methodological work.
+",2 Related Work,[0],[0]
+Emotion Representation and Data Sets.,2 Related Work,[0],[0]
+"Psychological models of emotion can typically be subdivided into discrete (or categorical) and dimensional ones (Stevenson et al., 2007; Calvo and Mac Kim, 2013).",2 Related Work,[0],[0]
+Discrete models are centered around particular sets of emotional categories considered to be fundamental.,2 Related Work,[0],[0]
+"Ekman (1992), for instance, identifies six Basic Emotions (Joy, Anger, Sadness, Fear, Disgust and Surprise).
+",2 Related Work,[0],[0]
+"In contrast, dimensional models consider emotions to be composed of several influencing factors (mainly two or three).",2 Related Work,[0],[0]
+"These are often referred to as Valence (a positive–negative scale), Arousal (a calm–excited scale), and Dominance (perceived degree of control over a (social) situation)—the VAD model (Bradley and Lang (1994); see Figure 1 for an illustration).",2 Related Work,[0],[0]
+"Many contributions though omit Dominance (the VA model) (Russell, 1980).",2 Related Work,[0],[0]
+"For convenience, we will still use the term “VAD” to jointly refer to both variants (with and without Dominance).
+",2 Related Work,[0],[0]
+"VAD is the most common framework to acquire empirical emotion values for words in psychology.
+",2 Related Work,[0],[0]
+"1 https://github.com/JULIELab/wordEmotions
+Over the years, a considerable number of such resources (also called “emotion lexicons”) have emerged from psychological research labs (as well as some NLP labs) for diverse languages.",2 Related Work,[0],[0]
+The emotion lexicons we use in our experiments are listed in Table 1.,2 Related Work,[0],[0]
+An even more extensive list of such data sets is presented by Buechel and Hahn (2018).,2 Related Work,[0],[0]
+"For illustration, we also provide three sample entries from one of those lexicons in Table 2.",2 Related Work,[0],[0]
+"As can be seen, the three affective dimensions behave complementary to each other, e.g., “terrorism” and “orgasm” display similar Arousal but opposing Valence.
+",2 Related Work,[0],[0]
+"The task we address in this paper is to predict the values for Valence, Arousal and Dominance, given a lexical item.",2 Related Work,[0],[0]
+"As is obvious from these examples, we consider emotion prediction as a regression, not as a classification problem (see arguments discussed in Buechel and Hahn (2016)).
+",2 Related Work,[0],[0]
+"In this paper, we focus on the VAD format for the following reasons: First, note that the Valence dimension exactly corresponds to polarity (Turney and Littman, 2003).",2 Related Work,[0],[0]
+"Hence, with the VAD model, emotion prediction can be seen as a generalization over classical polarity prediction.",2 Related Work,[0],[0]
+"Second, to the best of our knowledge, the amount and diversity of available emotion lexicons with VAD encodings is larger than for any other format (see Table 1).
+",2 Related Work,[0.9525663492966822],"['To further explore the impact of search accuracy, Table 2 shows the results of various models with beam widths ranging from 1 (greedy search) to 512, and also with and without future costs g. We see that for the better models there is a steady increase in accuracy even with large beams, indicating that search errors are made even with relatively large beams.']"
+Word Embeddings.,2 Related Work,[0],[0]
+"Word embeddings are dense, low-dimensional vector representations of words trained on large volumes of raw text in an unsupervised manner.",2 Related Work,[0],[0]
+"The following are among today’s most popular embedding algorithms:
+WORD2VEC (with its variants SGNS and CBOW) features an extremely trimmed down neural network (Mikolov et al., 2013).",2 Related Work,[0],[0]
+"FASTTEXT is a derivative of WORD2VEC, also incorporating sub-word character n-grams (Bojanowski et al., 2017).",2 Related Work,[0],[0]
+"Unlike the former two algorithms which fit word embeddings in a streaming fashion, GLOVE trains word vectors directly on a word co-occurrence matrix under the assumption to make more efficient use of word statistics (Pennington et al., 2014).",2 Related Work,[0],[0]
+"Somewhat similar, SVDPPMI performs singular value decomposition on top of a point-wise mutual information co-occurrence matrix (Levy et al., 2015).
+",2 Related Work,[0],[0]
+"In order to increase the reproducibility of our experiments, we rely on the following widely used, publicly available embedding models trained on very large corpora (summarized in Table 3): the SGNS model trained on the Google News corpus2",2 Related Work,[0],[0]
+"(GOOGLE), the FASTTEXT model trained on Common Crawl3 (COMMON), as well as the FASTTEXT models for a wide range of languages trained on the respective Wikipedias4 (WIKI).
+",2 Related Work,[0],[0]
+"2https://code.google.com/archive/p/ word2vec/
+3https://fasttext.cc/docs/en/ english-vectors.html
+4https://github.com/facebookresearch/ fastText/blob/master/pretrained-vectors.",2 Related Work,[0],[0]
+"md
+Note that WIKI denotes multiple embedding models with different training and vocabulary sizes (see Grave et al. (2018) for further details).",2 Related Work,[0],[0]
+"Additionally, we were given the opportunity to reuse the English embedding model from Sedoc et al. (2017) (GIGA), a strongly related contribution (see below).",2 Related Work,[0],[0]
+"Their embeddings were trained on the English Gigaword corpus (Parker et al., 2011).
+",2 Related Work,[0],[0]
+Word-Level Prediction.,2 Related Work,[0],[0]
+"One of the early approaches to word polarity induction which is still popular today (Köper and Schulte im Walde, 2016) was introduced by Turney and Littman (2003).",2 Related Work,[0],[0]
+"They compute the polarity of an unseen word based on its point-wise mutual information (PMI) to a set of positive and negative seed words, respectively.
+",2 Related Work,[0],[0]
+"SemEval-2015 Task 10E featured polarity induction on Twitter (Rosenthal et al., 2015).",2 Related Work,[0],[0]
+"The best system relied on support vector regression (SVR) using a radial base function kernel (Amir et al., 2015).",2 Related Work,[0],[0]
+They employ the embedding vector of the target word as features.,2 Related Work,[0],[0]
+"The results of their SVR-based system were beaten by the DENSIFIER algorithm (Rothe et al., 2016).",2 Related Work,[0],[0]
+"DENSIFIER learns an orthogonal transformation of an embedding space into a subspace of strongly reduced dimensionality.
+",2 Related Work,[0],[0]
+"Hamilton et al. (2016) developed SENTPROP, a graph-based, semi-supervised learning algorithm which builds up a word graph, where vertices correspond to words (of known as well as unknown polarity) and edge weights correspond to the similarity between them.",2 Related Work,[0],[0]
+"The polarity information is then propagated through the graph, thus computing scores for unlabeled nodes.",2 Related Work,[0],[0]
+"According to their evaluation, DENSIFIER seems to be superior overall, yet SENTPROP produces competitive results
+only when the seed lexicon or the corpus the word embeddings are trained on is very small.5
+For word emotion induction, a very similar approach to SENTPROP has been proposed by Wang et al. (2016a).",2 Related Work,[0],[0]
+"They also propagate affective information (Valence and Arousal, in this case) through a word graph with similarity weighted edges.
+",2 Related Work,[0],[0]
+"Sedoc et al. (2017) recently proposed an approach based on signed spectral clustering where a word graph is constructed not only based on word similarity but also on the considered affective information (again, Valence and Arousal).",2 Related Work,[0],[0]
+The emotion value of a target word is then computed based on the seed words in its cluster.,2 Related Work,[0],[0]
+"They report to outperform the results from Wang et al. (2016a).
+",2 Related Work,[0],[0]
+"Contrary to the trend to graph-based methods, the best system of the IALP 2016 Shared Task on Chinese word emotion induction (Yu et al., 2016b) employed a simple feed-forward neural network (FFNN) with one hidden layer in combination with boosting (Du and Zhang, 2016).
+",2 Related Work,[0],[0]
+Another very recent contribution which advocates a supervised set-up was published by Li et al. (2017).,2 Related Work,[0],[0]
+"They propose ridge regression, again using word embeddings as features.",2 Related Work,[0],[0]
+"Even with this simple approach, they report to outperform many of the above methods in the VAD prediction task.6
+Sentence-Level and Text-Level Prediction.",2 Related Work,[0.9551865784320623],"['Our work differs from the beam search approach for the WORDS+BNPS case of previous work in that we maintain multiple beams, as in stack decoding for phrase-based machine translation (Koehn, 2010), allowing us to incorporate the probabilities of internal, non-boundary words in the BNPs.']"
+"Different from the word-level prediction task (the one we focus on in this contribution), the determination of emotion values for higher-level linguistic units (especially sentences and texts) is also heavily investigated.",2 Related Work,[0],[0]
+"For this problem, DL approaches are meanwhile fully established as the method of choice (Wang et al., 2016b; Abdul-Mageed and Ungar, 2017; Felbo et al., 2017; Mohammad and Bravo-Marquez, 2017).
+",2 Related Work,[0],[0]
+"5Personal correspondence with William L. Hamilton; See also README at https://github.com/ williamleif/socialsent
+6However, they also report extremely weak performance figures for some of their reference methods.
+",2 Related Work,[0],[0]
+"It is important to note, however, that the methods discussed for these higher-level units cannot easily be transferred to solve the word emotion induction problem.",2 Related Work,[0],[0]
+"Sentence-level and text-level architectures are either adapted to sequential input data (typical for RNN, LSTM, GRNN and related architectures) or spatially arranged input data (as with CNN architectures).",2 Related Work,[0],[0]
+"However, for word embeddings (the default input for word emotion induction) there does not seem to be any meaningful order of their components.",2 Related Work,[0],[0]
+"Therefore, these more sophisticated DL methods are, for the time being, not applicable for the study at hand.",2 Related Work,[0],[0]
+"In this section, we will first introduce various reference methods (two originally polarity-based for which we offer adaptations for VAD prediction) before defining our own neural MTL model and discussing its difference from previous work.
+",3 Methods,[0],[0]
+"Let V := {w1, w2, ..., wm} be our word vocabulary and let E := {e1, e2, ..., em} be a set of embedding vectors",3 Methods,[0],[0]
+such that ei ∈ Rn denotes the ndimensional vector representation of word wi.,3 Methods,[0],[0]
+"Let D := {d1, d2, ..., dl} be a set of emotional dimensions.",3 Methods,[0],[0]
+Our task is to predict the empirically determined emotion vector emo(w) ∈,3 Methods,[0],[0]
+Rl given a word w and the embedding space E.,3 Methods,[0],[0]
+Linear Regression Baseline (LinReg).,3.1 Reference Methods,[0],[0]
+"We propose (multi-variate) linear regression as an obvious baseline for the problem:
+emoLR(wk) := Wek + b (1)
+where W is a matrix, Wi∗ contains the regression coefficients for the i-th affective dimension and b is the vector of bias terms.",3.1 Reference Methods,[0],[0]
+The model parameters are fitted using ordinary least squares.,3.1 Reference Methods,[0],[0]
+"Technically, we use the scikit-learn.org implementation with default parameters.
+",3.1 Reference Methods,[0],[0]
+Ridge Regression (RidgReg).,3.1 Reference Methods,[0],[0]
+Li et al. (2017) propose ridge regression for word emotion induction.,3.1 Reference Methods,[0],[0]
+"Ridge regression works identically to linear regression during prediction, but introduces L2 regularization during training.",3.1 Reference Methods,[0],[0]
+"Following the authors, for our implementation, we again use the scikit-learn implementation with default parameters.
+",3.1 Reference Methods,[0],[0]
+Turney-Littman Algorithm (TL).,3.1 Reference Methods,[0],[0]
+"As one of the earliest contributions in the field, Turney and Littman (2003) defined a simple PMI-based approach to determine the semantic polarity SPTL of a word w: SPTL(w) := ∑
+s∈seeds+ pmi(w, s)",3.1 Reference Methods,[0],[0]
+"−
+∑
+s∈seeds− pmi(w, s)
+(2) where seeds+ and seeds− are sets of positive and negative seed words, respectively.",3.1 Reference Methods,[0],[0]
+"Since this algorithm is still popular today (Köper and Schulte im Walde, 2016), we here provide a novel modification for adapting this originally polarity-based approach to word emotion induction with vectorial seed and output values.
+",3.1 Reference Methods,[0],[0]
+"First, we replace PMI-based association of seed and target word w and s by their similarity sim based on their word embeddings ew and es:
+sim(w, s) := max(0, ew · es
+||ew|| × ||es|| ) (3)
+emo(w) := ∑
+s∈seeds+ sim(w, s)",3.1 Reference Methods,[0],[0]
+"−
+∑
+s∈seeds− sim(w, s)
+(4) Although this step is technically not required for the adaptation, it renders the TL algorithm more comparable to the other approaches evaluated in Section 4 besides from most likely increasing performance.",3.1 Reference Methods,[0],[0]
+"Equation (4) can be rewritten as
+emo(w) := ∑
+s∈seeds sim(w, s)× emo(s) (5)
+where seeds := seeds+ ∪ seeds− and emo(s) maps to 1, if s ∈ seeds+, and −1, if s ∈ seeds−.
+Equation (5) can be trivially adapted to an ndimensional emotion format by redefining emo(s) such that it maps to a vector from Rn instead of {−1, 1}.",3.1 Reference Methods,[0],[0]
+"Our last step is to introduce a normalization term such that emo(w)TL lies within the
+range of the seed lexicon.
+emoTL(w) :=
+∑ s∈seeds sim(w, s)× emo(s)∑
+s∈seeds sim(w, s) (6)
+As can be seen from Equation (6), for the more general case of n-dimensional emotion prediction, the Turney-Littman algorithm naturally translates into a weighted average where the seed emotion values are weighted according to the similarity to the target item.
+",3.1 Reference Methods,[0],[0]
+Densifier.,3.1 Reference Methods,[0],[0]
+"Rothe et al. (2016) train an orthogonal matrix Q ∈ Rn×n (n being the dimensionality of the word embeddings) such that applying Q to an embedding vector ei concentrates all the polarity information in its first dimension such that the polarity of a word wi can be computed as
+SPDENSIFIER(wi) := pQei (7)
+where p = (1, 0, 0, ..., 0)T ∈ R1×n .",3.1 Reference Methods,[0],[0]
+"For fitting Q, the seeds are arranged into pairs of equal polarity (the set pairs=) and those of opposing polarity (pairs6=).",3.1 Reference Methods,[0],[0]
+"A good fit for Q will minimize the distance within the former and maximize the distance within the latter which can be expressed by the following two training objectives:
+argmin Q
+∑
+(wi,wj)∈pairs= |pQ(ei − ej)| (8)
+argmax Q
+∑
+(wi,wj)∈pairs6= |pQ(ei",3.1 Reference Methods,[0],[0]
+"− ej)| (9)
+",3.1 Reference Methods,[0],[0]
+The objectives described in the expressions (8) and (9) are combined into a single loss function (using a weighting factor α ∈,3.1 Reference Methods,[0],[0]
+"[0, 1]) which is then minimized using stochastic gradient descent (SGD).
+",3.1 Reference Methods,[0],[0]
+"To adapt this algorithm to dimensional emotion formats, we construct a positive seed set, seeds+v , and a negative seed set, seeds−v , for each emotion dimension v ∈ D. LetMv be the mean value of all the entries of the training lexicon for the affective dimension v. Let SDv be the respective standard deviation and β ∈ R, β ≥ 0.",3.1 Reference Methods,[0],[0]
+Then all entries greater than Mv + βSDv are assigned to seeds+v and those less than Mv − βSDv are assigned to seeds−v .,3.1 Reference Methods,[0],[0]
+"Q is fitted individually for each emotion dimension v.
+Training was performed according to the original paper with the exception that (following Hamilton et al. (2016))",3.1 Reference Methods,[0],[0]
+"we did not apply the proposed re-orthogonalization after each training
+step, since we did not find any evidence that this procedure actually results in improved performance.",3.1 Reference Methods,[0],[0]
+The hyperparameters α and β were set to .7 and .5 (respectively) for all experiments based on a pilot study.,3.1 Reference Methods,[0],[0]
+"Since the original implementation is not accessible, we devised our own using tensorflow.org.
+",3.1 Reference Methods,[0],[0]
+Boosted Neural Networks (ensembleNN).,3.1 Reference Methods,[0],[0]
+Du and Zhang (2016) propose simple FFNNs in combination with a boosting algorithm.,3.1 Reference Methods,[0],[0]
+An FFNN consists of an input or embedding layer with activation a(0) ∈,3.1 Reference Methods,[0],[0]
+Rn which is equal to the embedding vector ek when predicting the emotion of a word wk.,3.1 Reference Methods,[0],[0]
+"The input layer is followed by multiple hidden layers with activation
+a(l+1) := σ(W (l+1)a(l) + b(l+1)) (10)
+where W (l+1) and b(l+1) are the weights and biases for layer l + 1 and σ is a nonlinear activation function.",3.1 Reference Methods,[0],[0]
+"Since we treat emotion prediction as a regression problem, the activation on the output layer aout (where out is the number of non-input layers in the network) is computed as the affine transformation
+a(out)",3.1 Reference Methods,[0],[0]
+:= W (out)a(out−1) +,3.1 Reference Methods,[0],[0]
+"b(out) (11)
+",3.1 Reference Methods,[0],[0]
+Boosting is a general machine learning technique where several weak estimators are combined to form a strong estimator.,3.1 Reference Methods,[0],[0]
+The authors used FFNNs with a single hidden layer of 100 units and rectified linear unit (ReLU) activation.,3.1 Reference Methods,[0],[0]
+The boosting algorithm AdaBoost.,3.1 Reference Methods,[0],[0]
+"R2 (Drucker, 1997) was used to train the ensemble (one per affective dimension).",3.1 Reference Methods,[0],[0]
+Our re-implementation copies their technical set-up7 exactly using scikit-learn.,3.1 Reference Methods,[0],[0]
+"The approaches introduced in Section 3.1 and Section 2 vary largely in their methodological foundations, i.e., they comprise semi-supervised and supervised machine learning techniques—both statistical and neural ones.",3.2 Multi-Task Learning Neural Network,[0],[0]
+"Yet, they all have in common that they treat the prediction of the different emotional dimensions as separate tasks.",3.2 Multi-Task Learning Neural Network,[0],[0]
+"That is, they fit one individual model per VAD dimension without sharing parameters between them.
+",3.2 Multi-Task Learning Neural Network,[0],[0]
+"In contradistinction, the key feature of our approach is that we fit a single FFNN model to
+7Original settings available at https://github.",3.2 Multi-Task Learning Neural Network,[0],[0]
+"com/StevenLOL/ialp2016_Shared_Task
+predict all VAD dimensions jointly, thus applying multi-task learning to word emotion induction.",3.2 Multi-Task Learning Neural Network,[0],[0]
+"Hence, we treat the prediction of Valence, Arousal and Dominance as three independent tasks.",3.2 Multi-Task Learning Neural Network,[0],[0]
+Our multi-task learning neural network (MTLNN) (depicted in Figure 2) has an output layer of three units such that each output unit represents one of the VAD dimensions.,3.2 Multi-Task Learning Neural Network,[0],[0]
+"However, the activation in our two hidden layers (of 256 and 128 units, respectively) is shared across all VAD dimensions, and so are the associated weights and biases.
+",3.2 Multi-Task Learning Neural Network,[0],[0]
+"Thus, while we train our MTLNN model it is forced to learn intermediate representations of the input which are generally informative for all VAD dimensions.",3.2 Multi-Task Learning Neural Network,[0],[0]
+"This serves as a form of regularization, since it becomes less likely for our model to fit the noise in the training set as noise patterns may vary across emotional dimensions.",3.2 Multi-Task Learning Neural Network,[0],[0]
+"Simultaneously, this has an effect similar to an increase of the training size, since each sample now leads to additional error signals during backpropagation.",3.2 Multi-Task Learning Neural Network,[0],[0]
+"Intuitively, both properties seem extremely useful for relatively small-sized emotion lexicons (see Section 4 for empirical evidence).
+",3.2 Multi-Task Learning Neural Network,[0],[0]
+The remaining specifications of our model are as follows.,3.2 Multi-Task Learning Neural Network,[0],[0]
+"We use leaky ReLU activation (LReLU) as nonlinearity (Maas et al., 2013).
+LReLU(zi)",3.2 Multi-Task Learning Neural Network,[0],[0]
+":= max(γzi, zi) (12)
+with γ := .01 for our experiments.",3.2 Multi-Task Learning Neural Network,[0],[0]
+"For regularization, dropout (Srivastava et al., 2014) is applied during training with a probability of .2 on the embedding layer and .5",3.2 Multi-Task Learning Neural Network,[0],[0]
+on the hidden layers.,3.2 Multi-Task Learning Neural Network,[0],[0]
+"We train for 15, 000 iterations (well beyond convergence on each data set we use) with the ADAM optimizer (Kingma and Ba, 2015) of .001 base learning rate,
+batch size of 128 and Mean-Squared-Error loss.",3.2 Multi-Task Learning Neural Network,[0],[0]
+The weights are randomly initialized (drawn from a normal distribution with a standard deviation .001) and biases are uniformly initialized as .01.,3.2 Multi-Task Learning Neural Network,[0],[0]
+Tensorflow is used for implementation.,3.2 Multi-Task Learning Neural Network,[0],[0]
+"In this section, we first validate our assumption that MTL is superior to single-task learning for word emotion induction.",4 Results,[0],[0]
+"Next, we compare our proposed MTLNN model in a large-scale evaluation experiment.
+",4 Results,[0],[0]
+Performance figures will be measured as Pearson correlation (r) between our automatically predicted values and human gold ratings.,4 Results,[0],[0]
+"The Pearson correlation between two data series X = x1, x2, ..., xn and Y = y1, y2, ..., yn takes values between +1 (perfect positive correlation) and −1 (perfect negative correlation) and is computed as
+rxy := ∑n i=1(xi − x̄)(yi",4 Results,[0],[0]
+"− ȳ)√∑n
+i=1(xi",4 Results,[0],[0]
+"− x̄)2 √∑n
+i=1(yi",4 Results,[0],[0]
+"− ȳ)2 (13)
+where x̄ and ȳ denote the mean values for X and Y , respectively.",4 Results,[0],[0]
+The main hypothesis of this contribution is that an MTL set-up is superior to single-task learning for word emotion induction.,4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"Before proceeding to the large-scale evaluation of our proposed model, we will first examine this aspect of our work.
+",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"For this, we use the following experimental setup: We will compare the MTLNN model against its single-task learning counterpart (SepNN).",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"SepNN simultaneously trains three separate neural networks where only the input layer, yet no parameters of the intermediate layers are shared across the models.",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"Each of the separate networks is identical to MTLNN (same layers, dropout, initialization, etc.), yet has only one output neuron, thus modeling only one of the three affective VAD dimensions.",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"SepNN is equivalent to fitting our proposed model (but with only one output unit) to the different VAD dimensions individually, one after the other.",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"Yet, training these separate networks simultaneously (not jointly!) makes both approaches, MTLNN and SepNN, easier to compare.
+",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"We will run MTLNN against SepNN on the EN and the EN+ data set (the former is very
+small, the latter relatively large; see Table 1) using the following set-up: for each gold lexicon and model, we randomly split the data 9/1 and train for 15, 000 iterations on the larger split (the same number of steps is used for the main experiment).",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"After each one-thousand iterations step, model performance is tested on the held-out data.",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+This process will be repeated 20 times and the performance figures at each one-thousand iterations step will be averaged.,4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"In a final step, we will average the results for each of the three emotional dimensions and only plot this average value.",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"The results of this experiment are depicted in Figure 3.
+",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"First of all, each combination of model and data set displays a satisfactory performance of at least r ≈ .75",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"after 15,000 steps compared to previous work (see below).",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"Overall, performance is higher for the smaller EN lexicon.",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"Although counterintuitive (since smaller lexicons lead to fewer training samples), this finding is consistent with prior work (Sedoc et al., 2017; Li et al., 2017) and is probably related to the fact that smaller lexicons usually comprise a larger portion of strongly emotionbearing words.",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"In contrast, larger lexicons add more neutral words which tend to be harder to predict in terms of correlation.
+",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"As hypothesized, the MTLNN model does indeed outperform the single task model on both data sets.",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+Our data also suggest that the gain from the MTL approach is larger on smaller data sets (again in concordance with our expectations).,4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"Figure 3 reveals that this might be due to the regularizing effect of MTL, since the SepNN model shows signs of overfitting on the EN data set.",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"Yet, even
+when the separate model does not overfit (as on the EN+ lexicon), MTLNN reveals better results.
+",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"Although SepNN needs fewer training steps before convergence, the MTLNN model trains much faster, thus still converging faster in terms of runtime (about a minute on a middle-class GPU).",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+This is because MTLNN has only about a third as many parameters as the separate model SepNN.,4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"We combined each of the selected lexicon data sets (Table 1) with each of the applicable publicly available embedding models (Section 2; the embedding model provided by Sedoc et al. (2017) will be used separately) for a total of 15 conditions, i.e, the rows in Table 4.
+",4.2 Comparison against Reference Methods,[0],[0]
+"For each of these conditions, we performed a 10-fold cross-validation (CV) for each of the 6 methods presented in Section 3 such that each method is presented with the identical data splits.8 For each condition, algorithm, and VA(D) dimension, we compute the Pearson correlation r between gold ratings and predictions.",4.2 Comparison against Reference Methods,[0],[0]
+"For conciseness, we present only the average correlation over the respective affective dimensions in Table 4 (Valence and Arousal for ES+ and ZH, VAD for the others).",4.2 Comparison against Reference Methods,[0],[0]
+"Note that the methods we compare ourselves against comprise the current state-of-the art in both polarity and emotion induction (as described in Section 2).
+8This procedure constitutes a more direct comparison than using different splits for each method and allows using paired t-tests.
+",4.2 Comparison against Reference Methods,[0],[0]
+"As can be seen, our proposed MTLNN model outperforms all other approaches in each of the 15 conditions.",4.2 Comparison against Reference Methods,[0],[0]
+"Regarding the average over all affective dimensions and conditions, it outperforms the second best system, ensembleNN, by more than 5%-points.",4.2 Comparison against Reference Methods,[0],[0]
+"In line with our results from Section 4.1, those improvements are especially pronounced on smaller data sets containing one up to two thousand entries (EN, ES, IT, PT, ID) with close to 10%-points improvement over the respective second-best system.
+",4.2 Comparison against Reference Methods,[0],[0]
+"Concerning the relative ordering of the affective dimensions, in line with former studies (Sedoc et al., 2017; Li et al., 2017), the performance figures for the Valence dimension are usually much higher than for Arousal and Dominance.",4.2 Comparison against Reference Methods,[0],[0]
+"Using MTLNN, for many conditions, we see the pattern that Valence is about 10%-points above the VAD average, Arousal being 10%-points below and Dominance being roughly equal to the average over VAD (this applies, e.g., to EN, EN+ and IT).",4.2 Comparison against Reference Methods,[0],[0]
+"On other data sets (e.g., PL, NL and ID), the ordering between Arousal and Dominance is less clear though Valence still stands out with the best results.",4.2 Comparison against Reference Methods,[0],[0]
+"We observe the same general pattern for the reference methods, as well.
+",4.2 Comparison against Reference Methods,[0],[0]
+"Concerning the comparison to Sedoc et al. (2017), arguably one of most related contributions, they report a performance of r = .768 for Valence and .582 for Arousal on the EN+ data set in a 10- fold CV using their own embeddings.",4.2 Comparison against Reference Methods,[0],[0]
+"In contrast, MTLNN using the COMMON model achieves r = .870 and .674 in the same set-up—about 10%-
+points better on both dimensions.",4.2 Comparison against Reference Methods,[0],[0]
+"However, the COMMON model was trained on much more data than the embeddings Sedoc et al. (2017) use.",4.2 Comparison against Reference Methods,[0],[0]
+"For the most direct comparison, we also repeated this experiment using their embedding model (GIGA).",4.2 Comparison against Reference Methods,[0],[0]
+"We find that MTLNN still clearly outperforms their results with r = .814 for Valence and .607 for Arousal.9
+MTLNN achieves also very strong results in direct comparison to human performance (see Table 5).",4.2 Comparison against Reference Methods,[0],[0]
+"Warriner et al. (2013) (who created EN+) report an inter-study reliability (ISR; i.e., the correlation of the aggregated ratings from two different studies) between the EN and the EN+ lexicon of r = .953, .759 and .795 for VAD, respectively.",4.2 Comparison against Reference Methods,[0],[0]
+"Since EN is a subset of EN+, we can compare these performance figures against our own results on the EN data set where we achieved r = .918, .730 and .825, respectively.",4.2 Comparison against Reference Methods,[0],[0]
+"Thus, our proposed method did actually outperform human reliability for Dominance and is competitive for Valence and Arousal, as well.
+",4.2 Comparison against Reference Methods,[0],[0]
+"This general observation is also backed up by split-half reliability data (SHR; i.e., when randomly splitting all individual ratings in two groups and averaging the ratings within each group, how strong is the correlation between these averaged ratings?).",4.2 Comparison against Reference Methods,[0],[0]
+"For the EN+ data set, Warriner et al. (2013) report an SHR of r = .914, .689 and .770 for VAD, respectively.",4.2 Comparison against Reference Methods,[0],[0]
+"Again, our MTLNN model performs very competitive with r = .870, .674 and .758, respectively using the COMMON embeddings.",4.2 Comparison against Reference Methods,[0],[0]
+"In this paper, we propose multi-task learning (MTL) as a simple, yet surprisingly efficient method to improve the performance and, at the same time, to deal with existing data limitations
+9We also clearly outperform their results for the NL and ES+ data sets.",5 Conclusion,[0],[0]
+"For these cases, our embedding models were similar in training size.
+",5 Conclusion,[0],[0]
+in word emotion induction—the task to predict a complex emotion score for an individual word.,5 Conclusion,[0],[0]
+We validated our claim that MTL is superior to single-task learning by achieving better results with our proposed method in performance as well as training time compared to its single-task counterpart.,5 Conclusion,[0],[0]
+"We performed an extensive evaluation of our model on 9 typologically diverse languages, using different kinds of word embedding models for a total 15 conditions.",5 Conclusion,[0],[0]
+"Comparing our approach to state-of-the-art methods from word polarity and word emotion induction, our model turns out to be superior in each condition, thus setting a novel state-of-the-art performance for both polarity and emotion induction.",5 Conclusion,[0],[0]
+"Moreover, our results are even competitive to human annotation reliability in terms of inter-study as well as split-half reliability.",5 Conclusion,[0],[0]
+"Since this contribution was restricted to the VAD format of emotion representation, in future work we will examine whether MTL yields similar gains for other representational schemes, as well.",5 Conclusion,[0],[0]
+"We would like to thank the Positive Psychology Center, University of Pennsylvania for providing us with the embedding model used in Sedoc et al. (2017), Johannes Hellrich, JULIE Lab, for insightful discussions, and the reviewers for their valuable comments.",Acknowledgments,[0],[0]
+Predicting the emotional value of lexical items is a well-known problem in sentiment analysis.,abstractText,[0],[0]
+"While research has focused on polarity for quite a long time, meanwhile this early focus has been shifted to more expressive emotion representation models (such as Basic Emotions or Valence-Arousal-Dominance).",abstractText,[0],[0]
+"This change resulted in a proliferation of heterogeneous formats and, in parallel, often smallsized, non-interoperable resources (lexicons and corpus annotations).",abstractText,[0],[0]
+"In particular, the limitations in size hampered the application of deep learning methods in this area because they typically require large amounts of input data.",abstractText,[0],[0]
+We here present a solution to get around this language data bottleneck by rephrasing word emotion induction as a multi-task learning problem.,abstractText,[0],[0]
+"In this approach, the prediction of each independent emotion dimension is considered as an individual task and hidden layers are shared between these dimensions.",abstractText,[0],[0]
+We investigate whether multi-task learning is more advantageous than single-task learning for emotion prediction by comparing our model against a wide range of alternative emotion and polarity induction methods featuring 9 typologically diverse languages and a total of 15 conditions.,abstractText,[0],[0]
+Our model turns out to outperform each one of them.,abstractText,[0],[0]
+"Against all odds, the proposed deep learning approach yields the largest gain on the smallest data sets, merely composed of one thousand samples.",abstractText,[0],[0]
+Word Emotion Induction for Multiple Languages as a Deep Multi-Task Learning Problem,title,[0],[0]
+"Proceedings of the 2016 Conference on Empirical Methods in Natural Language Processing, pages 2319–2324, Austin, Texas, November 1-5, 2016. c©2016 Association for Computational Linguistics",text,[0],[0]
+"We address the task of recovering the original word order of a shuffled sentence, referred to as bag generation (Brown et al., 1990), shake-and-bake generation (Brew, 1992), or more recently, linearization, as standardized in a recent line of research as a method useful for isolating the performance of text-to-text generation models (Zhang and Clark, 2011; Liu et al., 2015; Liu and Zhang, 2015; Zhang and Clark, 2015).",1 Introduction,[0],[0]
+The predominant argument of the more recent works is that jointly recovering explicit syntactic structure is crucial for determining the correct word order of the original sentence.,1 Introduction,[1.0],['The predominant argument of the more recent works is that jointly recovering explicit syntactic structure is crucial for determining the correct word order of the original sentence.']
+"As such, these methods either generate or rely on given parse structure to reproduce the order.
+",1 Introduction,[0.9999999050770482],"['As such, these methods either generate or rely on given parse structure to reproduce the order.']"
+"Independently, Elman (1990) explored linearization in his seminal work on recurrent neural networks.",1 Introduction,[0],[0]
+"Elman judged the capacity of early recurrent neural networks via, in part, the network’s ability to predict word order in simple sentences.",1 Introduction,[1.0],"['Elman judged the capacity of early recurrent neural networks via, in part, the network’s ability to predict word order in simple sentences.']"
+"He notes,
+The order of words in sentences reflects a number of constraints. . .",1 Introduction,[0.988791892777857],"['He notes, The order of words in sentences reflects a number of constraints.']"
+"Syntactic structure, selective restrictions, subcategorization, and discourse considerations are among the many factors which join together to fix the order in which words occur. . .",1 Introduction,[0],[0]
+[T]here is an abstract structure which underlies the surface strings and it is this structure which provides a more insightful basis for understanding the constraints on word order. . . .,1 Introduction,[0.9904602191886503],['[T]here is an abstract structure which underlies the surface strings and it is this structure which provides a more insightful basis for understanding the constraints on word order.']
+"It is, therefore, an interesting question to ask whether a network can learn any aspects of that underlying abstract structure (Elman, 1990).
+",1 Introduction,[0.9999999454873989],"['It is, therefore, an interesting question to ask whether a network can learn any aspects of that underlying abstract structure (Elman, 1990).']"
+"Recently, recurrent neural networks have reemerged as a powerful tool for learning the latent structure of language.",1 Introduction,[1.0],"['Recently, recurrent neural networks have reemerged as a powerful tool for learning the latent structure of language.']"
+"In particular, work on long short-term memory (LSTM) networks for language modeling has provided improvements in perplexity.
+",1 Introduction,[0],[0]
+"We revisit Elman’s question by applying LSTMs to the word-ordering task, without any explicit syntactic modeling.",1 Introduction,[1.0],"['We revisit Elman’s question by applying LSTMs to the word-ordering task, without any explicit syntactic modeling.']"
+"We find that language models are in general effective for linearization relative to existing syntactic approaches, with LSTMs in particular outperforming the state-of-the-art by 11.5 BLEU points, with further gains observed when training with additional text and decoding with larger beams.",1 Introduction,[0],[0]
+The task of linearization is to recover the original order of a shuffled sentence.,2 Background: Linearization,[1.0],['The task of linearization is to recover the original order of a shuffled sentence.']
+"We assume a vocabulary V and are given a sequence of out-of-order phrases x1, . . .",2 Background: Linearization,[0],[0]
+", xN , with xn ∈ V+ for 1 ≤ n ≤",2 Background: Linearization,[0],[0]
+N .,2 Background: Linearization,[0],[0]
+"Define M as the total number of tokens (i.e., the sum of the lengths of the phrases).",2 Background: Linearization,[0],[0]
+"We consider two varieties of the task: (1) WORDS, where each xn consists of a single word and M = N , and (2) WORDS+BNPS,
+2319
+where base noun phrases (noun phrases not containing inner noun phrases) are also provided and M ≥ N .",2 Background: Linearization,[0],[0]
+"The second has become a standard formulation in recent literature.
+",2 Background: Linearization,[0],[0]
+"Given input x, we define the output set Y to be all possible permutations over the N elements of x, where ŷ ∈ Y is the permutation generating the true order.",2 Background: Linearization,[0],[0]
+"We aim to find ŷ, or a permutation close to it.",2 Background: Linearization,[0],[0]
+"We produce a linearization by (approximately) optimizing a learned scoring function f over the set of permutations, y∗ = arg maxy∈Y f(x, y).",2 Background: Linearization,[0],[0]
+Recent approaches to linearization have been based on reconstructing the syntactic structure to produce the word order.,3 Related Work: Syntactic Linearization,[0],[0]
+Let Z represent all projective dependency parse trees over M words.,3 Related Work: Syntactic Linearization,[0],[0]
+"The objective is to find y∗, z∗ = arg maxy∈Y,z∈Z f(x, y, z) where f is now over both the syntactic structure and the linearization.",3 Related Work: Syntactic Linearization,[0],[0]
+"The current state of the art on the Penn Treebank (PTB) (Marcus et al., 1993), without external data, of Liu et al. (2015) uses a transitionbased parser with beam search to construct a sentence and a parse tree.",3 Related Work: Syntactic Linearization,[0],[0]
+"The scoring function is a linear model f(x, y) =",3 Related Work: Syntactic Linearization,[0],[0]
+"θ>Φ(x, y, z) and is trained with an early update structured perceptron to match both a given order and syntactic tree.",3 Related Work: Syntactic Linearization,[0],[0]
+The feature function Φ includes features on the syntactic tree.,3 Related Work: Syntactic Linearization,[0],[0]
+"This work improves upon past work which used best-first search over a similar objective (Zhang and Clark, 2011).
+",3 Related Work: Syntactic Linearization,[0],[0]
+"In follow-up work, Liu and Zhang (2015) argue that syntactic models yield improvements over pure surface n-gram models for the WORDS+BNPS case.",3 Related Work: Syntactic Linearization,[0],[0]
+This result holds particularly on longer sentences and even when the syntactic trees used in training are of low quality.,3 Related Work: Syntactic Linearization,[0],[0]
+"The n-gram decoder of this work utilizes a single beam, discarding the probabilities of internal, non-boundary words in the BNPs when comparing hypotheses.",3 Related Work: Syntactic Linearization,[0],[0]
+"We revisit this comparison between syntactic models and surface-level models, utilizing a surface-level decoder with heuristic future costs and an alternative approach for scoring partial hypotheses for the WORDS+BNPS case.
+",3 Related Work: Syntactic Linearization,[0],[0]
+Additional previous work has also explored ngram models for the word ordering task.,3 Related Work: Syntactic Linearization,[0],[0]
+"The work of de Gispert et al. (2014) demonstrates improve-
+ments over the earlier syntactic model of Zhang et al. (2012) by applying an n-gram language model over the space of word permutations restricted to concatenations of phrases seen in a large corpus.",3 Related Work: Syntactic Linearization,[0],[0]
+"Horvat and Byrne (2014) models the search for the highest probability permutation of words under an n-gram model as a Travelling Salesman Problem; however, direct comparisons to existing works are not provided.",3 Related Work: Syntactic Linearization,[0],[0]
+"In contrast to the recent syntax-based approaches, we use an LM directly for word ordering.",4 LM-Based Linearization,[0],[0]
+"We consider two types of language models: an ngram model and a long short-term memory network (Hochreiter and Schmidhuber, 1997).",4 LM-Based Linearization,[0],[0]
+"For the purpose of this work, we define a common abstraction for both models.",4 LM-Based Linearization,[0],[0]
+"Let h ∈ H be the current state of the model, with h0 as the initial state.",4 LM-Based Linearization,[0],[0]
+"Upon seeing a word wi ∈ V , the LM advances to a new state hi = δ(wi,hi−1).",4 LM-Based Linearization,[0],[0]
+"At any time, the LM can be queried to produce an estimate of the probability of the next word q(wi,hi−1)",4 LM-Based Linearization,[0],[0]
+"≈ p(wi | w1, . .",4 LM-Based Linearization,[0],[0]
+.,4 LM-Based Linearization,[0],[0]
+", wi−1).",4 LM-Based Linearization,[0],[0]
+"For n-gram language models, H, δ, and q can naturally be defined respectively as the state space, transition model, and edge costs of a finite-state machine.
+",4 LM-Based Linearization,[0],[0]
+LSTMs are a type of recurrent neural network (RNN) that are conducive to learning long-distance dependencies through the use of an internal memory cell.,4 LM-Based Linearization,[0],[0]
+"Existing work with LSTMs has generated stateof-the-art results in language modeling (Zaremba et al., 2014), along with a variety of other NLP tasks.
+",4 LM-Based Linearization,[0],[0]
+"In our notation we define H as the hidden states and cell states of a multi-layer LSTM, δ as the LSTM update function, and q as a final affine transformation and softmax given as q(∗,hi−1; θq) = softmax(Wh
+(L) i−1 + b) where h (L) i−1 is the top hid-
+den layer and θq = (W , b) are parameters.",4 LM-Based Linearization,[0],[0]
+"We direct readers to the work of Graves (2013) for a full description of the LSTM update.
+",4 LM-Based Linearization,[0],[0]
+"For both models, we simply define the scoring function as
+f(x, y) =
+N∑
+n=1
+log p(xy(n) | xy(1), . . .",4 LM-Based Linearization,[0],[0]
+", xy(n−1))
+where the phrase probabilities are calculated wordby-word by our language model.
+",4 LM-Based Linearization,[0.9999999098452109],"[', xy(n−1)) where the phrase probabilities are calculated wordby-word by our language model.']"
+Algorithm 1 LM beam-search word ordering 1: procedure ORDER(x1 . . .,4 LM-Based Linearization,[0],[0]
+"xN , K, g) 2: B0 ← 〈(〈〉, {1, . . .",4 LM-Based Linearization,[0],[0]
+", N}, 0,h0)〉 3: for m = 0, . . .",4 LM-Based Linearization,[0],[0]
+",M − 1 do 4: for k = 1, . . .",4 LM-Based Linearization,[0],[0]
+", |Bm| do 5: (y,R, s,h)← B(k)m 6: for i ∈ R do 7: (s′,h′)← (s,h) 8: for word w in phrase xi do 9: s′ ← s′ + log q(w,h′) 10: h′ ← δ(w,h′) 11: j ← m+ |xi| 12:",4 LM-Based Linearization,[0],[0]
+"Bj ← Bj + (y + xi,R− i, s′,h′) 13: keep top-K of Bj by f(x, y) + g(R) 14: return BM
+Searching over all permutations Y is intractable, so we instead follow past work on linearization (Liu et al., 2015) and LSTM generation (Sutskever et al., 2014) in adapting beam search for our generation step.",4 LM-Based Linearization,[0],[0]
+"Our work differs from the beam search approach for the WORDS+BNPS case of previous work in that we maintain multiple beams, as in stack decoding for phrase-based machine translation (Koehn, 2010), allowing us to incorporate the probabilities of internal, non-boundary words in the BNPs.",4 LM-Based Linearization,[0.9534530138139984],"['This has implications for the utility of costly syntactic annotations in generation models, for both high- and low- resource languages and domains.']"
+"Additionally, for both WORDS and WORDS+BNPS, we also include an estimate of future cost in order to improve search accuracy.
+",4 LM-Based Linearization,[1.0000000697727085],"['Additionally, for both WORDS and WORDS+BNPS, we also include an estimate of future cost in order to improve search accuracy.']"
+"Beam search maintains M + 1 beams, B0, . . .",4 LM-Based Linearization,[0.9560420319245833],"['Beam search maintains M + 1 beams, B0, .']"
+", BM , each containing at most the topK partial hypotheses of that length.",4 LM-Based Linearization,[0],[0]
+"A partial hypothesis is a 4-tuple (y,R, s,h), where y is a partial ordering,R is the set of remaining indices to be ordered, s is the score of the partial linearization f(x, y), and h is the current LM state.",4 LM-Based Linearization,[1.0],"['A partial hypothesis is a 4-tuple (y,R, s,h), where y is a partial ordering,R is the set of remaining indices to be ordered, s is the score of the partial linearization f(x, y), and h is the current LM state.']"
+Each step consists of expanding all next possible phrases and adding the next hypothesis to a later beam.,4 LM-Based Linearization,[0],[0]
+"The full beam search is given in Algorithm 1.
+",4 LM-Based Linearization,[0],[0]
+"As part of the beam search scoring function we also include a future cost g, an estimate of the score contribution of the remaining elements in R. Together, f(x, y) + g(R) gives a noisy estimate of the total score, which is used to determine the K best elements in the beam.",4 LM-Based Linearization,[0],[0]
+"In our experiments we use a very simple unigram future cost estimate, g(R) =∑
+i∈R ∑ w∈xi log p(w).",4 LM-Based Linearization,[0],[0]
+"Setup Experiments are on PTB with sections 2- 21 as training, 22 as validation, and 23 as test1.",5 Experiments,[0],[0]
+"We utilize two UNK types, one for initial uppercase tokens and one for all other low-frequency tokens; end sentence tokens; and start/end tokens, which are treated as words, to mark BNPs for the WORDS+BNPS task.",5 Experiments,[0],[0]
+We also use a special symbol to replace tokens that contain at least one numeric character.,5 Experiments,[0],[0]
+"We otherwise train with punctuation and the original case of each token, resulting in a vocabulary containing around 16K types from around 1M training tokens.
+",5 Experiments,[0],[0]
+"For experiments marked GW we augment the PTB with a subset of the Annotated Gigaword corpus (Napoles et al., 2012).",5 Experiments,[0.954282307301136],"['We compare the performance of the models using the BLEU metric (Papineni et al., 2002).']"
+We follow Liu and Zhang (2015) and train on a sample of 900k Agence France-Presse sentences combined with the full PTB training set.,5 Experiments,[0],[0]
+"The GW models benefit from both additional data and a larger vocabulary of around 25K types, which reduces unknowns in the validation and test sets.
+",5 Experiments,[0],[0]
+"We compare the models of Liu et al. (2015)
+1In practice, the results in Liu et al. (2015) and Liu and Zhang (2015) use section 0 instead of 22 for validation (author correspondence).
+",5 Experiments,[0],[0]
+"(known as ZGEN), a 5-gram LM using Kneser-Ney smoothing (NGRAM)2, and an LSTM.",5 Experiments,[0],[0]
+"We experiment on the WORDS and WORDS+BNPS tasks, and we also experiment with including future costs (g), the Gigaword data (GW), and varying beam size.",5 Experiments,[0],[0]
+"We retrain ZGEN using publicly available code3 to replicate published results.
+",5 Experiments,[0],[0]
+The LSTM model is similar in size and architecture to the medium LSTM setup of Zaremba et al. (2014)4.,5 Experiments,[0],[0]
+"Our implementation uses the Torch5 framework and is publicly available6.
+",5 Experiments,[0],[0]
+"We compare the performance of the models using the BLEU metric (Papineni et al., 2002).",5 Experiments,[0],[0]
+"In generation if there are multiple tokens of identical UNK type, we randomly replace each with possible unused tokens in the original source before calculating BLEU.",5 Experiments,[0],[0]
+"For comparison purposes, we use the BLEU script distributed with the publicly available ZGEN code.
+",5 Experiments,[0],[0]
+Results Our main results are shown in Table 1.,5 Experiments,[0],[0]
+On the WORDS+BNPS task the NGRAM-64 model scores nearly 5 points higher than the syntax-based model ZGEN-64.,5 Experiments,[0],[0]
+"The LSTM-64 then surpasses
+2We use the KenLM Language Model Toolkit (https:// kheafield.com/code/kenlm/).
+",5 Experiments,[0],[0]
+3https://github.com/SUTDNLP/ZGen,5 Experiments,[0],[0]
+"4We hypothesize that additional gains are possible via a
+larger model and model averaging, ceteris paribus.",5 Experiments,[0],[0]
+"5http://torch.ch 6https://github.com/allenschmaltz/word_ ordering
+NGRAM-64 by more than 5 BLEU points.",5 Experiments,[0],[0]
+"Differences on the WORDS task are smaller, but show a similar pattern.",5 Experiments,[1.0],"['Differences on the WORDS task are smaller, but show a similar pattern.']"
+Incorporating Gigaword further increases the result another 2 points.,5 Experiments,[0],[0]
+"Notably, the NGRAM model outperforms the combined result of ZGEN-64+LM+GW+POS from Liu and Zhang (2015), which uses a 4-gram model trained on Gigaword.",5 Experiments,[1.0],"['Notably, the NGRAM model outperforms the combined result of ZGEN-64+LM+GW+POS from Liu and Zhang (2015), which uses a 4-gram model trained on Gigaword.']"
+We believe this is because the combined ZGEN model incorporates the n-gram scores as discretized indicator features instead of using the probability directly.7,5 Experiments,[0.9639066360319495],['We believe this is because the combined ZGEN model incorporates the n-gram scores as discretized indicator features instead of using the probability directly.7 A beam of 512 yields a further improvement at the cost of search time.']
+"A beam of 512 yields a further improvement at the cost of search time.
+",5 Experiments,[0],[0]
+"To further explore the impact of search accuracy, Table 2 shows the results of various models with beam widths ranging from 1 (greedy search) to 512, and also with and without future costs g. We see that for the better models there is a steady increase in accuracy even with large beams, indicating that search errors are made even with relatively large beams.
+",5 Experiments,[0],[0]
+"7In work of Liu and Zhang (2015), with the given decoder, N-grams only yielded a small further improvement over the syntactic models when discretized versions of the LM probabilities were incorporated as indicator features in the syntactic models.
+",5 Experiments,[0],[0]
+One proposed advantage of syntax in linearization models is that it can better capture long-distance relationships.,5 Experiments,[1.0],['One proposed advantage of syntax in linearization models is that it can better capture long-distance relationships.']
+"Figure 1 shows results by sentence length and distortion, which is defined as the absolute difference between a token’s index position in y∗ and ŷ, normalized by M .",5 Experiments,[1.0],"['Figure 1 shows results by sentence length and distortion, which is defined as the absolute difference between a token’s index position in y∗ and ŷ, normalized by M .']"
+"The LSTM model exhibits consistently better performance than existing syntax models across sentence lengths and generates fewer long-range distortions than the ZGEN model.
+",5 Experiments,[1.0000000050358773],['The LSTM model exhibits consistently better performance than existing syntax models across sentence lengths and generates fewer long-range distortions than the ZGEN model.']
+"Finally, Table 3 compares the syntactic fluency of the output.",5 Experiments,[0],[0]
+"As a lightweight test, we parse the output with the Yara Parser (Rasooli and Tetreault, 2015) and compare the unlabeled attachment scores (UAS) to the trees produced by the syntactic system.",5 Experiments,[0],[0]
+We first align the gold head to each output token.,5 Experiments,[1.0],['We first align the gold head to each output token.']
+"(In cases where the alignment is not one-to-one, we randomly sample among the possibilities.)",5 Experiments,[1.0],"['(In cases where the alignment is not one-to-one, we randomly sample among the possibilities.)']"
+The models with no knowledge of syntax are able to recover a higher proportion of gold arcs.,5 Experiments,[1.0],['The models with no knowledge of syntax are able to recover a higher proportion of gold arcs.']
+Strong surface-level language models recover word order more accurately than the models trained with explicit syntactic annotations appearing in a recent series of papers.,6 Conclusion,[1.0],['Strong surface-level language models recover word order more accurately than the models trained with explicit syntactic annotations appearing in a recent series of papers.']
+"This has implications for the utility of costly syntactic annotations in generation models, for both high- and low- resource languages and domains.",6 Conclusion,[0],[0]
+"We thank Yue Zhang and Jiangming Liu for assistance in using ZGen, as well as verification of the
+task setup for a valid comparison.",Acknowledgments,[0],[0]
+"Jiangming Liu also assisted in pointing out a discrepancy in the implementation of an earlier version of our NGRAM decoder, the resolution of which improved BLEU performance.",Acknowledgments,[0],[0]
+"Recent work on word ordering has argued that syntactic structure is important, or even required, for effectively recovering the order of a sentence.",abstractText,[0],[0]
+"We find that, in fact, an n-gram language model with a simple heuristic gives strong results on this task.",abstractText,[0],[0]
+"Furthermore, we show that a long short-term memory (LSTM) language model is even more effective at recovering order, with our basic model outperforming a state-of-the-art syntactic model by 11.5 BLEU points.",abstractText,[0],[0]
+"Additional data and larger beams yield further gains, at the expense of training and search time.",abstractText,[0],[0]
+Word Ordering Without Syntax,title,[0],[0]

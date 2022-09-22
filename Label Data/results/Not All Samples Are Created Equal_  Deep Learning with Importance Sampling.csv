@@ -1,0 +1,1043 @@
+0,1,label2,summary_sentences
+"Human Language Technologies: The 2015 Annual Conference of the North American Chapter of the ACL, pages 93–102, Denver, Colorado, May 31 – June 5, 2015. c©2015 Association for Computational Linguistics",text,[0],[0]
+"Authorship Attribution (AA) tackles the problem of determining who, among a set of authors, wrote the document at hand.",1 Introduction,[0],[0]
+"AA has relevant applications ranging from plagiarism detection (Stamatatos, 2011) to Forensic Linguistics, such as identifying authorship of threatening emails or malicious code.",1 Introduction,[0],[0]
+"Applied areas such as law and journalism can also benefit from authorship attribution, where identifying the true author of a piece of text (such as a ransom note) may help save lives or catch the offenders.
+",1 Introduction,[0],[0]
+"We know from state of the art research in AA that the length of the documents and the number of po-
+tential candidate authors have an important effect on the accuracy of AA approaches (Moore, 2001; Luyckx and Daelemans, 2008; Luyckx and Daelemans, 2010).",1 Introduction,[0],[0]
+"We can also point out the most common features that have been used successfully in AA work, including: bag-of-words (Madigan et al., 2005; Stamatatos, 2006), stylistic features (Zheng et al., 2006; Stamatatos et al., 2000), and word and character level n-grams (Kjell et al., 1994; Keselj et al., 2003; Peng et al., 2003; Juola, 2006).
+",1 Introduction,[0],[0]
+"The utility of bag-of-words features is well understood: they effectively capture correlations between authors and topics (Madigan et al., 2005; Kaster et al., 2005).",1 Introduction,[0],[0]
+"The discriminative value of these features is thus directly related to the level of content divergence among authors and among train and test sets.
+",1 Introduction,[0],[0]
+"The utility of stylistic features is also well understood: they model author preferences for the use of punctuation marks, emoticons, white spaces, and other traces of writing style.",1 Introduction,[0],[0]
+"Such preferences are less influenced by topic, and directly reflect some of the unique writing patterns of an author.
+",1 Introduction,[0],[0]
+Character n,1 Introduction,[0],[0]
+"-grams are the single most successful feature in authorship attribution (Koppel et al., 2009; Frantzeskou et al., 2007; Koppel et al., 2011), but the reason for their success is not well understood.",1 Introduction,[0],[0]
+"One hypothesis is that character n-grams carry a little bit of everything: lexical content, syntactic content, and even style by means of punctuation and white spaces (Koppel et al., 2011).",1 Introduction,[0],[0]
+"While this argument seems plausible, it falls short of a rigorous explanation.
+",1 Introduction,[0],[0]
+"In this paper, we investigate what in the make-up
+93
+of these small units of text makes them so powerful.",1 Introduction,[0],[0]
+"Our goal is two-fold: on the one hand we want to have a principled understanding of character ngrams that will inform their use as features for AA and other tasks; on the other hand we want to make AA approaches more accessible to non-experts so that, for example, they could be acceptable pieces of evidence in criminal cases.
+",1 Introduction,[0.9583568405724622],"['In comparison to all the above methods, our importance sampling scheme based on an upper bound to the gradient norm has a solid theoretical basis with clear objectives, very easy to choose hyperparameters, theoretically guaranteed speedup and can be applied to any type of network and loss function.']"
+"The research questions we aim to answer are:
+• Are all character n-grams equally important?",1 Introduction,[0],[0]
+"For example, are the prefix of ‘there’, the suffix of ‘breathe’ and the whole word ‘the’ all equivalent?",1 Introduction,[0],[0]
+"More generally, are character n-grams that capture morpho-syntactic information, thematic information and style information equally important?
+",1 Introduction,[0],[0]
+• Are the character n-grams that are most important for single-domain settings also the most important for cross-domain settings?,1 Introduction,[0],[0]
+"Which character n-grams are more like bag-of-words features (which tend to track topics), and which are more like stylistic features (which tend to track authors)?
+",1 Introduction,[0],[0]
+• Do different classifiers agree on the importance of the different types of character n-grams?,1 Introduction,[0],[0]
+"Are some character n-grams consistently the best regardless of the learning algorithm?
+",1 Introduction,[0],[0]
+• Are some types of character n-grams irrelevant in AA tasks?,1 Introduction,[0],[0]
+Are there categories of character n-grams that we can exclude and get similar (or better) performance than using all n-grams?,1 Introduction,[0],[0]
+"If there are, are they the same for both singledomain and cross-domain AA settings?
+",1 Introduction,[0],[0]
+"Our study shows that using the default bag-ofwords representation of char n-grams results in collapsing sequences of characters that correspond to different linguistic aspects, and that this yields suboptimal prediction performance.",1 Introduction,[0],[0]
+We further show that we can boost accuracy by loosing some categories of n-grams.,1 Introduction,[0],[0]
+"Char n-grams closely related to thematic content can be completely removed without loss of accuracy, even in cases where the train and test sets have the same topics represented, a counter-intuitive argument.",1 Introduction,[0],[0]
+"Given the wide spread use of char n-grams
+in text classification tasks, our findings have significant implications for future work in related areas.",1 Introduction,[0],[0]
+"To answer our research questions and explore the value of character n-grams in authorship attribution, we propose to separate character n-grams into ten distinct categories.",2 Categories of Character N -grams,[0],[0]
+"Unlike previous AA work where all character n-grams were combined into a single bagof-n-grams, we evaluate each category separately to understand its behavior and effectiveness in AA tasks.",2 Categories of Character N -grams,[0],[0]
+"These categories are related to the three linguistic aspects hypothesized to be represented by character n-grams: morpho-syntax (as represented by affix-like n-grams), thematic content (as represented by word-like n-grams) and style (as represented by punctuation-based n-grams).",2 Categories of Character N -grams,[0],[0]
+"We refer to these three aspects as super categories (SC).
+",2 Categories of Character N -grams,[0],[0]
+The following sections describe the different types of n-grams.,2 Categories of Character N -grams,[0],[0]
+We use the sentence in Table 1 as a running example for the classes and in Table 2 we show the resulting n-grams in that sentence.,2 Categories of Character N -grams,[0],[0]
+"For ease of understanding, we replace spaces in n-grams with underscores ( ).
+2.1 Affix n-grams Character n-grams are generally too short to represent any deep syntax, but some of them can reflect morphology to some degree.",2 Categories of Character N -grams,[0],[0]
+"In particular, we consider the following affix-like features by looking at n-grams that begin or end a word:
+prefix A character n-gram that covers the first n characters of a word that is at least n+ 1 characters long.
+suffix A character n-gram that covers the last n characters of a word that is at least n + 1 characters long.
+space-prefix A character n-gram that begins with a space.
+space-suffix A character n-gram that ends with a space.
+",2 Categories of Character N -grams,[0],[0]
+"2.2 Word n-grams While character n-grams are often too short to capture entire words, some types can capture partial words and other word-relevant tokens.",2 Categories of Character N -grams,[0],[0]
+"We consider the following such features:
+whole-word A character n-gram that covers all characters of a word that is exactly n characters long.
+",2 Categories of Character N -grams,[0],[0]
+mid-word,2 Categories of Character N -grams,[0],[0]
+"A character n-gram that covers n characters of a word that is at least n + 2 characters long, and that covers neither the first nor the last character of the word.
+",2 Categories of Character N -grams,[0],[0]
+"multi-word N -grams that span multiple words, identified by the presence of a space in the middle of the n-gram.
+",2 Categories of Character N -grams,[0],[0]
+2.3 Punctuation n-grams,2 Categories of Character N -grams,[0],[0]
+The main stylistic choices that character n-grams can capture are the author’s preferences for particular patterns of punctuation.,2 Categories of Character N -grams,[0],[0]
+"The following features characterize punctuation by its location in the n-gram.
+beg-punct A character n-gram",2 Categories of Character N -grams,[0],[0]
+"whose first character is punctuation, but middle characters are not.
+",2 Categories of Character N -grams,[0],[0]
+"mid-punct A character n-gram with at least one punctuation character that is neither the first nor the last character.
+end-punct A character n-gram whose last character is punctuation, but middle characters are not.
+",2 Categories of Character N -grams,[0],[0]
+"The above ten categories are intended to be disjoint, so that a character n-gram belongs to exactly one of the categories.",2 Categories of Character N -grams,[0],[0]
+"For n-grams that contain both spaces and punctuation, we first categorize by punctuation and then by spaces.",2 Categories of Character N -grams,[0],[0]
+"For example, ‘e, ’ is assigned to the mid-punct category, not the spacesuffix category.
+",2 Categories of Character N -grams,[0],[0]
+We have observed that in our data almost 80% of the n-grams in the punct-beg and punct-mid categories contain a space.,2 Categories of Character N -grams,[0],[0]
+This tight coupling of punctuation and spaces is due to the rules of English orthography: most punctuation marks require a space following them.,2 Categories of Character N -grams,[0],[0]
+"The 20% of n-grams that have punctuation but no spaces correspond mostly to the exceptions to this rule: quotation marks, mid-word hyphens, etc.",2 Categories of Character N -grams,[0],[0]
+An interesting experiment for future work would be to split out these two types of punctuation into separate feature categories.,2 Categories of Character N -grams,[0],[0]
+"We consider two corpora, a single-domain corpus, where there is only one topic that all authors are writing about, and a multi-domain corpus, where there are multiple different topics.",3 Datasets,[0],[0]
+"The latter allows us to test the generalization of AA models, by testing them on a different topic from that used for training.
+",3 Datasets,[0],[0]
+"The first collection is the CCAT topic class, a subset of the Reuters Corpus Volume 1 (Lewis et al., 2004).",3 Datasets,[0],[0]
+"Although this collection was not gathered for the goal of doing authorship attribution studies, previous work has reported results for AA with 10 and 50 authors (Stamatatos, 2008; Plakias and Stamatatos, 2008; Escalante et al., 2011).",3 Datasets,[0],[0]
+"We refer to these as CCAT 10 and CCAT 50, respectively.",3 Datasets,[0],[0]
+"Both CCAT 10 and CCAT 50 belong to CCAT category (about corporate/industrial news) and are balanced across authors, with 100 documents sampled for each author.",3 Datasets,[0],[0]
+Manual inspection of the dataset revealed that some of the authors in this collection consistently used signatures at the end of documents.,3 Datasets,[0],[0]
+"Also, we noticed some writers use quotations a lot.",3 Datasets,[0],[0]
+"Con-
+sidering these parts of text for measuring the frequencies of character n-grams is not a good idea because signatures provide direct clues about the authorship of document and quotations do not reflect the author’s writing style.",3 Datasets,[0],[0]
+"Therefore, to clean up the CCAT collection, we preprocessed it to remove signatures and quotations from each document.",3 Datasets,[0],[0]
+"Since the CCAT collection contains documents belonging to only corporate/industrial topic category, this will be our single-domain collection.
+",3 Datasets,[0],[0]
+"The other collection consists of texts published in The Guardian daily newspaper written by 13 authors in four different topics (Stamatatos, 2013).",3 Datasets,[0],[0]
+"This dataset contains opinion articles on the topics: World, U.K., Society, and Politics.",3 Datasets,[0],[0]
+"Following prior work, to make the collection balanced across authors, we choose at most ten documents per author for each of the four topics.",3 Datasets,[0],[0]
+We refer to this corpus as Guardian1.,3 Datasets,[0],[0]
+"We also consider a variation of this corpus that makes it more challenging but that more closely matches realistic scenarios of forensic investigation that deal with short texts such as tweets, SMS, and emails.",3 Datasets,[0],[0]
+We chunk each of the documents by sentence boundaries into five new short documents.,3 Datasets,[0],[0]
+"We refer to this corpus as Guardian2.
+",3 Datasets,[0],[0]
+"Table 3 shows some of the statistics of the CCAT and Guardian corpora and Table 4 presents some of the top character n-grams for each category (taken from an author in the Guardian data, but the top ngrams look qualitatively similar for other authors).",3 Datasets,[0],[0]
+We performed various experiments using different categories of character n-grams.,4 Experimental Settings,[0],[0]
+We chose n=3 since our preliminary experiments found character 3-grams to be more effective than other higher level character n-grams.,4 Experimental Settings,[0],[0]
+"For each category, we considered only those 3-grams that occur at least five times in the training documents.
+",4 Experimental Settings,[0],[0]
+"The performance of different authorship attribu-
+tion models was measured in terms of accuracy.",4 Experimental Settings,[0],[0]
+"In the single-domain CCAT experiments, accuracy was measured using the train/test partition of prior work.",4 Experimental Settings,[0],[0]
+"In the cross-domain Guardian experiments, accuracy was measured by considering all 12 possible pairings of the 4 topics, treating one topic as training data and the other as testing data, and averaging accuracy over these 12 scenarios.",4 Experimental Settings,[0],[0]
+"This ensured that in the crossdomain experiments, the topics of the training data were always different from that of the test data.
+",4 Experimental Settings,[0.9528229103018041],"['For completeness, in the supplementary material we include a theoretical analysis that explains why sampling based on the loss also achieves variance reduction during the late stages of training.']"
+"We trained support vector machine (SVM) classifiers using the Weka implementation (Witten and Frank, 2005) with default parameters.",4 Experimental Settings,[0],[0]
+We also ran some comparative experiments with the Weka implementation of naive Bayes classifiers and the LibSVM implementation of SVMs.,4 Experimental Settings,[0],[0]
+"In the results below, when performance of a single classifier is presented, it is the result of Weka’s SVM, which generally gave the best performance.",4 Experimental Settings,[0],[0]
+"When performance of other classifiers are presented, the classifiers are explicitly indicated.",4 Experimental Settings,[0],[0]
+"In this section, we present various results on authorship attribution tasks using both single as well as cross-domain datasets.",5 Experimental Results and Evaluation,[0],[0]
+"We will explore character ngrams in depth and try to understand why they are so effective in discriminating authors.
+5.1 Which n-gram Categories are Most Author-Discriminative?
+After breaking character n-grams into ten disjoint categories, we empirically illustrate what categories are
+Single Domain (CCAT)
+most discriminative.",5 Experimental Results and Evaluation,[0],[0]
+"Table 5 shows the accuracy of each type of n-gram for each of the different corpora.
+",5 Experimental Results and Evaluation,[0],[0]
+"Table 5(a) shows that the top four categories for single-domain AA are: prefix, suffix, space-prefix, and mid-word.",5 Experimental Results and Evaluation,[0],[0]
+These four categories have the best performance on both CCAT 10 and CCAT 50.,5 Experimental Results and Evaluation,[0],[0]
+"In contrast, Table 5(b) shows that the top four categories for cross-domain AA are: prefix, space-prefix, beg-
+punct, and mid-punct.",5 Experimental Results and Evaluation,[0],[0]
+"For both single-domain and cross-domain AA, prefix and space-prefix are strong features, and are generally better than the suffix features, perhaps because authors have more control over prefixes in English, while suffixes are often obligatory for grammatical reasons.",5 Experimental Results and Evaluation,[0],[0]
+"For cross-domain AA, beg-punct and midpunct are the top features, likely because an author’s
+use of punctuation is consistent even when the topic changes.",5 Experimental Results and Evaluation,[0],[0]
+"For single-domain AA, mid-word was also a good feature, probably because it captured lexical information that correlates with authors’ preferences towards writing about specific topics.
+",5 Experimental Results and Evaluation,[0],[0]
+"Figure 1 shows an alternate view of these results, graphing the rank of each n-gram type.",5 Experimental Results and Evaluation,[0],[0]
+"For computing the rank, the accuracies of the ten different n-gram type classifiers are sorted in decreasing order and ranked from 1 to 10 respectively with ties getting the same rank.",5 Experimental Results and Evaluation,[0],[0]
+"For the Guardian corpora, the average rank of each n-gram category was computed by averaging its rank across the 12 possible test/train cross-domain combinations.",5 Experimental Results and Evaluation,[0],[0]
+"In both of the single-domain CCAT corpora, the classifier based on prefix n-grams had the top accuracy (rank 1), and the classifier based on mid-punct had the worst accuracy (rank 10).",5 Experimental Results and Evaluation,[0],[0]
+"In both of the cross-domain Guardian corpora, on the other hand, mid-punct was among the top-ranked n-gram categories.",5 Experimental Results and Evaluation,[0],[0]
+"This suggests that punctuation features generalize the best across topic, but if AA is more of a topic classification task (as in the single-domain CCAT corpora), then punctuation adds little over other features that more directly capture the topic.
+",5 Experimental Results and Evaluation,[0],[0]
+"Since our cross-domain datasets are small, we performed a small number of planned comparisons using a two-tailed t-test over the accuracies on the Guardian1 and Guardian2 corpora.",5 Experimental Results and Evaluation,[0],[0]
+"We found that in both corpora, the best punctuation category (punctmid) is better than the best word category (wholeword) with p < 0.001.",5 Experimental Results and Evaluation,[0],[0]
+"In the Guardian2 corpus, the best affix category (space-prefix) is also better than the best word category (whole-word) with p < 0.05, but this does not hold in the Guardian1 corpus (p = 0.14).",5 Experimental Results and Evaluation,[0],[0]
+"Also, we observed that in both Guardian1 and Guardian2 datasets, both punct-mid and spaceprefix are better than multi-word (p < 0.01).
+",5 Experimental Results and Evaluation,[0],[0]
+"Overall, we see that affix n-grams are generally effective in both single-domain and cross-domain settings, punctuation n-grams are effective in crossdomain settings, and mid-word is the only effective word n-gram, and only in the single-domain setting.",5 Experimental Results and Evaluation,[0],[0]
+"Importance of Different n-gram Types?
+",5.2 Do Different Classifiers Agree on the,[0],[0]
+"The previous experiments have shown, for example, that prefix n-grams are universally predictive in AA
+tasks, that mid-word n-grams are good predictors in single-domain settings, and that beg-punct n-grams are good predictors in cross-domain settings.",5.2 Do Different Classifiers Agree on the,[0],[0]
+"But are these facts about the n-gram types themselves, or are these results only true for the specific SVM classifiers we trained?
+",5.2 Do Different Classifiers Agree on the,[0],[0]
+"To see whether certain types of n-grams are fundamentally good or bad, regardless of the classifier, we compare performance of the different n-gram types for three classifiers: Weka SVM classifiers (as used in our other experiments), LibSVM classifiers and Weka’s naive Bayes classifiers1.",5.2 Do Different Classifiers Agree on the,[0],[0]
+"Figure 2 shows the n-gram category rankings for all these classifiers2 for both the single-domain CCAT and the cross-domain Guardian settings.
+",5.2 Do Different Classifiers Agree on the,[0],[0]
+"Across the different classifiers, the pattern of feature rankings are similar.",5.2 Do Different Classifiers Agree on the,[0],[0]
+Table 6 shows the Spearman’s rank correlation coefficient (ρ) for the per-ngram-type accuracies of each pair of classifiers.,5.2 Do Different Classifiers Agree on the,[0],[0]
+"We observe fairly high correlations, with ρ above 0.70 for all single-domain pairings, and between 0.44 and 0.81 for cross-domain pairings.
+",5.2 Do Different Classifiers Agree on the,[0],[0]
+"As in Section 5.1, prefix and space-prefix are among the most predictive n-gram types.",5.2 Do Different Classifiers Agree on the,[0],[0]
+"In the single-domain settings, we again see that suffix and mid-word are also highly predictive, while in the cross-domain settings, we again see that beg-punct and mid-punct are highly predictive.",5.2 Do Different Classifiers Agree on the,[0],[0]
+"These results all confirm that some types of n-grams are fundamentally more predictive than others, and our results are not specific to the particular type of classifier used.
+",5.2 Do Different Classifiers Agree on the,[0],[0]
+"1Weka SVM and LibSVM are both support vector machine classifiers, but Weka uses Platt’s sequential minimal optimization algorithm while LibSVM uses working set selection with second order information.",5.2 Do Different Classifiers Agree on the,[0],[0]
+"The result is that they achieve different performance on our AA tasks.
+2We also tried a decision tree classifier, C4.5 (J48) from WEKA, and it produced similar patterns (not shown).
+",5.2 Do Different Classifiers Agree on the,[0],[0]
+Single Domain (CCAT),5.2 Do Different Classifiers Agree on the,[0],[0]
+"In the previous sections, we have seen that some types of character n-grams are more predictive than others - affix n-grams performed well in both single domain and cross-domain settings and punctuation n-grams performed well in cross-domain settings.",5.3 Are Some Character N -grams Irrelevant?,[0],[0]
+"In general, word n-grams were not as predictive as other types of n-grams (with the one exception being mid-word n-grams in the single domain setting).",5.3 Are Some Character N -grams Irrelevant?,[0],[0]
+"Given this poor performance of word n-grams, a natural question is: could we exclude these features entirely and achieve similar performance?
+",5.3 Are Some Character N -grams Irrelevant?,[0],[0]
+Our goal then is to compare a model trained on affix n-grams and punct n-grams against a model trained on “all” n-grams.,5.3 Are Some Character N -grams Irrelevant?,[0],[0]
+"We consider two definitions of “all”:
+all-untyped The traditional approach to extracting n-grams where n-gram types are ignored (e.g., ‘the’ as a whole word is no different from ‘the’ in the middle of a word)
+all-typed The approach discussed in this paper, where n-grams of different types are distinguished (equivalent to the set of all affix+punct+word n-grams).
+",5.3 Are Some Character N -grams Irrelevant?,[0],[0]
+"We compare these models trained on all the n-grams to our affix+punct model.
+",5.3 Are Some Character N -grams Irrelevant?,[0],[0]
+Table 7 shows this analysis.,5.3 Are Some Character N -grams Irrelevant?,[0],[0]
+"For either definition of “all”, the model that discards all word features achieves performance as high or higher than the model with all of the features, and does so with only about two thirds of the features.",5.3 Are Some Character N -grams Irrelevant?,[0],[0]
+"This is not too surprising in the cross-domain Guardian tasks, where the word n-grams were among the worst features.",5.3 Are Some Character N -grams Irrelevant?,[0],[0]
+"On the single-domain CCAT tasks this result is more surprising, since we have discarded the mid-word n-grams, which was one of the best single-domain n-gram types.",5.3 Are Some Character N -grams Irrelevant?,[0],[0]
+This indicates that whatever information mid-word is capturing it is also being captured in other ways via affix and punct n-grams.,5.3 Are Some Character N -grams Irrelevant?,[0],[0]
+"Of all 1024 possible combinations of features, we tried a
+number of different combinations and were unable to identify one that outperformed affix+punct.",5.3 Are Some Character N -grams Irrelevant?,[0],[0]
+"Overall, this experiment gives compelling evidence that affix and punct n-grams are more important than word n-grams.",5.3 Are Some Character N -grams Irrelevant?,[0],[0]
+We did a manual exploration of our datasets.,6 Analysis,[0],[0]
+"In our cross-domain dataset, the character 3-gram ‘sti’ shows up as both prefix and mid-word.",6 Analysis,[0],[0]
+"All 13 authors use ‘sti’ frequently as a mid-word n-gram in words such as institution, existing, justice, and distinction.",6 Analysis,[0],[0]
+"For example:
+• The government’s story is that the existing warheads might be deteriorating.
+",6 Analysis,[0],[0]
+"• For all the justice of many of his accusations, the result is occasionally as dreadful as his title suggests.
+",6 Analysis,[0],[0]
+"But only six authors use ‘sti’ as a prefix, in examples like:
+• Their mission was to convince tourists that Britain was still open for business.
+",6 Analysis,[0],[0]
+"• There aren’t even any dead people on it, since by the very act of being dead and still famous, they assert their long-term impact.
+",6 Analysis,[0],[0]
+Thus ‘sti’ as a prefix is predictive of authorship even though ‘sti’ as a mid-word n-gram is not.,6 Analysis,[0],[0]
+"Notably, under the traditional untyped bag-of-n-grams approach, both versions of ‘sti’ would have been treated the same, and this discriminative power would have been lost.
+",6 Analysis,[0],[0]
+"As already demonstrated in Section 5 that affix+punct features perform better than using all the features, we would like to use an example from our dataset to visualize the text when features in SC word are discarded.",6 Analysis,[0],[0]
+Out of seven categories in affix and punct,6 Analysis,[0],[0]
+", we computed in how many of them each character belongs to, three being the maximum possible value.",6 Analysis,[0],[0]
+"Therefore, we show each character with different opacity level depending on number of categories it belongs to: zero will get white color (word related n-grams), one will get 33% black, two will get 67% black, and three will get 100% black.",6 Analysis,[0],[0]
+"In Table 8, we show an example sentence before (first row of Table 8) and after (second row of Table 8) showing the opacity level of each character.",6 Analysis,[0],[0]
+"It is clear that the darkest characters are those around the punctuation characters and those around spaces are second darkest, while the lightest (with 0% darkness) are the ones in the middle of long words.",6 Analysis,[0],[0]
+This gives us an idea about the characters in a text that are important for AA tasks.,6 Analysis,[0],[0]
+"Various hypotheses have been put forth to explain the “black magic” (Kestemont, 2014) behind the success of character n-gram features in authorship attribution.",7 Discussion,[0],[0]
+Kestemont (2014) conjectured that their utility was in capturing function words and morphology.,7 Discussion,[0],[0]
+"Koppel et al. (2009) suggested that they were capturing topic information in single domain settings, and style and syntactic information in cross-domain settings.",7 Discussion,[0],[0]
+Our study provides empirical evidence for testing these claims.,7 Discussion,[0],[0]
+"We did indeed find that the ability of character n-grams to capture morphology is useful, as reflected in the high prediction performance of af-
+fix n-grams in both single-domain and cross-domain settings.",7 Discussion,[0],[0]
+"And we found that word n-grams (capturing topic information) were useful in single domain settings, while puct n-grams (capturing style information) were useful in cross-domain settings.",7 Discussion,[0],[0]
+"We further found that word n-grams are unnecessary, even in single-domain settings.",7 Discussion,[0],[0]
+"Models based only on affix and punct n-grams performed as well as models with all n-grams regardless of whether it was a single-domain or cross-domain authorship attribution task.
+",7 Discussion,[0],[0]
+Our findings on the value of selecting n-grams according to the linguistic aspect they represent may also be beneficial in other classification tasks where character n-grams are commonly used.,7 Discussion,[0],[0]
+"Promising tasks are those related to the stylistic analysis of texts, such as native language identification, document similarity and plagiarism detection.
+",7 Discussion,[0],[0]
+"Morphologically speaking, English is a poor language.",7 Discussion,[0],[0]
+The fact that we identified significant differences in performance by selecting n-gram categories that are related to affixation in this poorly inflected language suggests that we may find even larger differences in performance in morphologically richer languages.,7 Discussion,[0],[0]
+We leave this research question for future work.,7 Discussion,[0],[0]
+This research was partially supported by NSF awards 1462141 and 1254108.,Acknowledgements,[0],[0]
+It was also supported in part by the CONACYT grant 134186 and the WIQ-EI IRSES project (grant no. 269180) within the FP 7 Marie Curie.,Acknowledgements,[0],[0]
+"Character n-grams have been identified as the most successful feature in both singledomain and cross-domain Authorship Attribution (AA), but the reasons for their discriminative value were not fully understood.",abstractText,[0],[0]
+"We identify subgroups of character n-grams that correspond to linguistic aspects commonly claimed to be covered by these features: morphosyntax, thematic content and style.",abstractText,[0],[0]
+We evaluate the predictiveness of each of these groups in two AA settings: a single domain setting and a cross-domain setting where multiple topics are present.,abstractText,[0],[0]
+We demonstrate that character ngrams that capture information about affixes and punctuation account for almost all of the power of character n-grams as features.,abstractText,[0],[0]
+Our study contributes new insights into the use of n-grams for future AA work and other classification tasks.,abstractText,[0],[0]
+Not All Character N -grams Are Created Equal: A Study in Authorship Attribution,title,[0],[0]
+"Proceedings of the SIGDIAL 2017 Conference, pages 384–394, Saarbrücken, Germany, 15-17 August 2017. c©2017 Association for Computational Linguistics
+Neural conversational models require substantial amounts of dialogue data to estimate their parameters and are therefore usually learned on large corpora such as chat forums, Twitter discussions or movie subtitles. These corpora are, however, often challenging to work with, notably due to their frequent lack of turn segmentation and the presence of multiple references external to the dialogue itself. This paper shows that these challenges can be mitigated by adding a weighting model into the neural architecture. The weighting model, which is itself estimated from dialogue data, associates each training example to a numerical weight that reflects its intrinsic quality for dialogue modelling. At training time, these sample weights are included into the empirical loss to be minimised. Evaluation results on retrieval-based models trained on movie and TV subtitles demonstrate that the inclusion of such a weighting model improves the model performance on unsupervised metrics.",text,[0.9603342578920524],"['However, for the more complicated CIFAR100, only sampling with our proposed upper-bound to the gradient norm reduces the variance of the gradients and provides faster convergence.']"
+"The development of conversational agents (such as mobile assistants, chatbots or interactive robots) is increasingly based on data-driven methods aiming to infer conversational patterns from dialogue data.",1 Introduction,[0],[0]
+"One major trend in the last recent years is the emergence of neural conversation models (Vinyals and Le, 2015; Sordoni et al., 2015; Shang et al., 2015; Serban et al., 2016; Lowe et al., 2017; Li et al., 2017).",1 Introduction,[0],[0]
+"These neural models can be directly
+∗ Also affiliated with Universidad Central del Ecuador (Quito, Ecuador).
+",1 Introduction,[0],[0]
+"estimated from raw (non-annotated) dialogue corpora, allowing them to be deployed with a limited amount of domain-specific knowledge and feature engineering.
+",1 Introduction,[0],[0]
+"Due to their large parameter space, the estimation of neural conversation models requires considerable amounts of dialogue data.",1 Introduction,[0],[0]
+"They are therefore often trained on conversations collected from various online resources, such as Twitter discussions (Ritter et al., 2010) online chat logs (Lowe et al., 2017), movie scripts (DanescuNiculescu-Mizil and Lee, 2011) and movie and TV subtitles (Lison and Tiedemann, 2016).
+",1 Introduction,[0],[0]
+"Although these corpora are undeniably useful, they also face some limitations from a dialogue modelling perspective.",1 Introduction,[0],[0]
+"First of all, several dialogue corpora, most notably those extracted from subtitles, do not include any explicit turn segmentation or speaker identification (Serban and Pineau, 2015; Lison and Meena, 2016).",1 Introduction,[0],[0]
+"In other words, we do not know whether two consecutive sentences are part of the same dialogue turn or were uttered by different speakers.",1 Introduction,[0],[0]
+"The neural conversation model may therefore inadvertently learn responses that remain within the same dialogue turn instead of starting a new turn.
+",1 Introduction,[0],[0]
+"Furthermore, these dialogues contain multiple references to named entities (in particular, person names such as fictional characters) that are specific to the dialogue in question.",1 Introduction,[0],[0]
+"These named entities should ideally not be part of the conversation model, since they often draw on an external context that is absent from the inputs provided to the conversation model.",1 Introduction,[0],[0]
+"For instance, the mention of character names in a movie is associated with a visual context (for instance, the characters appearing in a given scene) that is not captured in the training data.",1 Introduction,[0],[0]
+"Finally, a substantial portion of the utterances observed in these corpora is made of neutral, commonplace responses (“Perhaps”, “I
+384
+don’t know”, “Err”, ...) that can be used in most conversational situations but fall short of creating meaningful and engaging conversations with human users (Li et al., 2016a).
+",1 Introduction,[0],[0]
+The present paper addresses these limitations by adding a weighting model to the neural architecture.,1 Introduction,[0],[0]
+"The purpose of this model is to associate each 〈context, response〉 example pair to a numerical weight that reflects the intrinsic “quality” of each example.",1 Introduction,[0],[0]
+The instance weights are then included in the empirical loss to minimise when learning the parameters of the neural conversation model.,1 Introduction,[0.9559976100546487],"['Contrary to the aforementioned algorithms, our proposed importance sampling does not improve the asymptotic convergence of SGD but results in pragmatic improvements in all the metrics given a fixed time budget.']"
+The weights are themselves computed via a neural model learned from dialogue data.,1 Introduction,[0],[0]
+Experimental results demonstrate that the use of instance weights improves the performance of neural conversation models on unsupervised metrics.,1 Introduction,[0],[0]
+"Human evaluation results are, however, inconclusive.
+",1 Introduction,[0],[0]
+The rest of this paper is as follows.,1 Introduction,[0],[0]
+The next section presents a brief overview of existing work on neural conversation models.,1 Introduction,[0],[0]
+Section 3 provides a description of the instance weighting approach.,1 Introduction,[0],[0]
+"Section 4 details the experimental validation of the proposed model, using both unsupervised metrics and a human evaluation of the selected responses.",1 Introduction,[0],[0]
+"Finally, Section 5 discusses the advantages and limitations of the approach, and Section 6 concludes this paper.",1 Introduction,[0],[0]
+Neural conversation models are a family of neural architectures (generally based on deep convolutional or recurrent networks) used to represent mappings between dialogue contexts (or queries) and possible responses.,2 Related Work,[0],[0]
+"Compared to previous statistical approaches to dialogue modelling based on Markov processes (Levin et al., 2000; Rieser and Lemon, 2011; Young et al., 2013), one benefit of these neural models is their ability to be estimated from raw dialogue corpora, without having to rely on additional annotation layers for intermediate representations such as state variables or dialogue acts.",2 Related Work,[0],[0]
+"Rather, neural conversation models automatically derive latent representations of the dialogue state based on the observed utterances.
+",2 Related Work,[0],[0]
+"Neural conversation models can be divided into two main categories, retrieval models and generative models.",2 Related Work,[0],[0]
+"Retrieval models are used to select the most relevant response for a given context amongst a (possibly large) set of predefined responses, such as the set of utterances extracted
+from a corpus (Lowe et al., 2015; Prakash et al., 2016).",2 Related Work,[0],[0]
+"Generative models, on the other hand, rely on sequence-to-sequence models (Sordoni et al., 2015) to generate new, possibly unseen responses given the provided context.",2 Related Work,[0],[0]
+"These models are built by linking together two recurrent architectures: one encoder which maps the sequence of input tokens in the context utterance(s) to a fixedsized vector, and one decoder that generates the response token by token given the context vector (Vinyals and Le, 2015; Sordoni et al., 2015).",2 Related Work,[0],[0]
+"Recent papers have shown that the performance of these generative models can be improved by incorporating attentional mechanisms (Yao et al., 2016) and accounting for the structure of conversations through hierarchical networks (Serban et al., 2016).",2 Related Work,[0],[0]
+"Neural conversation models can also be learned using adversarial learning (Li et al., 2017).",2 Related Work,[0],[0]
+"In this setting, two neural models are jointly learned: a generative model producing the response, and a discriminator optimised to distinguish between human-generated responses and machine-generated ones.",2 Related Work,[0],[0]
+"The discriminator outputs are then used to bias the generative model towards producing more human-like responses.
+",2 Related Work,[0],[0]
+"The linguistic coherence and diversity of the models can be enhanced by including speakeraddressee information (Li et al., 2016b) and by expressing the objective function in terms of Maximum Mutual Information to enhance the diversity of the generated responses (Li et al., 2016a).",2 Related Work,[0],[0]
+"As demonstrated by (Ghazvininejad et al., 2017), neural conversation models can also be combined with external knowledge sources in the form of factual information or entity-grounded opinions, which is an important requirement for developing task-oriented dialogue systems that must ground their action in an external context.
+",2 Related Work,[0],[0]
+"Dialogue is a sequential decision-making process where the conversational actions of each participant influence not only the current turn but the long-term evolution of the dialogue (Levin et al., 2000).",2 Related Work,[0],[0]
+"To incorporate the prediction of future outcomes in the generation process, several papers have explored the use of reinforcement learning techniques, using deep neural networks to model the expected future reward (Li et al., 2016c; Cuayáhuitl, 2017).",2 Related Work,[0],[0]
+"In particular, the Hybrid Code Networks model of (Williams et al., 2017) demonstrate how a mixture of supervised learning, reinforcement learning and domain-specific knowl-
+edge can be used to optimise dialogue strategies from limited amount of training data.
+",2 Related Work,[0],[0]
+"In contrast with the approaches outlined above, this paper does not present a new neural architecture for conversational models.",2 Related Work,[0],[0]
+"Rather, it investigates how the performance of existing models can be improved “upstream”, by adapting how these models can be trained on large, noisy corpora with varying levels of quality.",2 Related Work,[0],[0]
+"It should be noted that, although the experiments presented in Section 4 focus on a limited range of neural models, the approach presented in this paper is designed to be model-independent and can be applied as a preprocessing step to any data-driven model of dialogue.",2 Related Work,[0],[0]
+"As mentioned in the introduction, the interactions extracted from large dialogue corpora do not all have the same intrinsic quality, due for instance to the frequent lack of turn segmentation or the presence of external, unresolvable references to person names.",3 Approach,[0],[0]
+"In other words, there is a discrepancy between the actual 〈context, response〉 pairs found in these corpora and the conversational patterns that should be accounted for in the neural model.
+",3 Approach,[0],[0]
+"One way to address this discrepancy is by framing the problem as one of domain adaptation, the source domain being the original dialogue corpus and the target domain representing the dialogues we want our model to produce.",3 Approach,[0],[0]
+"The target domain is in this case not necessarily another dialogue domain, but simply reflects the fact that the distribution of responses in the raw corpus does not necessarily reflect the distribution of responses we ultimately wish to encode in the conversational model.
+",3 Approach,[0],[0]
+"A popular strategy for domain adaptation in natural language processing, which has notably been used in POS-tagging, sentiment analysis, spam filtering and machine translation (Bickel et al., 2007; Jiang and Zhai, 2007; Foster et al., 2010; Xia et al., 2013), is to assign a higher weight to training instances whose properties are similar to the target domain.",3 Approach,[0],[0]
+We present below such an instance weighting approach tailored for neural conversational models.,3 Approach,[0],[0]
+"The quality of a particular 〈context, response〉 pair is difficult to determine using handcrafted rules – for instance, the probability of a turn bound-
+ary may depend on multiple factors such as the presence of turn-yielding cues or the time gap between the utterances (Lison and Meena, 2016).",3.1 Weighting model,[0],[0]
+"To overcome these limitations, we adopt a datadriven approach and automatically learn a weighting model from examples of “high-quality” responses.",3.1 Weighting model,[0],[0]
+"What constitutes a high-quality response depends in practice on the specific criteria we wish to uphold in the conversation model – for instance, favouring responses that are likely to form a new dialogue turn (rather than a continuation of the current turn), avoiding the use of dull, commonplace responses, or disfavouring the selection of responses that contain unresolved references to person names.
+",3.1 Weighting model,[0],[0]
+"The weighting model can be expressed as a neural model which associates each 〈context, response〉 example pair to a numerical weight.",3.1 Weighting model,[0],[0]
+The architecture of this neural network is depicted in Figure 1.,3.1 Weighting model,[0],[0]
+"It is composed of two recurrent sub-networks with shared weights, one for the context and one for the response.",3.1 Weighting model,[0],[0]
+Each sub-network takes a sequence of tokens as input and pass them through an embedding layer and a recurrent layer with LSTM or GRU cells.,3.1 Weighting model,[0],[0]
+"The fixed-size vectors for the context and response are then fed to a regular densely-connected layer, and finally to the final weight value through a sigmoid activation function.",3.1 Weighting model,[0],[0]
+"Additional features can also be included whenever available – for instance, timing information for movie and TV subtitles (such as the duration gap between the context and its response, in milliseconds), or document-level features such as the dialogue genre or the total duration of the dialogue.
+",3.1 Weighting model,[0],[0]
+"To estimate its parameters, the neural model is provided with positive examples of “high-quality” responses along with negative examples sampled at random from the corpus.",3.1 Weighting model,[0],[0]
+"Based on this training data, the network learns to assign higher weights to the 〈context, response〉 pairs whose output vectors (combined with the additional inputs) are close from the high-quality examples, and a lower weight for those further away.",3.1 Weighting model,[0],[0]
+"In practice, the selection of high-quality example pairs from a given corpus can be performed through a combination of simple heuristics, as detailed in Section 4.1.",3.1 Weighting model,[0],[0]
+"Once the weighting model is estimated, the next step is to run it on the entire dia-
+logue corpus to compute the expected weight of each 〈context, response〉 pair.",3.2 Instance weighting,[0.9522791124427241],['This means that adding a single line of code to call this wrapper before actually fitting the model is sufficient to switch from the standard uniform sampling to our importance-sampling scheme.']
+These sample weights are then included in the empirical loss that is being minimised during training.,3.2 Instance weighting,[0],[0]
+"Formally, assuming a set of context-response pairs {(c1, r1), (c2, r2), ...(cn, rn)} with associated weights {w1, ...wn}, the estimation of the model parameters θ is expressed as a minimisation problem.",3.2 Instance weighting,[0],[0]
+"For retrieval models, this minimisation is expressed as:
+θ∗ = minθ n∑ 1 wi L(yi, f(ci, ri; θ)) (1)
+where L is a loss function (for instance, the cross-entropy loss), and yi is set to either 1 if ri is the response to ci, and 0 otherwise (when ri is a negative example).",3.2 Instance weighting,[0],[0]
+"For generative models, the minimisation is similarly expressed as:
+θ∗ = minθ n∑ 1 wi L(ri, f(ci; θ)) (2)
+",3.2 Instance weighting,[0],[0]
+"In both cases, the loss computed from each example pair is multiplied by the weight value determined by the weight model.",3.2 Instance weighting,[0],[0]
+Examples associated with a larger weight wi will therefore have a larger influence on the gradient update steps.,3.2 Instance weighting,[0],[0]
+"The approach is evaluated on the basis of retrievalbased neural models trained on English-language subtitles from (Lison and Tiedemann, 2016).",4 Evaluation,[0],[0]
+"Three alternative models are evaluated:
+1.",4 Evaluation,[0],[0]
+"A traditional TF-IDF model,
+2.",4 Evaluation,[0],[0]
+"A Dual Encoder model trained directly on the corpus examples,
+3.",4 Evaluation,[0],[0]
+A Dual Encoder model combined with the weighting model from Section 3.1.,4 Evaluation,[0],[0]
+"TF-IDF model The TF-IDF (Term Frequency - Inverse Document Frequency) model computes the similarity between the context and its response using methods from information retrieval (Ramos, 2003).",4.1 Models,[0],[0]
+TFIDF measures the importance of a word in a “document” (in this case the context or response) relative to the whole corpus.,4.1 Models,[0],[0]
+The model transforms the context and response (represented as bag-ofwords) into TF-IDF-weighted vectors.,4.1 Models,[0],[0]
+"These vectors are sparse vectors of a size equivalent to the vocabulary size, where each row corresponds, if the given word is present in the context or response, to its TF-IDF weight, and is 0 otherwise.",4.1 Models,[0],[0]
+"The matching score between the context and its response is then determined as the cosine similarity between the two vectors:
+similarity = vc · vr
+‖vc‖2 ‖vr‖2 (3)
+where vc and vr respectively denote the TF-IDFweighted vectors for the context and response.
+",4.1 Models,[0],[0]
+"Dual Encoder The Dual Encoder model (Lowe et al., 2017) consists of two recurrent networks, one for the context and one for the response.",4.1 Models,[0],[0]
+"The tokens are first
+passed through an embedding layer and then to a recurrent layer with LSTM or GRU cells.",4.1 Models,[0],[0]
+"In the original formalisation of this model (Lowe et al., 2015), the context vector is transformed through a dense layer of same dimension, representing the “predicted” response.",4.1 Models,[0],[0]
+"The inner product of the predicted and actual responses is then calculated and normalised, yielding a similarity score.",4.1 Models,[0.950015549210905],"['As a result, the variation of the gradient norm is mostly captured by the gradient of the loss function with respect to the pre-activation outputs of the last layer of our neural network.']"
+"This model, however, only seeks to capture the semantic similarity between the two sequences, while the selection of the most adequate response in a given context may also need to account for other factors such as the grammaticality and coherence of the response.",4.1 Models,[0],[0]
+We therefore extend the Dual Encoder model in two ways.,4.1 Models,[0],[0]
+"First, both the context and response vectors are transformed through a dense layer at the end of the recurrent layer (instead of just the context vector).",4.1 Models,[0],[0]
+"Second, the final prediction is connected to both the inner product of the two vectors and to the response vector itself, as depicted in Figure 2.
+",4.1 Models,[0],[0]
+"Dual Encoder with instance weighting
+Finally, the third model relies on the exact same Dual Encoder model as above, but applies the weighting model described in Section 3.1 prior to learning in order to assign weights to each training example.",4.1 Models,[0],[0]
+The weighting model is estimated on a subset of the movie and TV subtitles augmented with speaker information and filtered through heuristics to ensure a good cohesion between the context and its response.,4.1 Models,[0],[0]
+"These heuristics are detailed in the next section.
+",4.1 Models,[0],[0]
+"Although the architecture of the Dual Encoder
+is superficially similar to the weighting model of Figure 1, the two models serve a different purpose: the weighting model returns the expected quality of a training example, while the Dual Encoder returns a score expressing the adequacy between the context and the response.",4.1 Models,[0],[0]
+"Training data for the conversation models The dataset used for training the three retrieval models is the English-language portion of the OpenSubtitles corpus of movie and TV subtitles (Lison and Tiedemann, 2016).",4.2 Datasets,[0],[0]
+"The full dataset is composed of 105 445 subtitles and 95.5 million utterances, each utterance being associated with a start and end time (in milliseconds).
+",4.2 Datasets,[0],[0]
+"Training data for the weighting model For training the weighting model, we extracted a small subset of the full corpus of subtitles corresponding to 〈context, response〉 pairs satisfying specific quality criteria.",4.2 Datasets,[0],[0]
+"The first step was to align at the sentence level the subtitles with an online collection of movie and TV scripts (1 069 movies and 6 398 TV episodes), following the approach described in (Lison and Meena, 2016).
+",4.2 Datasets,[0],[0]
+This alignment enabled us to annotate the subtitles with speaker names and turn boundaries.,4.2 Datasets,[0],[0]
+"Based on these subtitles, we then selected example pairs with two heuristics:
+1.",4.2 Datasets,[0],[0]
+"To ensure the response constitutes an actual reply from another speaker and not simply a continuation of the current turn, the
+subtitles were segmented into sub-dialogues.",4.2 Datasets,[0],[0]
+"〈context, response〉 pairs including a change of speaker from the context to the response were then extracted from these subdialogues.",4.2 Datasets,[0],[0]
+"Since multi-party dialogues make it harder to determine who replies to whom, only sub-dialogues with two participants were considered in the subset.
+",4.2 Datasets,[0],[0]
+2.,4.2 Datasets,[0],[0]
+"To ensure the response is intelligible given the context (without drawing on unresolved references to e.g. fictional person names), we also filtered out from the subset the dialogue turns including mentions of fictional character names and out-of-vocabulary words.
+",4.2 Datasets,[0],[0]
+"A total of 95 624 〈context, response〉 pairs can be extracted using these two heuristics.",4.2 Datasets,[0],[0]
+This corresponds to about 0.1 % of the total number of examples for the OpenSubtitles corpus.,4.2 Datasets,[0],[0]
+"These pairs are used as positive examples for the weighting model, along with negative pairs sampled at random from the corpus.
+Test data Two distinct corpora are used as test sets for the evaluation.",4.2 Datasets,[0],[0]
+"The first corpus, whose genre is relatively close to the training set, is the Cornell Movie Dialog Corpus (Danescu-Niculescu-Mizil and Lee, 2011), which is a collection of fictional conversations extracted from movie scripts (unrelated to the ones used for training the weighting model).",4.2 Datasets,[0],[0]
+The transcripts from this corpus are segmented into conversations.,4.2 Datasets,[0],[0]
+Each conversation is represented as a sequence of dialogue turns.,4.2 Datasets,[0],[0]
+"As this paper concentrates on the selection of relevant responses in a given context, we limited the test pairs to the ones where the context ends with a question, which yields a total of 67 305 〈context, response〉 pairs.
+",4.2 Datasets,[0],[0]
+"The second test set comes from a slightly different conversational genre, namely theatre plays.",4.2 Datasets,[0],[0]
+The scripts of 62 English-language theatre plays were downloaded from public websites.,4.2 Datasets,[0],[0]
+"We also limited the test pairs to the pairs where the context ends with a question, for a total of 3 427 pairs.",4.2 Datasets,[0],[0]
+"The utterances from all datasets were tokenised, lemmatised and POS-tagged using the spaCy NLP library1.",4.2.1 Experimental design Preprocessing,[0],[0]
+"We also ran the named entity recogniser
+1https://spacy.io/
+from the same library to extract named entities.",4.2.1 Experimental design Preprocessing,[0],[0]
+"Since the person names mentioned in movies and theatre plays typically refer to fictional characters, we replaced their occurrences by tags, one distinct tag per entity.",4.2.1 Experimental design Preprocessing,[0],[0]
+"For instance, the pair:
+Dana: Frank, do you think you could give me a hand with these bags?",4.2.1 Experimental design Preprocessing,[0],[0]
+"Frank: I’m not a doorman, Miss Barrett.",4.2.1 Experimental design Preprocessing,[0],[0]
+"I’m a building superintendent.
+is simplified as:
+Dana: <person1>, do you think you could give me a hand with these bags?",4.2.1 Experimental design Preprocessing,[0],[0]
+"Frank: I’m not a doorman, <person2>.",4.2.1 Experimental design Preprocessing,[0],[0]
+"I’m a building superintendent.
+",4.2.1 Experimental design Preprocessing,[0],[0]
+Named entities of locations and numbers are also replaced by similar tags.,4.2.1 Experimental design Preprocessing,[0],[0]
+"To account for the turn structure, turn boundaries were annotated with a <newturn> tag.",4.2.1 Experimental design Preprocessing,[0],[0]
+The vocabulary is capped to 25 000 words determined from their frequency in the training corpus.,4.2.1 Experimental design Preprocessing,[0],[0]
+"Tokens not covered in this vocabulary are replaced by <unknown>.
+",4.2.1 Experimental design Preprocessing,[0],[0]
+"Training details
+The dialogue contexts were limited to the last 10 utterances preceding the response and a maximum of 60 tokens.",4.2.1 Experimental design Preprocessing,[0],[0]
+"The responses were defined as the next dialogue turn after the context, and limited to a maximum of 5 utterances and 30 tokens.
+",4.2.1 Experimental design Preprocessing,[0],[0]
+The embedding layers of the Dual Encoders were initialised with Skip-gram embeddings trained on the OpenSubtitles corpus.,4.2.1 Experimental design Preprocessing,[0],[0]
+"For the recurrent layers, we tested the use of both GRU and LSTM cells, along with their bidirectional equivalents (Chung et al., 2014), without noticeable differences in accuracy.",4.2.1 Experimental design Preprocessing,[0],[0]
+"As GRU cells are faster to train than LSTM cells, we opted for the use of GRU-based recurrent layers.",4.2.1 Experimental design Preprocessing,[0],[0]
+The dimensionality of the output vectors from the recurrent layers was 400.,4.2.1 Experimental design Preprocessing,[0],[0]
+"The neural networks are trained with a batch size of 256, binary cross-entropy as cost function and RMSProp as optimisation algorithm.",4.2.1 Experimental design Preprocessing,[0],[0]
+"To avoid overfitting issues, a dropout of 0.2 was applied at all layers of the neural model.
+",4.2.1 Experimental design Preprocessing,[0],[0]
+"Both the weighting model and the Dual Encoder models were training with a 1:1 ratio between positive examples (actual 〈 context, response 〉 pairs) and negative examples with a response sampled at random from the training set.",4.2.1 Experimental design Preprocessing,[0],[0]
+"The three models (the TF-IDF model, the baseline Dual Encoder and the Dual Encoder combined with the weighting model) are evaluated using the Recallm@i metric, which is the most common metric for the evaluation of retrieval-based models.",4.3 Results,[0],[0]
+"Let {〈ci, ri〉, 1 ≤ i ≤ n} be the list of m context-response pairs from the test set.",4.3 Results,[0],[0]
+"For each context ci, we create a set ofm alternative responses, one response being the actual response ri, and them−1 other responses being sampled at random from the same corpus.",4.3 Results,[0],[0]
+"The m alternative responses are then ranked based on the output from the conversational model, and the Recallm@imeasures how often the correct response appears in the top i results of this ranked list.",4.3 Results,[0.9531855570734556],['The two most important ones that were not investigated in this work are automatically tuning the learning rate based on the variance of the gradients and decreasing the batch size.']
+"The Recallm@i metric is often used for the evaluation of retrieval models as several responses may be equally “correct” given a particular context.
+",4.3 Results,[0],[0]
+The experimental results are shown in Table 1.,4.3 Results,[0],[0]
+"As detailed in the table, the Dual Encoder model combined with the weighting model outperforms the Dual Encoder baseline on both test sets (the Cornell Movie Dialogs corpus and the smaller corpus of theatre plays).",4.3 Results,[0],[0]
+"Our hypothesis is that the weighting model biases the responses selected by the conversation model towards more cohesive adjacency pairs between context and response2.
+",4.3 Results,[0],[0]
+"Figure 3 illustrates the learning curve for the two Dual Encoder models, where the accuracy is measured on a validation set composed of the high-quality example pairs described in the previous section along with randomly sampled alternative responses (using a 1:1 ratio of positive vs. negative examples).",4.3 Results,[0],[0]
+"We can observe that the Dual Encoder with instance weights outperforms the baseline model on this validation set – which is not per se a surprising result, since the purpose
+2Contrary to the OpenSubtitles corpus which is made of subtitles with no turn segmentation, the Cornell Movie Dialogs corpus and the corpus of theatre plays are derived from scripts and are therefore segmented in dialogue turns.
+of the weighting model is precisely to bias the conversation model to give more importance to these types of example pairs.",4.3 Results,[0],[0]
+"To further investigate the potential of this weighting strategy for neural conversational models, we conducted a human evaluation of the responses generated by the two neural models included in the evaluation.",4.4 Human evaluation,[0],[0]
+"We collected human judgements on 〈context, response〉 pairs using a crowdsourcing platform.",4.4 Human evaluation,[0],[0]
+"We extracted 115 random contexts from the Cornell Movie Dialogs corpus and used four distinct strategies to generate dialogue responses: a random predictor (used to identify the lower bound), the two Dual Encoder models (both without and with instance weights), and expert responses (used to identify the upper bound).",4.4 Human evaluation,[0],[0]
+The expert responses were manually authored by two human annotators.,4.4 Human evaluation,[0],[0]
+"The resulting 460 〈context, response〉 pairs were evaluated by 8 distinct human judges each (920 ratings per model).",4.4 Human evaluation,[0],[0]
+"The human judges were asked to rate the consistency between context and response on a 5-points scale, from Inconsistent to Consistent.",4.4 Human evaluation,[0],[0]
+"In total,
+118 individuals participated in the crowdsourced evaluation.
+",4.4 Human evaluation,[0],[0]
+The results of this human evaluation are presented in Figure 4.,4.4 Human evaluation,[0],[0]
+"There is unfortunately no statistically significant difference between the baseline Dual Encoder (M = 2.97, SD = 1.27) and the one combined with the weighting model (M = 3.04, SD = 1.27), as established by a Wilcoxon rank-sum test, W (1838) = 410360, p = 0.23.",4.4 Human evaluation,[0],[0]
+These inconclusive results are probably due to the very low agreement between the evaluation participants (Krippendorff’s α for continuous variable = 0.36).,4.4 Human evaluation,[0],[0]
+The fact that the lower and upper bounds are only separated by 2 standard deviations confirms the difficulty for the raters to discriminate between responses.,4.4 Human evaluation,[0.9530882935397155],"['This can also be deduced by observing figure 2, where the probabilities proportional to the loss and the upper-bound are plotted against the optimal ones (proportional to the gradient-norm).']"
+"We hypothesise that the nature of the corpus, which is heavily dependent on an external context (the movie scenes), makes it particularly difficult to assess the consistency of the responses.
+",4.4 Human evaluation,[0],[0]
+Some examples of responses produced by the two Dual Encoder models illustrate the improvements brought by the weighting model.,4.4 Human evaluation,[0],[0]
+"In (1), the baseline Dual Encoder selected a turn continuation rather than a reply, while the second model avoids this pitfall.",4.4 Human evaluation,[0],[0]
+"Both (1) and (2) also show that the dual encoder with instance weighting tends to select utterances with fewer named entities.
+",4.4 Human evaluation,[0],[0]
+(1) Context of conversation: – This is General Ripper speaking.,4.4 Human evaluation,[0],[0]
+"– Yes, sir. –",4.4 Human evaluation,[0],[0]
+Do you recognize my voice?”,4.4 Human evaluation,[0],[0]
+"⇒ Response of Dual Encoder: – This is General Nikolas Pherides, Commander of the Third Army.",4.4 Human evaluation,[0],[0]
+"I’m Oliver
+Davis.",4.4 Human evaluation,[0],[0]
+⇒,4.4 Human evaluation,[0],[0]
+"Response of Dual Encoder + weighting: – Yes, sir.",4.4 Human evaluation,[0],[0]
+"I’m Gideon.
+(2) Context of conversation: – Let me finish dinner before you eat it...",4.4 Human evaluation,[0],[0]
+Chop the peppers... – Are you all right?,4.4 Human evaluation,[0],[0]
+⇒,4.4 Human evaluation,[0],[0]
+"Response of Dual Encoder: – No thanks, not hungry.",4.4 Human evaluation,[0],[0]
+Harry Dunne. ⇒,4.4 Human evaluation,[0],[0]
+Response of Dual Encoder + weighting: –,4.4 Human evaluation,[0],[0]
+Yes I’m fine.,4.4 Human evaluation,[0],[0]
+Everything is ok.,4.4 Human evaluation,[0],[0]
+"The limitations of neural conversational models trained on large, noisy dialogue corpora such as movie and TV subtitles have been discussed in several papers.",5 Discussion,[0],[0]
+"Some of the issues raised in previous papers are the absence of turn segmentation in subtitling corpus (Vinyals and Le, 2015; Serban and Pineau, 2015; Lison and Meena, 2016), the lack of long-term consistency and “personality” in the generated responses (Li et al., 2016b), and the ubiquity of dull, commonplace responses when training generative models (Li et al., 2016a).",5 Discussion,[0],[0]
+"To the best of our knowledge, this paper is the first to propose an instance weighting approach to address some of these limitations.",5 Discussion,[0],[0]
+"One related approach is described in (Zhang et al., 2017) which also relies on domain adaptation for neural response generation, using a combination of online and offline human judgement.",5 Discussion,[0],[0]
+"Their focus is, however, on the construction of personalised conversation models and not on instance weighting.
+",5 Discussion,[0],[0]
+The empirical results corroborate the hypothesis that assigning weights to the training examples of “noisy” dialogue corpora can boost the performance of neural conversation models.,5 Discussion,[0],[0]
+"In essence, the proposed approach replaces a one-pass training regime with a two-pass procedure: the first pass to determine the quality of each example pair, and a second pass to update the model based on the observed pair and its associated weight.",5 Discussion,[0],[0]
+"We also showed that these weights can be determined in a data-driven manner with a neural model trained on example pairs selected for their adherence to specific quality criteria.
+",5 Discussion,[0],[0]
+"Instead of this two-pass procedure, an alternative approach is to directly learn a conversation model on the subset of example pairs that are known to be of high-quality.",5 Discussion,[0],[0]
+"However, one major shortcoming of this approach is that it consider-
+ably limits the size of the training set that can be exploited.",5 Discussion,[0],[0]
+"For instance, the data used to estimate the weighting model in Section 4.2 corresponds to a mere 0.1 % of the total English-language part of the OpenSubtitles corpus (since the utterances had to be associated with speaker names derived from aligned scripts in order to apply the heuristics).",5 Discussion,[0],[0]
+"In contract, the proposed two-pass procedure can scale to datasets of any size.
+",5 Discussion,[0],[0]
+The results from Section 4 are limited to retrieval-based models.,5 Discussion,[0],[0]
+"One important question for future work is to investigate whether the results carry over to generative, sequence-to-sequence models.",5 Discussion,[0],[0]
+"As generative models are more computationally intensive to train than retrieval models, the presented approach may bring another important benefit, namely the ability to filter out part of the training data to concentrate the training time on “interesting” examples with a high cohesion between the context and its response.",5 Discussion,[0],[0]
+Dialogue corpora such as chat logs or movie subtitles are very useful resources for developing opendomain conversation models.,6 Conclusion,[0],[0]
+"They do, however, also raise a number of challenges for conversation modelling.",6 Conclusion,[0],[0]
+"Two notable challenges are the lack of segmentation in dialogue turns (at least for the movie subtitles) and the presence of external context that is not captured in the dialogue transcripts themselves (leading to mentions of person names and unresolvable named entities).
+",6 Conclusion,[0],[0]
+This paper showed how to mitigate these challenges through the use of a weighting model applied on the training examples.,6 Conclusion,[0],[0]
+"This weighting model can be estimated in a data-driven manner, by providing example of “high-quality” training pairs along with random pairs extracted from the same corpus.",6 Conclusion,[0],[0]
+The criteria that determine how these training pairs should be selected depend in practice on the type of conversational model one wishes to learn.,6 Conclusion,[0],[0]
+"This instance weighting approach can be viewed as a form of domain adaptation, where the data points from the source domain (in this case, the original corpus) are re-weighted to improve the model performance in a target domain (in this case, the interactions in which the conversation model will be deployed).
+",6 Conclusion,[0],[0]
+Evaluation results on retrieval-based neural models demonstrate the potential of this approach.,6 Conclusion,[0],[0]
+"The weighting model is essentially a preprocess-
+ing step and can therefore be combined with any type of conversational model.
+",6 Conclusion,[0],[0]
+Future work will focus on two directions.,6 Conclusion,[0],[0]
+"The first is to extend the weighting model to account for other criteria, such as ensuring diversity of responses and coherence across turns.",6 Conclusion,[0],[0]
+"The second is to evaluate the approach on other types of neural conversational models, and more particularly on generative models.",6 Conclusion,[0],[0]
+"Neural conversational models require substantial amounts of dialogue data to estimate their parameters and are therefore usually learned on large corpora such as chat forums, Twitter discussions or movie subtitles.",abstractText,[0],[0]
+"These corpora are, however, often challenging to work with, notably due to their frequent lack of turn segmentation and the presence of multiple references external to the dialogue itself.",abstractText,[0],[0]
+This paper shows that these challenges can be mitigated by adding a weighting model into the neural architecture.,abstractText,[0],[0]
+"The weighting model, which is itself estimated from dialogue data, associates each training example to a numerical weight that reflects its intrinsic quality for dialogue modelling.",abstractText,[0],[0]
+"At training time, these sample weights are included into the empirical loss to be minimised.",abstractText,[0],[0]
+Evaluation results on retrieval-based models trained on movie and TV subtitles demonstrate that the inclusion of such a weighting model improves the model performance on unsupervised metrics.,abstractText,[0],[0]
+Not All Dialogues are Created Equal: Instance Weighting for Neural Conversational Models,title,[0],[0]
+"We propose to mitigate this phenomenon with a principled importance sampling scheme that focuses computation on “informative” examples, and reduces the variance of the stochastic gradients during training. Our contribution is twofold: first, we derive a tractable upper bound to the persample gradient norm, and second we derive an estimator of the variance reduction achieved with importance sampling, which enables us to switch it on when it will result in an actual speedup.
+The resulting scheme can be used by changing a few lines of code in a standard SGD procedure, and we demonstrate experimentally, on image classification, CNN fine-tuning, and RNN training, that for a fixed wall-clock time budget, it provides a reduction of the train losses of up to an order of magnitude and a relative improvement of test errors between 5% and 17%.",text,[0],[0]
+"The dramatic increase in available training data has made the use of deep neural networks feasible, which in turn has significantly improved the state-of-the-art in many fields, in particular computer vision and natural language processing.",1. Introduction,[0],[0]
+"However, due to the complexity of the resulting optimization problem, computational cost is now the core issue in training these large architectures.
+",1. Introduction,[0],[0]
+"When training such models, it appears to any practitioner that not all samples are equally important; many of them are properly handled after a few epochs of training, and most could be ignored at that point without impacting the final
+1Idiap Research Institute, Switzerland 2École Polytechique Fédérale de Lausanne, Switzerland.",1. Introduction,[0],[0]
+"Correspondence to: Angelos Katharopoulos <firstname.lastname@idiap.ch>.
+model.",1. Introduction,[0],[0]
+"To this end, we propose a novel importance sampling scheme that accelerates the training of any neural network architecture by focusing the computation on the samples that will introduce the biggest change in the parameters which reduces the variance of the gradient estimates.
+",1. Introduction,[0],[0]
+"For convex optimization problems, many works (Bordes et al., 2005; Zhao & Zhang, 2015; Needell et al., 2014; Canévet et al., 2016; Richtárik & Takáč, 2013) have taken advantage of the difference in importance among the samples to improve the convergence speed of stochastic optimization methods.",1. Introduction,[0],[0]
+"On the other hand, for deep neural networks, sample selection methods were mainly employed to generate hard negative samples for embedding learning problems or to tackle the class imbalance problem (Schroff et al., 2015; Wu et al., 2017; Simo-Serra et al., 2015).
+",1. Introduction,[0],[0]
+"Recently, researchers have shifted their focus on using importance sampling to improve and accelerate the training of neural networks (Alain et al., 2015; Loshchilov & Hutter, 2015; Schaul et al., 2015).",1. Introduction,[0],[0]
+"Those works, employ either the gradient norm or the loss to compute each sample’s importance.",1. Introduction,[0],[0]
+"However, the former is prohibitively expensive to compute and the latter is not a particularly good approximation of the gradient norm.
+",1. Introduction,[0],[0]
+"Compared to the aforementioned works, we derive an upper bound to the per sample gradient norm that can be computed in a single forward pass.",1. Introduction,[0],[0]
+This results in reduced computational requirements of more than an order of magnitude compared to Alain et al. (2015).,1. Introduction,[0],[0]
+"Furthermore, we quantify the variance reduction achieved with the proposed importance sampling scheme and associate it with the batch size increment required to achieve an equivalent variance reduction.",1. Introduction,[0],[0]
+"The benefits of this are twofold, firstly we provide an intuitive metric to predict how useful importance sampling is going to be, thus we are able to decide when to switch on importance sampling during training.",1. Introduction,[0],[0]
+"Secondly, we also provide theoretical guarantees for speedup, when variance reduction is above a threshold.",1. Introduction,[0],[0]
+"Based on our analysis, we propose a simple to use algorithm that can be used to accelerate the training of any neural network architecture.
+",1. Introduction,[0],[0]
+"Our implementation is generic and can be employed by adding a single line of code in a standard Keras model
+ar X
+iv :1
+80 3.
+00 94
+2v 3
+[ cs
+.L G
+] 2
+8 O
+ct 2
+01 9
+training.",1. Introduction,[0],[0]
+"We validate it on three independent tasks: image classification, fine-tuning and sequence classification with recurrent neural networks.",1. Introduction,[0],[0]
+"Compared to existing batch selection schemes, we show that our method consistently achieves lower training loss and test error for equalized wall-clock time.",1. Introduction,[0],[0]
+Existing importance sampling methods can be roughly categorized in methods applied to convex problems and methods designed for deep neural networks.,2. Related Work,[0],[0]
+Importance sampling for convex optimization problems has been extensively studied over the last years.,2.1. Importance Sampling for Convex Problems,[0],[0]
+"Bordes et al. (2005) developed LASVM, which is an online algorithm that uses importance sampling to train kernelized support vector machines.",2.1. Importance Sampling for Convex Problems,[0],[0]
+"Later, Richtárik & Takáč (2013) proposed a generalized coordinate descent algorithm that samples coordinate sets in a way that optimizes the algorithm’s convergence rate.
+",2.1. Importance Sampling for Convex Problems,[0],[0]
+"More recent works (Zhao & Zhang, 2015; Needell et al., 2014) make a clear connection with the variance of the gradient estimates of stochastic gradient descent and show that the optimal sampling distribution is proportional to the per sample gradient norm.",2.1. Importance Sampling for Convex Problems,[0],[0]
+"Due to the relatively simple optimization problems that they deal with, the authors resort to sampling proportionally to the norm of the inputs, which in simple linear classification is proportional to the Lipschitz constant of the per sample loss function.
+",2.1. Importance Sampling for Convex Problems,[0.950157584265792],"['In all the subsequent sections, we use uniform to refer to the usual training algorithm that samples points from a uniform distribution, we use loss to refer to algorithm 1 but instead of sampling from a distribution proportional to our upperbound to the gradient norm Ĝi (equations 8 and 20), we sample from a distribution proportional to the loss value and finally upper-bound to refer to our proposed method.']"
+"Such simple importance measures do not exist for Deep Learning and the direct application of the aforementioned theory (Alain et al., 2015), requires clusters of GPU workers just to compute the sampling distribution.",2.1. Importance Sampling for Convex Problems,[0],[0]
+Importance sampling has been used in Deep Learning mainly in the form of manually tuned sampling schemes.,2.2. Importance Sampling for Deep Learning,[0],[0]
+Bengio et al. (2009) manually design a sampling scheme inspired by the perceived way that human children learn; in practice they provide the network with examples of increasing difficulty in an arbitrary manner.,2.2. Importance Sampling for Deep Learning,[0],[0]
+"Diametrically opposite, it is common for deep embedding learning to sample hard examples because of the plethora of easy non informative ones (Simo-Serra et al., 2015; Schroff et al., 2015).
+",2.2. Importance Sampling for Deep Learning,[0],[0]
+"More closely related to our work, Schaul et al. (2015) and Loshchilov & Hutter (2015) use the loss to create the sampling distribution.",2.2. Importance Sampling for Deep Learning,[1.0],"['More closely related to our work, Schaul et al. (2015) and Loshchilov & Hutter (2015) use the loss to create the sampling distribution.']"
+"Both approaches keep a history of losses for previously seen samples, and sample either proportionally to the loss or based on the loss ranking.",2.2. Importance Sampling for Deep Learning,[0],[0]
+"One of the
+main limitations of history based sampling, is the need for tuning a large number of hyperparameters that control the effects of “stale” importance scores; i.e. since the model is constantly updated, the importance of samples fluctuate and previous observations may poorly reflect the current situation.",2.2. Importance Sampling for Deep Learning,[0],[0]
+"In particular, Schaul et al. (2015) use various forms of smoothing for the losses and the importance sampling weights, while Loshchilov & Hutter (2015) introduce a large number of hyperparameters that control when the losses are computed, when they are sorted as well as how the sampling distribution is computed based on the rank.
+",2.2. Importance Sampling for Deep Learning,[0],[0]
+"In comparison to all the above methods, our importance sampling scheme based on an upper bound to the gradient norm has a solid theoretical basis with clear objectives, very easy to choose hyperparameters, theoretically guaranteed speedup and can be applied to any type of network and loss function.",2.2. Importance Sampling for Deep Learning,[0],[0]
+"For completeness, we mention the work of Wu et al. (2017), who design a distribution (suitable only for the distance based losses) that maximizes the diversity of the losses in a single batch.",2.3. Other Sample Selection Methods,[0],[0]
+"In addition, Fan et al. (2017) use reinforcement learning to train a neural network that selects samples for another neural network in order to optimize the convergence speed.",2.3. Other Sample Selection Methods,[1.0],"['In addition, Fan et al. (2017) use reinforcement learning to train a neural network that selects samples for another neural network in order to optimize the convergence speed.']"
+"Although their preliminary results are promising, the overhead of training two networks makes the wall-clock speedup unlikely and their proposal not as appealing.",2.3. Other Sample Selection Methods,[0],[0]
+"Finally, a class of algorithms that aim to accelerate the convergence of Stochastic Gradient Descent (SGD) through variance reduction are SVRG type algorithms (Johnson & Zhang, 2013; Defazio et al., 2014; Allen-Zhu, 2017; Lei et al., 2017).",2.4. Stochastic Variance Reduced Gradient,[0],[0]
+"Although asymptotically better, those algorithms typically perform worse than plain SGD with momentum for the low accuracy optimization setting of Deep Learning.",2.4. Stochastic Variance Reduced Gradient,[0],[0]
+"Contrary to the aforementioned algorithms, our proposed importance sampling does not improve the asymptotic convergence of SGD but results in pragmatic improvements in all the metrics given a fixed time budget.",2.4. Stochastic Variance Reduced Gradient,[0.9584452545206412],"['In the first subsection, we compare the variance reduction achieved with our upper bound to the theoretically maximum achieved with the true gradient norm.']"
+Importance sampling aims at increasing the convergence speed of SGD by focusing computation on samples that actually induce a change in the model parameters.,3. Variance Reduction for Deep Neural Networks,[0],[0]
+This formally translates into a reduced variance of the gradient estimates for a fixed computational cost.,3. Variance Reduction for Deep Neural Networks,[0],[0]
+"In the following sections, we analyze how this works and present an efficient algorithm that can be used to train any Deep Learning model.",3. Variance Reduction for Deep Neural Networks,[0],[0]
+"Let xi, yi be the i-th input-output pair from the training set, Ψ(·; θ) be a Deep Learning model parameterized by the vector θ, and L(·, ·) be the loss function to be minimized during training.",3.1. Introduction to Importance Sampling,[1.0],"['Let xi, yi be the i-th input-output pair from the training set, Ψ(·; θ) be a Deep Learning model parameterized by the vector θ, and L(·, ·) be the loss function to be minimized during training.']"
+"The goal of training is to find
+θ∗ = arg min θ
+1
+N N∑ i=1",3.1. Introduction to Importance Sampling,[0],[0]
+"L(Ψ(xi; θ), yi) (1)
+where N corresponds to the number of examples in the training set.
+",3.1. Introduction to Importance Sampling,[0.9641414570570124],"['The goal of training is to find θ∗ = arg min θ 1 N N∑ i=1 L(Ψ(xi; θ), yi) (1) where N corresponds to the number of examples in the training set.']"
+"We use an SGD procedure with learning rate η, where the update at iteration t depends on the sampling distribution pt1, . . .",3.1. Introduction to Importance Sampling,[0.9921304851283304],"['We use an SGD procedure with learning rate η, where the update at iteration t depends on the sampling distribution pt1, .']"
+", p t N and re-scaling coefficients w t 1, . . .",3.1. Introduction to Importance Sampling,[0],[0]
+", w t N .",3.1. Introduction to Importance Sampling,[0],[0]
+"Let It be the data point sampled at that step, we have P (It = i) =",3.1. Introduction to Importance Sampling,[0],[0]
+"pti and
+θt+1 = θt − ηwIt∇θtL(Ψ(xIt ; θt), yIt) (2)
+Plain SGD with uniform sampling is achieved with wti = 1 and pti = 1 N for all t and i.
+If we define the convergence speed S of SGD as the reduction of the distance of the parameter vector θ from the optimal parameter vector θ∗ in two consecutive iterations t and t+ 1
+S = −EPt",3.1. Introduction to Importance Sampling,[0],[0]
+[ ‖θt+1 − θ∗‖22,3.1. Introduction to Importance Sampling,[0],[0]
+"− ‖θt − θ ∗‖22 ] , (3)
+and if we have wi = 1Npi such that
+EPt [wIt∇θtL(Ψ(xIt ; θt), yIt)]",3.1. Introduction to Importance Sampling,[0],[0]
+(4) = ∇θt,3.1. Introduction to Importance Sampling,[0],[0]
+1N ∑N i=1,3.1. Introduction to Importance Sampling,[0],[0]
+"L(Ψ(xi; θt), yi), (5)
+and set Gi = wi∇θtL(Ψ(xi; θt), yi), then we get (this is a different derivation of the result by Wang et al., 2016)
+",3.1. Introduction to Importance Sampling,[0],[0]
+S = −EPt,3.1. Introduction to Importance Sampling,[0],[0]
+"[ (θt+1−θ∗)T (θt+1−θ∗)− (θt−θ∗)T (θt−θ∗) ] = −EPt [ θTt+1θt+1−2θt+1θ∗ − θTt θt + 2θtθ∗
+] = −EPt [ (θt−ηGIt) T (θt−ηGIt) + 2ηGTItθ ∗−θTt",3.1. Introduction to Importance Sampling,[0],[0]
+"θt ]
+= −EPt [ −2η (θt−θ∗)GIt + η2GTItGIt ] = 2η (θt−θ∗)EPt [GIt ]− η2 EPt [GIt ]
+TEPt [GIt ]− η2Tr (VPt [GIt ])
+(6)
+Since the first two terms, in the last expression, are the speed of batch gradient descent, we observe that it is possible to gain a speedup by sampling from the distribution that minimizes Tr (VPt [GIt ]).",3.1. Introduction to Importance Sampling,[0],[0]
+"Several works (Needell et al., 2014; Zhao & Zhang, 2015; Alain et al., 2015) have shown the optimal distribution to be proportional to the per-sample gradient norm.",3.1. Introduction to Importance Sampling,[0],[0]
+"However, computing this distribution is computationally prohibitive.",3.1. Introduction to Importance Sampling,[0],[0]
+"Given an upper bound Ĝi ≥ ‖∇θtL(Ψ(xi; θt), yi)‖2 and due to
+arg min P Tr (VPt [GIt ]) = arg min P
+EPt [ ‖GIt‖ 2 2 ] , (7)
+we propose to relax the optimization problem in the following way
+min P
+EPt [ ‖GIt‖ 2 2 ] ≤",3.2. Beyond the Full Gradient Norm,[0],[0]
+min P EPt,3.2. Beyond the Full Gradient Norm,[0],[0]
+[ w2ItĜ 2 It ] .,3.2. Beyond the Full Gradient Norm,[0],[0]
+"(8)
+The minimizer of the second term of equation 8, similar to the first term, is pi ∝ Ĝi.",3.2. Beyond the Full Gradient Norm,[0],[0]
+"All that remains, is to find a proper expression for Ĝi which is significantly easier to compute than the norm of the gradient for each sample.
+",3.2. Beyond the Full Gradient Norm,[0],[0]
+"In order to continue with the derivation of our upper bound Ĝi, let us introduce some notation specific to a multi-layer perceptron.",3.2. Beyond the Full Gradient Norm,[0],[0]
+Let θ(l) ∈ RMl×Ml−1 be the weight matrix for layer l and σ(l)(·) be a Lipschitz continuous activation function.,3.2. Beyond the Full Gradient Norm,[0],[0]
+"Then, let
+x(0) = x (9)
+z(l) = θ(l) x(l−1)",3.2. Beyond the Full Gradient Norm,[0],[0]
+"(10)
+x(l) = σ(l)(z(l)) (11)
+Ψ(x; Θ) = x(L) (12)
+",3.2. Beyond the Full Gradient Norm,[0],[0]
+"Although our notation describes simple fully connected neural networks without bias, our analysis holds for any affine operation followed by a slope-bounded non-linearity (|σ′(x)| ≤ K).",3.2. Beyond the Full Gradient Norm,[0],[0]
+"With
+Σ′l(z) = diag ( σ′(l)(z1), . . .",3.2. Beyond the Full Gradient Norm,[0],[0]
+", σ ′(l)(zMl) ) , (13)
+∆",3.2. Beyond the Full Gradient Norm,[0],[0]
+(l) i = Σ ′ l(z (l) i )θ T l+1 . .,3.2. Beyond the Full Gradient Norm,[0],[0]
+.Σ ′,3.2. Beyond the Full Gradient Norm,[0],[0]
+"L−1(z (L−1) i )θ T L , (14)
+∇",3.2. Beyond the Full Gradient Norm,[0],[0]
+x (L) i L = ∇,3.2. Beyond the Full Gradient Norm,[0],[0]
+x,3.2. Beyond the Full Gradient Norm,[0],[0]
+"(L) i L(Ψ(xi; Θ), yi) (15)
+we get
+‖∇θlL(Ψ(xi; Θ), yi)‖2 (16)
+",3.2. Beyond the Full Gradient Norm,[0],[0]
+= ∥∥∥∥(∆(l)i Σ′L(z(L)i ),3.2. Beyond the Full Gradient Norm,[0],[0]
+∇x(L)i L)(x(l−1)i ),3.2. Beyond the Full Gradient Norm,[0],[0]
+"T ∥∥∥∥
+2
+(17)
+≤",3.2. Beyond the Full Gradient Norm,[0],[0]
+"∥∥∥∆(l)i ∥∥∥
+2 ∥∥∥Σ′L(z(L)i )∇x(L)i L∥∥∥2 ∥∥∥x(l−1)i ∥∥∥2 (18) ≤",3.2. Beyond the Full Gradient Norm,[0],[0]
+"max
+l,i (∥∥∥x(l−1)i ∥∥∥ 2 ∥∥∥∆(l)i ∥∥∥ 2 ) ︸",3.2. Beyond the Full Gradient Norm,[0],[0]
+"︷︷ ︸
+ρ
+∥∥∥Σ′L(z(L)i )",3.2. Beyond the Full Gradient Norm,[0],[0]
+"∇x(L)i L∥∥∥2(19)
+Various weight initialization (Glorot & Bengio, 2010) and activation normalization techniques (Ioffe & Szegedy, 2015; Ba et al., 2016) uniformise the activations across samples.",3.2. Beyond the Full Gradient Norm,[0],[0]
+"As a result, the variation of the gradient norm is mostly captured by the gradient of the loss function with respect
+to the pre-activation outputs of the last layer of our neural network.",3.2. Beyond the Full Gradient Norm,[0],[0]
+"Consequently we can derive the following upper bound to the gradient norm of all the parameters
+‖∇ΘL(Ψ(xi; Θ), yi)‖2 ≤",3.2. Beyond the Full Gradient Norm,[0],[0]
+"Lρ ∥∥∥Σ′L(z(L)i )∇x(L)i L∥∥∥2︸ ︷︷ ︸
+Ĝi
+,
+(20)
+which is marginally more difficult to compute than the value of the loss since it can be computed in a closed form in terms of z(L).",3.2. Beyond the Full Gradient Norm,[0],[0]
+"However, our upper bound depends on the time step t, thus we cannot generate a distribution once and sample from it during training.",3.2. Beyond the Full Gradient Norm,[0],[0]
+This is intuitive because the importance of each sample changes as the model changes.,3.2. Beyond the Full Gradient Norm,[0],[0]
+Computing the importance score from equation 20 is more than an order of magnitude faster compared to computing the gradient norm for each sample.,3.3. When is Variance Reduction Possible?,[0],[0]
+"Nevertheless, it still costs one forward pass through the network and can be wasteful.",3.3. When is Variance Reduction Possible?,[0],[0]
+"For instance, during the first iterations of training, the gradients with respect to every sample have approximately equal norm; thus we would waste computational resources trying to sample from the uniform distribution.",3.3. When is Variance Reduction Possible?,[0.951702630126456],"['At this point, we would also like to discuss the performance of the loss compared to other methods that also select batches based on this metric.']"
+"In addition, computing the importance score for the whole dataset is still prohibitive and would render the method unsuitable for online learning.
+",3.3. When is Variance Reduction Possible?,[0],[0]
+"In order to solve the problem of computing the importance for the whole dataset, we pre-sample a large batch of data points, compute the sampling distribution for that batch and re-sample a smaller batch with replacement.",3.3. When is Variance Reduction Possible?,[0],[0]
+The above procedure upper bounds both the speedup and variance reduction.,3.3. When is Variance Reduction Possible?,[0],[0]
+"Given a large batch consisting of B samples and a small one consisting of b, we can achieve a maximum variance reduction of 1b − 1 B and a maximum speedup of B+3b 3B assuming that the backward pass requires twice the amount of time as the forward pass.
+",3.3. When is Variance Reduction Possible?,[0],[0]
+"Due to the large cost of computing the importance per sample, we only perform importance sampling when we know that the variance of the gradients can be reduced.",3.3. When is Variance Reduction Possible?,[0],[0]
+"In the following equation, we show that the variance reduction is proportional to the squared L2 distance of the sampling distribution, g, to the uniform distribution u. Due to lack of space, the complete derivation is included in the supplementary material.",3.3. When is Variance Reduction Possible?,[0],[0]
+Let gi ∝,3.3. When is Variance Reduction Possible?,[0],[0]
+"‖∇θtL(Ψ(xi; θt), yi)‖2 =",3.3. When is Variance Reduction Possible?,[0],[0]
+‖Gi‖2,3.3. When is Variance Reduction Possible?,[0],[0]
+and u = 1B,3.3. When is Variance Reduction Possible?,[0],[0]
+"the uniform probability.
+",3.3. When is Variance Reduction Possible?,[0],[0]
+Tr (Vu[Gi])− Tr (Vg[wiGi]) (21) =,3.3. When is Variance Reduction Possible?,[0],[0]
+Eu [ ‖Gi‖22 ],3.3. When is Variance Reduction Possible?,[0],[0]
+"− Eg [ w2i ‖Gi‖ 2 2 ] (22)
+=
+( 1
+B B∑ i=1",3.3. When is Variance Reduction Possible?,[0],[0]
+‖Gi‖2 ),3.3. When is Variance Reduction Possible?,[0],[0]
+2 B ‖g,3.3. When is Variance Reduction Possible?,[0],[0]
+− u‖22 .,3.3. When is Variance Reduction Possible?,[0],[0]
+"(23)
+Equation 23 already provides us with a useful metric to decide if the variance reduction is significant enough to justify using importance sampling.",3.3. When is Variance Reduction Possible?,[0],[0]
+"However, choosing a suitable threshold for the L2 distance squared would be tedious and unintuitive.",3.3. When is Variance Reduction Possible?,[0],[0]
+We can do much better by dividing the variance reduction with the original variance to derive the increase in the batch size that would achieve an equivalent variance reduction.,3.3. When is Variance Reduction Possible?,[0],[0]
+"Assuming that we increase the batch size by τ , we achieve variance reduction 1τ ; thus we have 1
+( 1 B ∑B i=1",3.3. When is Variance Reduction Possible?,[0],[0]
+‖Gi‖2 ),3.3. When is Variance Reduction Possible?,[0],[0]
+2 B ‖g,3.3. When is Variance Reduction Possible?,[0],[0]
+"− u‖22 Tr (Vu[Gi]) ≥ (24)(
+1 B ∑B i=1 ‖Gi‖2 )",3.3. When is Variance Reduction Possible?,[0],[0]
+2 B ‖g,3.3. When is Variance Reduction Possible?,[0],[0]
+"− u‖22
+1 B ∑B i=1 ‖Gi‖",3.3. When is Variance Reduction Possible?,[0],[0]
+"2 2
+=",3.3. When is Variance Reduction Possible?,[0],[0]
+"(25)
+1∑B i=1",3.3. When is Variance Reduction Possible?,[0],[0]
+g 2,3.3. When is Variance Reduction Possible?,[0],[0]
+i ‖g,3.3. When is Variance Reduction Possible?,[0],[0]
+"− u‖22 = 1− 1 τ ⇐⇒ (26) 1
+τ = 1− 1∑B
+i=1",3.3. When is Variance Reduction Possible?,[0],[0]
+"g 2 i
+‖g",3.3. When is Variance Reduction Possible?,[0],[0]
+"− u‖22 (27)
+Using equation 27, we have a hyperparameter that is very easy to select and can now design our training procedure which is described in pseudocode in algorithm 1.",3.3. When is Variance Reduction Possible?,[0],[0]
+Computing τ from equation 27 allows us to have guaranteed speedup when B + 3b < 3τb.,3.3. When is Variance Reduction Possible?,[0.9998023355668347],['Computing τ from equation 26 allows us to have guaranteed speedup when B + 3b < 3τb.']
+"However, as it is shown in the experiments, we can use τth smaller than B+3b3b and still get a significant speedup.
+",3.3. When is Variance Reduction Possible?,[0],[0]
+"Algorithm 1 Deep Learning with Importance Sampling 1: Inputs B, b, τth, aτ , θ0 2: t← 1 3: τ ← 0 4: repeat 5: if τ > τth then 6: U ← B uniformly sampled datapoints 7: gi ∝",3.3. When is Variance Reduction Possible?,[0],[0]
+Ĝi ∀i ∈ U according to eq 20 8: G ← b datapoints sampled with gi from U 9: wi ← 1Bgi,3.3. When is Variance Reduction Possible?,[0],[0]
+"∀i ∈ G 10: θt ← sgd step(wi,G, θt−1) 11: else 12: U ← b uniformly sampled datapoints 13: wi ← 1 ∀i ∈ U 14: θt ← sgd step(wi,U , θt−1) 15: gi ∝",3.3. When is Variance Reduction Possible?,[0],[0]
+Ĝi,3.3. When is Variance Reduction Possible?,[0],[0]
+"∀i ∈ U 16: end if
+17: τ ← aττ +",3.3. When is Variance Reduction Possible?,[0],[0]
+(,3.3. When is Variance Reduction Possible?,[0],[0]
+"1− aτ ) (
+1− 1∑ i g 2 i ∥∥∥g − 1|U|∥∥∥2 2 )−1 18: until convergence
+1In the first version we mistakenly assume 1 τ2 which made the algorithm unnecessarily conservative.",3.3. When is Variance Reduction Possible?,[0],[0]
+"All the experiments are run using the square root of line 17 in Algorithm 1.
+",3.3. When is Variance Reduction Possible?,[0],[0]
+"The inputs to the algorithm are the pre-sampling size B, the batch size b, the equivalent batch size increment after which we start importance sampling τth and the exponential moving average parameter aτ used to compute a smooth estimate of τ .",3.3. When is Variance Reduction Possible?,[0],[0]
+θ0 denotes the initial parameters of our deep network.,3.3. When is Variance Reduction Possible?,[1.0],['θ0 denotes the initial parameters of our deep network.']
+"We would like to point out that in line 15 of the algorithm, we compute gi for free since we have done the forward pass in the previous step.
+",3.3. When is Variance Reduction Possible?,[1.000000033373807],"['We would like to point out that in line 15 of the algorithm, we compute gi for free since we have done the forward pass in the previous step.']"
+The only parameter that has to be explicitly defined for our algorithm is the pre-sampling size B because τth can be set using equation 27.,3.3. When is Variance Reduction Possible?,[0],[0]
+We provide a small ablation study for B in the supplementary material.,3.3. When is Variance Reduction Possible?,[1.0],['We provide a small ablation study for B in the supplementary material.']
+"In this section, we analyse experimentally the performance of the proposed importance sampling scheme based on our upper-bound of the gradient norm.",4. Experiments,[0],[0]
+"In the first subsection, we compare the variance reduction achieved with our upper bound to the theoretically maximum achieved with the true gradient norm.",4. Experiments,[0],[0]
+"We also compare against sampling based on the loss, which is commonly used in practice.",4. Experiments,[0],[0]
+"Subsequently, we conduct experiments which demonstrate that we are able to achieve non-negligible wall-clock speedup for a variety of tasks using our importance sampling scheme.
+",4. Experiments,[0],[0]
+"In all the subsequent sections, we use uniform to refer to the usual training algorithm that samples points from a uniform distribution, we use loss to refer to algorithm 1 but instead of sampling from a distribution proportional to our upperbound to the gradient norm Ĝi (equations 8 and 20), we sample from a distribution proportional to the loss value and finally upper-bound to refer to our proposed method.",4. Experiments,[0],[0]
+"All the other baselines from published methods are referred to using the names of the authors.
+",4. Experiments,[0.9999999352265188],['All the other baselines from published methods are referred to using the names of the authors.']
+"In addition to batch selection methods, we compare with various SVRG implementations including the accelerated Katyusha (Allen-Zhu, 2017) and the online SCSG (Lei et al., 2017) method.",4. Experiments,[0],[0]
+"In all cases, SGD with uniform sampling performs significantly better.",4. Experiments,[1.0],"['In all cases, SGD with uniform sampling performs significantly better.']"
+"Due to lack of space, we report the detailed results in the supplementary material.
+",4. Experiments,[0],[0]
+"Experiments were conducted using Keras (Chollet et al., 2015) with TensorFlow (Abadi et al., 2016), and the code can be found at http://github.com/idiap/ importance-sampling.",4. Experiments,[0],[0]
+"For all the experiments, we use Nvidia K80 GPUs and the reported time is calculated by subtracting the timestamps before starting one epoch and after finishing one; thus it includes the time needed to transfer data between CPU and GPU memory.
+",4. Experiments,[0],[0]
+Our implementation provides a wrapper around models that substitutes the standard uniform sampling with our importance-sampling method.,4. Experiments,[0],[0]
+"This means that adding a sin-
+gle line of code to call this wrapper before actually fitting the model is sufficient to switch from the standard uniform sampling to our importance-sampling scheme.",4. Experiments,[0],[0]
+"And, as specified in § 3.3 and Algorithm 1, our procedure reliably estimates at every iteration if the importance sampling will provide a speed-up and sticks to uniform sampling otherwise.",4. Experiments,[0],[0]
+"As already mentioned, several works (Loshchilov & Hutter, 2015; Schaul et al., 2015) use the loss value, directly or indirectly, to generate sampling distributions.",4.1. Ablation study,[0],[0]
+"In this section, we present experiments that validate the superiority of our method with respect to the loss in terms of variance reduction.",4.1. Ablation study,[0],[0]
+"For completeness, in the supplementary material we include a theoretical analysis that explains why sampling based on the loss also achieves variance reduction during
+the late stages of training.
+",4.1. Ablation study,[0],[0]
+"Our experimental setup is as follows: we train a wide residual network (Zagoruyko & Komodakis, 2016) on the CIFAR100 dataset (Krizhevsky, 2009), following closely the training procedure of Zagoruyko & Komodakis (2016) (the details are presented in § 4.2).",4.1. Ablation study,[0],[0]
+"Subsequently, we sample 1, 024 images uniformly at random from the dataset.",4.1. Ablation study,[1.0],"['Subsequently, we sample 1, 024 images uniformly at random from the dataset.']"
+"Using the weights of the trained network, at intervals of 3, 000 updates, we resample 128 images from the large batch of 1, 024 images using uniform sampling or importance sampling with probabilities proportional to the loss, our upper-bound or the gradient-norm.",4.1. Ablation study,[0],[0]
+"The gradient-norm is computed by running the backpropagation algorithm with a batch size of 1.
+",4.1. Ablation study,[0],[0]
+Figure 1 depicts the variance reduction achieved with every sampling scheme in comparison to uniform.,4.1. Ablation study,[1.0],['Figure 1 depicts the variance reduction achieved with every sampling scheme in comparison to uniform.']
+"We measure this directly as the distance between the mini-batch gradient and the batch gradient of the 1, 024 samples.",4.1. Ablation study,[0],[0]
+For robustness we perform the sampling 10 times and report the average.,4.1. Ablation study,[0],[0]
+"We observe that our upper bound and the gradient norm result in very similar variance reduction, meaning that the bound is relatively tight and that the produced probability distributions are highly correlated.",4.1. Ablation study,[0],[0]
+"This can also be deduced by observing figure 2, where the probabilities proportional to the loss and the upper-bound are plotted against the optimal ones (proportional to the gradient-norm).",4.1. Ablation study,[0],[0]
+"We observe that our upper bound is almost perfectly correlated with the gradient norm, in stark contrast to the loss which is only correlated at the regime of very small gradients.",4.1. Ablation study,[0],[0]
+"Quantitatively the sum of squared error of 16, 384 points in figure 2 is 0.017 for the loss and 0.002 for our proposed upper bound.
+",4.1. Ablation study,[0],[0]
+"Furthermore, we observe that sampling hard examples (with high loss), increases the variance, especially in the beginning of training.",4.1. Ablation study,[1.0],"['Furthermore, we observe that sampling hard examples (with high loss), increases the variance, especially in the beginning of training.']"
+"Similar behaviour has been observed in problems such as embedding learning where semi-hard sample mining is preferred over sampling using the loss (Wu et al., 2017; Schroff et al., 2015).",4.1. Ablation study,[0],[0]
+"In this section, we use importance sampling to train a residual network on CIFAR10 and CIFAR100.",4.2. Image classification,[0],[0]
+"We follow the experimental setup of Zagoruyko & Komodakis (2016), specifically we train a wide resnet 28-2 with SGD with momentum.",4.2. Image classification,[0],[0]
+"We use batch size 128, weight decay 0.0005, momentum 0.9, initial learning rate 0.1 divided by 5 after 20, 000 and 40, 000 parameter updates.",4.2. Image classification,[0],[0]
+"Finally, we train for a total of 50, 000 iterations.",4.2. Image classification,[0],[0]
+"In order for our history based baselines to be compatible with the data augmentation of the CIFAR images, we pre-augment both datasets to generate 1.5 × 106 images for each one.",4.2. Image classification,[0],[0]
+Our method does not have this limitation since it can work on infinite datasets in a true online fashion.,4.2. Image classification,[1.0],['Our method does not have this limitation since it can work on infinite datasets in a true online fashion.']
+"To compare between methods, we
+use a learning rate schedule based on wall-clock time and we also fix the total seconds available for training.",4.2. Image classification,[0],[0]
+"A faster method should have smaller training loss and test error given a specific time during training.
+",4.2. Image classification,[0],[0]
+"For this experiment, we compare the proposed method to uniform, loss, online batch selection by Loshchilov & Hutter (2015) and the history based sampling of Schaul et al. (2015).",4.2. Image classification,[0],[0]
+"For the method of Schaul et al. (2015), we use their proportional sampling since the rank based is very similar to Loshchilov & Hutter (2015) and we select the best parameters from the grid a = {0.1, 0.5, 1.0} and β = {0.5, 1.0}.",4.2. Image classification,[0],[0]
+"Similarly, for online batch selection, we use s = {1, 10, 102} and a recomputation of all the losses every r = {600, 1200, 3600} updates.
+",4.2. Image classification,[0],[0]
+"For our method, we use a presampling size of 640.",4.2. Image classification,[0],[0]
+One of the goals of this experiment is to show that even a smaller reduction in variance can effectively stabilize training and provide wall-clock time speedup; thus we set τth = 1.5.,4.2. Image classification,[0],[0]
+"We perform 3 independent runs and report the average.
+",4.2. Image classification,[0.9999999433110304],['We perform 3 independent runs and report the average.']
+The results are depicted in figure 3.,4.2. Image classification,[0],[0]
+"We observe that in the relatively easy CIFAR10 dataset, all methods can provide some speedup over uniform sampling.",4.2. Image classification,[0],[0]
+"However, for the more complicated CIFAR100, only sampling with our proposed upper-bound to the gradient norm reduces the variance of the gradients and provides faster convergence.",4.2. Image classification,[0],[0]
+"Examining the training evolution in detail, we observe that on CIFAR10 our method is the only one that achieves a significant improvement in the test error even in the first stages of training (4, 000 to 8, 000 seconds).",4.2. Image classification,[0],[0]
+"Quantitatively, on CIFAR10 we achieve more than an order of magnitude lower training loss and 8% lower test error from 0.087 to 0.079 while on CIFAR100 approximately 3 times lower training loss and 5% lower test error from 0.34 to 0.32 compared to uniform sampling.
+",4.2. Image classification,[0],[0]
+"At this point, we would also like to discuss the performance of the loss compared to other methods that also select batches based on this metric.",4.2. Image classification,[0],[0]
+"Our experiments show, that using “fresh” values for the loss combined with a warmup stage so that importance sampling is not started too early outperforms all the other baselines on the CIFAR10 dataset.",4.2. Image classification,[0],[0]
+Our second experiment shows the application of importance sampling to the significant task of fine tuning a pre-trained large neural network on a new dataset.,4.3. Fine-tuning,[0],[0]
+"This task is of particular importance because there exists an abundance of powerful models pre-trained on large datasets such as ImageNet (Deng et al., 2009).
+",4.3. Fine-tuning,[0],[0]
+"Our experimental setup is the following, we fine-tune a ResNet-50 (He et al., 2015) previously trained on ImageNet.",4.3. Fine-tuning,[0],[0]
+"We replace the last classification layer and then train the
+whole network end-to-end to classify indoor images among 67 possible categories (Quattoni & Torralba, 2009).",4.3. Fine-tuning,[0],[0]
+We use SGD with learning rate 10−3 and momentum 0.9.,4.3. Fine-tuning,[0],[0]
+We set the batch size to 16 and for our importance sampling algorithm we pre-sample 48.,4.3. Fine-tuning,[0],[0]
+"The variance reduction threshold is set to 2 as designated by equation 27.
+",4.3. Fine-tuning,[0],[0]
+"To assess the performance of both our algorithm and our gradient norm approximation, we compare the convergence speed of our importance sampling algorithm using our upper-bound and using the loss.",4.3. Fine-tuning,[0],[0]
+"Once again, for robustness, we run 3 independent runs and report the average.
+",4.3. Fine-tuning,[0],[0]
+The results of the experiment are depicted in figure 4.,4.3. Fine-tuning,[0],[0]
+"As expected, importance sampling is very useful for the task of fine-tuning since a lot of samples are handled correctly very early in the training process.",4.3. Fine-tuning,[0],[0]
+"Our upper-bound, once again, greatly outperforms sampling proportionally to the loss when the network is large and the problem is non trivial.",4.3. Fine-tuning,[0],[0]
+"Compared to uniform sampling, in just half an hour importance sampling has converged close to the best performance (28.06% test error) that can be expected on this dataset without any data augmentation or multiple crops (Razavian et al.,
+2014), while uniform achieves only 33.74%.",4.3. Fine-tuning,[0],[0]
+"To showcase the generality of our method, we use our importance sampling algorithm to accelerate the training of an LSTM in a sequence classification problem.",4.4. Pixel by Pixel MNIST,[0],[0]
+"We use the pixel by pixel classification of randomly permuted MNIST digits (LeCun et al., 2010), as defined by Le et al. (2015).",4.4. Pixel by Pixel MNIST,[0],[0]
+"The problem may seem trivial at first, however as shown by Le et al. (2015)",4.4. Pixel by Pixel MNIST,[0],[0]
+"it is particularly suited to benchmarking the training of recurrent neural networks, due to the long range dependency problems inherent in the dataset (784 time steps).
+",4.4. Pixel by Pixel MNIST,[0],[0]
+"For our experiment, we fix a permutation matrix for all the pixels to generate a training set of 60, 000 samples with 784 time steps each.",4.4. Pixel by Pixel MNIST,[0],[0]
+"Subsequently, we train an LSTM (Hochreiter & Schmidhuber, 1997) with 128 dimensions in the hidden space, tanh(·) as an activation function and sigmoid(·) as the recurrent activation function.",4.4. Pixel by Pixel MNIST,[0],[0]
+"Finally, we use a linear classifier on top of the LSTM to choose a digit based on the hidden representation.",4.4. Pixel by Pixel MNIST,[0],[0]
+"To train the aforemen-
+tioned architecture, we use the Adam optimizer (Kingma & Ba, 2014) with a learning rate of 10−3 and a batch size of 32.",4.4. Pixel by Pixel MNIST,[0],[0]
+"We have also found gradient clipping to be necessary for the training not to diverge; thus we clip the norm of all gradients to 1.
+",4.4. Pixel by Pixel MNIST,[0],[0]
+The results of the experiment are depicted in figure 5.,4.4. Pixel by Pixel MNIST,[0],[0]
+"Both for the loss and our proposed upper-bound, importance sampling starts at around 2, 000 seconds by setting τth = 1.8 and the presampling size to 128.",4.4. Pixel by Pixel MNIST,[0],[0]
+We could set τth = 2.33 (equation 27) which would only result in our algorithm being more conservative and starting importance sampling later.,4.4. Pixel by Pixel MNIST,[0],[0]
+We clearly observe that sampling proportionally to the loss hurts the convergence in this case.,4.4. Pixel by Pixel MNIST,[0],[0]
+"On the other hand, our algorithm achieves 20% lower training loss and 7% lower test error in the given time budget.",4.4. Pixel by Pixel MNIST,[0],[0]
+We have presented an efficient algorithm for accelerating the training of deep neural networks using importance sampling.,5. Conclusions,[0],[0]
+"Our algorithm takes advantage of a novel upper bound to the
+gradient norm of any neural network that can be computed in a single forward pass.",5. Conclusions,[0],[0]
+"In addition, we show an equivalence of the variance reduction with importance sampling to increasing the batch size; thus we are able to quantify both the variance reduction and the speedup and intelligently decide when to stop sampling uniformly.
+",5. Conclusions,[0],[0]
+Our experiments show that our algorithm is effective in reducing the training time for several tasks both on image and sequence data.,5. Conclusions,[0],[0]
+"More importantly, we show that not all data points matter equally in the duration of training, which can be exploited to gain a speedup or better quality gradients or both.
+",5. Conclusions,[0],[0]
+Our analysis opens several avenues of future research.,5. Conclusions,[0],[0]
+The two most important ones that were not investigated in this work are automatically tuning the learning rate based on the variance of the gradients and decreasing the batch size.,5. Conclusions,[0],[0]
+The variance of the gradients can be kept stable by increasing the learning rate proportionally to the batch increment or by decreasing the number of samples for which we compute the backward pass.,5. Conclusions,[1.0],['The variance of the gradients can be kept stable by increasing the learning rate proportionally to the batch increment or by decreasing the number of samples for which we compute the backward pass.']
+"Thus, we can speed up convergence by increasing the step size or reducing the time per update.",5. Conclusions,[1.0],"['Thus, we can speed up convergence by increasing the step size or reducing the time per update.']"
+This work is supported by the Swiss National Science Foundation under grant number FNS-30209 “ISUL”.,6. Acknowledgement,[0],[0]
+In the following equations we quantify the variance reduction achieved with importance sampling using the gradient norm.,A. Differences of variances,[0],[0]
+Let gi ∝,A. Differences of variances,[0],[0]
+"‖∇θtL(Ψ(xi; θt), yi)‖2 =",A. Differences of variances,[0],[0]
+‖Gi‖2,A. Differences of variances,[0],[0]
+and u = 1B,A. Differences of variances,[0],[0]
+"the uniform probability.
+",A. Differences of variances,[0],[0]
+"We want to compute
+Tr (Vu[Gi])− Tr (Vg[wiGi])",A. Differences of variances,[0],[0]
+= Eu [ ‖Gi‖22 ] − Eg [ w2i ‖Gi‖ 2 2 ] .,A. Differences of variances,[0],[0]
+"(28)
+Using the fact that wi = 1Bgi we have
+Eg [ w2i ‖Gi‖ 2 2 ] =
+( 1
+B B∑ i=1",A. Differences of variances,[0],[0]
+"‖Gi‖2
+)",A. Differences of variances,[0],[0]
+"2 , (29)
+thus
+",A. Differences of variances,[0],[0]
+"Tr (Vu[Gi])− Tr (Vg[wiGi]) (30)
+= 1
+B B∑ i=1 ‖Gi‖22",A. Differences of variances,[0],[0]
+"−
+( 1
+B B∑ i=1",A. Differences of variances,[0],[0]
+"‖Gi‖2
+)",A. Differences of variances,[0],[0]
+"2 (31)
+",A. Differences of variances,[0],[0]
+"=
+(∑B i=1 ‖Gi‖2 )",A. Differences of variances,[0],[0]
+2 B3 B∑ i=1,A. Differences of variances,[0],[0]
+"( B2 ‖Gi‖22 ( ∑B i=1 ‖Gi‖2)2 − 1 ) (32)
+",A. Differences of variances,[0],[0]
+"=
+(∑B i=1 ‖Gi‖2 )",A. Differences of variances,[0],[0]
+2 B B∑ i=1,A. Differences of variances,[0],[0]
+( g2i − u2 ) .,A. Differences of variances,[0],[0]
+"(33)
+Completing the squares at equation 33 and using the fact that ∑B i=1",A. Differences of variances,[0],[0]
+"u = 1 we complete the derivation.
+",A. Differences of variances,[0],[0]
+"Tr (Vu[Gi])− Tr (Vg[wiGi]) (34)
+=
+(∑B i=1 ‖Gi‖2 )",A. Differences of variances,[0],[0]
+2 B B∑ i=1,A. Differences of variances,[0],[0]
+"(gi − u)2 (35)
+=
+( 1
+B B∑ i=1",A. Differences of variances,[0],[0]
+‖Gi‖2 ),A. Differences of variances,[0],[0]
+2 B ‖g,A. Differences of variances,[0],[0]
+− u‖22 .,A. Differences of variances,[0],[0]
+(36),A. Differences of variances,[0],[0]
+"In this section, we reiterate the analysis from the main paper (§ 3.2) with more details.
+",B. An upper bound to the gradient norm,[0],[0]
+Let θ(l) ∈ RMl×Ml−1 be the weight matrix for layer l and σ(l)(·) be a Lipschitz continuous activation function.,B. An upper bound to the gradient norm,[0],[0]
+"Then, let
+x(0) = x (37)
+z(l) = θ(l) x(l−1)",B. An upper bound to the gradient norm,[0],[0]
+"(38)
+x(l) = σ(l)(z(l)) (39)
+Ψ(x; Θ) = x(L).",B. An upper bound to the gradient norm,[0],[0]
+"(40)
+Equations 37-40 define a simple fully connected neural network without bias to simplify the closed form definition of the gradient with respect to the parameters Θ.
+",B. An upper bound to the gradient norm,[0],[0]
+"In addition we define the gradient of the loss with respect to the output of the network as
+∇",B. An upper bound to the gradient norm,[0],[0]
+x (L) i L = ∇,B. An upper bound to the gradient norm,[0],[0]
+x,B. An upper bound to the gradient norm,[0],[0]
+"(L) i L(Ψ(xi; Θ), yi) (41)
+and the gradient of the loss with respect to the output of layer l as
+∇ x",B. An upper bound to the gradient norm,[0],[0]
+(l) i L = ∆(l)i Σ ′,B. An upper bound to the gradient norm,[0],[0]
+L(z (L) i ),B. An upper bound to the gradient norm,[0],[0]
+"∇x(L)i L (42)
+where
+∆",B. An upper bound to the gradient norm,[0],[0]
+(l) i = Σ ′ l(z (l) i )θ T l+1 . .,B. An upper bound to the gradient norm,[0],[0]
+.Σ ′,B. An upper bound to the gradient norm,[0],[0]
+"L−1(z (L−1) i )θ T L (43)
+propagates the gradient from the last layer (pre-activation) to layer l and
+Σ′l(z) = diag ( σ′(l)(z1), . . .",B. An upper bound to the gradient norm,[0],[0]
+", σ ′(l)(zMl) )
+(44)
+defines the gradient of the activation function of layer l.
+Finally, the gradient with respect to the parameters of the l-th layer can be written
+‖∇θlL(Ψ(xi; Θ), yi)‖2 (45)
+= ∥∥∥∥(∆(l)i Σ′L(z(L)i )",B. An upper bound to the gradient norm,[0],[0]
+∇x(L)i L)(x(l−1)i ),B. An upper bound to the gradient norm,[0],[0]
+"T ∥∥∥∥
+2
+(46)
+≤ ∥∥∥x(l−1)i ∥∥∥
+",B. An upper bound to the gradient norm,[0],[0]
+2 ∥∥∥∆(l)i ∥∥∥ 2 ∥∥∥Σ′L(z(L)i )∇x(L)i L∥∥∥2 .,B. An upper bound to the gradient norm,[0],[0]
+"(47) We observe that x(l)i and ∆ (l) i depend only on zi and Θ. However, we theorize that due to various weight initialization and activation normalization techniques those quantities do not capture the important per sample variations of the
+gradient norm.",B. An upper bound to the gradient norm,[0],[0]
+"Using the above, which is also shown experimentally to be true in § 4.1, we deduce the following upper bound per layer
+‖∇θlL(Ψ(xi; Θ), yi)‖2 (48)
+≤",B. An upper bound to the gradient norm,[0],[0]
+"max l,i (∥∥∥x(l−1)i ∥∥∥ 2 ∥∥∥∆(l)i ∥∥∥ 2 )∥∥∥Σ′L(z(L)i )∇x(L)i L∥∥∥2(49) = ρ
+∥∥∥Σ′L(z(L)i )",B. An upper bound to the gradient norm,[0],[0]
+"∇x(L)i L∥∥∥2 , (50) which can then be used to derive our final upper bound
+‖∇ΘL(Ψ(xi; Θ), yi)‖2 ≤",B. An upper bound to the gradient norm,[0],[0]
+"Lρ ∥∥∥Σ′L(z(L)i )∇x(L)i L∥∥∥2︸ ︷︷ ︸
+Ĝi
+.
+(51)
+Intuitively, equation 51 means that the variations of the gradient norm are mostly captured by the final classification layer.",B. An upper bound to the gradient norm,[0],[0]
+"Consequently, we can use the gradient of the loss with respect to the pre-activation outputs of our neural network as an upper bound to the per-sample gradient norm.",B. An upper bound to the gradient norm,[0],[0]
+"For completeness, we also compare our proposed method with Stochastic Variance Reduced Gradient methods and present the results in this section.",C. Comparison with SVRG methods,[0],[0]
+We follow the experimental setup of § 4.2 and evaluate on the augmented CIFAR10 and CIFAR100 datasets.,C. Comparison with SVRG methods,[0],[0]
+"The algorithms we considered were SVRG (Johnson & Zhang, 2013), accelerated SVRG with Katyusha momentum (Allen-Zhu, 2017) and, the most suitable for Deep Learning, SCSG (Lei et al., 2017) which in practice is a mini-batch version of SVRG. SAGA (Defazio et al., 2014) was not considered due to the prohibitive memory requirements for storing the per sample gradients.
+",C. Comparison with SVRG methods,[0],[0]
+"For all methods, we tune the learning rate and the epochs per batch gradient computation (m in SVRG literature).",C. Comparison with SVRG methods,[0],[0]
+"For SCSG, we also tune the large batch (denoted as Bj in Lei et al. (2017)) and its growth rate.",C. Comparison with SVRG methods,[0],[0]
+The results are depicted in figure 6.,C. Comparison with SVRG methods,[0],[0]
+We observe that SGD with momentum performs significantly better than all SVRG methods.,C. Comparison with SVRG methods,[0],[0]
+Full batch SVRG and Katyusha perform a small number of parameter updates thus failing to optimize the networks.,C. Comparison with SVRG methods,[0],[0]
+"In all cases, the best variance reduced method achieves more than an order of magnitude higher training loss than our proposed importance sampling scheme.",C. Comparison with SVRG methods,[0],[0]
+"The only hyperparameter that is somewhat hard to define in our algorithm is the pre-sampling size B. As mentioned in the main paper, it controls the maximum possible variance reduction and also how much wall-clock time one iteration with importance sampling will require.
+",D. Ablation study on B,[0],[0]
+In figure 7 we depict the results of training with importance sampling and different pre-sampling sizes on CIFAR10.,D. Ablation study on B,[0],[0]
+"We follow the same experimental setup as in the paper.
+",D. Ablation study on B,[0],[0]
+"We observe that larger presampling size results in lower training loss, which follows from our theory since the maximum variance reduction is smaller with small B.",D. Ablation study on B,[0],[0]
+In this experiment we use the same τth for all the methods and we observe that B = 384 reaches first to 0.6 training loss.,D. Ablation study on B,[0],[0]
+"This is justified because computing the importance for 1, 024 samples in the beginning of training is wasteful according to our analysis.
+",D. Ablation study on B,[0],[0]
+"According to this preliminary ablation study for B, we conclude that choosing B = kb with 2 < k",D. Ablation study on B,[0],[0]
+< 6 is a good strategy for achieving a speedup.,D. Ablation study on B,[0],[0]
+"However, regardless of the choice of B, pairing it with a threshold τth designated by the analysis in the paper guarantees that the algorithm will be spending time on importance sampling only when the variance can be greatly reduced.
+",D. Ablation study on B,[0],[0]
+E. Importance Sampling with the Loss,D. Ablation study on B,[0],[0]
+"In this section we will present a small analysis that provides intuition regarding using the loss as an approximation or an upper bound to the per sample gradient norm.
+",D. Ablation study on B,[0],[0]
+"Let L(ψ, y) :",D. Ablation study on B,[0],[0]
+"D → R be either the negative log likelihood through a sigmoid or the squared error loss function defined respectively as
+L1(ψ, y) =",D. Ablation study on B,[0],[0]
+"− log ( exp(yψ)
+1 + exp(yψ)
+)",D. Ablation study on B,[0],[0]
+"y ∈ {−1, 1} ψ ∈ R
+L2(ψ, y) =",D. Ablation study on B,[0],[0]
+‖y,D. Ablation study on B,[0],[0]
+− ψ‖22 y ∈ R d ψ ∈,D. Ablation study on B,[0],[0]
+"Rd
+(52)
+",D. Ablation study on B,[0],[0]
+"Given our upper bound to the gradient norm, we can write
+‖∇θtL(Ψ(xi; θt), yi)‖2 ≤",D. Ablation study on B,[0],[0]
+"Lρ ‖∇ψL(Ψ(xi; θt), yi)‖2 .",D. Ablation study on B,[0],[0]
+"(53)
+Moreover, for the losses that we are considering, when L(ψ, y)→ 0 then ‖∇ψL(Ψ(xi; θt), yi)‖2 → 0.",D. Ablation study on B,[0],[0]
+"Using this fact in combination to equation 53, we claim that so does the per sample gradient norm thus small loss values imply small gradients.",D. Ablation study on B,[0],[0]
+"However, large loss values are not well correlated with the gradient norm which can also be observed in § 4.1 in the paper.
+",D. Ablation study on B,[0],[0]
+"To summarize, we conjecture that due to the above facts, sampling proportionally to the loss reduces the variance only when the majority of the samples have losses close to 0.",D. Ablation study on B,[0],[0]
+"Our assumption is validated from our experiments, where the loss struggles to achieve a speedup in the early stages of training where most samples still have relatively large loss values.",D. Ablation study on B,[0],[0]
+"Deep neural network training spends most of the computation on examples that are properly handled, and could be ignored.",abstractText,[0],[0]
+"We propose to mitigate this phenomenon with a principled importance sampling scheme that focuses computation on “informative” examples, and reduces the variance of the stochastic gradients during training.",abstractText,[0],[0]
+"Our contribution is twofold: first, we derive a tractable upper bound to the persample gradient norm, and second we derive an estimator of the variance reduction achieved with importance sampling, which enables us to switch it on when it will result in an actual speedup.",abstractText,[0],[0]
+"The resulting scheme can be used by changing a few lines of code in a standard SGD procedure, and we demonstrate experimentally, on image classification, CNN fine-tuning, and RNN training, that for a fixed wall-clock time budget, it provides a reduction of the train losses of up to an order of magnitude and a relative improvement of test errors between 5% and 17%.",abstractText,[0],[0]
+Not All Samples Are Created Equal:  Deep Learning with Importance Sampling,title,[0],[0]

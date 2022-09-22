@@ -1,0 +1,774 @@
+0,1,label2,summary_sentences
+"Recently, deep learning has emerged as a powerful and popular class of machine learning algorithms.",1. Introduction,[0],[0]
+"Well-known examples include the convolutional neural network (LeCun et al., 1998), long short term memory (Hochreiter & Schmidhuber, 1997), memory network (Weston et al., 2014), and deep Q-network (Mnih et al., 2015).",1. Introduction,[0],[0]
+"These models have achieved remarkable performance on various difficult tasks such as image classification (He et al., 2016), speech recognition (Graves et al., 2013), natural language understanding (Bahdanau et al., 2015; Sukhbaatar et al., 2015), and game playing (Silver et al., 2016).
+",1. Introduction,[0],[0]
+"Deep network is a highly nonlinear model with typically millions of parameters (Hinton et al., 2006).",1. Introduction,[0],[0]
+"Thus, it is imperative to design scalable and effective solvers.",1. Introduction,[0],[0]
+"How-
+",1. Introduction,[0],[0]
+"1Department of Computer Science and Engineering, Hong Kong University of Science and Technology, Clear Water Bay, Hong Kong.",1. Introduction,[0],[0]
+"Correspondence to: Shuai Zheng <szhengac@cse.ust.hk>, James T. Kwok <jamesk@cse.ust.hk>.
+",1. Introduction,[0],[0]
+"Proceedings of the 34 th International Conference on Machine Learning, Sydney, Australia, PMLR 70, 2017.",1. Introduction,[0],[0]
+"Copyright 2017 by the author(s).
+ever, training deep networks is difficult as the optimization can suffer from pathological curvature and get stuck in local minima (Martens, 2010).",1. Introduction,[0],[0]
+"Moreover, every critical point that is not a global minimum is a saddle point (Kawaguchi, 2016), which can significantly slow down training.",1. Introduction,[0],[0]
+Second-order information is useful in that it reflects local curvature of the error surface.,1. Introduction,[0],[0]
+"However, a direct computation of the Hessian is computationally infeasible.",1. Introduction,[0],[0]
+"Martens (2010) introduced Hessian-free optimization, a variant of truncated-Newton methods that relies on using the linear conjugate gradient to avoid computing the Hessian.",1. Introduction,[0],[0]
+Dauphin et al. (2014) proposed to use the absolute Hessian to escape from saddle points.,1. Introduction,[0],[0]
+"However, these methods still require higher computational costs.
+",1. Introduction,[0],[0]
+"Recent advances in deep learning optimization focus mainly on stochastic gradient descent (SGD) (Bottou, 1998) and its variants (Sutskever et al., 2013).",1. Introduction,[0],[0]
+"However, SGD requires careful stepsize tuning, which is difficult as different weights have vastly different gradients (in terms of both magnitude and direction).",1. Introduction,[0],[0]
+"On the other hand, online learning (Zinkevich, 2003), which is closely related to stochastic optimization, has been extensively studied in the past decade.",1. Introduction,[0],[0]
+"Well-known algorithms include follow the regularized leader (FTRL) (Kalai & Vempala, 2005), follow the proximally-regularized leader (FTPRL) (McMahan & Streeter, 2010) and their variants (Duchi & Singer, 2009; Duchi et al., 2011; Shalev-Shwartz, 2012; Xiao, 2010).",1. Introduction,[0],[0]
+"In particular, adaptive gradient descent (Adagrad) (Duchi et al., 2011) uses an adaptive per-coordinate stepsize.",1. Introduction,[0],[0]
+"On convex problems, it has been shown both theoretically and empirically that Adagrad is especially efficient on highdimensional data (Duchi et al., 2011; McMahan et al., 2013).",1. Introduction,[0],[0]
+"When used on deep networks, Adagrad also demonstrates significantly better performance than SGD (Dean et al., 2012).",1. Introduction,[0],[0]
+"However, in Adagrad, the variance estimate underlying the adaptive stepsize is based on accumulating all past (squared) gradients.",1. Introduction,[0],[0]
+This becomes infinitesimally small as training proceeds.,1. Introduction,[0],[0]
+"In more recent algorithms, such as RMSprop (Tieleman & Hinton, 2012) and Adam (Kingma & Ba, 2015), the variance is estimated by an exponentially decaying average of the squared gradients.
+",1. Introduction,[0],[0]
+"Another problem with the FTRL family of algorithms is that in each round, the learner has to solve an optimization problem that considers the sum of all previous gradients.
+",1. Introduction,[0],[0]
+"For highly nonconvex models such as the deep network, the parameter iterate may move from one local basin to another.",1. Introduction,[0],[0]
+Gradients that are due to samples in the distant past are less informative than those from the recent ones.,1. Introduction,[0],[0]
+"In applications where the data distribution is changing (as in deep reinforcement learning), this may impede parameter adaptation to the environment.
+",1. Introduction,[0],[0]
+"To alleviate this problem, we propose a FTPRL variant that reweighs the learning subproblems in each iteration.",1. Introduction,[0],[0]
+"The proposed algorithm, which will be called follow the moving leader (FTML), shows strong connections with popular deep learning optimizers such as RMSprop and Adam.",1. Introduction,[0],[0]
+"Experiments on various deep learning models demonstrate that FTML outperforms or at least has comparable convergence performance with state-of-the-art solvers.
+",1. Introduction,[0],[0]
+The rest of this paper is organized as follows.,1. Introduction,[0],[0]
+Section 2 first gives a brief review on FTRL and other solvers for deep learning.,1. Introduction,[0],[0]
+Section 3 presents the proposed FTML.,1. Introduction,[0],[0]
+"Experimental results are shown in Section 4, and the last section gives some concluding remarks.
+Notation.",1. Introduction,[0],[0]
+"For a vector x ∈ Rd, ‖x‖ = √∑d
+i=1",1. Introduction,[0],[0]
+"x 2 i ,
+diag(x) is a diagonal matrix with x on its diagonal, √ x is the element-wise square root of x, x2 denotes the Hadamard (elementwise) product x x, and ‖x‖2Q = xTQx, whereQ is a symmetric matrix.",1. Introduction,[0],[0]
+"For any two vectors x and y, x/y, and 〈x, y〉 denote the elementwise division and dot product, respectively.",1. Introduction,[0],[0]
+"For a matrix X , X2 = XX , and diag(X) is a vector with the diagonal of X as its elements.",1. Introduction,[0],[0]
+"For t vectors {x1, . . .",1. Introduction,[0],[0]
+", xt}, x1:",1. Introduction,[0],[0]
+t = ∑t i=1,1. Introduction,[0],[0]
+"xi, and
+x21:",1. Introduction,[0],[0]
+t = ∑t i=1,1. Introduction,[0],[0]
+"x
+2 i .",1. Introduction,[0],[0]
+"For t matrices {X1, . . .",1. Introduction,[0],[0]
+", Xt}, X1:t =∑t
+i=1Xi.",1. Introduction,[0],[0]
+"In online learning, the learner observes a sequence of functions fi’s, which can be deterministic, stochastic, or even adversarially chosen.",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+Let Θ ⊆ Rd be a convex compact set.,2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"At round t, the learner picks a predictor θt−1 ∈ Θ, and the adversary picks a loss ft.",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+The learner then suffers a loss ft(θt−1).,2.1. Follow the Regularized Leader and its Variants,[0],[0]
+The goal of the learner is to minimize the cumulative loss suffered over the course of T rounds.,2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"In online convex learning, ft is assumed to be convex.
+",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"Two popular online learning algorithms are the follow the regularized leader (FTRL) (Kalai & Vempala, 2005; Shalev-Shwartz, 2012), and its variant follow the proximally-regularized leader (FTPRL) (McMahan & Streeter, 2010).",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"Both achieve the optimal O( √ T ) regret, where T is the number of rounds (Shalev-Shwartz, 2012).",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"Other FTRL-like algorithms include regularized dual aver-
+aging (RDA) (Xiao, 2010) as well as its adaptive variant presented in (Duchi et al., 2011).",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"Gradient descent style algorithms like online forward and backward splitting (FOBOS) (Duchi & Singer, 2009) and adaptive gradient descent (Adagrad) (Duchi et al., 2011) can also be expressed as special cases of the FTRL family (McMahan, 2011).
+",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"At round t, FTRL generates the next iterate θt by solving the optimization problem:
+θt = arg min θ∈Θ t∑ i=1",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"( 〈gi, θ〉+ αt 2 ‖θ‖2 ) ,
+where gt is a subgradient of ft at θt−1 (usually, θ0 = 0), and αt is the regularization parameter at round t. Note that the regularization is centered at the origin.",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"McMahan & Streeter (2010) generalizes this to FTPRL by centering regularization at each iterate θi−1 as in online gradient descent and online mirror descent (Cesa-Bianchi & Lugosi, 2006),
+θt = arg min θ∈Θ t∑ i=1",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"( 〈gi, θ〉+ 1 2 ‖θ − θi−1‖2Qi ) , (1)
+where Qi is a full or diagonal positive semidefinite matrix, and ‖θ",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+− θi−1‖Qi is the corresponding Mahalanobis distance between θ and θi−1.,2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"When Qi is diagonal, each of its entries controls the learning rate in the corresponding dimension.",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"When Θ = Rd, θt can be obtained in closedform (McMahan, 2011):
+θt = θt−1 −Q−11:t gt.",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"(2)
+",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"When
+Qt = 1
+η diag
+(√ g21:t − √ g21:t−1 ) , (3)
+where η > 0 is the stepsize, (2) becomes the update rule of Adagrad (Duchi et al., 2011)
+θt = θt−1 − diag
+( η√
+g21:t + 1
+) gt.",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"(4)
+Here, > 0 (usually a very small number) is used to avoid division by zero, and 1 is the vector of all 1’s.
+",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"In general, all these algorithms satisfy (McMahan & Streeter, 2010):
+Q1:t = diag ( 1
+η
+(√ g21:t + 1 )) .",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"(5)
+It can be shown that this setting is optimal within a factor of √ 2 of the best possible regret bound for any nonincreasing per-coordinate learning rate schedule (McMahan & Streeter, 2010).",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"In training deep networks, different weights may have vastly different gradients (in terms of both magnitude and direction).",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"Hence, using a per-coordinate learning rate as in Adagrad can significantly improve performance over standard SGD (Dean et al., 2012).",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"However, a caveat is that Adagrad suffers from diminishing stepsize.",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"As optimization proceeds, the accumulated squared gradient g21:t in (5) becomes larger and larger, making training difficult.
+",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"To alleviate this problem, a number of algorithms have been proposed (Zeiler, 2012; Tieleman & Hinton, 2012; Kingma & Ba, 2015).",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"Typically, they employ an average of the past squared gradients (i.e., vt = ∑t i=1",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"αi,tg 2",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"i , where αi,t ∈",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"[0, 1]), which is exponentially decaying.",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"For example, RMSprop (Tieleman & Hinton, 2012) uses
+vi = βvi−1 + (1− β)g2i , (6)
+where β is close to 1, and the corresponding αi,t is (1 − β)βt−i.",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"This vt can then be used to replace g21:t, and the update in (4) becomes
+θt = θt−1 − diag (
+η √ vt + 1
+) gt.",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"(7)
+Zeiler (2012) further argues that the parameter and update should have the same unit, and modifies (7) to the Adadelta update rule:
+θt = θt−1 − diag (√
+ut−1 + 1√ vt + 1
+) gt,
+where ut−1 = ∑t−1 i=0 αi,t−1(4θi)2, and 4θt = θt − θt−1 with4θ0 = 0.
+",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"As v0 in (6) is often initialized to 0, the bias has to be corrected.",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"Adam (Kingma & Ba, 2015) uses the variance estimate vt/(1 − βt) (which corresponds to αi,t = (1− β)βt−i/(1− βt)).
+",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"Another recent proposal is the equilibrated stochastic gradient descent (Dauphin et al., 2015).",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"It uses the variance estimate vt = vt−1 +(Htζt)2, whereHt is the Hessian and ζt ∼ N (0, 1).",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"It is shown that (Htζt)2 is an unbiased estimator of √ diag(H2t ), which serves as the Jacobi preconditioner of the absolute Hessian.",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"Computation of the Hessian can be avoided by using the R-operator (Schraudolph, 2002), though it still costs roughly twice that of standard backpropagation.",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"Recall that at round t, FTRL generates the next iterate θt as
+θt = arg min θ∈Θ t∑ i=1",3. Follow the Moving Leader,[0],[0]
+"Pi(θ), (8)
+where Pi(θ) = 〈gi, θ〉 + 12‖θ",3. Follow the Moving Leader,[0],[0]
+− θi−1‖ 2 Qi .,3. Follow the Moving Leader,[0],[0]
+Note that all Pi’s have the same weight.,3. Follow the Moving Leader,[0],[0]
+"However, for highly nonconvex models such as the deep network, the parameter iterate may move from one local basin to another.",3. Follow the Moving Leader,[0],[0]
+Pi’s that are due to samples in the distant past are less informative than those from the recent ones.,3. Follow the Moving Leader,[0],[0]
+"To alleviate this problem, one may consider only Pi’s in a recent window.",3.1. Weighting the Components,[0],[0]
+"However, a large memory is needed for its implementation.",3.1. Weighting the Components,[0],[0]
+"A simpler alternative is by using an exponential moving average of the Pi’s: Si = β1Si−1 + (1 − β1)Pi, where β1 ∈",3.1. Weighting the Components,[0],[0]
+"[0, 1) and S0 = 0.",3.1. Weighting the Components,[0],[0]
+This can be easily rewritten as St = (1− β1) ∑t i=1,3.1. Weighting the Components,[0],[0]
+β t−i 1 Pi.,3.1. Weighting the Components,[0],[0]
+"Instead of minimizing (8), we have
+θt = arg min θ∈Θ t∑ i=1",3.1. Weighting the Components,[0],[0]
+"wi,tPi(θ), (9)
+where the weights
+wi,t = (1− β1)βt−i1
+1− βt1 (10)
+are normalized to sum to 1.",3.1. Weighting the Components,[0],[0]
+The denominator 1− βt1 plays a similar role as bias correction in Adam.,3.1. Weighting the Components,[0],[0]
+"When β1 = 0, wi,t = 0 for i < t, and wt,t = 1.",3.1. Weighting the Components,[0],[0]
+"Thus, (9) reduces to minθ∈Θ Pt(θ).",3.1. Weighting the Components,[0],[0]
+"When β1 → 1, the following Lemma shows that all Pi’s are weighted equally, and (8) is recovered.",3.1. Weighting the Components,[0],[0]
+Lemma 1.,3.1. Weighting the Components,[0],[0]
+"limβ1→1 wi,t = 1/t.
+Note that the Hessian of the objective in (8) is Q1:t. This becomes ∑t i=1",3.1. Weighting the Components,[0],[0]
+"wi,tQi in (9).",3.1. Weighting the Components,[0],[0]
+"Recall that Q1:t depends on the accumulated past gradients in (5), which is then refined by an exponential moving average in (6).",3.1. Weighting the Components,[0],[0]
+"As in Adam, we define vi = β2vi−1 + (1 − β2)g2i , where β2 ∈",3.1. Weighting the Components,[0],[0]
+"[0, 1) and v0 = 0, and then correct its bias by dividing by 1 − βt2.",3.1. Weighting the Components,[0],[0]
+"Thus, (5) is changed to
+t∑ i=1",3.1. Weighting the Components,[0],[0]
+"wi,tQi = diag ( 1 ηt (√ vt 1− βt2 + t1 )) , (11)
+where ηt and t are the stepsize and value at time t, respectively.",3.1. Weighting the Components,[0],[0]
+"When β2 = 0, (11) reduces to ∑t i=1",3.1. Weighting the Components,[0],[0]
+"wi,tQi =
+diag (
+1 ηt ( √ g2t + t1) ) .",3.1. Weighting the Components,[0],[0]
+"When β2 → 1, all g2i ’s are
+weighted equally and (11) reduces to ∑t i=1",3.1. Weighting the Components,[0],[0]
+"wi,tQi =
+diag (
+1 ηt (√ g21:",3.1. Weighting the Components,[0],[0]
+t t + t1 )) .,3.1. Weighting the Components,[0],[0]
+"Using ηt = η/ √ t and t =
+/ √ t, this is further reduced to (5).",3.1. Weighting the Components,[0],[0]
+"The following shows
+that Qt in (11) has a closed-form expression.
+",3.1. Weighting the Components,[0],[0]
+Proposition 1.,3.1. Weighting the Components,[0],[0]
+"Define dt = 1−βt1 ηt
+(√ vt
+1−βt2 + t1
+) .",3.1. Weighting the Components,[0],[0]
+"Then,
+Qt = diag ( dt − β1dt−1
+1− β1
+) .",3.1. Weighting the Components,[0],[0]
+"(12)
+Algorithm 1 Follow the Moving Leader (FTML).",3.1. Weighting the Components,[0],[0]
+"1: Input: ηt > 0, β1, β2 ∈",3.1. Weighting the Components,[0],[0]
+"[0, 1), t > 0. 2: initialize θ0 ∈ Θ; d0 ← 0; v0 ← 0; z0 ← 0; 3: for t = 1, 2, . . .",3.1. Weighting the Components,[0],[0]
+", T do 4: fetch function ft; 5: gt ← ∂θft(θt−1); 6: vt ← β2vt−1",3.1. Weighting the Components,[0],[0]
+"+ (1− β2)g2t ;
+7: dt ← 1−β t 1
+ηt
+(√ vt
+1−βt2 + t1
+) ;
+8: σt ← dt − β1dt−1; 9: zt ← β1zt−1 + (1− β1)gt − σtθt−1;
+10: θt ← Π diag(dt/(1−βt1))",3.1. Weighting the Components,[0],[0]
+"Θ (−zt/dt); 11: end for 12: Output: θT .
+",3.1. Weighting the Components,[0],[0]
+"Substituting this back into (9), θt is then equal to
+arg min θ∈Θ t∑ i=1",3.1. Weighting the Components,[0],[0]
+"wi,t ( 〈gi, θ〉+ 1 2 ‖θ",3.1. Weighting the Components,[0],[0]
+"− θi−1‖2diag ( σi 1−β1 )) , (13) where σi ≡",3.1. Weighting the Components,[0],[0]
+di − β1di−1.,3.1. Weighting the Components,[0],[0]
+"Note that some entries of σi may be negative, and ‖θ− θi−1‖2diag(σi/(1−β1)) is then not a regularizer in the usual sense.",3.1. Weighting the Components,[0],[0]
+"Instead, the negative entries of σi encourage the corresponding entries of θ to move away from those of θi−1.",3.1. Weighting the Components,[0],[0]
+"Nevertheless, from the definitions of dt, σt and (11), we have ∑t i=1",3.1. Weighting the Components,[0],[0]
+"wi,tdiag(σi/(1 − β1))",3.1. Weighting the Components,[0],[0]
+"=∑t
+i=1",3.1. Weighting the Components,[0],[0]
+"wi,tQi = diag(dt/(1−βt1)), and thus the following: Lemma 2. ∑t i=1",3.1. Weighting the Components,[0],[0]
+"wi,tdiag(σi/(1− β1)) 0.
+",3.1. Weighting the Components,[0],[0]
+"Hence, the objective in (13) is still strongly convex.",3.1. Weighting the Components,[0],[0]
+"Moreover, the following Proposition shows that θt in (13) has a simple closed-form solution.
+",3.1. Weighting the Components,[0],[0]
+Proposition 2.,3.1. Weighting the Components,[0],[0]
+"In (13),
+θt = Π diag(dt/(1−βt1))",3.1. Weighting the Components,[0],[0]
+"Θ (−zt/dt),
+where zt = β1zt−1 + (1 − β1)gt − σtθt−1, and ΠAΘ(x) ≡ arg minu∈Θ 1 2‖u−x‖ 2",3.1. Weighting the Components,[0],[0]
+"A is the projection onto Θ for a given positive semidefinite matrix A.
+The proposed procedure, which will be called follow the moving leader (FTML), is shown in Algorithm 1.",3.1. Weighting the Components,[0],[0]
+"Note that though {P1, . . .",3.1. Weighting the Components,[0],[0]
+", Pt} are considered in each round, the update depends only the current gradient gt and parameter θt−1.",3.1. Weighting the Components,[0],[0]
+"It can be easily seen that FTML is easy to implement, memory-efficient and has low per-iteration complexity.",3.1. Weighting the Components,[0],[0]
+"The following Propositions show that we can recover Adagrad in two extreme cases: (i) β1 = 0 with decreasing stepsize; and (ii) β1 → 1 with increasing stepsize.
+",3.2.1. RELATIONSHIP WITH ADAGRAD,[0],[0]
+Proposition 3.,3.2.1. RELATIONSHIP WITH ADAGRAD,[0],[0]
+"With β1 = 0, β2 → 1, ηt = η/ √ t, and
+t = / √ t, θt in (13) reduces to:
+Π diag(( √ g21:t+ 1)/η)
+",3.2.1. RELATIONSHIP WITH ADAGRAD,[0],[0]
+"Θ
+( θt−1 − diag ( η√
+g21:t + 1
+) gt ) ,
+which recovers Adagrad in (4).",3.2.1. RELATIONSHIP WITH ADAGRAD,[0],[0]
+Proposition 4.,3.2.1. RELATIONSHIP WITH ADAGRAD,[0],[0]
+"With β1 → 1, β2 → 1, ηt = η √ t, and
+t = / √ t, we recover (1) with Qi in (3).",3.2.1. RELATIONSHIP WITH ADAGRAD,[0],[0]
+"If Θ = Rd, it
+generates identical updates as Adagrad in (4).",3.2.1. RELATIONSHIP WITH ADAGRAD,[0],[0]
+"When Θ = Rd, McMahan (2011) showed that (1) and (2) generate the same updates.",3.2.2. RELATIONSHIP WITH RMSPROP,[0],[0]
+The following Theorem shows that FTML also has a similar gradient descent update.,3.2.2. RELATIONSHIP WITH RMSPROP,[0],[0]
+Theorem 1.,3.2.2. RELATIONSHIP WITH RMSPROP,[0],[0]
+"With Θ = Rd, FTML generates the same updates as:
+θt = θt−1 − diag ( 1− β1 1− βt1 ηt√ vt/(1− βt2) + t1 ) gt.",3.2.2. RELATIONSHIP WITH RMSPROP,[0],[0]
+"(14)
+When β1 = 0 and bias correction for the variance is not used, (14) reduces to RMSprop in (7).",3.2.2. RELATIONSHIP WITH RMSPROP,[0],[0]
+"However, recall from Section 3.1 that when β1 = 0, we have wi,t = 0 for i < t, and wt,t = 1.",3.2.2. RELATIONSHIP WITH RMSPROP,[0],[0]
+"Hence, only the current loss component Pt is taken into account, and this may be sensitive to the noise in Pt.",3.2.2. RELATIONSHIP WITH RMSPROP,[0],[0]
+"Moreover, as demonstrated in Adam, bias correction of the variance can be very important.",3.2.2. RELATIONSHIP WITH RMSPROP,[0],[0]
+"When β2 → 1, the variance estimate of RMSprop,∑t i=1(1−β2)β t−i 2 g 2 i , becomes zero and blows up the stepsize, leading to divergence.",3.2.2. RELATIONSHIP WITH RMSPROP,[0],[0]
+"In contrast, FTML’s Qi in (12) recovers that of Adagrad in this case (Proposition 4).",3.2.2. RELATIONSHIP WITH RMSPROP,[0],[0]
+"In practice, a smaller β2 has to be used for RMSprop.",3.2.2. RELATIONSHIP WITH RMSPROP,[0],[0]
+"However, a larger β2 enables the algorithm to be more robust to the gradient noise in general.",3.2.2. RELATIONSHIP WITH RMSPROP,[0],[0]
+"At iteration t, instead of centering regularization at each θi−1 in (13), consider centering all the proximal regularization terms at the last iterate θt−1. θt then becomes:
+arg min θ∈Θ t∑ i=1",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"wi,t ( 〈gi, θ〉+ 1 2 ‖θ − θt−1‖2diag ( σi 1−β1 )) .",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"(15) Compared with (13), the regularization in (15) is more aggressive as it encourages θt to be close only to the last iterate θt−1.",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+The following Proposition shows that (15) generates the same updates as Adam.,3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+Proposition 5.,3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"In (15),
+θt = Π At Θ ( θt−1 −A−1t t∑ i=1",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"wi,tgi ) , (16)
+where At = diag(( √ vt/(1− βt2) + t1)/ηt).
+",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"As in Adam, ∑t i=1",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"wi,tgi in (16) can be obtained as mt/(1−βt1), wheremt is computed as an exponential moving average of gt’s: mt = β1mt−1 +",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"(1− β1)gt.
+Note that the θt updates of Adagrad (4), RMSprop (7), and FTML (14) depend only on the current gradient gt.",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"On the other hand, the Adam update in (16) involves ∑t i=1",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"wi,tgi, which contains all the past gradients (evaluated at past parameter estimates θi−1’s).",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"This is similar to the use of momentum, which is sometimes helpful in escaping from local minimum.",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"However, when the data distribution is changing (as in deep reinforcement learning), the past gradients may not be very informative, and can even impede parameter adaptation to the environment.",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"Recently, it is also reported that the use of momentum can make training unstable when the loss is nonstationary (Arjovsky et al., 2017).",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"Indeed, Theorem 4.1 in (Kingma & Ba, 2015) shows that Adam has low regret only when β1 is decreasing w.r.t.",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+t.,3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"When β1 → 0, ∑t i=1 wi,tgi → gt and so only the current gradient is used.
+",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+Remark 1.,3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+(Summary) RMSprop and Adam are improvements over Adagrad in training deep networks.,3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"However, RMSprop uses β1 = 0 (and thus relies only on the current sample), does not correct the bias of the variance estimate, but centers the regularization at the current iterates θi−1’s.",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"On the other hand, Adam uses β1 > 0, bias-corrected variance, but centers all regularization terms at the last iterate θt−1.",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+The proposed FTML combines the nice properties of the two.,3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"In this section, experiments are performed on a number of deep learning models, including convolutional neural networks (Section 4.1), deep residual networks (Section 4.2), memory networks (Section 4.3), neural conversational model (Section 4.4), deep Q-network (Section 4.5), and long short-term memory (LSTM) (Section 4.6).",4. Experiments,[0],[0]
+"A summary of the empirical performance of the various deep learning optimizers is presented in Section 4.7.
+",4. Experiments,[0],[0]
+"The following state-of-the-art optimizers for deep learning models will be compared: (i) Adam (Kingma & Ba, 2015); (ii) RMSprop (Tieleman & Hinton, 2012); (iii) Adadelta (Zeiler, 2012); and (iv)",4. Experiments,[0],[0]
+"Nesterov accelerated gradient (NAG) (Sutskever et al., 2013).",4. Experiments,[0],[0]
+"For FTML, we set β1 = 0.6, β2 = 0.999, and a constant t = = 10−8 for all t. For FTML, Adam, RMSprop, and NAG, η is selected by monitoring performance on the training set (note that Adadelta does not need to set η).",4. Experiments,[0],[0]
+"The learning rate is chosen from {0.5, 0.25, 0.1, . . .",4. Experiments,[0],[0]
+", 0.00005, 0.000025, 0.00001}.",4. Experiments,[0],[0]
+Significantly underperforming learning rates are removed after running the model for 5− 20 epochs.,4. Experiments,[0],[0]
+We then pick the rate that leads to the smallest final training loss.,4. Experiments,[0],[0]
+"In the section, we perform experiments with the convolutional neural network (CNN) (LeCun et al., 1998).",4.1. Convolutional Neural Networks,[0],[0]
+We use the example models on the MNIST and CIFAR-10 data sets from the Keras library1.,4.1. Convolutional Neural Networks,[0],[0]
+"For MNIST, the CNN has two alternating stages of 3 × 3 convolution filters (using ReLU activation), followed by a 2 × 2 max-pooling layer and a dropout layer (with a dropout rate of 0.25).",4.1. Convolutional Neural Networks,[0],[0]
+"Finally, there is a fully-connected layer with ReLU activation and a dropout rate of 0.5.",4.1. Convolutional Neural Networks,[0],[0]
+"For CIFAR-10, the CNN has four alternating stages of 3× 3 convolution filters (using ReLU activation).",4.1. Convolutional Neural Networks,[0],[0]
+Every two convolutional layers is followed by a 2×2 maxpooling layer and a dropout layer (with a dropout rate of 0.25).,4.1. Convolutional Neural Networks,[0],[0]
+The last stage has a fully-connected layer with ReLU activation and a dropout rate of 0.5.,4.1. Convolutional Neural Networks,[0],[0]
+"Features in both data sets are normalized to [0, 1].",4.1. Convolutional Neural Networks,[0],[0]
+"Minibatches of sizes 128 and 32 are used for MNIST and CIFAR-10, respectively.
+",4.1. Convolutional Neural Networks,[0],[0]
+"As the iteration complexities of the various algorithms are comparable and the total cost is dominated by backpropagation, we report convergence of the training cross entropy loss versus the number of epochs.",4.1. Convolutional Neural Networks,[0],[0]
+"This setup is also used in (Zeiler, 2012; Kingma & Ba, 2015).
+",4.1. Convolutional Neural Networks,[0],[0]
+Figure 1 shows the convergence results.,4.1. Convolutional Neural Networks,[0],[0]
+"As can be seen, FTML performs best on both data sets.",4.1. Convolutional Neural Networks,[0],[0]
+"Adam has comparable performance with FTML on MNIST, but does not perform as well on CIFAR-10.",4.1. Convolutional Neural Networks,[0],[0]
+The other methods are much inferior.,4.1. Convolutional Neural Networks,[0],[0]
+"In particular, RMSprop is slow on both MNIST and CIFAR-10, and Adadelta tends to diverge on CIFAR-10.",4.1. Convolutional Neural Networks,[0],[0]
+"Recently, substantially deeper networks have been popularly used, particularly in computer vision.",4.2. Deep Residual Networks,[0],[0]
+"For example, a 152-layer deep residual network (He et al., 2016) achieves state-of-the-art performance on ImageNet classification, and won the first place on the ILSVRC 2015 classification task.
+",4.2. Deep Residual Networks,[0],[0]
+"In this section, we perform experiments with a 110-layer deep residual network on the CIFAR-10 and CIFAR-100 data sets.",4.2. Deep Residual Networks,[0],[0]
+The code is based on its Torch implementation2.,4.2. Deep Residual Networks,[0],[0]
+"We leave the architecture and related settings intact, and use the same learning rate schedule.",4.2. Deep Residual Networks,[0],[0]
+The default optimizer in the Torch code is NAG.,4.2. Deep Residual Networks,[0],[0]
+"Here, we also experiment with Adadelta, RMSprop, Adam and the proposed FTML.",4.2. Deep Residual Networks,[0],[0]
+"A minibatch size of 32 is used.
+",4.2. Deep Residual Networks,[0],[0]
+Convergence of the training cross entropy loss is shown in Figure 2.,4.2. Deep Residual Networks,[0],[0]
+"As can been seen, all optimizers, except Adadelta, are very competitive and have comparable per-
+1https://github.com/fchollet/keras.",4.2. Deep Residual Networks,[0],[0]
+"2https://github.com/facebook/fb.resnet.
+torch.
+",4.2. Deep Residual Networks,[0],[0]
+formance on these two data sets.,4.2. Deep Residual Networks,[0],[0]
+"NAG shows slower initial convergence, while FTML converges slightly faster than the others on the CIFAR-10 data set.",4.2. Deep Residual Networks,[0],[0]
+"Recently, there has been a lot of attention on combining inference, attention and memory for various machine learning tasks.",4.3. Memory Networks,[0],[0]
+"In particular, the memory network (Weston et al., 2014; Sukhbaatar et al., 2015) has been popularly used for natural language understanding.
+",4.3. Memory Networks,[0],[0]
+"In this section, we use the example model of the end-toend memory network (with LSTM) from the Keras library.",4.3. Memory Networks,[0],[0]
+"We consider the question answering task (Sukhbaatar et al., 2015; Weston et al., 2016), and perform experiments on the “single supporting fact” task in the bAbI data set (Weston et al., 2016).",4.3. Memory Networks,[0],[0]
+This task consists of questions in which a previously given single sentence provides the answer.,4.3. Memory Networks,[0],[0]
+"An
+example is shown below.",4.3. Memory Networks,[0],[0]
+"We use a single supporting memory, and a minibatch size of 32.
+",4.3. Memory Networks,[0],[0]
+Single Supporting Fact:,4.3. Memory Networks,[0],[0]
+Mary moved to the bathroom.,4.3. Memory Networks,[0],[0]
+John went to the hallway.,4.3. Memory Networks,[0],[0]
+Where is Mary?,4.3. Memory Networks,[0],[0]
+"A: bathroom
+Convergence of the training cross entropy loss is shown in Figure 3.",4.3. Memory Networks,[0],[0]
+"As can be seen, FTML and RMSprop perform best on this data set.",4.3. Memory Networks,[0],[0]
+"Adam is slower, while NAG and Adadelta perform poorly.",4.3. Memory Networks,[0],[0]
+"The neural conversational model (Vinyals & Le, 2015) is a sequence-to-sequence model (Sutskever et al., 2014) that is capable of predicting the next sequence given the last or previous sequences in a conversation.",4.4. Neural Conversational Model,[0],[0]
+"A LSTM layer en-
+codes the input sentence to a thought vector, and a second LSTM layer decodes the thought vector to the response.",4.4. Neural Conversational Model,[0],[0]
+"It has been shown that this model can often produce fluent and natural conversations.
+",4.4. Neural Conversational Model,[0],[0]
+"In this experiment, we use the publicly available Torch implementation3 with a constant stepsize, and its default data set Cornell Movie-Dialogs Corpus (with 50, 000 samples) (Danescu-Niculescu-Mizil & Lee, 2011).",4.4. Neural Conversational Model,[0],[0]
+"The number of hidden units is set to 1000, and the minibatch size is 10.
+",4.4. Neural Conversational Model,[0],[0]
+Convergence of the training cross entropy loss is shown in Figure 4.,4.4. Neural Conversational Model,[0],[0]
+"Adadelta is not reported here, since it performs poorly (as in previous experiments).",4.4. Neural Conversational Model,[0],[0]
+"As can be seen, FTML outperforms Adam and RMSprop.",4.4. Neural Conversational Model,[0],[0]
+"In particular, RMSprop is much inferior.",4.4. Neural Conversational Model,[0],[0]
+"NAG is slower than FTML and Adam in the first 21 epochs, but becomes faster towards the end of training.",4.4. Neural Conversational Model,[0],[0]
+"In this section, we use the Deep Q-network (DQN) (Mnih et al., 2015) for deep reinforcement learning.",4.5. Deep Q-Network,[0],[0]
+Experiments are performed on two computer games on the Atari 2600 platform: Breakout and Asterix.,4.5. Deep Q-Network,[0],[0]
+"We use the publicly available Torch implementation with the default network setup4, and a minibatch size of 32.",4.5. Deep Q-Network,[0],[0]
+"We only compare FTML with RMSprop and Adam for optimization, as NAG and Adadelta are rarely used in training the DQN.",4.5. Deep Q-Network,[0],[0]
+"As in (Mnih et al., 2015), we use = 10−2 for all methods, and performance evaluation is based on the average score per episode.",4.5. Deep Q-Network,[0],[0]
+"The higher the score, the better the performance.
+",4.5. Deep Q-Network,[0],[0]
+Convergence is shown in Figure 5.,4.5. Deep Q-Network,[0],[0]
+"On Breakout, RM-
+3https://github.com/macournoyer/ neuralconvo.
+",4.5. Deep Q-Network,[0],[0]
+"4https://github.com/Kaixhin/Atari.
+",4.5. Deep Q-Network,[0],[0]
+Sprop and FTML are comparable and yield higher scores than Adam.,4.5. Deep Q-Network,[0],[0]
+"On Asterix, FTML outperforms all the others.",4.5. Deep Q-Network,[0],[0]
+"In particular, the DQN trained with RMSprop fails to learn the task, and its score begins to drop after about 100 epochs.",4.5. Deep Q-Network,[0],[0]
+"A similar problem has also been observed in (Hasselt et al., 2016).",4.5. Deep Q-Network,[0],[0]
+"Experience replay (Mnih et al., 2015) has been commonly used in deep reinforcement learning to smooth over changes in the data distribution, and avoid oscillations or divergence of the parameters.",4.5. Deep Q-Network,[0],[0]
+"However, results here show that Adam still has inferior performance because of its use of all past gradients, many of these are not informative when the data distribution has changed.",4.5. Deep Q-Network,[0],[0]
+"To illustrate the problem of Adam in Section 4.5 more clearly, we perform the following timeseries prediction experiment with the LSTM.",4.6. Long Short-Term Memory (LSTM),[0],[0]
+We construct a synthetic timeseries of length 1000.,4.6. Long Short-Term Memory (LSTM),[0],[0]
+"This is divided into 20 segments, each of length 50.",4.6. Long Short-Term Memory (LSTM),[0],[0]
+"At each time point, the sample is 10- dimensional.",4.6. Long Short-Term Memory (LSTM),[0],[0]
+"In segment i, samples are generated from a normal distribution with mean ([i, i, . . .",4.6. Long Short-Term Memory (LSTM),[0],[0]
+", i] + ζi) ∈ R10 and identity covariance matrix, where the components of ζi are independent standard normal random variables.",4.6. Long Short-Term Memory (LSTM),[0],[0]
+Noise from the standard normal distribution is added to corrupt the data.,4.6. Long Short-Term Memory (LSTM),[0],[0]
+"The task is to predict the data sample at the next time point t.
+We use a one-layer LSTM implemented in (Léonard et al., 2015).",4.6. Long Short-Term Memory (LSTM),[0],[0]
+100 hidden units are used.,4.6. Long Short-Term Memory (LSTM),[0],[0]
+"We truncate backpropagation through time (BPTT) to 5 timesteps, and input 5 samples to the LSTM in each iteration.",4.6. Long Short-Term Memory (LSTM),[0],[0]
+"Thus, the data distribution changes every 10 iterations, as a different normal distribution is then used for data generation.",4.6. Long Short-Term Memory (LSTM),[0],[0]
+"Performance evaluation is based on the squared loss ft(θt−1) at time t.
+Convergence of the loss is shown in Figure 6(a).",4.6. Long Short-Term Memory (LSTM),[0],[0]
+"As can be
+seen, Adam has difficulty in adapting to the data.",4.6. Long Short-Term Memory (LSTM),[0],[0]
+"In contrast, FTML and RMSprop can adapt more quickly, yielding better and more stable performance.
+",4.6. Long Short-Term Memory (LSTM),[0],[0]
+"As a baseline, we consider the case where the data distribution does not change (the means of all the segments are fixed to the vector of ones)",4.6. Long Short-Term Memory (LSTM),[0],[0]
+Figure 6(b) shows the results.,4.6. Long Short-Term Memory (LSTM),[0],[0]
+"As can be seen, Adam now performs comparably to FTML and RMSprop.",4.6. Long Short-Term Memory (LSTM),[0],[0]
+The main problem with RMSprop is that its performance is not stable.,4.7. Summary of Results,[0],[0]
+"Sometimes, it performs well, but sometimes it can have significantly inferior performance (e.g., as can be seen from Figures 1, 4 and 5(b)).",4.7. Summary of Results,[0],[0]
+"The performance of Adam is more stable, though it often lags behind the best optimizer (e.g., Figures 1(b), 3, and 4).",4.7. Summary of Results,[0],[0]
+"It is particularly problematic when learning in a changing environment (Fig-
+ures 5 and 6(a)).",4.7. Summary of Results,[0],[0]
+"In contrast, the proposed FTML shows stable performance on various models and tasks.",4.7. Summary of Results,[0],[0]
+"It converges quickly, and is always the best (or at least among the best) in all our experiments.",4.7. Summary of Results,[0],[0]
+"In this paper, we proposed a FTPRL variant called FTML, in which the recent samples are weighted more heavily in each iteration.",5. Conclusion,[0],[0]
+"Hence, it is able to adapt more quickly when the parameter moves to another local basin, or when the data distribution changes.",5. Conclusion,[0],[0]
+FTML is closely related to RMSprop and Adam.,5. Conclusion,[0],[0]
+"In particular, it enjoys their nice properties, but avoids their pitfalls.",5. Conclusion,[0],[0]
+"Experimental results on a number of deep learning models and tasks demonstrate that FTML converges quickly, and is always the best (or among the best) of the various optimizers.",5. Conclusion,[0],[0]
+This research was supported in part by ITF/391/15FX.,Acknowledgments,[0],[0]
+Deep networks are highly nonlinear and difficult to optimize.,abstractText,[0],[0]
+"During training, the parameter iterate may move from one local basin to another, or the data distribution may even change.",abstractText,[0],[0]
+"Inspired by the close connection between stochastic optimization and online learning, we propose a variant of the follow the regularized leader (FTRL) algorithm called follow the moving leader (FTML).",abstractText,[0],[0]
+"Unlike the FTRL family of algorithms, the recent samples are weighted more heavily in each iteration and so FTML can adapt more quickly to changes.",abstractText,[0],[0]
+"We show that FTML enjoys the nice properties of RMSprop and Adam, while avoiding their pitfalls.",abstractText,[0],[0]
+"Experimental results on a number of deep learning models and tasks demonstrate that FTML converges quickly, and outperforms other state-ofthe-art optimizers.",abstractText,[0],[0]
+Follow the Moving Leader in Deep Learning,title,[0],[0]
+NMT has witnessed promising improvements recently.,1 Introduction,[0],[0]
+"Depending on the types of input and output, these efforts can be divided into three categories: string-to-string systems (Sutskever et al., 2014; Bahdanau et al., 2014); tree-to-string systems (Eriguchi et al., 2016, 2017); and string-totree systems (Aharoni and Goldberg, 2017; Nadejde et al., 2017).",1 Introduction,[0],[0]
+"Compared with string-to-string systems, tree-to-string and string-to-tree systems (henceforth, tree-based systems) offer some attractive features.",1 Introduction,[0],[0]
+"They can use more syntactic information (Li et al., 2017), and can conveniently incorporate prior knowledge (Zhang et al., 2017).
+∗ Contribution during internship at National Institute of Information and Communications Technology.
+†Corresponding author
+Because of these advantages, tree-based methods become the focus of many researches of NMT nowadays.
+",1 Introduction,[0],[0]
+"Based on how to represent trees, there are two main categories of tree-based NMT methods: representing trees by a tree-structured neural network (Eriguchi et al., 2016; Zaremoodi and Haffari, 2017), representing trees by linearization (Vinyals et al., 2015; Dyer et al., 2016; Ma et al., 2017).",1 Introduction,[0],[0]
+"Compared with the former, the latter method has a relatively simple model structure, so that a larger corpus can be used for training and the model can be trained within reasonable time, hence is preferred from the viewpoint of computation.",1 Introduction,[0],[0]
+"Therefore we focus on this kind of methods in this paper.
+",1 Introduction,[0],[0]
+"In spite of impressive performance of tree-based NMT systems, they suffer from a major drawback: they only use the 1-best parse tree to direct the translation, which potentially introduces translation mistakes due to parsing errors (Quirk and Corston-Oliver, 2006).",1 Introduction,[1.0],"['In spite of impressive performance of tree-based NMT systems, they suffer from a major drawback: they only use the 1-best parse tree to direct the translation, which potentially introduces translation mistakes due to parsing errors (Quirk and Corston-Oliver, 2006).']"
+"For SMT, forest-based methods have employed a packed forest to address this problem (Huang, 2008), which represents exponentially many parse trees rather than just the 1-best one (Mi et al., 2008; Mi and Huang, 2008).",1 Introduction,[0],[0]
+"But for NMT, (computationally efficient) forestbased methods are still being explored1.
+",1 Introduction,[0],[0]
+"Because of the structural complexity of forests, the inexistence of appropriate topological ordering, and the hyperedge-attachment nature of weights (see Section 3.1 for details), it is not trivial to linearize a forest.",1 Introduction,[0],[0]
+"This hinders the development of forest-based NMT to some extent.
+",1 Introduction,[0],[0]
+"Inspired by the tree-based NMT methods based on linearization, we propose an efficient forestbased NMT approach (Section 3), which can en-
+1Zaremoodi and Haffari (2017) have proposed a forestbased NMT method based on a forest-structured neural network recently, but it is computationally inefficient (see Section 5).
+code the syntactic information of a packed forest on the basis of a novel weighted linearization method for a packed forest (Section 3.1), and can decode the linearized packed forest under the simple sequence-to-sequence framework (Section 3.2).",1 Introduction,[0],[0]
+Experiments demonstrate the effectiveness of our method (Section 4).,1 Introduction,[0],[0]
+"We first review the general sequence-to-sequence model (Section 2.1), then describe tree-based NMT systems based on linearization (Section 2.2), and finally introduce the packed forest, through which exponentially many trees can be represented in a compact manner (Section 2.3).",2 Preliminaries,[0],[0]
+"Current NMT systems usually resort to a simple framework, i.e., the sequence-to-sequence model (Cho et al., 2014; Sutskever et al., 2014).",2.1 Sequence-to-sequence model,[0],[0]
+"Given a source sequence (x0, . . .",2.1 Sequence-to-sequence model,[0],[0]
+", xT ), in order to find a target sequence (y0, . . .",2.1 Sequence-to-sequence model,[0],[0]
+", yT ′) that maximizes the conditional probability p(y0, . . .",2.1 Sequence-to-sequence model,[0],[0]
+", yT ′",2.1 Sequence-to-sequence model,[0],[0]
+"| x0, . . .",2.1 Sequence-to-sequence model,[0],[0]
+", xT ), the sequence-to-sequence model uses one RNN to encode the source sequence into a fixed-length context vector c and a second RNN to decode this vector and generate the target sequence.",2.1 Sequence-to-sequence model,[0.9976044851402562],"[', xT ), the sequence-to-sequence model uses one RNN to encode the source sequence into a fixed-length context vector c and another RNN to decode this vector and generate the target sequence.']"
+"Formally, the probability of the target sequence can be calculated as follows:
+p(y0, . . .",2.1 Sequence-to-sequence model,[0],[0]
+",yT ′",2.1 Sequence-to-sequence model,[0],[0]
+"| x0, . . .",2.1 Sequence-to-sequence model,[0],[0]
+", xT )
+",2.1 Sequence-to-sequence model,[0],[0]
+"= T ′∏ t=0 p(yt | c, y0, . . .",2.1 Sequence-to-sequence model,[0],[0]
+", yt−1), (1)
+where
+p(yt | c, y0, . . .",2.1 Sequence-to-sequence model,[0],[0]
+", yt−1) = g(yt−1, st, c), (2) st = f(st−1, yt−1, c), (3)
+c = q(h0, . . .",2.1 Sequence-to-sequence model,[0],[0]
+", hT ), (4)
+ht = f(et, ht−1).",2.1 Sequence-to-sequence model,[0],[0]
+"(5)
+Here, g, f , and q are nonlinear functions; ht and st are the hidden states of the source-side RNN and target-side RNN, respectively, c is the context vector, and et is the embedding of xt.
+Bahdanau et al. (2014) introduced an attention mechanism to deal with the issues related to long sequences (Cho et al., 2014).",2.1 Sequence-to-sequence model,[0],[0]
+"Instead of encoding the source sequence into a fixed vector c, the attention model uses different ci-s when calculating
+the target-side output yi at time step i:
+ci = T∑
+j=0
+αijhj , (6)
+αij = exp(a(si−1, hj))∑T k=0",2.1 Sequence-to-sequence model,[0],[0]
+"exp(a(si−1, hk))",2.1 Sequence-to-sequence model,[0],[0]
+.,2.1 Sequence-to-sequence model,[0],[0]
+"(7)
+The function a(si−1, hj) can be regarded as representing the soft alignment between the target-side RNN hidden state si−1 and the source-side RNN hidden state hj .
+",2.1 Sequence-to-sequence model,[0],[0]
+"By changing the format of the source/target sequences, this framework can be regarded as a string-to-string NMT system (Sutskever et al., 2014), a tree-to-string NMT system (Li et al., 2017), or a string-to-tree NMT system (Aharoni and Goldberg, 2017).",2.1 Sequence-to-sequence model,[0],[0]
+"Regarding the linearization adopted for tree-tostring NMT (i.e., linearization of the source side), Sennrich and Haddow (2016) encoded the sequence of dependency labels and the sequence of words simultaneously, partially utilizing the syntax information, while Li et al. (2017) traversed the constituent tree of the source sentence and combined this with the word sequence, utilizing the syntax information completely.
+",2.2 Linear-structured tree-based NMT systems,[0.999999983384178],"['Regarding the linearization adopted for tree-tostring NMT (i.e., linearization of the source side), Sennrich and Haddow (2016) encoded the sequence of dependency labels and the sequence of words simultaneously, partially utilizing the syntax information, while Li et al. (2017) traversed the constituent tree of the source sentence and combined this with the word sequence, utilizing the syntax information completely.']"
+"Regarding the linearization used for string-totree NMT (i.e., linearization of the target side), Nadejde et al. (2017) used a CCG supertag sequence as the target sequence, while Aharoni and Goldberg (2017) applied a linearization method in a top-down manner, generating a sequence ensemble for the annotated tree in the Penn Treebank (Marcus et al., 1993).",2.2 Linear-structured tree-based NMT systems,[1.0],"['Regarding the linearization used for string-totree NMT (i.e., linearization of the target side), Nadejde et al. (2017) used a CCG supertag sequence as the target sequence, while Aharoni and Goldberg (2017) applied a linearization method in a top-down manner, generating a sequence ensemble for the annotated tree in the Penn Treebank (Marcus et al., 1993).']"
+"Wu et al. (2017) used transition actions to linearize a dependency tree, and employed the sequence-to-sequence framework for NMT.
+",2.2 Linear-structured tree-based NMT systems,[0.9999999312364984],"['Wu et al. (2017) used transition actions to linearize a dependency tree, and employed the sequence-to-sequence framework for NMT.']"
+It can be seen all current tree-based NMT systems use only one tree for encoding or decoding.,2.2 Linear-structured tree-based NMT systems,[0],[0]
+"In contrast, we hope to utilize multiple trees (i.e., a forest).",2.2 Linear-structured tree-based NMT systems,[1.0],"['In contrast, we hope to utilize multiple trees (i.e., a forest).']"
+"This is not trivial, on account of the lack of a fixed traversal order and the need for a compact representation.",2.2 Linear-structured tree-based NMT systems,[0],[0]
+"The packed forest gives a representation of exponentially many parsing trees, and can compactly encode many more candidates than the n-best list
+(Huang, 2008).",2.3 Packed forest,[0],[0]
+"Figure 1a shows a packed forest, which can be unpacked into two constituent trees (Figure 1b and Figure 1c).
+",2.3 Packed forest,[0.9999999653298445],"['Figure 1a shows a packed forest, which can be unpacked into two constituent trees (Figure 1b and Figure 1c).']"
+"Formally, a packed forest is a pair 〈V,E〉, where V is the set of nodes and E is the set of hyperedges.",2.3 Packed forest,[0],[0]
+"Each v ∈ V can be represented as Xi,j , where X is a constituent label and i, j ∈",2.3 Packed forest,[0],[0]
+"[0, n] are indices of words, showing that the node spans the words ranging from i (inclusive) to j (exclusive).",2.3 Packed forest,[0],[0]
+"Here, n is the length of the input sentence.",2.3 Packed forest,[0],[0]
+"Each e ∈ E is a three-tuple 〈head(e), tails(e), score(e)〉, where head(e) ∈ V is similar to the head node in a constituent tree, and tails(e) ∈ V ∗ is similar to the set of child nodes in a constituent tree.",2.3 Packed forest,[0],[0]
+score(e) ∈ R is the logarithm of the probability that tails(e) represents the tails of head(e) calculated by the parser.,2.3 Packed forest,[0],[0]
+"Based on score(e), the score of a constituent tree T can be calculated as follows:
+score(T ) = −λn+",2.3 Packed forest,[0],[0]
+"∑
+e∈E(T )
+score(e), (8)
+where E(T ) is the set of hyperedges appearing in tree T , and λ is a regularization coefficient for the sentence length2.
+2Following the configuration of Charniak and Johnson",2.3 Packed forest,[0],[0]
+"We first propose a linearization method for the packed forest (Section 3.1), then describe how to encode the linearized forest (Section 3.2), which can then be translated by the conventional decoder (see Section 2.1).",3 Forest-based NMT,[0],[0]
+"Recently, several studies have focused on the linearization methods of a syntax tree, both in the area of tree-based NMT (Section 2.2) and in the area of parsing (Vinyals et al., 2015; Dyer et al., 2016; Ma et al., 2017).",3.1 Forest linearization,[0],[0]
+"Basically, these methods follow a fixed traversal order (e.g., depthfirst), which does not exist for the packed forest (a directed acyclic graph (DAG)).",3.1 Forest linearization,[0],[0]
+"Furthermore, the weights are attached to edges of a packed forest instead of the nodes, which further increase the difficulty.
+",3.1 Forest linearization,[0],[0]
+"Topological ordering algorithms for DAG (Kahn, 1962; Tarjan, 1976) are not good solutions, because the outputted ordering is not always optimal for machine translation.",3.1 Forest linearization,[0],[0]
+"In particular, a topo-
+(2005), for all the experiments in this paper, we fixed λ to log2 600.
+",3.1 Forest linearization,[0],[0]
+"Algorithm 1 Linearization of a packed forest 1: function LINEARIZEFOREST(〈V,E〉,w) 2: v ← FINDROOT(V ) 3: r←",3.1 Forest linearization,[0],[0]
+"[] 4: EXPANDSEQ(v, r, 〈V,E〉,w) 5: return r 6: function FINDROOT(V ) 7: for v ∈ V do 8: if v has no parent then 9: return v 10: procedure EXPANDSEQ(v, r, 〈V,E〉,w) 11: for e ∈ E do 12: if head(e) = v then 13: if tails(e) 6= ∅",3.1 Forest linearization,[0],[0]
+then 14: for t ∈ SORT(tails(e)) do .,3.1 Forest linearization,[0],[0]
+"Sort
+tails(e) by word indices.",3.1 Forest linearization,[0],[0]
+"15: EXPANDSEQ(t, r, 〈V,E〉,w) 16: l← LINEARIZEEDGE(head(e),w) 17: r.append(〈l, σ(0.0)〉) .",3.1 Forest linearization,[0],[0]
+"σ is the sigmoid
+function, i.e., σ(x) = 1 1+e−x , x ∈ R.
+18:",3.1 Forest linearization,[0],[0]
+"l ← c©LINEARIZEEDGES(tails(e),w) .",3.1 Forest linearization,[0],[0]
+c© is a unary operator.,3.1 Forest linearization,[0],[0]
+"19: r.append(〈l, σ(score(e))",3.1 Forest linearization,[0],[0]
+"〉) 20: else 21: l← LINEARIZEEDGE(head(e),w) 22:",3.1 Forest linearization,[0],[0]
+"r.append(〈l, σ(0.0)〉) 23: function LINEARIZEEDGE(Xi,j ,w) 24: return X ⊗",3.1 Forest linearization,[0],[0]
+"( j−1k=iwk) 25: function LINEARIZEEDGES(v,w) 26: return ⊕v∈vLINEARIZEEDGE(v,w)
+logical ordering could ignore “word sequential information” and “parent-child information” in the sentences.
+",3.1 Forest linearization,[0],[0]
+"For example, for the packed forest in Figure 1a, although “[10]→[1]→[2]→ · · · →[9]→[11]” is a valid topological ordering, the word sequential information of the words (e.g., “John” should be located ahead of the period), which is fairly crucial for translation of languages with fixed pragmatic word order such as Chinese or English, is lost.
+",3.1 Forest linearization,[0],[0]
+"As another example, for the packed forest in Figure 1a, nodes [2], [9], and [10] are all the children of node [11].",3.1 Forest linearization,[0],[0]
+"However, in the topological order “[1]→[2]→ · · · →[9]→[10]→[11],” node [2] is quite far from node [11], while nodes [9] and [10] are both close to node [11].",3.1 Forest linearization,[0],[0]
+"The parent-child information cannot be reflected in this topological order, which is not what we would expect.
+",3.1 Forest linearization,[0],[0]
+"To address the above two problems, we propose a novel linearization algorithm for a packed forest (Algorithm 1).",3.1 Forest linearization,[0],[0]
+"The algorithm linearizes the packed forest from the root node (Line 2) to leaf nodes by calling the EXPANDSEQ procedure (Line 15) recursively, while preserving the word order in the sentence (Line 14).",3.1 Forest linearization,[1.0],"['The algorithm linearizes the packed forest from the root node (Line 2) to leaf nodes by calling the EXPANDSEQ procedure (Line 15) recursively, while preserving the word order in the sentence (Line 14).']"
+"In this way, word sequential information is preserved.",3.1 Forest linearization,[0],[0]
+"Within the
+EXPANDSEQ procedure, once a hyperedge is linearized (Line 16), the tails are also linearized immediately (Line 18).",3.1 Forest linearization,[0],[0]
+"In this way, parent-child information is preserved.",3.1 Forest linearization,[1.0],"['In this way, parent-child information is preserved.']"
+"Intuitively, different parts of constituent trees should be combined in different ways, therefore we define different operators ( c©, ⊗, ⊕, or ) to represent the relationships between different parts, so that the representations of these parts can be combined in different ways (see Section 3.2 for details).",3.1 Forest linearization,[0],[0]
+"Words are concatenated by the operator “ ” with each other, a word and a constituent label is concatenated by the operator “⊗”, the linearization results of child nodes are concatenated by the operator “⊕” with each other, while the unary operator “ c©” is used to indicate that the node is the child node of the previous part.",3.1 Forest linearization,[0],[0]
+"Furthermore, each token in the linearized sequence is related to a score, representing the confidence of the parser.
+",3.1 Forest linearization,[0],[0]
+The linearization result of the packed forest in Figure 1a is shown in Figure 2.,3.1 Forest linearization,[0],[0]
+Tokens in the linearized sequence are separated by slashes.,3.1 Forest linearization,[0],[0]
+Each token in the sequence is composed of different types of symbols and combined by different operators.,3.1 Forest linearization,[0],[0]
+We can see that word sequential information is preserved.,3.1 Forest linearization,[0],[0]
+"For example, “NNP⊗John” (linearization result of node [1]) is in front of “VBZ⊗has” (linearization result of node [3]), which is in front of “DT⊗a” (linearization result of node [4]).",3.1 Forest linearization,[0],[0]
+"Moreover, parent-child information is also preserved.",3.1 Forest linearization,[0],[0]
+"For example, “NP⊗John” (linearization result of node [2]) is followed by “ c©NNP⊗John” (linearization result of node [1], the child of node [2]).
+",3.1 Forest linearization,[0.999999914339835],"['For example, “NP⊗John” (linearization result of node [2]) is followed by “ c©NNP⊗John” (linearization result of node [1], the child of node [2]).']"
+Note that our linearization method cannot fully recover packed forest.,3.1 Forest linearization,[0],[0]
+What we want to do is not to propose a fully recoverable linearization method.,3.1 Forest linearization,[0],[0]
+"What we actually want to do is to encode syntax information as much as possible, so that we can improve the performance of NMT.",3.1 Forest linearization,[0],[0]
+"As will be shown in Section 4, this goal is achieved.
+",3.1 Forest linearization,[0],[0]
+"Also note that there is one more advantage of our linearization method: the linearized sequence
+is a weighted sequence, while all the previous studies ignored the weights during linearization.",3.1 Forest linearization,[0],[0]
+"As will be shown in Section 4, the weights are actually important not only for the linearization of a packed forest, but also for the linearization of a single tree.
+",3.1 Forest linearization,[0],[0]
+"By preserving only the nodes and hyperedges in the 1-best tree and removing all others, our linearization method can be regarded as a treelinearization method.",3.1 Forest linearization,[0],[0]
+"Compared with other treelinearization methods, our method combines several different kinds of information within one symbol, retaining the parent-child information, and incorporating the confidence of the parser in the sequence.",3.1 Forest linearization,[0],[0]
+"We examine whether the weights can be useful not only for linear structured tree-based NMT but also for our forest-based NMT.
+",3.1 Forest linearization,[0],[0]
+"Furthermore, although our method is nonreversible for packed forests, it is reversible for constituent trees, in that the linearization is processed exactly in the depth-first traversal order and all necessary information in the tree nodes has been encoded.",3.1 Forest linearization,[0],[0]
+"As far as we know, there is no previous work on linearization of packed forests.",3.1 Forest linearization,[0],[0]
+"The linearized packed forest forms the input of the encoder, which has two major differences from the input of a sequence-to-sequence NMT system.",3.2 Encoding the linearized forest,[0],[0]
+"First, the input sequence of the encoder consists of two parts: the symbol sequence and the score sequence.",3.2 Encoding the linearized forest,[0],[0]
+"Second, each symbol in the symbol sequence consists of several parts (words and constituent labels), which are combined by certain operators ( c©, ⊗, ⊕, or ).",3.2 Encoding the linearized forest,[0],[0]
+"Based on these observa-
+tions, we propose two new frameworks, which are illustrated in Figure 3.
+",3.2 Encoding the linearized forest,[0],[0]
+"Formally, the input layer receives the sequence (〈l0, ξ0〉, . . .",3.2 Encoding the linearized forest,[0],[0]
+", 〈lT , ξT 〉), where li denotes the i-th symbol and ξi its score.",3.2 Encoding the linearized forest,[0],[0]
+"Then, the sequence is fed into the score layer and the symbol layer.",3.2 Encoding the linearized forest,[0],[0]
+"The score and symbol layers receive the sequence and output the score sequence ξ = (ξ0, . . .",3.2 Encoding the linearized forest,[0],[0]
+", ξT ) and symbol sequence",3.2 Encoding the linearized forest,[0],[0]
+"l = (l0, . . .",3.2 Encoding the linearized forest,[0],[0]
+", lT ), respectively, from the input.",3.2 Encoding the linearized forest,[0],[0]
+Any item l ∈,3.2 Encoding the linearized forest,[0],[0]
+"l in the symbol layer has the form
+l = o0x1o1 . . .",3.2 Encoding the linearized forest,[0],[0]
+"xm−1om−1xm, (9)
+where each xk (k = 1, . . .",3.2 Encoding the linearized forest,[0],[0]
+",m) is a word or a constituent label, m is the total number of words and constituent labels in a symbol, o0 is “ c©” or empty, and each ok (k = 1, . . .",3.2 Encoding the linearized forest,[0],[0]
+",m − 1) is either “⊗”, “⊕”, or “ ”.",3.2 Encoding the linearized forest,[0],[0]
+"Then, in the node/operator layer, the x-s and o-s are separated and rearranged as x = (x1, . . .",3.2 Encoding the linearized forest,[0],[0]
+", xm, o0, . . .",3.2 Encoding the linearized forest,[0],[0]
+", om−1), which is fed to the pre-embedding layer.",3.2 Encoding the linearized forest,[0],[0]
+"The pre-embedding layer generates a sequence p = (p1, . .",3.2 Encoding the linearized forest,[0],[0]
+.,3.2 Encoding the linearized forest,[0],[0]
+", pm, . . .",3.2 Encoding the linearized forest,[0],[0]
+", p2m), which is calculated as follows:
+p =Wemb[I(x)].",3.2 Encoding the linearized forest,[0],[0]
+"(10)
+Here, the function I(x) returns a list of the indices in the dictionary for all the elements in x, which consist of words, constituent labels, or operators.",3.2 Encoding the linearized forest,[0],[0]
+"In addition, Wemb is the embedding matrix of size (|wword| + |wlabel| + 4) × dword, where |wword| and |wlabel| are the total number of words and constituent labels, respectively, dword is the dimension of the word embedding, and there are four possible operators: “",3.2 Encoding the linearized forest,[0],[0]
+"c©,” “⊗,” “⊕,” and “ .”",3.2 Encoding the linearized forest,[0],[0]
+"Note
+that p is a list of 2m vectors, and the dimension of each vector is dword.
+",3.2 Encoding the linearized forest,[0],[0]
+"Because the length of the sequence of the input layer is T + 1, there are T + 1 different ps in the pre-embedding layer, which we denote by P = (p0, . . .",3.2 Encoding the linearized forest,[0],[0]
+",pT ).",3.2 Encoding the linearized forest,[0],[0]
+"Depending on where the score layer is incorporated, we propose two frameworks: Score-on-Embedding (SoE) and Score-onAttention (SoA).",3.2 Encoding the linearized forest,[0],[0]
+"In SoE, the k-th element of the embedding layer is calculated as follows:
+ek = ξk ∑ p∈pk p, (11)
+while in SoA, the k-th element of the embedding layer is calculated as
+ek = ∑ p∈pk p, (12)
+where k = 0, . . .",3.2 Encoding the linearized forest,[0],[0]
+", T .",3.2 Encoding the linearized forest,[0],[0]
+Note that ek ∈ Rdword .,3.2 Encoding the linearized forest,[0],[0]
+"In this manner, the proposed forest-to-string NMT framework is connected with the conventional sequence-to-sequence NMT framework.
+",3.2 Encoding the linearized forest,[0],[0]
+"After calculating the embedding vectors in the embedding layer, the hidden vectors are calculated using Equation 5.",3.2 Encoding the linearized forest,[0],[0]
+"When calculating the context vector ci-s, SoE and SoA differ from each other.",3.2 Encoding the linearized forest,[0],[0]
+"For SoE, the ci-s are calculated using Equation 6 and 7, while for SoA, the αij-s used to calculate the ci-s are determined as follows:
+αij = exp(ξja(si−1, hj))∑T k=0",3.2 Encoding the linearized forest,[0],[0]
+"exp(ξka(si−1, hk)) .",3.2 Encoding the linearized forest,[0],[0]
+"(13)
+Then, using the decoder of the sequence-tosequence framework, the sentence of the target language can be generated.",3.2 Encoding the linearized forest,[0],[0]
+We evaluate the effectiveness of our forest-based NMT systems on English-to-Chinese and Englishto-Japanese translation tasks3.,4.1 Setup,[0],[0]
+"The statistics of the corpora used in our experiments are summarized in Table 1.
+",4.1 Setup,[0],[0]
+The packed forests of English sentences are obtained by the constituent parser proposed by Huang (2008)4.,4.1 Setup,[0],[0]
+"We filtered out the sentences for
+3English is commonly chosen as the target language.",4.1 Setup,[0],[0]
+"We chose English as the source language because a highperformance forest parser is not available for other languages.
+4http://web.engr.oregonstate.edu/ ˜huanlian/software/forest-reranker/ forest-charniak-v0.8.tar.bz2
+which the parser cannot generate the packed forest successfully and the sentences longer than 80 words.",4.1 Setup,[0],[0]
+"For NIST datasets, we simply choose the first reference among the four English references of NIST corpora, because all of them are independent with each other, according to the documents of NIST datasets.",4.1 Setup,[0],[0]
+"For Chinese sentences, we used Stanford segmenter5 for segmentation.",4.1 Setup,[0],[0]
+"For Japanese sentences, we followed the preprocessing steps recommended in WAT 20176.
+",4.1 Setup,[0],[0]
+"We implemented our framework based on nematus8 (Sennrich et al., 2017).",4.1 Setup,[0],[0]
+"For optimization, we used the Adadelta algorithm (Zeiler, 2012).",4.1 Setup,[0],[0]
+"In order to avoid overfitting, we used dropout (Srivastava et al., 2014) on the embedding layer and hidden layer, with the dropout probability set to 0.2.",4.1 Setup,[0],[0]
+"We used the gated recurrent unit (Cho et al., 2014) as the recurrent unit of RNNs, which are bi-directional, with one hidden layer.
+",4.1 Setup,[0],[0]
+"Based on the tuning result, we set the maximum length of the input sequence to 300, the hidden layer size as 512, the dimension of word embedding as 620, and the batch size for training as 40.",4.1 Setup,[0],[0]
+"We pruned the packed forest using the algorithm of Huang (2008), with a threshold of 5.",4.1 Setup,[0],[0]
+"If the linearization of the pruned forest is still longer than 300, then we linearize the 1-best parsing tree instead of the forest.",4.1 Setup,[0],[0]
+"During decoding, we used beam search, and fixed the beam size to 12.",4.1 Setup,[0],[0]
+"For the case of Forest (SoA), with 1 core of Tesla K80 GPU and LDC corpus as the training data, training spent about 10 days, and decoding speed is about 10 sentences per second.
+",4.1 Setup,[0],[0]
+"5https://nlp.stanford.edu/software/ stanford-segmenter-2017-06-09.zip
+6http://lotus.kuee.kyoto-u.ac.jp/WAT/ WAT2017/baseline/dataPreparationJE.html
+7LDC2002E18, LDC2003E07, LDC2003E14, Hansards portion of LDC2004T07, LDC2004T08, and LDC2005T06
+8https://github.com/EdinburghNLP/ nematus",4.1 Setup,[0],[0]
+Table 2 and 3 summarize the experimental results.,4.2 Experimental results,[0],[0]
+"To avoid the affect of segmentation errors, the performance were evaluated by character-level BLEU (Papineni et al., 2002).",4.2 Experimental results,[0],[0]
+"We compare our proposed models (i.e., Forest (SoE) and Forest (SoA)) with three types of baseline: a string-to-string model (s2s), forest-based models that do not use score sequences (Forest (No score)), and tree-based models that use the 1-best parsing tree (1-best (No score, SoE, SoA)).",4.2 Experimental results,[0.993076696493362],"['We compared our proposed models (i.e., Forest (SoE) and Forest (SoA)) with three types of baseline: a string-tostring model (s2s), forest-based models that do not use score sequences (Forest (No score)), and treebased models that use the 1-best parsing tree (1- best (No score, SoE, SoA)).']"
+"For the 1-best models, we preserve the nodes and hyperedges that are used in the 1-best constituent tree in the packed forest, and remove all other nodes and hyperedges, yielding a pruned forest that contains only the 1-best constituent tree.",4.2 Experimental results,[0],[0]
+"For the “No score” configurations, we force the input score sequence to be a sequence of 1.0 with the same length as the input symbol sequence, so that neither the embedding layer nor the attention layer are affected by the score sequence.
+",4.2 Experimental results,[0],[0]
+"In addition, we also perform a comparison with some state-of-the-art tree-based systems that are
+publicly available, including an SMT system (Mi et al., 2008) and the NMT systems (Eriguchi et al. (2016)9, Chen et al. (2017)10, and Li et al. (2017)).",4.2 Experimental results,[0],[0]
+"For Mi et al. (2008), we use the implementation of cicada11.",4.2 Experimental results,[0],[0]
+"For Li et al. (2017), we reimplemented the “Mixed RNN Encoder” model, because of its outstanding performance on the NIST MT corpus.
+",4.2 Experimental results,[0],[0]
+"We can see that for both English-Chinese and English-Japanese, compared with the s2s baseline system, both the 1-best and forest-based configurations yield better results.",4.2 Experimental results,[0],[0]
+This indicates syntactic information contained in the constituent trees or forests is indeed useful for machine translation.,4.2 Experimental results,[0],[0]
+"Specifically, we observe the following facts.
+",4.2 Experimental results,[0],[0]
+"First, among the three different frameworks SoE, SoA, and No-score, the SoA framework performs the best, while the No-score framework per-
+9https://github.com/tempra28/tree2seq 10https://github.com/howardchenhd/
+Syntax-awared-NMT 11https://github.com/tarowatanabe/ cicada
+forms the worst.",4.2 Experimental results,[0],[0]
+"This indicates that the scores of the edges in constituent trees or packed forests, which reflect the confidence of the correctness of the edges, are indeed useful.",4.2 Experimental results,[0],[0]
+"In fact, for the 1-best constituent parsing tree, the score of the edge reflects the confidence of the parser.",4.2 Experimental results,[0],[0]
+"By using this information, the NMT system succeed to learn a better attention, paying much attention to the confident structure and not paying attention to the unconfident structure, which improved the translation performance.",4.2 Experimental results,[0.9901851207739151],"['With this information, the NMT system succeeded to learn a better attention, paying more attention to the confident structure and less attention to the unconfident structure, which improved the translation performance.']"
+This fact is ignored by previous studies on tree-based NMT.,4.2 Experimental results,[0],[0]
+"Furthermore, it is better to use the scores to modify the values of attention instead of rescaling the word embeddings, because modifying word embeddings carelessly may change the semantic meanings of words.
+",4.2 Experimental results,[0],[0]
+"Second, compared with the cases that only using the 1-best constituent trees, using packed forests yields statistical significantly better results for the SoE and SoA frameworks.",4.2 Experimental results,[0.9937479614481441],"['Second, compared with the cases that only use the 1-best constituent trees, with some exceptions, using packed forests yielded statistical significantly better results for the SoE and SoA frameworks.']"
+This shows the effectiveness of using more syntactic information.,4.2 Experimental results,[1.0],['This shows the effectiveness of using more syntactic information.']
+"Compared with one constituent tree, the packed forest, which contains multiple different trees, describes the syntactic structure of the sentence in different aspects, which together increase the accuracy of machine translation.",4.2 Experimental results,[1.0],"['Compared with one constituent tree, the packed forest, which contains multiple different trees, describes the syntactic structure of the sentence in different aspects, which together increase the accuracy of machine translation.']"
+"However, without using the scores, the 1-best constituent tree is preferred.",4.2 Experimental results,[1.0],"['However, without using the scores, the 1-best constituent tree is preferred.']"
+"This is because without using the scores, all trees in the packed forest are treated equally, which makes it easy to import noise into the encoder.
+",4.2 Experimental results,[0.9999999956632104],"['This is because without using the scores, all trees in the packed forest are treated equally, which makes it easy to import noise into the encoder.']"
+"Compared with other types of state-of-the-art systems, our systems using only the 1-best tree (1-best(SoE, SoA)) are better than the other treebased systems.",4.2 Experimental results,[0.9930714317833994],"['Compared with other types of state-of-the-art systems, our systems using only the 1-best tree (1- best (SoE, SoA)) were better than the other treebased systems.']"
+"Moreover, our NMT systems using the packed forests achieve the best performance.",4.2 Experimental results,[0],[0]
+"These results also support the usefulness of the scores of the edges and packed forests in NMT.
+",4.2 Experimental results,[1.0000000361533508],['These results also support the usefulness of the scores of the edges and packed forests in NMT.']
+"As for the efficiency, the training time of the SoA system was slightly longer than that of the SoE system, which was about twice of the s2s baseline.",4.2 Experimental results,[1.0],"['As for the efficiency, the training time of the SoA system was slightly longer than that of the SoE system, which was about twice of the s2s baseline.']"
+The training time of the tree-based system was about 1.5 times of the baseline.,4.2 Experimental results,[1.0],['The training time of the tree-based system was about 1.5 times of the baseline.']
+"For the
+case of Forest (SoA), with 1 core of Tesla P100 GPU and LDC corpus as the training data, training spent about 10 days, and decoding speed was about 10 sentences per second.",4.2 Experimental results,[0],[0]
+"The reason for the relatively low efficiency is that the linearized sequences of packed forests were much longer than word sequences, enlarging the scale of the inputs.",4.2 Experimental results,[1.0],"['The reason for the relatively low efficiency is that the linearized sequences of packed forests were much longer than word sequences, enlarging the scale of the inputs.']"
+"Despite this, the training process ended within reasonable time.",4.2 Experimental results,[0],[0]
+"Figure 4 illustrates the translation results of an English sentence using several different configurations: the s2s baseline, using only the 1-best tree (SoE), and using the packed forest (SoE).",4.3 Qualitative analysis,[0],[0]
+"This is a sentence from NIST MT 03, and the training corpus is the LDC corpus.
+",4.3 Qualitative analysis,[0],[0]
+"For the s2s case, no syntactic information is utilized, and therefore the output of the system is not a grammatical Chinese sentence.",4.3 Qualitative analysis,[0],[0]
+The attributive phrase of “Czech border region” is a complete sentence.,4.3 Qualitative analysis,[0],[0]
+"However, the attributive is not allowed to be a complete sentence in Chinese.
+",4.3 Qualitative analysis,[0],[0]
+"For the case of using 1-best constituent tree, the output is a grammatical Chinese sentence.",4.3 Qualitative analysis,[0],[0]
+"However, the phrase “adjacent to neighboring Slovakia” is completely ignored in the translation result.",4.3 Qualitative analysis,[0],[0]
+"After analyzing the constituent tree, we found that this phrase was incorrectly parsed as an “adverb phrase”, so that the NMT system paid little attention to it, because of the low confidence given by the parser.
+",4.3 Qualitative analysis,[0],[0]
+"In contrast, for the case of the packed forest, we can see this phrase was not ignored and was translated correctly.",4.3 Qualitative analysis,[0],[0]
+"Actually, besides “adverb phrase”, this phrase was also correctly parsed as an “adjective phrase”, and covered by multiple different nodes in the forest, making it difficult for the encoder to ignore the phrase.
+",4.3 Qualitative analysis,[0],[0]
+We also noticed that our method performed better on learning attention.,4.3 Qualitative analysis,[0],[0]
+"For the example in Figure 4, we observed that for s2s model, the decoder paid attention to the word “Czech” twice, which
+causes the output sentence contains the Chinese translation of Czech twice.",4.3 Qualitative analysis,[0],[0]
+"On the other hand, for our forest model, by using the syntax information, the decoder paid attention to the phrase “In the Czech Republic” only once, making the decoder generates the correct output.",4.3 Qualitative analysis,[0],[0]
+Incorporating syntactic information into NMT systems is attracting widespread attention nowadays.,5 Related work,[0],[0]
+"Compared with conventional string-to-string NMT systems, tree-based systems demonstrate a better performance with the help of constituent trees or dependency trees.
+",5 Related work,[0],[0]
+"The first noteworthy study is Eriguchi et al. (2016), which used Tree-structured LSTM (Tai et al., 2015) to encode the HPSG syntax tree of the sentence in the source-side in a bottom-up manner.",5 Related work,[0],[0]
+"Then, Chen et al. (2017) enhanced the encoder with a top-down tree encoder.
+",5 Related work,[0],[0]
+"As a simple extension of Eriguchi et al. (2016), very recently, Zaremoodi and Haffari (2017) proposed a forest-based NMT method by representing the packed forest with a forest-structured neural network.",5 Related work,[0],[0]
+"However, their method was evaluated in small-scale MT settings (each training dataset consists of under 10k parallel sentences).",5 Related work,[0],[0]
+"In contrast, our proposed method is effective in a largescale MT setting, and we present qualitative analysis regarding the effectiveness of using forests in NMT.
+",5 Related work,[0],[0]
+"Although these methods obtained good results, the tree-structured network used by the encoder made the training and decoding relatively slow, therefore restricts the scope of application.
+",5 Related work,[0],[0]
+Other attempts at encoding syntactic trees have also been proposed.,5 Related work,[0],[0]
+"Eriguchi et al. (2017) combined the Recurrent Neural Network Grammar (Dyer et al., 2016) with NMT systems, while Li et al. (2017) linearized the constituent tree and encoded it using RNNs.",5 Related work,[0],[0]
+"The training of these methods is fast, because of the linear structures of RNNs.",5 Related work,[0],[0]
+"However, all these syntax-based NMT systems used only the 1-best parsing tree, making the systems sensitive to parsing errors.
+",5 Related work,[0],[0]
+"Instead of using trees to represent syntactic information, some studies use other data structures to represent the latent syntax of the input sentence.",5 Related work,[0],[0]
+"For example, Hashimoto and Tsuruoka (2017) proposed translating using a latent graph.",5 Related work,[0],[0]
+"However, such systems do not enjoy the benefit of
+handcrafted syntactic knowledge, because they do not use a parser trained from a large treebank with human annotations.
+",5 Related work,[0],[0]
+"Compared with these related studies, our framework utilizes a linearized packed forest, meaning the encoder can encode exponentially many trees in an efficient manner.",5 Related work,[0],[0]
+The experimental results demonstrated these advantages.,5 Related work,[0],[0]
+"We proposed a new NMT framework, which encodes a packed forest for the source sentence using linear-structured neural networks, such as RNN.",6 Conclusion and future work,[0],[0]
+"Compared with conventional string-tostring NMT systems and tree-to-string NMT systems, our framework can utilize exponentially many linearized parsing trees during encoding, without significantly decreasing the efficiency.",6 Conclusion and future work,[0],[0]
+This represents the first attempt at using a forest under the string-to-string NMT framework.,6 Conclusion and future work,[0],[0]
+"The experimental results demonstrate the effectiveness of our framework.
+",6 Conclusion and future work,[0],[0]
+"As future work, we plan to design some more elaborate structures to incorporate the score layer in the encoder.",6 Conclusion and future work,[0],[0]
+Further improvement in the translation performance is expected to be achieved for the forest-based NMT system.,6 Conclusion and future work,[0],[0]
+We will also apply the proposed linearization method to other tasks.,6 Conclusion and future work,[0],[0]
+We are grateful to the anonymous reviewers for their insightful comments and suggestions.,Acknowledgements,[0],[0]
+We thank Lemao Liu from Tencent AI Lab for his suggestions about the experiments.,Acknowledgements,[0],[0]
+We thank Atsushi Fujita whose suggestions greatly improve the readability and the logical soundness of this paper.,Acknowledgements,[0],[0]
+This work was done during the internship of Chunpeng Ma at NICT.,Acknowledgements,[0],[0]
+Akihiro Tamura is supported by JSPS KAKENHI Grant Number JP18K18110.,Acknowledgements,[0],[0]
+Tiejun Zhao is supported by the National Natural Science Foundation of China (NSFC) via grant 91520204 and State High-Tech Development Plan of China (863 program) via grant 2015AA015405.,Acknowledgements,[0],[0]
+"Tree-based neural machine translation (NMT) approaches, although achieved impressive performance, suffer from a major drawback: they only use the 1best parse tree to direct the translation, which potentially introduces translation mistakes due to parsing errors.",abstractText,[0],[0]
+"For statistical machine translation (SMT), forestbased methods have been proven to be effective for solving this problem, while for NMT this kind of approach has not been attempted.",abstractText,[0],[0]
+"This paper proposes a forest-based NMT method that translates a linearized packed forest under a simple sequence-to-sequence framework (i.e., a forest-to-string NMT model).",abstractText,[0],[0]
+"The BLEU score of the proposed method is higher than that of the string-to-string NMT, treebased NMT, and forest-based SMT systems.",abstractText,[0],[0]
+Forest-Based Neural Machine Translation,title,[0],[0]

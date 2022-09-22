@@ -1,0 +1,314 @@
+0,1,label2,summary_sentences
+"People vary widely both in their linguistic preferences when producing language and in their ability to understand specific natural-language expressions, depending on what they know about the domain, their age and cognitive capacity, and many other factors.",1 Introduction,[0],[0]
+"It has long been recognized that effective NLG systems should therefore adapt to the current user, in order to generate language which works well for them.",1 Introduction,[0],[0]
+"This adaptation needs to address all levels of the NLG pipeline, including discourse planning (Paris, 1988), sentence planning (Walker et al., 2007), and RE generation (Janarthanam and Lemon, 2014), and depends on many features of the user, including level of expertise and language proficiency, age, and gender.
+",1 Introduction,[0],[0]
+Existing techniques for adapting the output of an NLG system have shortcomings which limit their practical usefulness.,1 Introduction,[0],[0]
+"Some systems need user-specific information in training (Ferreira and Paraboni, 2014) and therefore cannot generalize to unseen users.",1 Introduction,[0],[0]
+"Other systems assume that each user in the training data is annotated with their group, which allows them to learn a model from the data of each group.",1 Introduction,[0],[0]
+"However, hand-designed user groups
+may not reflect the true variability of the data, and may therefore inhibit the system’s ability to flexibly adapt to new users.
+",1 Introduction,[0],[0]
+"In this paper, we present a user adaptation model for NLG systems which induces user groups from training data in which these groups were not annotated.",1 Introduction,[0],[0]
+"At training time, we probabilistically assign users to groups and learn the language preferences for each group.",1 Introduction,[1.0],"['At training time, we probabilistically assign users to groups and learn the language preferences for each group.']"
+"At evaluation time, we assume that our system has a chance to interact with each new user repeatedly – e.g., in the context of a dialogue system.",1 Introduction,[1.0],"['At evaluation time, we assume that our system has a chance to interact with each new user repeatedly – e.g., in the context of a dialogue system.']"
+"It will then calculate an increasingly accurate estimate of the user’s group membership based on observable behavior, and use it to generate utterances that are suitable to the user’s true group.
+",1 Introduction,[0],[0]
+We evaluate our model on two tasks involving the generation of referring expressions (RE).,1 Introduction,[0],[0]
+"First, we predict the use of spatial relations in humanlike REs in the GRE3D domain (Viethen and Dale, 2010) using a log-linear production model in the spirit of Ferreira and Paraboni (2014).",1 Introduction,[1.0],"['First, we predict the use of spatial relations in humanlike REs in the GRE3D domain (Viethen and Dale, 2010) using a log-linear production model in the spirit of Ferreira and Paraboni (2014).']"
+"Second, we predict the comprehension of generated REs, in a synthetic dataset based on data from the GIVE Challenge domain (Striegnitz et al., 2011) with the log-linear comprehension model of Engonopoulos et al. (2013).",1 Introduction,[0],[0]
+"In both cases, we show that our model discovers user groups in the training data and infers the group of unseen users with high confidence after only a few interactions during testing.",1 Introduction,[1.0],"['In both cases, we show that our model discovers user groups in the training data and infers the group of unseen users with high confidence after only a few interactions during testing.']"
+"In the GRE3D domain, our system outperformed a strong baseline which used demographic information for the users.",1 Introduction,[1.0],"['In the GRE3D domain, our system outperformed a strong baseline which used demographic information for the users.']"
+Differences between individual users have a substantial impact on language comprehension.,2 Related Work,[0],[0]
+"Factors that play a role include level of expertise and spatial ability (Benyon and Murray, 1993); age (Häuser et al., 2017); gender (Dräger and Koller,
+ar X
+iv :1
+80 6.
+",2 Related Work,[0],[0]
+"05 94
+7v 1
+[ cs
+.C",2 Related Work,[0],[0]
+"L
+] 1
+5 Ju
+n 20
+18
+2012); or language proficiency (Koller et al., 2010).
+",2 Related Work,[0],[0]
+Individual differences are also reflected in the way people produce language.,2 Related Work,[0],[0]
+"Viethen and Dale (2008) present a corpus study of human-produced REs (GRE3D3) for simple visual scenes, where they note two clearly distinguishable groups of speakers, one that always uses a spatial relation and one that never does.",2 Related Work,[0],[0]
+Ferreira and Paraboni (2014) show that a model using speaker-specific information outperforms a generic model in predicting the attributes used by a speaker when producing an RE.,2 Related Work,[0],[0]
+"However, their system needs to have seen the particular speaker in training, while our system can dynamically adapt to unseen users.",2 Related Work,[0],[0]
+"Ferreira and Paraboni (2017) also demonstrate that splitting speakers in predefined groups and training each group separately improves the human likeness of REs compared to training individual user models.
+",2 Related Work,[0],[0]
+"The ability to adapt to the comprehension and production preferences of a user is especially important in the context of a dialog system, where there are multiple chances of interacting with the same user.",2 Related Work,[0],[0]
+Some methods adapt to dialog system users by explicitly modeling the users’ knowledge state.,2 Related Work,[0],[0]
+"An early example is Paris (1988); she selects a discourse plan for a user, depending on their level of domain knowledge ranging between novice and expert, but provides no mechanism for inferring the group to which the user belongs.",2 Related Work,[0],[0]
+"Rosenblum and Moore (1993) try to infer what knowledge a user possesses during dialogue, based on the questions they ask.",2 Related Work,[0],[0]
+Janarthanam and Lemon (2014) adapt to unseen users by using reinforcement learning with simulated users to make a system able to adjust to the level of the user’s knowledge.,2 Related Work,[0],[0]
+"They use five predefined groups from which they generate the simulated users’ behavior, but do not assign real users to these groups.",2 Related Work,[0],[0]
+"Our system makes no assumptions about the user’s knowledge and does not need to train with simulated users, or use any kind of information-seeking moves; we instead rely on the groups that are discovered in training and dynamically assign new, unseen users, based only on their observable behavior in the dialog.
+",2 Related Work,[0],[0]
+"Another example of a user-adapting dialog component is SPaRKy (Walker et al., 2007), a trainable sentence planner that can tailor sentence plans to individual users’ preferences.",2 Related Work,[0],[0]
+"This requires training on separate data for each user; in contrast to this, we leverage the similarities between users and can take advantage of the full training data.",2 Related Work,[0],[0]
+We start with a basic model of the way in which people produce and comprehend language.,3 Log-linear models for NLG in dialog,[1.0],['We start with a basic model of the way in which people produce and comprehend language.']
+"In order to generalize over production and comprehension, we will simply say that a human language user exhibits a certain behavior b among a range of possible behaviors, in response to a stimulus s.",3 Log-linear models for NLG in dialog,[0],[0]
+"The behavior of a speaker is the utterance b they produce in order to achieve a communicative goal s; the behavior of a listener is the meaning b which they assign to the utterance s they hear.
+",3 Log-linear models for NLG in dialog,[0],[0]
+"Given this terminology, we define a basic loglinear model (Berger et al., 1996) of language use as follows:
+P (b|s; ρ) = exp(ρ · φ(b, s))∑ b′",3 Log-linear models for NLG in dialog,[0],[0]
+"exp(ρ · φ(b′, s))
+",3 Log-linear models for NLG in dialog,[0],[0]
+"(1)
+where ρ is a real-valued parameter vector of length n and φ(b, s) is a vector of real-valued feature functions f1, ..., fn over behaviors and stimuli.",3 Log-linear models for NLG in dialog,[0],[0]
+"The parameters can be trained by maximum-likelihood estimation from a corpus of observations (b, s).",3 Log-linear models for NLG in dialog,[0],[0]
+"In addition to maximum-likelihood training it is possible to include some prior probability distribution, which expresses our belief about the probability of any parameter vector and which is generally used for regularization.",3 Log-linear models for NLG in dialog,[0],[0]
+"The latter case is referred to as a posteriori training, which selects the value of ρ that maximizes the product of the parameter probability and the probability of the data.
+",3 Log-linear models for NLG in dialog,[0],[0]
+"In this paper, we focus on the use of such models in the context of the NLG module of a dialogue system, and more specifically on the generation of referring expressions (REs).",3 Log-linear models for NLG in dialog,[0],[0]
+"Using (1) as a comprehension model, Engonopoulos et al. (2013) developed an RE generation model in which the stimulus s = (r, c) consists of an RE r and a visual context c of the GIVE Challenge (Striegnitz et al., 2011), as illustrated in Fig. 1.",3 Log-linear models for NLG in dialog,[0],[0]
+The behavior is the object b in the visual scene to which the user will resolve the RE.,3 Log-linear models for NLG in dialog,[0],[0]
+"Thus for instance, when we consider the RE r =“the blue button” in the context of Fig. 1, the log-linear model may assign a higher probability to the button on the right than to the one in the background.",3 Log-linear models for NLG in dialog,[0],[0]
+"Engonopoulos and Koller (2014) develop an algorithm for generating the RE r which maximizes P (b∗|s; ρ), where b∗ is the intended referent in this setting.
+",3 Log-linear models for NLG in dialog,[0],[0]
+"Conversely, log-linear models can also be used to directly capture how a human speaker would refer to an object in a given scene.",3 Log-linear models for NLG in dialog,[0],[0]
+"In this case, the stimulus s = (a, c) consists of the target object a and
+the visual context c, and the behavior b is the RE.",3 Log-linear models for NLG in dialog,[0],[0]
+"We follow Ferreira and Paraboni (2014) in training individual models for the different attributes which can be used in the RE (e.g., that a is a button; that it is blue; that the RE contains a binary relation such as “to the right of”), such that we can simply represent b as a binary choice b ∈ {1,−1} between whether a particular attribute should be used in the RE or not.",3 Log-linear models for NLG in dialog,[0],[0]
+"We can then implement an analog of Ferreira’s model in terms of (1) by using feature functions φ(b, a, c) = b · φ′(a, c), where φ′(a, c) corresponds to their context features, which do not capture any speaker-specific information.",3 Log-linear models for NLG in dialog,[0],[0]
+"As discussed above, a user-agnostic model such as (1) does not do justice to the variability of language comprehension and production across different speakers and listeners.",4 Log-linear models with user groups,[0],[0]
+We will therefore extend it to a model which distinguishes different user groups.,4 Log-linear models with user groups,[0],[0]
+We will not try to model why1 users behave differently.,4 Log-linear models with user groups,[0],[0]
+"Instead our model sorts users into groups simply based on the way in which they respond to stimuli, in the sense of Section 3, and implements this by giving each group g its own parameter vector ρ(g).",4 Log-linear models with user groups,[0],[0]
+"As a theoretical example, Group 1 might contain users who reliably comprehend REs which use colors (“the green button”), whereas Group 2 might contain users who more easily understand relational REs (“the button next to the lamp”).",4 Log-linear models with user groups,[0],[0]
+"These groups are then discovered at training time.
+",4 Log-linear models with user groups,[0],[0]
+"When our trained NLG system starts interacting with an unseen user u, it will infer the group to which u belongs based on u’s observed responses to previous stimuli.",4 Log-linear models with user groups,[0],[0]
+"Thus as the dialogue with u unfolds, the system will have an increasingly pre-
+1E.g., in the sense of explicitly modeling sociolects or the difference between novice system users vs. experts.
+cise estimate of the group to which u belongs, and will thus be able to generate language which is increasingly well-tailored to this particular user.",4 Log-linear models with user groups,[0],[0]
+"We assume training data D = {(bi, si, ui)}i which contains stimuli si together with the behaviors bi which the users ui exhibited in response to si.",4.1 Generative story,[0],[0]
+"We write D(u) = {(bu1 , su1), . . .",4.1 Generative story,[0],[0]
+"(buN , suN )} for the data points for each user",4.1 Generative story,[0],[0]
+"u.
+",4.1 Generative story,[0],[0]
+"The generative story we use is illustrated in Fig. 2; observable variables are shaded gray, unobserved variables and parameters to be set in training are shaded white and externally set hyperparameters have no circle around them.",4.1 Generative story,[0],[0]
+"Arrows indicate which variables and parameters influence the probability distribution of other variables.
+",4.1 Generative story,[0],[0]
+"We assume that each user belongs to a group g ∈ {1, . . .",4.1 Generative story,[0],[0]
+",K}, where the number K of groups is fixed beforehand based on, e.g., held out data.",4.1 Generative story,[0],[0]
+"A group g is assigned to u at random from the distribution
+P (g|π) = exp(πg)∑K g′=1 exp(πg′)
+(2)
+",4.1 Generative story,[0],[0]
+"Here π ∈ RK is a vector of weights, which defines how probable each group is a-priori.
+",4.1 Generative story,[0],[0]
+"We replace the single parameter vector ρ of (1) with group-specific parameters vectors ρ(g), thus obtaining a potentially different log-linear model P ( b|s; ρ(g) ) for each group.",4.1 Generative story,[0],[0]
+"After assigning a group, our model generates responses bu1 , . . .",4.1 Generative story,[0],[0]
+", b u N at
+random from P ( b|s; ρ(g) ) , based on the group specific parameter vector and the stimuli su1 , . . .",4.1 Generative story,[0],[0]
+", s u N .",4.1 Generative story,[0],[0]
+This accounts for the generation of the data.,4.1 Generative story,[0],[0]
+"We model the parameter vectors π ∈ RK , and ρ(g) ∈",4.1 Generative story,[0],[0]
+"Rn for every 1 ≤ g ≤ K as drawn from
+P (D; θ) = ∏ u∈U K∑ g=1",4.1 Generative story,[0],[0]
+"P (g|π) · ∏ d∈D(u) P ( bd|sd; ρ(g) ) · N (π|0, σ(π)) · K∏",4.1 Generative story,[0],[0]
+g=1 N,4.1 Generative story,[0],[0]
+"( ρ(g)|0, σ(ρ) )",4.1 Generative story,[0],[0]
+"(3) L(θ) =
+∑ u∈U log K∑",4.1 Generative story,[0],[0]
+g=1,4.1 Generative story,[0],[0]
+P (g|π) · ∏ d∈D(u) P ( bd|sd; ρ(g) ),4.1 Generative story,[0],[0]
+"(4)
+AL(θ) = ∑ u∈U K∑ g=1
+P (g|D(u); θ(i−1)) ·",4.1 Generative story,[0],[0]
+logP (g|π) +,4.1 Generative story,[0],[0]
+"∑
+d∈Du
+logP ( bd|sd; ρ(g) )",4.1 Generative story,[0],[0]
+"(5)
+normal distributions N (0, σ(π)), and N (0, σ(ρ)), which are centered at 0 with externally given variances and no covariance between parameters.",4.1 Generative story,[0],[0]
+This has the effect of making parameter choices close to zero more probable.,4.1 Generative story,[0],[0]
+"Consequently, our models are unlikely to contain large weights for features that only occurred a few times or which are only helpful for a few examples.",4.1 Generative story,[0],[0]
+"This should reduce the risk of overfitting the training set.
+",4.1 Generative story,[0],[0]
+The equation for the full probability of the data and a specific parameter setting is given in (3).,4.1 Generative story,[0],[0]
+"The left bracket contains the likelihood of the data, while the right bracket contains the prior probability of the parameters.",4.1 Generative story,[0],[0]
+Once we have set values θ =,4.2 Predicting user behavior,[0],[0]
+"(π, ρ(1), . . .",4.2 Predicting user behavior,[0],[0]
+", ρ(K))",4.2 Predicting user behavior,[0],[0]
+"for all the parameters, we want to predict what behavior b a user u will exhibit in response to a stimulus s. If we encounter a completely new user u, the prior user group distribution from (2) gives the probability that this user belongs to each group.",4.2 Predicting user behavior,[0],[0]
+"We combine this with the group-specific log-linear behavior models to obtain the distribution:
+P (b|s; θ) = K∑ g=1 P ( b|s; ρ(g) )",4.2 Predicting user behavior,[0],[0]
+"· P (g|π) (6)
+",4.2 Predicting user behavior,[0],[0]
+"Thus, we have a group-aware replacement for (1).",4.2 Predicting user behavior,[0],[0]
+"Furthermore, in the interactive setting of a dialogue system, we may have multiple opportunities to interact with the same user u. We can then develop a more precise estimate of u’s group based on their responses to previous stimuli.",4.2 Predicting user behavior,[0],[0]
+Say that we have made the previous observations D(u) =,4.2 Predicting user behavior,[0],[0]
+"{〈s1, b1〉, . . .",4.2 Predicting user behavior,[0],[0]
+", 〈sN , bN 〉} for user u.",4.2 Predicting user behavior,[0],[0]
+"Then we can use Bayes’ theorem to calculate a posterior estimate for u’s group membership:
+P ( g|D(u); θ ) ∝",4.2 Predicting user behavior,[0],[0]
+P ( D(u)|ρ(g) ) ·,4.2 Predicting user behavior,[0],[0]
+"P (g|π) (7)
+",4.2 Predicting user behavior,[0],[0]
+This posterior balances whether a group is likely in general against whether members of that group behave as u does.,4.2 Predicting user behavior,[0],[0]
+"We can use Pu(g) = P ( g|D(u); θ ) as our new estimate for the group membership probabilities for u and replace (6) with: P ( b|s,D(u); θ ) =
+K∑ g=1 P ( b|s; ρ(g) ) ·",4.2 Predicting user behavior,[0],[0]
+"Pu(g) (8)
+for the next interaction with u. An NLG system can therefore adapt to each new user over time.",4.2 Predicting user behavior,[0],[0]
+"Before the first interaction with u, it has no specific information about u and models u’s behavior based on (6).",4.2 Predicting user behavior,[1.0],"['Before the first interaction with u, it has no specific information about u and models u’s behavior based on (6).']"
+"As the system interacts with u repeatedly, it collects observationsD(u) about u’s behavior.",4.2 Predicting user behavior,[0],[0]
+"This allows it to calculate an increasingly accurate posterior Pu(g) = P ( g|D(u); θ ) of u’s group membership, and thus generate utterances which are more and more suitable to u using (8).",4.2 Predicting user behavior,[1.0],"['This allows it to calculate an increasingly accurate posterior Pu(g) = P ( g|D(u); θ ) of u’s group membership, and thus generate utterances which are more and more suitable to u using (8).']"
+"So far we have not discussed how to find settings for the parameters θ = π, ρ(1), . . .",5 Training,[0],[0]
+", ρ(K), which define our probability model.",5 Training,[0],[0]
+"The key challenge for training is the fact that we want to be able to train while treating the assignment of users to groups as unobserved.
+",5 Training,[0],[0]
+"We will use a maximum a posteriori estimate for θ, i.e., the setting which maximizes (3) when D is our training set.",5 Training,[0],[0]
+"We will first discuss how to pick parameters to maximize only the left part of (3), i.e., the data likelihood, since this is the part that involves unobserved variables.",5 Training,[0],[0]
+We will then discuss handling the parameter prior in section 5.2.,5 Training,[0],[0]
+"Gradient descent based methods (Nocedal and Wright, 2006) exist for finding the parameter settings which maximize the likelihood for log-linear
+models, under the conditions that all relevant variables are observed in the training data.",5.1 Expectation Maximization,[0.9999999713216051],"['Gradient descent based methods (Nocedal and Wright, 2006) exist for finding the parameter settings which maximize the likelihood for log-linear models, under the conditions that all relevant variables are observed in the training data.']"
+"If group assignments were given, gradient computations, and therefore gradient based maximization, would be straightforward for our model.",5.1 Expectation Maximization,[0],[0]
+"One algorithm specifically designed to solve maximization problems with unknown variables by reducing them to the case where all variables are observed, is the expectation maximization (EM) algorithm (Neal and Hinton, 1999).",5.1 Expectation Maximization,[0],[0]
+"Instead of maximizing the data likelihood from (3) directly, EM equivalently maximizes the log-likelihood, given in (4).",5.1 Expectation Maximization,[0],[0]
+"It helps us deal with unobserved variables by introducing “pseudo-observations” based on the expected frequency of the unobserved variables.
+",5.1 Expectation Maximization,[0],[0]
+"EM is an iterative algorithm which produces a sequence of parameter settings θ(1), . . .",5.1 Expectation Maximization,[0],[0]
+", θ(n).",5.1 Expectation Maximization,[0],[0]
+Each will achieve a larger value for (4).,5.1 Expectation Maximization,[0],[0]
+Each new setting is generated in two steps: (1) an lower bound on the log-likelhood is generate and (2) the new parameter setting is found by optimizing this lower bound.,5.1 Expectation Maximization,[0],[0]
+"To find the lower bound we compute the probability for every possible value the unobserved variables could have had, based on the observed variables and the parameter setting θ(i−1) from the last iteration step.",5.1 Expectation Maximization,[0],[0]
+"Then the lower bound essentially assumes that each assignment was seen with a frequency equal to these probabilities - these are the “pseudo-observations”.
+",5.1 Expectation Maximization,[0],[0]
+In our model the unobserved variables are the assignments of users to groups.,5.1 Expectation Maximization,[0],[0]
+"The probability of seeing each user u assigned to a group, given all the data D(u) and the model parameters from the last iteration θ(i−1), is simply the posterior group membership probability P ( g|D(u); θ(i−1) ) .",5.1 Expectation Maximization,[0],[0]
+The lower bound is then given by (5).,5.1 Expectation Maximization,[0],[0]
+"This is the sum of the log probabilities of the data points under each group model, weighted by P ( g|D(u); θ(i−1) ) .",5.1 Expectation Maximization,[0],[0]
+We can now use gradient descent techniques to optimize this lower bound.,5.1 Expectation Maximization,[0],[0]
+To fully implement EM we need a way to maximize (5).,5.1.1 Maximizing the Lower Bound,[0],[0]
+"This can be achieved with gradient based methods such as L-BFGS (Nocedal and Wright, 2006).",5.1.1 Maximizing the Lower Bound,[1.0],"['This can be achieved with gradient based methods such as L-BFGS (Nocedal and Wright, 2006).']"
+Here the gradient refers to the vector of all partial derivatives of the function with respect to each dimension of θ.,5.1.1 Maximizing the Lower Bound,[0],[0]
+"We therefore need to calculate these partial derivatives.
+",5.1.1 Maximizing the Lower Bound,[0],[0]
+There are existing implementations of the gradient computations our base model such as in Engonopoulos et al. (2013).,5.1.1 Maximizing the Lower Bound,[0],[0]
+"The gradients of (5)
+for each of the ρ(g) is simply the gradient for the base model on each datapoint d weighted by P ( g|D(u); θ(i−1) )",5.1.1 Maximizing the Lower Bound,[0],[0]
+"if d ∈ Du, i.e., the probability that the user u from which the datapoint originates belongs to group g. We can therefore compute the gradients needed for each ρ(g) by using implementations developed for the base model.
+",5.1.1 Maximizing the Lower Bound,[0],[0]
+"We also need gradients for the parameters in π, which are only used in our extended model.",5.1.1 Maximizing the Lower Bound,[0],[0]
+"We can use the rules for computing derivatives to find, for each dimension g:
+∂UL(θ) ∂πg = ∑ u∈U Pu(g)− exp (πg)∑K g′=1 exp ( πg′ )
+where Pu(g) = P ( g|D(u); θ(i−1) ) .",5.1.1 Maximizing the Lower Bound,[0],[0]
+Using these gradients we can use L-BFGS to maximize the lower bound and implement the EM iteration.,5.1.1 Maximizing the Lower Bound,[0],[0]
+So far we have discussed maximization only for the likelihood without accounting for the prior probabilities for every parameter.,5.2 Handling the Parameter Prior,[0],[0]
+"To obtain our full training objective we add the log of the right hand side of (3):
+log N (π|0, σ(π)) · K∏",5.2 Handling the Parameter Prior,[0],[0]
+g=1 N,5.2 Handling the Parameter Prior,[0],[0]
+"( ρ(g)|0, σ(ρ) )",5.2 Handling the Parameter Prior,[0],[0]
+"i.e., the parameter prior, to (4) and (5).",5.2 Handling the Parameter Prior,[0],[0]
+The gradient contribution from these priors can be computed with standard techniques.,5.2 Handling the Parameter Prior,[0],[0]
+"We can now implement an EM loop, which maximizes (3) as follows: we randomly pick an initial value θ(0) for all parameters.",5.3 Training Iteration,[0],[0]
+Then we repeatedly compute the P ( g|D(u); θ(i−1) ) values and maximize the lower bound using L-BFGS to find θ(i).,5.3 Training Iteration,[0],[0]
+This EM iteration is guaranteed to eventually converge towards a local optimum of our objective function.,5.3 Training Iteration,[0],[0]
+"Once change in the objective falls below a pre-defined threshold, we keep the final θ setting.
+",5.3 Training Iteration,[0],[0]
+"For our implementation we make a small improvement to the approach: L-BFGS is itself an iterative algorithm and instead of running it until convergence every time we need to find a new θ(i), we only let it take a few steps.",5.3 Training Iteration,[0],[0]
+"Even if we just took a single L-BFGS step in each iteration, we would still obtain a correct algorithm (Neal and
+Hinton, 1999) and this has the advantage that we do not spend time trying to find a θ(i) which is a good fit for the likely poor group assignments P ( g|D(u); θ(i−1) )",5.3 Training Iteration,[0.9962841152558015],"['Even if we just took a single L-BFGS step in each iteration, we would still obtain a correct algorithm (Neal and Hinton, 1999) and this has the advantage that we do not spend time trying to find a θ(i) which is a good fit for the likely poor group assignments P ( g|D(u); θ(i−1) ) we obtain from early parameter estimates.']"
+we obtain from early parameter estimates.,5.3 Training Iteration,[0],[0]
+Our model can be used in any component of a dialog system for which a prediction of the user’s behavior is needed.,6 Evaluation,[1.0],['Our model can be used in any component of a dialog system for which a prediction of the user’s behavior is needed.']
+"In this work, we evaluate it in two NLG-related prediction tasks: RE production and RE comprehension.",6 Evaluation,[0],[0]
+In both cases we evaluate the ability of our model to predict the user’s behavior given a stimulus.,6 Evaluation,[0],[0]
+"We expect our user-group model to gradually improve its prediction accuracy compared to a generic baseline without user groups as it sees more observations from a given user.
+",6 Evaluation,[0],[0]
+In all experiments described below we set the prior variances σγ = 1.0 and σπ = 0.3 after trying out values between 0.1 and 10 on the training data of the comprehension experiment.,6 Evaluation,[0],[0]
+"Task The task of RE generation can be split in two steps: attribute selection, the selection of the visual attributes to be used in the RE such as color, size, relation to other objects and surface realization, the generation of a full natural language expression.",6.1 RE production,[0],[0]
+"We focus here on attribute selection: given a visual scene and a target object, we want to predict the set of attributes of the target object that a human speaker would use in order to describe it.",6.1 RE production,[0],[0]
+"Here we treat attribute selection in terms of individual classification decisions on whether to use each attribute, as described in Section 3.",6.1 RE production,[0],[0]
+"More specifically, we focus on predicting whether the speaker will use a spatial relation to another object (“landmark”).",6.1 RE production,[1.0],"['More specifically, we focus on predicting whether the speaker will use a spatial relation to another object (“landmark”).']"
+"Our motivation for choosing this attribute stems from the fact that previous authors (Viethen and Dale, 2008; Ferreira and Paraboni, 2014) have found substantial variation between different users with respect to their preference towards using spatial relations.
+",6.1 RE production,[0],[0]
+"Data We use the GRE3D3 dataset of humanproduced REs (Viethen and Dale, 2010), which contains 630 descriptions for 10 scenes collected from 63 users, each describing the same target object in each scene.",6.1 RE production,[1.0],"['Data We use the GRE3D3 dataset of humanproduced REs (Viethen and Dale, 2010), which contains 630 descriptions for 10 scenes collected from 63 users, each describing the same target object in each scene.']"
+35% of the descriptions in this corpus use a spatial relation.,6.1 RE production,[0],[0]
+"An example of such a scene can be seen in Fig. 3.
+",6.1 RE production,[0],[0]
+"Models We use two baselines for comparison:
+Basic: The state-of-the-art model on this task with this dataset, under the assumption that users are seen in training, is presented in Ferreira and Paraboni (2014).",6.1 RE production,[0],[0]
+"They define context features such as type of relation between the target object and its landmark, number of object of the same color or size, etc., then train an SVM classifier to predict the use of each attribute.",6.1 RE production,[0],[0]
+"We recast their model in terms of a log-linear model with the same features, to make it fit with the setup of Section 3.
+Basic++: Ferreira and Paraboni (2014) also take speaker features into account.",6.1 RE production,[0],[0]
+"We do not use speaker identity and the speaker’s attribute frequency vector, because we only evaluate on unseen users.",6.1 RE production,[0],[0]
+"We do use their other speaker features (age, gender), together with Basic’s context features; this gives us a strong baseline which is aware of manually annotated user group characteristics.
+",6.1 RE production,[0],[0]
+"We compare these baselines to our Group model for values of K between 1 and 10, using the exact same features as Basic.",6.1 RE production,[1.0],"['We compare these baselines to our Group model for values of K between 1 and 10, using the exact same features as Basic.']"
+"We do not use the speaker features of Basic++, because we do not want to rely on manually annotated groups.",6.1 RE production,[0],[0]
+"Note that our results are not directly comparable with those of Ferreira and Paraboni (2014), because of a different training-test split: their model requires having seen speakers in training, while we explicitly want to test our model’s ability to generalize to unseen users.
+",6.1 RE production,[0],[0]
+"Experimental setup We evaluate using crossvalidation, splitting the folds so that all speakers we see in testing are previously unseen in training.",6.1 RE production,[0],[0]
+We use 9 folds in order to have folds of the same size (each containing 70 descriptions coming from 7 speakers).,6.1 RE production,[0],[0]
+At each iteration we train on 8 folds and test on the 9th.,6.1 RE production,[0],[0]
+"At test time, we process each test instance iteratively: we first predict for each instance whether the user uwould use a spatial relation or not and test our prediction; we then add the
+actual observation from the corpus to the set D(u) of observations for this particular user, in order to update our estimate about their group membership.
+",6.1 RE production,[0],[0]
+"Results Figure 4 shows the test F1-score (microaveraged over all folds) as we increase the number of groups, compared to the baselines.",6.1 RE production,[0],[0]
+"For our Group models, these are averaged over all interactions with the user.",6.1 RE production,[0],[0]
+"Our model gets F1-scores between 0.69 and 0.76 for all values ofK > 1, outperforming both Basic (0.22) and Basic++ (0.23).
+",6.1 RE production,[0],[0]
+"In order to take a closer look at our model’s behavior, we also show the accuracy of our model as it observes more instances at test time.",6.1 RE production,[0],[0]
+We compare the model with K = 3 groups against the two baselines.,6.1 RE production,[0],[0]
+"Figure 5 shows that the group model’s F1-score increases dramatically after the first two observations and then stays high throughout the test phase, always outperforming both baselines by at least 0.37 F1-score points after the first observation.",6.1 RE production,[0],[0]
+The baseline models of course are not expected to improve with time; fluctuations are due to differences between the visual scenes.,6.1 RE production,[0],[0]
+"In the same figure, we plot the evolution of the entropy of the group model’s posterior distribution over the groups (see (7)).",6.1 RE production,[0],[0]
+"As expected, the model is highly uncertain at the beginning of the test phase about which group the user belongs to, then gets more and more certain as the set D(u) of observations from that user grows.",6.1 RE production,[0],[0]
+Task Our next task is to predict the referent to which a user will resolve an RE in the context of a visual scene.,6.2 RE comprehension,[0],[0]
+"Our model is given a stimulus s = (r, c) consisting of an instruction containing an RE r and a visual context c and outputs a probability distribution over all possible referents b.",6.2 RE comprehension,[0],[0]
+"Such a model can be used by a probabilistic RE generator to select an RE which is highly likely to be correctly understood by the user or predict potential
+misunderstandings (see Section 3).
+",6.2 RE comprehension,[0],[0]
+Data We use the GIVE-2.5 corpus for training and the GIVE-2 corpus for testing our model (the same used by Engonopoulos et al. (2013)).,6.2 RE comprehension,[0],[0]
+These contain recorded observations of dialog systems giving instructions to users who play a game in a 3D environment.,6.2 RE comprehension,[0],[0]
+"Each instruction contains an RE r, which is recorded in the data together with the visual context c at the time the instruction was given.",6.2 RE comprehension,[0],[0]
+The object b which the user understood as the referent of the RE is inferred by the immediately subsequent action of the user.,6.2 RE comprehension,[0],[0]
+"In total, we extracted 2927 observations by 403 users from GIVE-25 and 5074 observations by 563 users from GIVE-2.
+",6.2 RE comprehension,[0],[0]
+Experimental setup We follow the training method described in Section 3.,6.2 RE comprehension,[0],[0]
+"At test time, we present the observations from each user in the order they occur in the test data; for each stimulus, we ask our models to predict the referent a which the user understood to be the referent of the RE, and compare with the recorded observation.",6.2 RE comprehension,[0],[0]
+"We subsequently add the recorded observation to the dataset for the user and continue.
+",6.2 RE comprehension,[0],[0]
+"Models As a baseline, we use the Basic model described in Section 3, with the features of the “semantic” model of Engonopoulos et al. (2013).",6.2 RE comprehension,[0],[0]
+"Those features capture information about the objects in the visual scene (e.g. salience) and some basic semantic properties of the RE (e.g. color, position).",6.2 RE comprehension,[0],[0]
+"We use those features for our Group model as well, and evaluate for K between 1 and 10.
+Results on GIVE data Basic had a test accuracy of 72.70%, which was almost identical with the accuracy of our best Group model for K = 6 (72.78%).",6.2 RE comprehension,[0],[0]
+This indicates that our group model does not differentiate between users.,6.2 RE comprehension,[0],[0]
+"Indeed, after training, the 6-group model assigns 81% prior probabil-
+ity to one of the groups, and effectively gets stuck with this assignment while testing; the mean entropy of the posterior group distribution only falls from an initial 1.1 to 0.7 after 10 observations.
+",6.2 RE comprehension,[0],[0]
+We speculate that the reason behind this is that the features we use are not sensitive enough to capture the differences between the users in this data.,6.2 RE comprehension,[0],[0]
+"Since our model relies completely on observable behavior, it also relies on the ability of the features to make relevant distinctions between users.
+",6.2 RE comprehension,[1.0000000901533987],"['Since our model relies completely on observable behavior, it also relies on the ability of the features to make relevant distinctions between users.']"
+"Results on synthetic data In order to test this hypothesis, we made a synthetic dataset based on the GIVE datasets with 1000 instances from 100 users, in the following way: for each user, we randomly selected 10 scenes from GIVE-2, and replaced the target the user selected, so that half of the users always select the target with the highest visual salience, and the other half always select the one with the lowest.",6.2 RE comprehension,[1.0],"['Results on synthetic data In order to test this hypothesis, we made a synthetic dataset based on the GIVE datasets with 1000 instances from 100 users, in the following way: for each user, we randomly selected 10 scenes from GIVE-2, and replaced the target the user selected, so that half of the users always select the target with the highest visual salience, and the other half always select the one with the lowest.']"
+"Our aim was to test whether our model is capable of identifying groups when they are clearly present in the data and exhibit differences which our features are able to capture.
+",6.2 RE comprehension,[0],[0]
+We evaluated the same models in a 2-fold crossvalidation.,6.2 RE comprehension,[0],[0]
+Figure 6 shows the prediction accuracy for Basic and the Group models for K from 1 to 10.,6.2 RE comprehension,[0],[0]
+"All models for K > 1 clearly outperform the baseline model: the 2-group model gets 62.3% vs 28.6% averaged over all test examples, while adding more than two groups does not further improve the accuracy.",6.2 RE comprehension,[1.0],"['All models for K > 1 clearly outperform the baseline model: the 2-group model gets 62.3% vs 28.6% averaged over all test examples, while adding more than two groups does not further improve the accuracy.']"
+We also show in Figure 7 the evolution of the accuracy asD(u) grows: the Group model with K = 2 reaches a 64% testing accuracy after seeing two observations from the same user.,6.2 RE comprehension,[0],[0]
+"In the same figure, the entropy of the posterior distribution over groups (see production experiment) falls towards zero as D(u) grows.",6.2 RE comprehension,[1.0],"['In the same figure, the entropy of the posterior distribution over groups (see production experiment) falls towards zero as D(u) grows.']"
+"These results show that our model is capable of correctly assigning a user to the group they belong to, once the features are adequate for distinguishing between different user behaviors.",6.2 RE comprehension,[1.0],"['These results show that our model is capable of correctly assigning a user to the group they belong to, once the features are adequate for distinguishing between different user behaviors.']"
+"Our model was shown to be successful in discovering groups of users with respect to their behavior, within datasets which present discernible user variation.",6.3 Discussion,[0],[0]
+"In particular, if all listeners are influenced in a similar way by e.g. the visual salience of an object, then the group model cannot learn different weights for the visual salience feature; if this happens for all available features, there are effectively no groups for our model to discover.
+",6.3 Discussion,[0.9999999859081496],"['In particular, if all listeners are influenced in a similar way by e.g. the visual salience of an object, then the group model cannot learn different weights for the visual salience feature; if this happens for all available features, there are effectively no groups for our model to discover.']"
+"Once the groups have been discovered, our model can then very quickly distinguish between them at test time.",6.3 Discussion,[0],[0]
+This is reflected in the steep performance improvement even after the first user observation in both the real data experiment in 6.1 and the synthetic data experiment in 6.2.,6.3 Discussion,[0],[0]
+"We have presented a probabilistic model for NLG which predicts the behavior of individual users of a dialog system by dynamically assigning them to user groups, which were discovered during training2.",7 Conclusion,[0],[0]
+"We showed for two separate NLG-related tasks, RE production and RE comprehension, how our model, after being trained with data that is not annotated with user groups, can quickly adapt to unseen users as it gets more observations from them in the course of a dialog and makes increasingly accurate predictions about their behavior.
+",7 Conclusion,[1.0000000628619146],"['We showed for two separate NLG-related tasks, RE production and RE comprehension, how our model, after being trained with data that is not annotated with user groups, can quickly adapt to unseen users as it gets more observations from them in the course of a dialog and makes increasingly accurate predictions about their behavior.']"
+"Although in this work we apply our model to tasks related to NLG, nothing hinges on this choice; it can also be applied to any other dialog-related prediction task where user variation plays a role.",7 Conclusion,[1.0],"['Although in this work we apply our model to tasks related to NLG, nothing hinges on this choice; it can also be applied to any other dialog-related prediction task where user variation plays a role.']"
+"In the future, we will also try to apply the basic principles of our user group approach to more sophisticated underlying models, such as neural networks.
+2Our code and data is available in https://bit.ly/ 2jIu1Vm",7 Conclusion,[0],[0]
+We present a model which predicts how individual users of a dialog system understand and produce utterances based on user groups.,abstractText,[0],[0]
+"In contrast to previous work, these user groups are not specified beforehand, but learned in training.",abstractText,[0],[0]
+"We evaluate on two referring expression (RE) generation tasks; our experiments show that our model can identify user groups and learn how to most effectively talk to them, and can dynamically assign unseen users to the correct groups as they interact with the system.",abstractText,[0],[0]
+Discovering User Groups for Natural Language Generation,title,[0],[0]

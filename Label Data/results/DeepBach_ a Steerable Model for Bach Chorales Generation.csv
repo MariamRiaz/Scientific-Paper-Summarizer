@@ -1,0 +1,631 @@
+0,1,label2,summary_sentences
+"Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics (Long Papers), pages 1948–1958 Melbourne, Australia, July 15 - 20, 2018. c©2018 Association for Computational Linguistics
+1948",text,[0],[0]
+"With the recent surge of interest in deep learning, one question that is being asked across a number of fronts is: can deep learning techniques be harnessed for creative purposes?",1 Introduction,[0],[0]
+"Creative applications where such research exists include the composition of music (Humphrey et al., 2013; Sturm et al., 2016; Choi et al., 2016), the design of sculptures (Lehman et al., 2016), and automatic choreography (Crnkovic-Friis and Crnkovic-Friis, 2016).",1 Introduction,[0],[0]
+"In this paper, we focus on a creative textual task: automatic poetry composition.
+",1 Introduction,[0],[0]
+"A distinguishing feature of poetry is its aesthetic forms, e.g. rhyme and rhythm/",1 Introduction,[0],[0]
+"meter.1 In this work, we treat the task of poem generation as a constrained language modelling task, such that lines of a given poem rhyme, and each line follows a canonical meter and has a fixed number
+1Noting that there are many notable divergences from this in the work of particular poets (e.g. Walt Whitman) and poetry types (such as free verse or haiku).
+",1 Introduction,[0],[0]
+Shall I compare thee to a summer’s day?,1 Introduction,[0],[0]
+"Thou art more lovely and more temperate: Rough winds do shake the darling buds of May, And summer’s lease hath all too short a date:
+",1 Introduction,[0],[0]
+"Figure 1: 1st quatrain of Shakespeare’s Sonnet 18.
+of stresses.",1 Introduction,[0],[0]
+"Specifically, we focus on sonnets and generate quatrains in iambic pentameter (e.g. see Figure 1), based on an unsupervised model of language, rhyme and meter trained on a novel corpus of sonnets.
+",1 Introduction,[0],[0]
+"Our findings are as follows:
+• our proposed stress and rhyme models work very well, generating sonnet quatrains with stress and rhyme patterns that are indistinguishable from human-written poems and rated highly by an expert; • a vanilla language model trained over our son-
+net corpus, surprisingly, captures meter implicitly at human-level performance; • while crowd workers rate the poems generated
+by our best model as nearly indistinguishable from published poems by humans, an expert annotator found the machine-generated poems to lack readability and emotion, and our best model to be only comparable to a vanilla language model on these dimensions; • most work on poetry generation focuses on me-
+ter (Greene et al., 2010; Ghazvininejad et al., 2016; Hopkins and Kiela, 2017); our results suggest that future research should look beyond meter and focus on improving readability.
+",1 Introduction,[0],[0]
+"In this, we develop a new annotation framework for the evaluation of machine-generated poems, and release both a novel data of sonnets and the full source code associated with this research.2
+2https://github.com/jhlau/deepspeare",1 Introduction,[0],[0]
+"Early poetry generation systems were generally rule-based, and based on rhyming/TTS dictionaries and syllable counting (Gervás, 2000; Wu et al., 2009; Netzer et al., 2009; Colton et al., 2012; Toivanen et al., 2013).",2 Related Work,[0],[0]
+"The earliest attempt at using statistical modelling for poetry generation was Greene et al. (2010), based on a language model paired with a stress model.
+",2 Related Work,[0],[0]
+Neural networks have dominated recent research.,2 Related Work,[0],[0]
+"Zhang and Lapata (2014) use a combination of convolutional and recurrent networks for modelling Chinese poetry, which Wang et al. (2016) later simplified by incorporating an attention mechanism and training at the character level.",2 Related Work,[0],[0]
+"For English poetry, Ghazvininejad et al. (2016) introduced a finite-state acceptor to explicitly model rhythm in conjunction with a recurrent neural language model for generation.",2 Related Work,[0],[0]
+"Hopkins and Kiela (2017) improve rhythm modelling with a cascade of weighted state transducers, and demonstrate the use of character-level language model for English poetry.",2 Related Work,[0],[0]
+"A critical difference over our work is that we jointly model both poetry content and forms, and unlike previous work which use dictionaries (Ghazvininejad et al., 2016) or heuristics (Greene et al., 2010) for rhyme, we learn it automatically.",2 Related Work,[0],[0]
+"The sonnet is a poem type popularised by Shakespeare, made up of 14 lines structured as 3 quatrains (4 lines) and a couplet (2 lines);3 an example quatrain is presented in Figure 1.",3 Sonnet Structure and Dataset,[0],[0]
+"It follows a number of aesthetic forms, of which two are particularly salient: stress and rhyme.
+",3 Sonnet Structure and Dataset,[0],[0]
+"A sonnet line obeys an alternating stress pattern, called the iambic pentameter, e.g.:
+S− S+ S− S+ S− S+ S− S+ S− S+
+Shall I compare thee to a summer’s day?",3 Sonnet Structure and Dataset,[0],[0]
+"where S− and S+ denote unstressed and stressed syllables, respectively.
+",3 Sonnet Structure and Dataset,[0],[0]
+"A sonnet also rhymes, with a typical rhyming scheme being ABAB CDCD EFEF GG.",3 Sonnet Structure and Dataset,[0],[0]
+"There are a number of variants, however, mostly seen in the quatrains; e.g. AABB or ABBA are also common.
+",3 Sonnet Structure and Dataset,[0],[0]
+"We build our sonnet dataset from the latest image of Project Gutenberg.4 We first create a
+3There are other forms of sonnets, but the Shakespearean sonnet is the dominant one.",3 Sonnet Structure and Dataset,[0],[0]
+"Hereinafter “sonnet” is used to specifically mean Shakespearean sonnets.
+",3 Sonnet Structure and Dataset,[0],[0]
+"4https://www.gutenberg.org/.
+(generic) poetry document collection using the GutenTag tool (Brooke et al., 2015), based on its inbuilt poetry classifier and rule-based structural tagging of individual poems.
+",3 Sonnet Structure and Dataset,[0],[0]
+"Given the poems, we use word and character statistics derived from Shakespeare’s 154 sonnets to filter out all non-sonnet poems (to form the “BACKGROUND” dataset), leaving the sonnet corpus (“SONNET”).5 Based on a small-scale manual analysis of SONNET, we find that the approach is sufficient for extracting sonnets with high precision.",3 Sonnet Structure and Dataset,[0],[0]
+"BACKGROUND serves as a large corpus (34M words) for pre-training word embeddings, and SONNET is further partitioned into training, development and testing sets.",3 Sonnet Structure and Dataset,[0],[0]
+Statistics of SONNET are given in Table 1.6,3 Sonnet Structure and Dataset,[0],[0]
+"We propose modelling both content and forms jointly with a neural architecture, composed of 3 components: (1) a language model; (2) a pentameter model for capturing iambic pentameter; and (3) a rhyme model for learning rhyming words.
+",4 Architecture,[0],[0]
+"Given a sonnet line, the language model uses standard categorical cross-entropy to predict the next word, and the pentameter model is similarly trained to learn the alternating iambic stress patterns.7 The rhyme model, on the other hand, uses a margin-based loss to separate rhyming word pairs from non-rhyming word pairs in a quatrain.",4 Architecture,[0],[0]
+"For generation we use the language model to generate one word at a time, while applying the pentame-
+5The following constraints were used to select sonnets: 8.0 6 mean words per line 6 11.5; 40 6 mean characters per line 6 51.0; min/max number of words per line of 6/15; min/max number of characters per line of 32/60; and min letter ratio per line > 0.59.
+6The sonnets in our collection are largely in Modern English, with possibly a small number of poetry in Early Modern English.",4 Architecture,[0],[0]
+"The potentially mixed-language dialect data might add noise to our system, and given more data it would be worthwhile to include time period as a factor in the model.
+",4 Architecture,[0],[0]
+"7There are a number of variations in addition to the standard pattern (Greene et al., 2010), but our model uses only the standard pattern as it is the dominant one.
+",4 Architecture,[0],[0]
+ter model to sample meter-conforming sentences and the rhyme model to enforce rhyme.,4 Architecture,[0],[0]
+The architecture of the joint model is illustrated in Figure 2.,4 Architecture,[0],[0]
+We train all the components together by treating each component as a sub-task in a multitask learning setting.8,4 Architecture,[0],[0]
+"The language model is a variant of an LSTM encoder–decoder model with attention (Bahdanau et al., 2015), where the encoder encodes the preceding context (i.e. all sonnet lines before the current line) and the decoder decodes one word at a time for the current line, while attending to the preceding context.
+",4.1 Language Model,[0],[0]
+"In the encoder, we embed context words zi using embedding matrix Wwrd to yield wi, and feed them to a biLSTM9 to produce a sequence of encoder hidden states",4.1 Language Model,[0],[0]
+hi =,4.1 Language Model,[0],[0]
+[~hi; ~hi].,4.1 Language Model,[0],[0]
+"Next we apply
+8We stress that although the components appear to be disjointed, the shared parameters allow the components to mutually influence each other during joint training.",4.1 Language Model,[0],[0]
+"To exemplify this, we found that the pentameter model performs very poorly when we train each component separately.
+",4.1 Language Model,[0],[0]
+"9We use a single layer for all LSTMs.
+",4.1 Language Model,[0],[0]
+"a selective mechanism (Zhou et al., 2017) to each hi.",4.1 Language Model,[0],[0]
+"By defining the representation of the whole context h = [~hC ; ~h1] (where C is the number of words in the context), the selective mechanism filters the hidden states hi using h as follows:
+h′i = hi σ(Wahi",4.1 Language Model,[0],[0]
+"+Uah+ ba)
+where denotes element-wise product.",4.1 Language Model,[0],[0]
+"Hereinafter W, U and b are used to refer to model parameters.",4.1 Language Model,[0],[0]
+"The intuition behind this procedure is to selectively filter less useful elements from the context words.
+",4.1 Language Model,[0],[0]
+"In the decoder, we embed words xt in the current line using the encoder-shared embedding matrix (Wwrd) to produce wt.",4.1 Language Model,[0],[0]
+"In addition to the word embeddings, we also embed the characters of a word using embedding matrix Wchr to produce ct,i, and feed them to a bidirectional (character-level) LSTM:
+~ut,i = LSTMf (ct,i, ~ut,i−1) ~ut,i = LSTMb(ct,i, ~ut,i+1)
+(1)
+We represent the character encoding of a word by concatenating the last forward and first back-
+ward hidden states ut =",4.1 Language Model,[0],[0]
+"[~ut,L; ~ut,1], where L is the length of the word.",4.1 Language Model,[0],[0]
+"We incorporate character encodings because they provide orthographic information, improve representations of unknown words, and are shared with the pentameter model (Section 4.2).10 The rationale for sharing the parameters is that we see word stress and language model information as complementary.
+",4.1 Language Model,[0],[0]
+"Given the word embedding wt and character encoding ut, we concatenate them together and feed them to a unidirectional (word-level) LSTM to produce the decoding states:
+st = LSTM([wt;ut], st−1) (2)
+We attend st to encoder hidden states h′i and compute the weighted sum of h′i as follows:
+eti = v ᵀ b tanh(Wbh ′",4.1 Language Model,[0],[0]
+"i +Ubst + bb) at = softmax(et)
+h∗t",4.1 Language Model,[0],[0]
+= ∑ i atih ′,4.1 Language Model,[0],[0]
+"i
+To combine st and h∗t , we use a gating unit similar to a GRU (Cho et al., 2014; Chung et al., 2014): s′t = GRU(st,h ∗ t ).",4.1 Language Model,[0],[0]
+"We then feed s ′ t to a linear layer with softmax activation to produce the vocabulary distribution (i.e. softmax(Wouts′t + bout), and optimise the model with standard categorical cross-entropy loss.",4.1 Language Model,[0],[0]
+"We use dropout as regularisation (Srivastava et al., 2014), and apply it to the encoder/decoder LSTM outputs and word embedding lookup.",4.1 Language Model,[0],[0]
+"The same regularisation method is used for the pentameter and rhyme models.
+",4.1 Language Model,[0],[0]
+"As our sonnet data is relatively small for training a neural language model (367K words; see Table 1), we pre-train word embeddings and reduce parameters further by introducing weight-sharing between output matrix Wout and embedding matrix Wwrd via a projection matrix",4.1 Language Model,[0],[0]
+"Wprj (Inan et al., 2016; Paulus et al., 2017; Press and Wolf, 2017):
+Wout = tanh(WwrdWprj)",4.1 Language Model,[0],[0]
+This component is designed to capture the alternating iambic stress pattern.,4.2 Pentameter Model,[0],[0]
+"Given a sonnet line,
+10We initially shared the character encodings with the rhyme model as well, but found sub-par performance for the rhyme model.",4.2 Pentameter Model,[0],[0]
+"This is perhaps unsurprising, as rhyme and stress are qualitatively very different aspects of forms.
+",4.2 Pentameter Model,[0],[0]
+"the pentameter model learns to attend to the appropriate characters to predict the 10 binary stress symbols sequentially.11 As punctuation is not pronounced, we preprocess each sonnet line to remove all punctuation, leaving only spaces and letters.",4.2 Pentameter Model,[0],[0]
+"Like the language model, the pentameter model is fashioned as an encoder–decoder network.
+",4.2 Pentameter Model,[0],[0]
+"In the encoder, we embed the characters using the shared embedding matrix Wchr and feed them to the shared bidirectional character-level LSTM (Equation (1)) to produce the character encodings for the sentence: uj = [~uj ; ~uj ].
+",4.2 Pentameter Model,[0],[0]
+"In the decoder, it attends to the characters to predict the stresses sequentially with an LSTM:
+gt = LSTM(u∗t−1,gt−1)
+where u∗t−1 is the weighted sum of character encodings from the previous time step, produced by an attention network which we describe next,12 and gt is fed to a linear layer with softmax activation to compute the stress distribution.
+",4.2 Pentameter Model,[0],[0]
+"The attention network is designed to focus on stress-producing characters, whose positions are monotonically increasing (as stress is predicted sequentially).",4.2 Pentameter Model,[0],[0]
+"We first compute µt, the mean position of focus:
+µ′t = σ(v ᵀ c tanh(Wcgt +Ucµt−1 + bc)) µt =M ×min(µ′t + µt−1, 1.0)
+where M is the number of characters in the sonnet line.",4.2 Pentameter Model,[0],[0]
+"Given µt, we can compute the (unnormalised) probability for each character position:
+ptj = exp",4.2 Pentameter Model,[0],[0]
+"( −(j − µt)2
+2T 2 ) where standard deviation T is a hyper-parameter.",4.2 Pentameter Model,[0],[0]
+"We incorporate this position information when computing u∗t : 13
+u′j = p t juj",4.2 Pentameter Model,[0],[0]
+dtj = v ᵀ d tanh(Wdu ′,4.2 Pentameter Model,[0],[0]
+j,4.2 Pentameter Model,[0],[0]
+"+Udgt + bd)
+f t = softmax(dt + logpt) u∗t = ∑ j btjuj
+11That is, given the input line Shall I compare thee to a summer’s day?",4.2 Pentameter Model,[0],[0]
+the model is required to output S− S+ S− S+ S− S+ S− S+,4.2 Pentameter Model,[0],[0]
+"S− S+, based on the syllable boundaries from Section 3.
+",4.2 Pentameter Model,[0],[0]
+"12Initial input (u∗0) and state (g0) is a trainable vector and zero vector respectively.
+",4.2 Pentameter Model,[0],[0]
+"13Spaces are masked out, so they always yield zero attention weights.
+",4.2 Pentameter Model,[0],[0]
+"Intuitively, the attention network incorporates the position information at two points, when computing: (1) dtj by weighting the character encodings; and (2) f t by adding the position log probabilities.",4.2 Pentameter Model,[0],[0]
+"This may appear excessive, but preliminary experiments found that this formulation produces the best performance.
+",4.2 Pentameter Model,[0],[0]
+"In a typical encoder–decoder model, the attended encoder vector u∗t would be combined with the decoder state gt to compute the output probability distribution.",4.2 Pentameter Model,[0],[0]
+"Doing so, however, would result in a zero-loss model as it will quickly learn that it can simply ignore u∗t to predict the alternating stresses based on gt.",4.2 Pentameter Model,[0],[0]
+"For this reason we use only u∗t to compute the stress probability:
+P (S−) = σ(Weu ∗ t + be)
+which gives the loss Lent = ∑
+t− logP (S?t ) for the whole sequence, where S?t is the target stress at time step t.
+We find the decoder still has the tendency to attend to the same characters, despite the incorporation of position information.",4.2 Pentameter Model,[0],[0]
+"To regularise the model further, we introduce two loss penalties: repeat and coverage loss.
+",4.2 Pentameter Model,[0],[0]
+"The repeat loss penalises the model when it attends to previously attended characters (See et al., 2017), and is computed as follows:
+Lrep = ∑ t ∑ j min(f tj , t−1∑ t=1 f tj )
+By keeping a sum of attention weights over all previous time steps, we penalise the model when it focuses on characters that have non-zero history weights.
+",4.2 Pentameter Model,[0],[0]
+"The repeat loss discourages the model from focussing on the same characters, but does not assure that the appropriate characters receive attention.",4.2 Pentameter Model,[0],[0]
+"Observing that stresses are aligned with the vowels of a syllable, we therefore penalise the model when vowels are ignored:
+Lcov = ∑ j∈V ReLU(C − 10∑ t=1 f tj )
+where V is a set of positions containing vowel characters, and C is a hyper-parameter that defines the minimum attention threshold that avoids penalty.
+",4.2 Pentameter Model,[0],[0]
+"To summarise, the pentameter model is optimised with the following loss:
+Lpm = Lent + αLrep + βLcov (3)
+where α and β are hyper-parameters for weighting the additional loss terms.",4.2 Pentameter Model,[0],[0]
+"Two reasons motivate us to learn rhyme in an unsupervised manner: (1) we intend to extend the current model to poetry in other languages (which may not have pronunciation dictionaries); and (2) the language in our SONNET data is not Modern English, and so contemporary dictionaries may not accurately reflect the rhyme of the data.
+",4.3 Rhyme Model,[0],[0]
+"Exploiting the fact that rhyme exists in a quatrain, we feed sentence-ending word pairs of a quatrain as input to the rhyme model and train it to learn how to separate rhyming word pairs from non-rhyming ones.",4.3 Rhyme Model,[0],[0]
+"Note that the model does not assume any particular rhyming scheme — it works as long as quatrains have rhyme.
+",4.3 Rhyme Model,[0],[0]
+"A training example consists of a number of word pairs, generated by pairing one target word with 3 other reference words in the quatrain, i.e. {(xt, xr), (xt, xr+1), (xt, xr+2)}, where xt is the target word and xr+i are the reference words.14",4.3 Rhyme Model,[0],[0]
+We assume that in these 3 pairs there should be one rhyming and 2 non-rhyming pairs.,4.3 Rhyme Model,[0],[0]
+From preliminary experiments we found that we can improve the model by introducing additional non-rhyming or negative reference words.,4.3 Rhyme Model,[0],[0]
+"Negative reference words are sampled uniform randomly from the vocabulary, and the number of additional negative words is a hyper-parameter.
+",4.3 Rhyme Model,[0],[0]
+For each word x in the word pairs we embed the characters using the shared embedding matrix Wchr and feed them to an LSTM to produce the character states uj,4.3 Rhyme Model,[0],[0]
+.15,4.3 Rhyme Model,[0],[0]
+"Unlike the language and pentameter models, we use a unidirectional forward LSTM here (as rhyme is largely determined by the final characters), and the LSTM parameters are not shared.",4.3 Rhyme Model,[0],[0]
+"We represent the encoding of the whole word by taking the last state u = uL, where L is the character length of the word.
+",4.3 Rhyme Model,[0],[0]
+"Given the character encodings, we use a
+14E.g.",4.3 Rhyme Model,[0],[0]
+"for the quatrain in Figure 1, a training example is {(day, temperate), (day, may), (day, date)}.
+",4.3 Rhyme Model,[0],[0]
+"15The character embeddings are the only shared parameters in this model.
+margin-based loss to optimise the model:
+Q = {cos(ut,ur), cos(ut,ur+1), ...}",4.3 Rhyme Model,[0],[0]
+"Lrm = max(0, δ − top(Q, 1) + top(Q, 2))
+where top(Q, k) returns the k-th largest element in Q, and δ is a margin hyper-parameter.
+",4.3 Rhyme Model,[0],[0]
+"Intuitively, the model is trained to learn a sufficient margin (defined by δ) that separates the best pair with all others, with the second-best being used to quantify all others.",4.3 Rhyme Model,[0],[0]
+"This is the justification used in the multi-class SVM literature for a similar objective (Wang and Xue, 2014).
+",4.3 Rhyme Model,[0],[0]
+"With this network we can estimate whether two words rhyme by computing the cosine similarity score during generation, and resample words as necessary to enforce rhyme.",4.3 Rhyme Model,[0],[0]
+"We focus on quatrain generation in this work, and so the aim is to generate 4 lines of poetry.",4.4 Generation Procedure,[0],[0]
+During generation we feed the hidden state from the previous time step to the language model’s decoder to compute the vocabulary distribution for the current time step.,4.4 Generation Procedure,[0],[0]
+"Words are sampled using a temperature between 0.6 and 0.8, and they are resampled if the following set of words is generated: (1) UNK token; (2) non-stopwords that were generated before;16 (3) any generated words with a frequency > 2; (4) the preceding 3 words; and (5) a number of symbols including parentheses, single and double quotes.17",4.4 Generation Procedure,[0],[0]
+"The first sonnet line is generated without using any preceding context.
+",4.4 Generation Procedure,[0],[0]
+We next describe how to incorporate the pentameter model for generation.,4.4 Generation Procedure,[0],[0]
+"Given a sonnet line, the pentameter model computes a loss Lpm (Equation (3))",4.4 Generation Procedure,[0],[0]
+that indicates how well the line conforms to the iambic pentameter.,4.4 Generation Procedure,[0],[0]
+"We first generate 10 candidate lines (all initialised with the same hidden state), and then sample one line from the candidate lines based on the pentameter loss values (Lpm).",4.4 Generation Procedure,[0],[0]
+"We convert the losses into probabilities by taking the softmax, and a sentence is sampled with temperature = 0.1.
+",4.4 Generation Procedure,[0],[0]
+"To enforce rhyme, we randomly select one of the rhyming schemes (AABB, ABAB or ABBA) and resample sentence-ending words as necessary.",4.4 Generation Procedure,[0],[0]
+"Given a pair of words, the rhyme model produces a cosine similarity score that estimates how well the
+16We use the NLTK stopword list (Bird et al., 2009).",4.4 Generation Procedure,[0],[0]
+"17We add these constraints to prevent the model from being
+too repetitive, in generating the same words.
+",4.4 Generation Procedure,[0],[0]
+two words rhyme.,4.4 Generation Procedure,[0],[0]
+We resample the second word of a rhyming pair (e.g. when generating the second A in AABB) until it produces a cosine similarity > 0.9.,4.4 Generation Procedure,[0],[0]
+"We also resample the second word of a nonrhyming pair (e.g. when generating the first B in AABB) by requiring a cosine similarity 6 0.7.18
+When generating in the forward direction we can never be sure that any particular word is the last word of a line, which creates a problem for resampling to produce good rhymes.",4.4 Generation Procedure,[0],[0]
+"This problem is resolved in our model by reversing the direction of the language model, i.e. generating the last word of each line first.",4.4 Generation Procedure,[0],[0]
+We apply this inversion trick at the word level (character order of a word is not modified) and only to the language model; the pentameter model receives the original word order as input.,4.4 Generation Procedure,[0],[0]
+"We assess our sonnet model in two ways: (1) component evaluation of the language, pentameter and rhyme models; and (2) poetry generation evaluation, by crowd workers and an English literature expert.",5 Experiments,[0],[0]
+"A sample of machine-generated sonnets are included in the supplementary material.
+",5 Experiments,[0],[0]
+We tune the hyper-parameters of the model over the development data (optimal configuration in the supplementary material).,5 Experiments,[0],[0]
+"Word embeddings are initialised with pre-trained skip-gram embeddings (Mikolov et al., 2013a,b) on the BACKGROUND dataset, and are updated during training.",5 Experiments,[0],[0]
+"For optimisers, we use Adagrad (Duchi et al., 2011) for the language model, and Adam (Kingma and Ba, 2014) for the pentameter and rhyme models.",5 Experiments,[0],[0]
+"We truncate backpropagation through time after 2 sonnet lines, and train using 30 epochs, resetting the network weights to the weights from the previous epoch whenever development loss worsens.",5 Experiments,[0],[0]
+We use standard perplexity for evaluating the language model.,5.1.1 Language Model,[0],[0]
+"In terms of model variants, we have:19 • LM: Vanilla LSTM language model; • LM∗: LSTM language model that incorporates
+character encodings (Equation (2)); 18Maximum number of resampling steps is capped at 1000.",5.1.1 Language Model,[0],[0]
+"If the threshold is exceeded the model is reset to generate from scratch again.
+",5.1.1 Language Model,[0],[0]
+"19All models use the same (applicable) hyper-parameter configurations.
+",5.1.1 Language Model,[0],[0]
+• LM∗∗: LSTM language model that incorporates both character encodings and preceding context; • LM∗∗-C:,5.1.1 Language Model,[0],[0]
+"Similar to LM∗∗, but preceding con-
+text is encoded using convolutional networks, inspired by the poetry model of Zhang and Lapata (2014);20 • LM∗∗+PM+RM: the full model, with joint training of the language, pentameter and rhyme models.",5.1.1 Language Model,[0],[0]
+Perplexity on the test partition is detailed in Table 2.,5.1.1 Language Model,[0],[0]
+"Encouragingly, we see that the incorporation of character encodings and preceding context improves performance substantially, reducing perplexity by almost 10 points from LM to LM∗∗.",5.1.1 Language Model,[0],[0]
+The inferior performance of LM∗∗-C compared to LM∗∗ demonstrates that our approach of processing context with recurrent networks with selective encoding is more effective than convolutional networks.,5.1.1 Language Model,[0],[0]
+"The full model LM∗∗+PM+RM, which learns stress
+20In Zhang and Lapata (2014), the authors use a series of convolutional networks with a width of 2 words to convert 5/7 poetry lines into a fixed size vector; here we use a standard convolutional network with max-pooling operation (Kim, 2014) to process the context.
+and rhyme patterns simultaneously, also appears to improve the language model slightly.",5.1.1 Language Model,[0],[0]
+"To assess the pentameter model, we use the attention weights to predict stress patterns for words in the test data, and compare them against stress patterns in the CMU pronunciation dictionary.21 Words that have no coverage or have nonalternating patterns given by the dictionary are discarded.",5.1.2 Pentameter Model,[0],[0]
+"We use accuracy as the metric, and a predicted stress pattern is judged to be correct if it matches any of the dictionary stress patterns.
+",5.1.2 Pentameter Model,[0],[0]
+"To extract a stress pattern for a word from the model, we iterate through the pentameter (10 time steps), and append the appropriate stress (e.g. 1st time step = S−) to the word if any of its characters receives an attention > 0.20.
+",5.1.2 Pentameter Model,[0],[0]
+For the baseline (Stress-BL) we use the pretrained weighted finite state transducer (WFST) provided by Hopkins and Kiela (2017).22 The WFST maps a sequence word to a sequence of stresses by assuming each word has 1–5 stresses and the full word sequence produces iambic pentameter.,5.1.2 Pentameter Model,[0],[0]
+"It is trained using the EM algorithm on a sonnet corpus developed by the authors.
+",5.1.2 Pentameter Model,[0],[0]
+We present stress accuracy in Table 2.,5.1.2 Pentameter Model,[0],[0]
+"LM∗∗+PM+RM performs competitively, and informal inspection reveals that a number of mistakes are due to dictionary errors.",5.1.2 Pentameter Model,[0],[0]
+"To understand the predicted stresses qualitatively, we display attention heatmaps for the the first quatrain of Shakespeare’s Sonnet 18 in Figure 3.",5.1.2 Pentameter Model,[0],[0]
+"The y-axis represents the ten stresses of the iambic pentameter, and
+21http://www.speech.cs.cmu.edu/cgi-bin/ cmudict.",5.1.2 Pentameter Model,[0],[0]
+"Note that the dictionary provides 3 levels of stresses: 0, 1 and 2; we collapse 1 and 2 to S+.
+22https://github.com/JackHopkins/ ACLPoetry
+x-axis the characters of the sonnet line (punctuation removed).",5.1.2 Pentameter Model,[0],[0]
+"The attention network appears to perform very well, without any noticeable errors.",5.1.2 Pentameter Model,[0],[0]
+"The only minor exception is lovely in the second line, where it predicts 2 stresses but the second stress focuses incorrectly on the character e rather than y. Additional heatmaps for the full sonnet are provided in the supplementary material.",5.1.2 Pentameter Model,[0],[0]
+"We follow a similar approach to evaluate the rhyme model against the CMU dictionary, but score based on F1 score.",5.1.3 Rhyme Model,[0],[0]
+Word pairs that are not included in the dictionary are discarded.,5.1.3 Rhyme Model,[0],[0]
+"Rhyme is determined by extracting the final stressed phoneme for the paired words, and testing if their phoneme patterns match.
+",5.1.3 Rhyme Model,[0],[0]
+"We predict rhyme for a word pair by feeding them to the rhyme model and computing cosine similarity; if a word pair is assigned a score > 0.8,23 it is considered to rhyme.",5.1.3 Rhyme Model,[0],[0]
+"As a baseline (Rhyme-BL), we first extract for each word the last vowel and all following consonants, and predict a word pair as rhyming if their extracted sequences match.",5.1.3 Rhyme Model,[0],[0]
+"The extracted sequence can be interpreted as a proxy for the last syllable of a word.
+",5.1.3 Rhyme Model,[0],[0]
+Reddy and Knight (2011) propose an unsupervised model for learning rhyme schemes in poems via EM.,5.1.3 Rhyme Model,[0],[0]
+"There are two latent variables: φ specifies the distribution of rhyme schemes, and θ defines
+230.8 is empirically found to be the best threshold based on development data.
+",5.1.3 Rhyme Model,[0],[0]
+the pairwise rhyme strength between two words.,5.1.3 Rhyme Model,[0],[0]
+The model’s objective is to maximise poem likelihood over all possible rhyme scheme assignments under the latent variables φ and θ.,5.1.3 Rhyme Model,[0],[0]
+"We train this model (Rhyme-EM) on our data24 and use the learnt θ to decide whether two words rhyme.25
+Table 2 details the rhyming results.",5.1.3 Rhyme Model,[0],[0]
+"The rhyme model performs very strongly at F1 > 0.90, well above both baselines.",5.1.3 Rhyme Model,[0],[0]
+"Rhyme-EM performs poorly because it operates at the word level (i.e. it ignores character/orthographic information) and hence does not generalise well to unseen words and word pairs.26
+To better understand the errors qualitatively, we present a list of word pairs with their predicted cosine similarity in Table 3.",5.1.3 Rhyme Model,[0],[0]
+Examples on the left side are rhyming word pairs as determined by the CMU dictionary; right are non-rhyming pairs.,5.1.3 Rhyme Model,[0],[0]
+"Looking at the rhyming word pairs (left), it appears that these words tend not to share any wordending characters.",5.1.3 Rhyme Model,[0],[0]
+"For the non-rhyming pairs, we spot several CMU errors: (sire, ire) and (queen, been) clearly rhyme.",5.1.3 Rhyme Model,[0],[0]
+"Following Hopkins and Kiela (2017), we present a pair of quatrains (one machine-generated and one human-written, in random order) to crowd workers on CrowdFlower, and ask them to guess which is the human-written poem.",5.2.1 Crowdworker Evaluation,[0],[0]
+"Generation quality is estimated by computing the accuracy of workers at correctly identifying the human-written poem (with lower values indicate better results for the model).
+",5.2.1 Crowdworker Evaluation,[0],[0]
+"We generate 50 quatrains each for LM, LM∗∗ and LM∗∗+PM+RM (150 in total), and as a control, generate 30 quatrains with LM trained for one epoch.",5.2.1 Crowdworker Evaluation,[0],[0]
+An equal number of human-written quatrains was sampled from the training partition.,5.2.1 Crowdworker Evaluation,[0],[0]
+"A HIT contained 5 pairs of poems (of which one is a control), and workers were paid $0.05 for each HIT.",5.2.1 Crowdworker Evaluation,[0],[0]
+"Workers who failed to identify the human-written poem in the control pair reliably (minimum accuracy = 70%) were removed by CrowdFlower automati-
+24We use the original authors’ implementation: https: //github.com/jvamvas/rhymediscovery.
+",5.2.1 Crowdworker Evaluation,[0],[0]
+"25A word pair is judged to rhyme if θw1,w2 > 0.02; the threshold (0.02) is selected based on development performance.
+",5.2.1 Crowdworker Evaluation,[0],[0]
+"26Word pairs that did not co-occur in a poem in the training data have rhyme strength of zero.
+cally, and they were restricted to do a maximum of 3 HITs.",5.2.1 Crowdworker Evaluation,[0],[0]
+"To dissuade workers from using search engines to identify real poems, we presented the quatrains as images.
+",5.2.1 Crowdworker Evaluation,[0],[0]
+Accuracy is presented in Table 4.,5.2.1 Crowdworker Evaluation,[0],[0]
+"We see a steady decrease in accuracy (= improvement in model quality) from LM to LM∗∗ to LM∗∗+PM+RM, indicating that each model generates quatrains that are less distinguishable from human-written ones.",5.2.1 Crowdworker Evaluation,[0],[0]
+"Based on the suspicion that workers were using rhyme to judge the poems, we tested a second model, LM∗∗+RM, which is the full model without the pentameter component.",5.2.1 Crowdworker Evaluation,[0],[0]
+"We found identical accuracy (0.532), confirming our suspicion that crowd workers depend on only rhyme in their judgements.",5.2.1 Crowdworker Evaluation,[0],[0]
+These observations demonstrate that meter is largely ignored by lay persons in poetry evaluation.,5.2.1 Crowdworker Evaluation,[0],[0]
+"To better understand the qualitative aspects of our generated quatrains, we asked an English literature expert (a Professor of English literature at a major English-speaking university; the last author of this paper) to directly rate 4 aspects: meter, rhyme, readability and emotion (i.e. amount of emotion the poem evokes).",5.2.2 Expert Judgement,[0],[0]
+All are rated on an ordinal scale between 1 to 5 (1 = worst; 5 = best).,5.2.2 Expert Judgement,[0],[0]
+"In total, 120 quatrains were annotated, 30 each for LM, LM∗∗, LM∗∗+PM+RM, and human-written poems (Human).",5.2.2 Expert Judgement,[0],[0]
+The expert was blind to the source of each poem.,5.2.2 Expert Judgement,[0],[0]
+"The mean and standard deviation of the ratings are presented in Table 5.
+",5.2.2 Expert Judgement,[0],[0]
+"We found that our full model has the highest ratings for both rhyme and meter, even higher than
+human poets.",5.2.2 Expert Judgement,[0],[0]
+"This might seem surprising, but in fact it is well established that real poets regularly break rules of form to create other effects (Adams, 1997).",5.2.2 Expert Judgement,[0],[0]
+"Despite excellent form, the output of our model can easily be distinguished from humanwritten poetry due to its lower emotional impact and readability.",5.2.2 Expert Judgement,[0],[0]
+"In particular, there is evidence here that our focus on form actually hurts the readability of the resulting poems, relative even to the simpler language models.",5.2.2 Expert Judgement,[0],[0]
+"Another surprise is how well simple language models do in terms of their grasp of meter: in this expert evaluation, we see only marginal benefit as we increase the sophistication of the model.",5.2.2 Expert Judgement,[0],[0]
+"Taken as a whole, this evaluation suggests that future research should look beyond forms, towards the substance of good poetry.",5.2.2 Expert Judgement,[0],[0]
+"We propose a joint model of language, meter and rhyme that captures language and form for modelling sonnets.",6 Conclusion,[0],[0]
+"We provide quantitative analyses for each component, and assess the quality of generated poems using judgements from crowdworkers and a literature expert.",6 Conclusion,[0],[0]
+"Our research reveals that vanilla LSTM language model captures meter implicitly, and our proposed rhyme model performs exceptionally well.",6 Conclusion,[0],[0]
+"Machine-generated generated poems, however, still underperform in terms of readability and emotion.",6 Conclusion,[0],[0]
+"In this paper, we propose a joint architecture that captures language, rhyme and meter for sonnet modelling.",abstractText,[0],[0]
+We assess the quality of generated poems using crowd and expert judgements.,abstractText,[0],[0]
+"The stress and rhyme models perform very well, as generated poems are largely indistinguishable from human-written poems.",abstractText,[0],[0]
+"Expert evaluation, however, reveals that a vanilla language model captures meter implicitly, and that machine-generated poems still underperform in terms of readability and emotion.",abstractText,[0],[0]
+"Our research shows the importance expert evaluation for poetry generation, and that future research should look beyond rhyme/meter and focus on poetic language.",abstractText,[0],[0]
+"Deep-speare: A joint neural model of poetic language, meter and rhyme",title,[0],[0]
+The composition of polyphonic chorale music in the style of J.S. Bach has represented a major challenge in automatic music composition over the last decades.,1. Introduction,[0],[0]
+"The corpus of the chorale harmonizations by Johann Sebastian Bach is remarkable by its homogeneity and its size (389 chorales in (Bach, 1985)).",1. Introduction,[0],[0]
+"All these short pieces (approximately one minute long) are written for a four-part chorus (soprano, alto, tenor and bass) using similar compositional principles: the composer takes a well-known (at that time) melody from a Lutheran hymn and harmonizes it i.e. the three lower parts (alto, tenor and bass) accompanying the soprano (the highest part) are composed, see Fig.1 for an example.
+",1. Introduction,[0],[0]
+"1LIP6, Université Pierre et Marie Curie 2Sony CSL, Paris 3Sony CSL, Japan.",1. Introduction,[0],[0]
+"Correspondence to: Gaëtan Hadjeres <gaetan.hadjeres@etu.upmc.fr>, François",1. Introduction,[0],[0]
+"Pachet <pachetcsl@gmail.com>, Frank Nielsen <Frank.Nielsen@acm.org>.
+",1. Introduction,[0],[0]
+"Proceedings of the 34 th International Conference on Machine Learning, Sydney, Australia, PMLR 70, 2017.",1. Introduction,[0],[0]
+"Copyright 2017 by the author(s).
+",1. Introduction,[0],[0]
+"Moreover, since the aim of reharmonizing a melody is to give more power or new insights to its text, the lyrics have to be understood clearly.",1. Introduction,[0],[0]
+"We say that voices are in homophony, i.e. they articulate syllables simultaneously.",1. Introduction,[0],[0]
+"This implies characteristic rhythms, variety of harmonic ideas as well as characteristic melodic movements which make the style of these chorale compositions easily distinguishable, even for non experts.
+",1. Introduction,[0],[0]
+"The difficulty, from a compositional point of view comes from the intricate interplay between harmony (notes sounding at the same time) and voice movements (how a single voice evolves through time).",1. Introduction,[0],[0]
+"Furthermore, each voice has its own “style” and its own coherence.",1. Introduction,[0],[0]
+"Finding a chorale-like reharmonization which combines Bach-like harmonic progressions with musically interesting melodic movements is a problem which often takes years of practice for musicians.
+",1. Introduction,[0.9999999301254605],['Finding a chorale-like reharmonization which combines Bach-like harmonic progressions with musically interesting melodic movements is a problem which often takes years of practice for musicians.']
+"From the point of view of automatic music generation, the first solution to this apparently highly combinatorial problem was proposed by (Ebcioglu, 1988) in 1988.",1. Introduction,[1.0],"['From the point of view of automatic music generation, the first solution to this apparently highly combinatorial problem was proposed by (Ebcioglu, 1988) in 1988.']"
+"This problem is seen as a constraint satisfaction problem, where the system must fulfill numerous hand-crafted constraints characterizing the style of Bach.",1. Introduction,[1.0],"['This problem is seen as a constraint satisfaction problem, where the system must fulfill numerous hand-crafted constraints characterizing the style of Bach.']"
+It is a rule-based expert system which contains no less than 300 rules and tries to reharmonize a given melody with a generate-and-test method and intelligent backtracking.,1. Introduction,[0],[0]
+"Among the short examples presented at the end of the paper, some are flawless.",1. Introduction,[0],[0]
+"The drawbacks of this method are, as stated by the author, the considerable effort to generate the rule base and the fact that the harmonizations produced “do not sound like Bach, except for occasional Bachian patterns and cadence formulas.”",1. Introduction,[0],[0]
+"In our opinion, the requirement of an expert knowledge implies a lot of subjective choices.
+",1. Introduction,[0],[0]
+"A neural-network-based solution was later developed by (Hild et al., 1992).",1. Introduction,[0],[0]
+"This method relies on several neural networks, each one trained for solving a specific task: a harmonic skeleton is first computed then refined and ornamented.",1. Introduction,[0],[0]
+"A similar approach is adopted in (Allan & Williams, 2005), but uses Hidden Markov Models (HMMs) instead of neural networks.",1. Introduction,[0],[0]
+"Chords are represented as lists of intervals and form the states of the Markov mod-
+2https://www.youtube.com/watch?v=",1. Introduction,[0],[0]
+"73WF0M99vlg
+els.",1. Introduction,[0],[0]
+These approaches produce interesting results even if they both use expert knowledge and bias the generation by imposing their compositional process.,1. Introduction,[0],[0]
+"In (Whorley et al., 2013; Whorley & Conklin, 2016), authors elaborate on those methods by introducing multiple viewpoints and variations on the sampling method (generated sequences which violate “rules of harmony” are put aside for instance).",1. Introduction,[0],[0]
+"However, this approach does not produce a convincing chorale-like texture, rhythmically as well as harmonically and the resort to hand-crafted criteria to assess the quality of the generated sequences might rule out many musically-interesting solutions.
+",1. Introduction,[0],[0]
+"Recently, agnostic approaches (requiring no knowledge about harmony, Bach’s style or music) using neural networks have been investigated with promising results.",1. Introduction,[0],[0]
+"In (Boulanger-Lewandowski et al., 2012), chords are modeled with Restricted Boltzmann Machines (RBMs).",1. Introduction,[0],[0]
+Their temporal dependencies are learned using Recurrent Neural Networks (RNNs).,1. Introduction,[0],[0]
+"Variations of these architectures based on Long Short-Term Memory (LSTM) units ((Hochreiter & Schmidhuber, 1997; Mikolov et al., 2014)) or GRUs (Gated Recurrent Units) have been developed by (Lyu et al., 2015) and (Chung et al., 2014) respectively.",1. Introduction,[0],[0]
+"However, these models which work on piano roll representations of the music are too general to capture the specificity of Bach chorales.",1. Introduction,[0],[0]
+"Also, a major drawback is their lack of flexibility.",1. Introduction,[0],[0]
+Generation is performed from left to right.,1. Introduction,[1.0],['Generation is performed from left to right.']
+A user cannot interact with the system: it is impossible to do reharmonization for instance which is the essentially how the corpus of Bach chorales was composed.,1. Introduction,[0],[0]
+"Moreover, their invention capacity and non-plagiarism abilities are not demonstrated.
+",1. Introduction,[0],[0]
+"A method that addresses the rigidity of sequential generation in music was first proposed in (Sakellariou et al., 2015; Sakellariou et al., 2016) for monophonic music and later generalized to polyphony in (Hadjeres et al., 2016).",1. Introduction,[0],[0]
+"These approaches advocate for the use of Gibbs sampling as a generation process in automatic music composition.
+",1. Introduction,[0],[0]
+"The most recent advances in chorale harmonization is arguably the BachBot model (Liang, 2016), a LSTMbased approach specifically designed to deal with Bach
+chorales.",1. Introduction,[0],[0]
+This approach relies on little musical knowledge (all chorales are transposed in a common key) and is able to produce high-quality chorale harmonizations.,1. Introduction,[0],[0]
+"However, compared to our approach, this model is less general (produced chorales are all in the C key for instance) and less flexible (only the soprano can be fixed).",1. Introduction,[0],[0]
+"Similarly to our work, the authors evaluate their model with an online Turing test to assess the efficiency of their model.",1. Introduction,[0],[0]
+"They also take into account the fermata symbols (Fig. 2) which are indicators of the structure of the chorales.
+",1. Introduction,[0],[0]
+"In this paper we introduce DeepBach, a dependency network (Heckerman et al., 2000) capable of producing musically convincing four-part chorales in the style of Bach by using a Gibbs-like sampling procedure.",1. Introduction,[1.0],"['In this paper we introduce DeepBach, a dependency network (Heckerman et al., 2000) capable of producing musically convincing four-part chorales in the style of Bach by using a Gibbs-like sampling procedure.']"
+"Contrary to models based on RNNs, we do not sample from left to right which allows us to enforce positional, unary user-defined constraints such as rhythm, notes, parts, chords and cadences.",1. Introduction,[1.0],"['Contrary to models based on RNNs, we do not sample from left to right which allows us to enforce positional, unary user-defined constraints such as rhythm, notes, parts, chords and cadences.']"
+"DeepBach is able to generate coherent musical phrases and provides, for instance, varied reharmonizations of melodies without plagiarism.",1. Introduction,[0],[0]
+"Its core features are its speed, the possible interaction with users and the richness of harmonic ideas it proposes.",1. Introduction,[0],[0]
+"Its efficiency opens up new ways of composing Bach-like chorales for non experts in an interactive manner similarly to what is proposed in (Papadopoulos et al., 2016) for leadsheets.
+",1. Introduction,[0],[0]
+In Sect.,1. Introduction,[0],[0]
+2 we present the DeepBach model for four-part chorale generation.,1. Introduction,[0],[0]
+We discuss in Sect.,1. Introduction,[0],[0]
+3 the results of an experimental study we conducted to assess the quality of our model.,1. Introduction,[0],[0]
+"Finally, we provide generated examples in Sect.",1. Introduction,[0],[0]
+4.3 and elaborate on the possibilities offered by our interactive music composition editor in Sect.,1. Introduction,[1.0],['4.3 and elaborate on the possibilities offered by our interactive music composition editor in Sect.']
+4.,1. Introduction,[0],[0]
+All examples can be heard on the accompanying web page3 and the code of our implementation is available on GitHub4.,1. Introduction,[0],[0]
+"Even if our presentation focuses on Bach chorales, this model has been successfully applied to other styles and composers including Monteverdi five-voice madrigals to Palestrina masses.
+",1. Introduction,[0],[0]
+"3https://sites.google.com/site/ deepbachexamples/
+4https://github.com/Ghadjeres/DeepBach",1. Introduction,[0],[0]
+In this paper we introduce a generative model which takes into account the distinction between voices.,2. DeepBach,[0],[0]
+Sect.,2. DeepBach,[0],[0]
+2.1 presents the data representation we used.,2. DeepBach,[0],[0]
+This representation is both fitted for our sampling procedure and more accurate than many data representation commonly used in automatic music composition.,2. DeepBach,[0],[0]
+Sect.,2. DeepBach,[0],[0]
+2.2 presents the model’s architecture and Sect.,2. DeepBach,[0],[0]
+2.3 our generation method.,2. DeepBach,[0],[0]
+"Finally, Sect. 2.4 provides implementation details and indicates how we preprocessed the corpus of Bach chorale harmonizations.",2. DeepBach,[0],[0]
+We use MIDI pitches to encode notes and choose to model voices separately.,2.1.1. NOTES AND VOICES,[1.0],['We use MIDI pitches to encode notes and choose to model voices separately.']
+"We consider that only one note can be sung at a given time and discard chorales with voice divisions.
+",2.1.1. NOTES AND VOICES,[0.9999999862522596],['We consider that only one note can be sung at a given time and discard chorales with voice divisions.']
+"Since Bach chorales only contain simple time signatures, we discretize time with sixteenth notes, which means that each beat is subdivided into four equal parts.",2.1.1. NOTES AND VOICES,[0],[0]
+"Since there is no smaller subdivision in Bach chorales, there is no loss of information in this process.
+",2.1.1. NOTES AND VOICES,[1.000000024190516],"['Since there is no smaller subdivision in Bach chorales, there is no loss of information in this process.']"
+"In this setting, a voice Vi = {Vti }t is a list of notes indexed by t ∈",2.1.1. NOTES AND VOICES,[0],[0]
+"[T ]5, where T is the duration piece (in sixteenth notes).",2.1.1. NOTES AND VOICES,[0],[0]
+We choose to model rhythm by simply adding a hold symbol “ ” coding whether or not the preceding note is held to the list of existing notes.,2.1.2. RHYTHM,[1.0],['We choose to model rhythm by simply adding a hold symbol “ ” coding whether or not the preceding note is held to the list of existing notes.']
+"This representation is thus unambiguous, compact and well-suited to our sampling method (see Sect.",2.1.2. RHYTHM,[1.0],"['This representation is thus unambiguous, compact and well-suited to our sampling method (see Sect.']"
+2.3.4).,2.1.2. RHYTHM,[0],[0]
+The music sheet (Fig. 1b) conveys more information than only the notes played.,2.1.3. METADATA,[0],[0]
+"We can cite:
+• the lyrics,
+• the key signature,
+• the time signature,
+• the beat index,
+• an implicit metronome (on which subdivision of the beat the note is played),
+• the fermata symbols (see Fig. 2), 5We adopt the standard notation [N ] to denote the set of inte-
+gers {1, . . .",2.1.3. METADATA,[0],[0]
+", N} for any integer N .
+",2.1.3. METADATA,[0],[0]
+"In the following, we will only take into account the fermata symbols, the subdivision indexes and the current key signature.",2.1.3. METADATA,[0],[0]
+"To this end, we introduce:
+•",2.1.3. METADATA,[0],[0]
+"The fermata list F that indicates if there is a fermata symbol, see Fig. 2, over the current note, it is a Boolean value.",2.1.3. METADATA,[0],[0]
+"If a fermata is placed over a note on the music sheet, we consider that it is active for all time indexes within the duration of the note.
+",2.1.3. METADATA,[0],[0]
+•,2.1.3. METADATA,[0],[0]
+The subdivision list S that contains the subdivision indexes of the beat.,2.1.3. METADATA,[0],[0]
+It is an integer between 1 and 4: there is no distinction between beats in a bar so that our model is able to deal with chorales with three and four beats per measure.,2.1.3. METADATA,[0],[0]
+"We represent a chorale as a couple
+(V,M) (1)
+composed of voices and metadata.",2.1.4. CHORALE,[0],[0]
+"For Bach chorales, V is a list of 4 voices Vi for i ∈",2.1.4. CHORALE,[0],[0]
+"[4] (soprano, alto, tenor and bass) andM a collection of metadata lists (F and S).
+",2.1.4. CHORALE,[0],[0]
+Our choices are very general and do not involve expert knowledge about harmony or scales but are only mere observations of the corpus.,2.1.4. CHORALE,[0],[0]
+The list S acts as a metronome.,2.1.4. CHORALE,[0],[0]
+The list F is added since fermatas in Bach chorales indicate the end of each musical phrase.,2.1.4. CHORALE,[0],[0]
+The use of fermata to this end is a specificity of Bach chorales that we want to take advantage of.,2.1.4. CHORALE,[0],[0]
+We choose to consider the metadata sequences in M as given.,2.2. Model Architecture,[0],[0]
+"For clarity, we suppose in this section that our dataset is composed of only one chorale written as in Eq. 1 of size T .",2.2. Model Architecture,[0],[0]
+"We define a dependency network on the finite set of variables V = {V ti } by specifying a set of conditional probability distributions (parametrized by parameter θi,t){
+pi,t(V t i |V\i,t,M, θi,t) } i∈[4],t∈[T ] , (2)
+where Vti indicates the note of voice i at time index t and V\i,t all variables in V except from the variable Vti .",2.2. Model Architecture,[0.9999999242869164],"['We define a dependency network on the finite set of variables V = {V ti } by specifying a set of conditional probability distributions (parametrized by parameter θi,t){ pi,t(V t i |V\\i,t,M, θi,t) } i∈[4],t∈[T ] , (2) where Vti indicates the note of voice i at time index t and V\\i,t all variables in V except from the variable Vti .']"
+"As we want our model to be time invariant so that we can apply it to sequences of any size, we share the parameters between all conditional probability distributions on variables lying in the same voice, i.e.
+θi := θi,t, pi := pi,t ∀t ∈",2.2. Model Architecture,[0],[0]
+"[T ].
+Finally, we fit each of these conditional probability distributions on the data by maximizing the log-likelihood.",2.2. Model Architecture,[0],[0]
+"Due to weight sharing, this amounts to solving four classification problems of the form:
+max θi ∑ t log pi(Vti |V\i,t,M, θi), for i ∈",2.2. Model Architecture,[0],[0]
+"[4], (3)
+where the aim is to predict a note knowing the value of its neighboring notes, the subdivision of the beat it is on and the presence of fermatas.",2.2. Model Architecture,[0],[0]
+"The advantage with this formulation is that each classifier has to make predictions within a small range of notes whose ranges correspond to the notes within the usual voice ranges (see 2.4).
+",2.2. Model Architecture,[0],[0]
+"For accurate predictions and in order to take into account the sequential aspect of the data, each classifier is modeled using four neural networks: two Deep Recurrent Neural Networks (Pascanu et al., 2013), one summing up past information and another summing up information coming from the future together with a non-recurrent neural network for notes occurring at the same time.",2.2. Model Architecture,[1.0],"['For accurate predictions and in order to take into account the sequential aspect of the data, each classifier is modeled using four neural networks: two Deep Recurrent Neural Networks (Pascanu et al., 2013), one summing up past information and another summing up information coming from the future together with a non-recurrent neural network for notes occurring at the same time.']"
+Only the last output from the uppermost RNN layer is kept.,2.2. Model Architecture,[1.0],['Only the last output from the uppermost RNN layer is kept.']
+"These three outputs are then merged and passed as the input of a fourth neural network whose output is pi(Vti |V\i,t,M, θ).",2.2. Model Architecture,[0],[0]
+Figure 4 shows a graphical representation for one of these models.,2.2. Model Architecture,[0],[0]
+Details are provided in Sect.,2.2. Model Architecture,[0],[0]
+2.4.,2.2. Model Architecture,[0],[0]
+These choices of architecture somehow match real compositional practice on Bach chorales.,2.2. Model Architecture,[1.0],['These choices of architecture somehow match real compositional practice on Bach chorales.']
+"Indeed, when reharmonizing a given melody, it is often simpler to start from the cadence and write music “backwards.”",2.2. Model Architecture,[0],[0]
+Generation in dependency networks is performed using the pseudo-Gibbs sampling procedure.,2.3.1. ALGORITHM,[0],[0]
+"This Markov Chain
+Monte Carlo (MCMC) algorithm is described in Alg.1.",2.3.1. ALGORITHM,[0.9999999694527596],['This Markov Chain Monte Carlo (MCMC) algorithm is described in Alg.1.']
+"It is similar to the classical Gibbs sampling procedure (Geman & Geman, 1984) on the difference that the conditional distributions are potentially incompatible (Chen & Ip, 2015).",2.3.1. ALGORITHM,[1.0],"['It is similar to the classical Gibbs sampling procedure (Geman & Geman, 1984) on the difference that the conditional distributions are potentially incompatible (Chen & Ip, 2015).']"
+This means that the conditional distributions of Eq.,2.3.1. ALGORITHM,[0],[0]
+(2) do not necessarily comes from a joint distribution p(V) and that the theoretical guarantees that the MCMC converges to this stationary joint distribution vanish.,2.3.1. ALGORITHM,[0],[0]
+"We experimentally verified that it was indeed the case by checking that the Markov Chain of Alg.1 violates Kolmogorov’s criterion (Kelly, 2011): it is thus not reversible and cannot converge to a joint distribution whose conditional distributions match the ones used for sampling.
+",2.3.1. ALGORITHM,[0.9999999850258001],"['We experimentally verified that it was indeed the case by checking that the Markov Chain of Alg.1 violates Kolmogorov’s criterion (Kelly, 2011): it is thus not reversible and cannot converge to a joint distribution whose conditional distributions match the ones used for sampling.']"
+"However, this Markov chain converges to another stationary distribution and applications on real data demonstrated that this method yielded accurate joint probabilities, especially when the inconsistent probability distributions are learned from data (Heckerman et al., 2000).",2.3.1. ALGORITHM,[0],[0]
+"Furthermore, nonreversible MCMC algorithms can in particular cases be better at sampling that reversible Markov Chains (Vucelja, 2014).",2.3.1. ALGORITHM,[0],[0]
+The advantage of this method is that we can enforce userdefined constraints by tweaking Alg.,2.3.2. FLEXIBILITY OF THE SAMPLING PROCEDURE,[0],[0]
+"1:
+• instead of choosing voice i from 1 to 4 we can choose to fix the soprano and only resample voices from 2, 3
+Algorithm 1 Pseudo-Gibbs sampling 1: Input: Chorale length L, metadataM containing lists
+of length L, probability distributions (p1, p2, p3, p4), maximum number of iterations M 2: Create four lists V = (V1,V2,V3,V4) of length L 3: {The lists are initialized with random notes drawn from
+the ranges of the corresponding voices (sampled uniformly or from the marginal distributions of the notes)}
+4: for m from 1 to M do 5: Choose voice i uniformly between 1 and 4 6: Choose time t uniformly between 1 and L 7: Re-sample Vti from pi(Vti |V\i,t,M, θi) 8: end for 9: Output: V = (V1,V2,V3,V4)
+and 4 in step (3) in order to provide reharmonizations of the fixed melody
+• we can choose the fermata list F in order to impose end of musical phrases at some places
+• more generally, we can impose any metadata
+• for any t and any i, we can fix specific subsets Rti of notes within the range of voice i.",2.3.2. FLEXIBILITY OF THE SAMPLING PROCEDURE,[1.0000000395397528],"['1: • instead of choosing voice i from 1 to 4 we can choose to fix the soprano and only resample voices from 2, 3 Algorithm 1 Pseudo-Gibbs sampling 1: Input: Chorale length L, metadataM containing lists of length L, probability distributions (p1, p2, p3, p4), maximum number of iterations M 2: Create four lists V = (V1,V2,V3,V4) of length L 3: {The lists are initialized with random notes drawn from the ranges of the corresponding voices (sampled uniformly or from the marginal distributions of the notes)} 4: for m from 1 to M do 5: Choose voice i uniformly between 1 and 4 6: Choose time t uniformly between 1 and L 7: Re-sample Vti from pi(Vti |V\\i,t,M, θi) 8: end for 9: Output: V = (V1,V2,V3,V4) and 4 in step (3) in order to provide reharmonizations of the fixed melody • we can choose the fermata list F in order to impose end of musical phrases at some places • more generally, we can impose any metadata • for any t and any i, we can fix specific subsets Rti of notes within the range of voice i.']"
+"We then restrict ourselves to some specific chorales by re-sampling Vti from
+pi(Vti |V\i,t,M, θi,Vti ∈",2.3.2. FLEXIBILITY OF THE SAMPLING PROCEDURE,[0],[0]
+"Rti)
+at step (5).",2.3.2. FLEXIBILITY OF THE SAMPLING PROCEDURE,[0],[0]
+"This allows us for instance to fix rhythm (since the hold symbol is considered as a note), impose some chords in a soft manner or restrict the vocal ranges.",2.3.2. FLEXIBILITY OF THE SAMPLING PROCEDURE,[1.0],"['This allows us for instance to fix rhythm (since the hold symbol is considered as a note), impose some chords in a soft manner or restrict the vocal ranges.']"
+Note that it is possible to make generation faster by making parallel Gibbs updates on GPU.,2.3.3. PERFORMANCE,[1.0],['Note that it is possible to make generation faster by making parallel Gibbs updates on GPU.']
+Steps (3) to (5) from Alg. 1 can be run simultaneously to provide significant speedups.,2.3.3. PERFORMANCE,[0],[0]
+"Even if it is known that this approach is biased (De Sa et al., 2016) (since we can update simultaneously variables which are not conditionally independent), we experimentally observed that for small batch sizes (16 or 32), DeepBach still generates samples of great musicality while running ten times faster than the sequential version.",2.3.3. PERFORMANCE,[0],[0]
+"This allows DeepBach to generate chorales in a few seconds.
+",2.3.3. PERFORMANCE,[0],[0]
+"It is also possible to use the hard-disk-configurations generation algorithm (Alg.2.9 in (Krauth, 2006)) to appropriately choose all the time indexes at which we parallelly resample so that:
+• every time index is at distance at least δ from the other time indexes
+• configurations of time indexes satisfying the relation above are equally sampled.
+",2.3.3. PERFORMANCE,[0],[0]
+This trick allows to assert that we do not update simultaneously a variable and its local context.,2.3.3. PERFORMANCE,[0],[0]
+We emphasize on this section the importance of our particular choice of data representation with respect to our sampling procedure.,2.3.4. IMPORTANCE OF THE DATA REPRESENTATION,[0],[0]
+"The fact that we obtain great results using pseudo-Gibbs sampling relies exclusively on our choice to integrate the hold symbol into the list of notes.
+",2.3.4. IMPORTANCE OF THE DATA REPRESENTATION,[0],[0]
+"Indeed, Gibbs sampling fails to sample the true joint distribution p(V|M, θ) when variables are highly correlated, creating isolated regions of high probability states in which the MCMC chain can be trapped.",2.3.4. IMPORTANCE OF THE DATA REPRESENTATION,[1.0],"['Indeed, Gibbs sampling fails to sample the true joint distribution p(V|M, θ) when variables are highly correlated, creating isolated regions of high probability states in which the MCMC chain can be trapped.']"
+"However, many data representations used in music modeling such as
+• the piano-roll representation,
+• the couple (pitch, articulation) representation where articulation is a Boolean value indicating whether or not the note is played or held,
+tend to make the musical data suffer from this drawback.
+",2.3.4. IMPORTANCE OF THE DATA REPRESENTATION,[1.0000000663967843],"['However, many data representations used in music modeling such as • the piano-roll representation, • the couple (pitch, articulation) representation where articulation is a Boolean value indicating whether or not the note is played or held, tend to make the musical data suffer from this drawback.']"
+"As an example, in the piano-roll representation, a long note is represented as the repetition of the same value over many variables.",2.3.4. IMPORTANCE OF THE DATA REPRESENTATION,[0],[0]
+"In order to only change its pitch, one needs to change simultaneously a large number of variables (which is exponentially rare) while this is achievable with only one variable change with our representation.",2.3.4. IMPORTANCE OF THE DATA REPRESENTATION,[0],[0]
+"We implemented DeepBach using Keras (Chollet, 2015) with the Tensorflow (Abadi et al., 2015) backend.",2.4. Implementation Details,[0],[0]
+"We used the database of chorale harmonizations by J.S. Bach included in the music21 toolkit (Cuthbert & Ariza, 2010).",2.4. Implementation Details,[0],[0]
+"After removing chorales with instrumental parts and chorales containing parts with two simultaneous notes (bass parts sometimes divide for the last chord), we ended up with 352 pieces.",2.4. Implementation Details,[0],[0]
+"Contrary to other approaches which transpose all chorales to the same key (usually in C major or A minor), we choose to augment our dataset by adding all chorale transpositions which fit within the vocal ranges defined by the initial corpus.",2.4. Implementation Details,[0],[0]
+This gives us a corpus of 2503 chorales and split it between a training set (80%) and a validation set (20%).,2.4. Implementation Details,[0],[0]
+"The vocal ranges contains less than 30 different pitches for each voice (21, 21, 21, 28) for the soprano, alto, tenor and bass parts respectively.
+",2.4. Implementation Details,[0],[0]
+"As shown in Fig. 4, we model only local interactions between a note Vti and its context (V\i,t, M) i.e. only elements with time index t between t − ∆t and t + ∆t are
+taken as inputs of our model for some scope ∆t.",2.4. Implementation Details,[0],[0]
+"This approximation appears to be accurate since musical analysis reveals that Bach chorales do not exhibit clear long-term dependencies.
+",2.4. Implementation Details,[0],[0]
+The reported results in Sect.,2.4. Implementation Details,[0],[0]
+3 and examples in Sect.,2.4. Implementation Details,[0],[0]
+4.3 were obtained with ∆t = 16.,2.4. Implementation Details,[0],[0]
+"We chose as the “neural network brick” in Fig. 4 a neural network with one hidden layer of size 200 and ReLU (Nair & Hinton, 2010)",2.4. Implementation Details,[0],[0]
+"nonlinearity and as the “Deep RNN brick” two stacked LSTMs (Hochreiter & Schmidhuber, 1997; Mikolov et al., 2014), each one being of size 200 (see Fig. 2 (f) in (Li & Wu, 2015)).",2.4. Implementation Details,[0],[0]
+"The “embedding brick” applies the same neural network to each time slice (Vt,Mt).",2.4. Implementation Details,[0],[0]
+"There are 20% dropout on input and 50% dropout after each layer.
+",2.4. Implementation Details,[0],[0]
+We experimentally found that sharing weights between the left and right embedding layers improved neither validation accuracy nor the musical quality of our generated chorales.,2.4. Implementation Details,[0],[0]
+We evaluated the quality of our model with an online test conducted on human listeners.,3. Experimental Results,[0],[0]
+"For the parameters used in our experiment, see Sect 2.4.",3.1. Setup,[0],[0]
+"We compared our model with two other models: a Maximum Entropy model (MaxEnt) as in (Hadjeres et al., 2016) and a Multilayer Perceptron (MLP) model.
+",3.1. Setup,[0],[0]
+The Maximum Entropy model is a neural network with no hidden layer.,3.1. Setup,[0],[0]
+"It is given by:
+pi(Vti |V\i,t,M, Ai, bi) = Softmax(AX + b) (4)
+where X is a vector containing the elements in V\i,t ∪Mt, Ai a (ni,mi) matrix and bi a vector of size mi with mi being the size of X , ni the number of notes in the voice range i and Softmax the softmax function given by
+Softmax(z)j = ezj∑K k=1 e zk for j ∈",3.1. Setup,[0],[0]
+"[K],
+for a vector z = (z1, . . .",3.1. Setup,[0],[0]
+", zK).
+",3.1. Setup,[0],[0]
+"The Multilayer Perceptron model we chose takes as input elements in V\i,t∪M, is a neural network with one hidden layer of size 500 and uses a ReLU (Nair & Hinton, 2010)",3.1. Setup,[0],[0]
+"nonlinearity.
+",3.1. Setup,[0],[0]
+"All models are local and have the same scope ∆t, see Sect. 2.4.
+",3.1. Setup,[0],[0]
+Subjects were asked to give information about their musical expertise.,3.1. Setup,[0],[0]
+"They could choose what category fits them best between:
+1.",3.1. Setup,[0],[0]
+"I seldom listen to classical music
+2.",3.1. Setup,[0],[0]
+"Music lover or musician
+3.",3.1. Setup,[0],[0]
+"Student in music composition or professional musician.
+",3.1. Setup,[0],[0]
+"The musical extracts have been obtained by reharmonizing 50 chorales from the validation set by each of the three models (MaxEnt, MLP, DeepBach).",3.1. Setup,[0],[0]
+"We rendered the MIDI files using the Leeds Town Hall Organ soundfont6 and cut two extracts of 12 seconds from each chorale, which gives us 400 musical extracts for our test: 4 versions for each of the 100 melody chunks.",3.1. Setup,[0],[0]
+"We chose our rendering so that the generated parts (alto, tenor and bass) can be distinctly heard and differentiated from the soprano part (which is fixed and identical for all models): in our mix, dissonances are easily heard, the velocity is the same for all notes as in a real organ performance and the sound does not decay, which is important when evaluating the reharmonization of long notes.",3.1. Setup,[0],[0]
+Subjects were presented series of only one musical extract together with the binary choice “Bach” or “Computer”.,3.2. Discrimination Test: “Bach or Computer” experiment,[0],[0]
+Fig. 5 shows how the votes are distributed depending on the level of musical expertise of the subjects for each model.,3.2. Discrimination Test: “Bach or Computer” experiment,[0],[0]
+"For this experiment, 1272 people took this test, 261 with musical expertise 1, 646 with musical expertise 2 and 365 with musical expertise 3.
+",3.2. Discrimination Test: “Bach or Computer” experiment,[0],[0]
+The results are quite clear: the percentage of “Bach” votes augment as the model’s complexity increase.,3.2. Discrimination Test: “Bach or Computer” experiment,[0],[0]
+"Furthermore, the distinction between computer-generated extracts and Bach’s extracts is more accurate when the level of musical expertise is higher.",3.2. Discrimination Test: “Bach or Computer” experiment,[0],[0]
+"When presented a DeepBach-generated
+6https://www.samplephonics.com/products/ free/sampler-instruments/the-leeds-townhall-organ
+extract, around 50% of the voters would judge it as composed by Bach.",3.2. Discrimination Test: “Bach or Computer” experiment,[0],[0]
+"We consider this to be a good score knowing the complexity of Bach’s compositions and the facility to detect badly-sounding chords even for non musicians.
+",3.2. Discrimination Test: “Bach or Computer” experiment,[0],[0]
+We also plotted specific results for each of the 400 extracts.,3.2. Discrimination Test: “Bach or Computer” experiment,[0],[0]
+Fig. 6 shows for each reharmonization extract the percentage of Bach votes it collected: more than half of the DeepBach’s automatically-composed extracts has a majority of votes considering them as being composed by J.S. Bach while it is only a third for the MLP model.,3.2. Discrimination Test: “Bach or Computer” experiment,[0],[0]
+We developed a plugin on top of the MuseScore music editor allowing a user to call DeepBach on any rectangular region.,4.1. Description,[0],[0]
+"Even if the interface is minimal (see Fig.7), the possibilities are numerous: we can generate a chorale from scratch, reharmonize a melody and regenerate a given chord, bar or part.",4.1. Description,[0],[0]
+We believe that this interplay between a user and the system can boost creativity and can interest a wide range of audience.,4.1. Description,[0],[0]
+We made two major changes between the model we described for the online test and the interactive composition tool.,4.2. Adapting the model,[0],[0]
+We changed the MIDI encoding of the notes to a full name encoding of the notes.,4.2.1. NOTE ENCODING,[0],[0]
+"Indeed, some information is lost when reducing a music sheet to its MIDI representation since we cannot differentiate between two enharmonic
+notes (notes that sound the same but that are written differently e.g. F# and Gb).",4.2.1. NOTE ENCODING,[0],[0]
+"This difference in Bach chorales is unambiguous and it is thus natural to consider the full name of the notes, like C#3, Db3 or E#4.",4.2.1. NOTE ENCODING,[0],[0]
+"From a machine learning point of view, these notes would appear in totally different contexts.",4.2.1. NOTE ENCODING,[0],[0]
+"This improvement enables the model to generate notes with the correct spelling, which is important when we focus on the music sheet rather than on its audio rendering.",4.2.1. NOTE ENCODING,[0],[0]
+We added the current key signature list K to the metadataM. This allows users to impose modulations and key changes.,4.2.2. STEERING MODULATIONS,[0],[0]
+Each element Kt of this list contains the number of sharps of the estimated key for the current bar.,4.2.2. STEERING MODULATIONS,[0],[0]
+It is a integer between -7 and 7.,4.2.2. STEERING MODULATIONS,[0],[0]
+The current key is computed using the key analyzer algorithm from music21.,4.2.2. STEERING MODULATIONS,[0],[0]
+We now provide and comment on examples of chorales generated using the DeepBach plugin.,4.3. Generation examples,[0],[0]
+Our aim is to show the quality of the solutions produced by DeepBach.,4.3. Generation examples,[0],[0]
+"For these examples, no note was set by hand and we asked DeepBach to generate regions longer than one bar and covering all four voices.
+",4.3. Generation examples,[0],[0]
+"Despite some compositional errors like parallel octaves, the musical analysis reveals that the DeepBach compositions reproduce typical Bach-like patterns, from characteristic cadences to the expressive use of nonchord tones.",4.3. Generation examples,[0],[0]
+As discussed in Sect.,4.3. Generation examples,[0],[0]
+"4.2, DeepBach also learned the correct spelling of the notes.",4.3. Generation examples,[0],[0]
+"Among examples in Fig. 8, examples (a) and (b) share the same metadata (S,F and K).",4.3. Generation examples,[0],[0]
+"This demonstrates that even with fixed metadata it is possible to generate contrasting chorales.
+",4.3. Generation examples,[0],[0]
+"Since we aimed at producing music that could not be distinguished from actual Bach compositions, we had all provided extracts sung by the Wishful Singing choir.",4.3. Generation examples,[0],[0]
+These audio files can be heard on the accompanying website.,4.3. Generation examples,[0],[0]
+"We described DeepBach, a probabilistic model together with a sampling method which is flexible, efficient and provides musically convincing results even to the ears of professionals.",5. Discussion and future work,[0],[0]
+"The strength of our method is the possibility to let users impose unary constraints, which is a feature often neglected in probabilistic models of music.",5. Discussion and future work,[0],[0]
+"Through our graphical interface, the composition of polyphonic music becomes accessible to non-specialists.",5. Discussion and future work,[0],[0]
+The playful interaction between the user and this system can boost creativity and help explore new ideas quickly.,5. Discussion and future work,[0],[0]
+"We believe that this approach could form a starting point for a novel com-
+positional process that could be described as a constructive dialogue between a human operator and the computer.",5. Discussion and future work,[0],[0]
+This method is general and its implementation simple.,5. Discussion and future work,[0],[0]
+"It is not only applicable to Bach chorales but embraces a wider range of polyphonic music.
+",5. Discussion and future work,[0],[0]
+"Future work aims at refining our interface, speeding up
+generation and handling datasets with small corpora.",5. Discussion and future work,[0],[0]
+"This paper introduces DeepBach, a graphical model aimed at modeling polyphonic music and specifically hymn-like pieces.",abstractText,[0],[0]
+"We claim that, after being trained on the chorale harmonizations by Johann Sebastian Bach, our model is capable of generating highly convincing chorales in the style of Bach.",abstractText,[0],[0]
+DeepBach’s strength comes from the use of pseudo-Gibbs sampling coupled with an adapted representation of musical data.,abstractText,[0],[0]
+This is in contrast with many automatic music composition approaches which tend to compose music sequentially.,abstractText,[0],[0]
+"Our model is also steerable in the sense that a user can constrain the generation by imposing positional constraints such as notes, rhythms or cadences in the generated score.",abstractText,[0],[0]
+We also provide a plugin on top of the MuseScore music editor making the interaction with DeepBach easy to use.,abstractText,[0],[0]
+DeepBach: a Steerable Model for Bach Chorales Generation ,title,[0],[0]

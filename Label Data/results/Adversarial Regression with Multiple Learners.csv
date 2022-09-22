@@ -1,0 +1,920 @@
+0,1,label2,summary_sentences
+"Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics, pages 1–10 Vancouver, Canada, July 30 - August 4, 2017. c©2017 Association for Computational Linguistics
+https://doi.org/10.18653/v1/P17-1001",text,[0],[0]
+Multi-task learning is an effective approach to improve the performance of a single task with the help of other related tasks.,1 Introduction,[0],[0]
+"Recently, neuralbased models for multi-task learning have become very popular, ranging from computer vision (Misra et al., 2016; Zhang et al., 2014) to natural language processing (Collobert and Weston, 2008; Luong et al., 2015), since they provide a convenient way of combining information from multiple tasks.
+",1 Introduction,[0],[0]
+"However, most existing work on multi-task learning (Liu et al., 2016c,b) attempts to divide the features of different tasks into private and shared spaces, merely based on whether parameters of
+some components should be shared.",1 Introduction,[0],[0]
+"As shown in Figure 1-(a), the general shared-private model introduces two feature spaces for any task: one is used to store task-dependent features, the other is used to capture shared features.",1 Introduction,[0],[0]
+"The major limitation of this framework is that the shared feature space could contain some unnecessary taskspecific features, while some sharable features could also be mixed in private space, suffering from feature redundancy.
+",1 Introduction,[0],[0]
+"Taking the following two sentences as examples, which are extracted from two different sentiment classification tasks: Movie reviews and Baby products reviews.
+",1 Introduction,[0],[0]
+The infantile cart is simple and easy to use.,1 Introduction,[0],[0]
+"This kind of humour is infantile and boring.
+",1 Introduction,[0],[0]
+The word “infantile” indicates negative sentiment in Movie task while it is neutral in Baby task.,1 Introduction,[0],[0]
+"However, the general shared-private model could place the task-specific word “infantile” in a shared space, leaving potential hazards for other tasks.",1 Introduction,[0],[0]
+"Additionally, the capacity of shared space could also be wasted by some unnecessary features.
+",1 Introduction,[0],[0]
+"To address this problem, in this paper we propose an adversarial multi-task framework, in which the shared and private feature spaces are in-
+1
+herently disjoint by introducing orthogonality constraints.",1 Introduction,[0],[0]
+"Specifically, we design a generic sharedprivate learning framework to model the text sequence.",1 Introduction,[0],[0]
+"To prevent the shared and private latent feature spaces from interfering with each other, we introduce two strategies: adversarial training and orthogonality constraints.",1 Introduction,[0],[0]
+"The adversarial training is used to ensure that the shared feature space simply contains common and task-invariant information, while the orthogonality constraint is used to eliminate redundant features from the private and shared spaces.
+",1 Introduction,[0],[0]
+"The contributions of this paper can be summarized as follows.
+1.",1 Introduction,[0],[0]
+"Proposed model divides the task-specific and shared space in a more precise way, rather than roughly sharing parameters.",1 Introduction,[0],[0]
+2.,1 Introduction,[0],[0]
+"We extend the original binary adversarial training to multi-class, which not only enables multiple tasks to be jointly trained, but allows us to utilize unlabeled data.",1 Introduction,[0],[0]
+3.,1 Introduction,[0],[0]
+"We can condense the shared knowledge among multiple tasks into an off-the-shelf neural layer, which can be easily transferred to new tasks.",1 Introduction,[0],[0]
+"There are many neural sentence models, which can be used for text modelling, involving recurrent neural networks (Sutskever et al., 2014; Chung et al., 2014; Liu et al., 2015a), convolutional neural networks (Collobert et al., 2011; Kalchbrenner et al., 2014), and recursive neural networks (Socher et al., 2013).",2 Recurrent Models for Text Classification,[0],[0]
+"Here we adopt recurrent neural network with long short-term memory (LSTM) due to their superior performance in various NLP tasks (Liu et al., 2016a; Lin et al., 2017).
+",2 Recurrent Models for Text Classification,[0],[0]
+"Long Short-term Memory Long short-term memory network (LSTM) (Hochreiter and Schmidhuber, 1997) is a type of recurrent neural network (RNN) (Elman, 1990), and specifically addresses the issue of learning long-term dependencies.",2 Recurrent Models for Text Classification,[0],[0]
+"While there are numerous LSTM variants, here we use the LSTM architecture used by (Jozefowicz et al., 2015), which is similar to the architecture of (Graves, 2013) but without peep-hole connections.
+",2 Recurrent Models for Text Classification,[0],[0]
+"We define the LSTM units at each time step t to be a collection of vectors in Rd: an input gate it, a
+forget gate ft, an output gate ot, a memory cell ct and a hidden state ht. d is the number of the LSTM units.",2 Recurrent Models for Text Classification,[0],[0]
+"The elements of the gating vectors it, ft and ot are in [0, 1].
+",2 Recurrent Models for Text Classification,[0],[0]
+"The LSTM is precisely specified as follows.
+ 
+",2 Recurrent Models for Text Classification,[0],[0]
+"c̃t ot it ft
+  =  
+tanh σ σ",2 Recurrent Models for Text Classification,[0],[0]
+"σ
+  ( Wp [ xt
+ht−1
+] + bp ) , (1)
+ct = c̃t it + ct−1 ft, (2) ht = ot tanh (ct) , (3)
+",2 Recurrent Models for Text Classification,[0],[0]
+where xt ∈,2 Recurrent Models for Text Classification,[0],[0]
+Re is the input at the current time step;,2 Recurrent Models for Text Classification,[0],[0]
+"Wp ∈ R4d×(d+e) and bp ∈ R4d are parameters of affine transformation; σ denotes the logistic sigmoid function and denotes elementwise multiplication.
+",2 Recurrent Models for Text Classification,[0],[0]
+"The update of each LSTM unit can be written precisely as follows:
+ht = LSTM(ht−1,xt, θp).",2 Recurrent Models for Text Classification,[0],[0]
+"(4)
+Here, the function LSTM(·, ·, ·, ·) is a shorthand for Eq.",2 Recurrent Models for Text Classification,[0],[0]
+"(1-3), and θp represents all the parameters of LSTM.
+",2 Recurrent Models for Text Classification,[0],[0]
+"Text Classification with LSTM Given a text sequence x = {x1, x2, · · · , xT }, we first use a lookup layer to get the vector representation (embeddings) xi of the each word xi.",2 Recurrent Models for Text Classification,[0],[0]
+"The output at the last moment hT can be regarded as the representation of the whole sequence, which has a fully connected layer followed by a softmax non-linear layer that predicts the probability distribution over classes.
+",2 Recurrent Models for Text Classification,[0],[0]
+"ŷ = softmax(WhT + b) (5)
+where ŷ is prediction probabilities, W is the weight which needs to be learned, b is a bias term.
+",2 Recurrent Models for Text Classification,[0],[0]
+"Given a corpus with N training samples (xi, yi), the parameters of the network are trained to minimise the cross-entropy of the predicted and true distributions.
+",2 Recurrent Models for Text Classification,[0],[0]
+"L(ŷ, y) =",2 Recurrent Models for Text Classification,[0],[0]
+"− N∑
+i=1
+C∑
+j=1
+yji log(ŷ j i ), (6)
+where yji is the ground-truth label; ŷ",2 Recurrent Models for Text Classification,[0],[0]
+"j i is prediction probabilities, and C is the class number.
+",2 Recurrent Models for Text Classification,[0],[0]
+"softmax Lmtask
+LSTM
+softmax Lntask
+xm xn
+(a) Fully Shared Model (FS-MTL)",2 Recurrent Models for Text Classification,[0],[0]
+The goal of multi-task learning is to utilizes the correlation among these related tasks to improve classification by learning tasks in parallel.,3 Multi-task Learning for Text Classification,[0],[0]
+"To facilitate this, we give some explanation for notations used in this paper.",3 Multi-task Learning for Text Classification,[0],[0]
+"Formally, we refer to Dk as a dataset with Nk samples for task k. Specifically,
+",3 Multi-task Learning for Text Classification,[0],[0]
+"Dk = {(xki , yki )}Nki=1 (7)
+where xki and y k",3 Multi-task Learning for Text Classification,[0],[0]
+i denote a sentence and corresponding label for task k.,3 Multi-task Learning for Text Classification,[0],[0]
+The key factor of multi-task learning is the sharing scheme in latent feature space.,3.1 Two Sharing Schemes for Sentence Modeling,[0],[0]
+"In neural network based model, the latent features can be regarded as the states of hidden neurons.",3.1 Two Sharing Schemes for Sentence Modeling,[0],[0]
+"Specific to text classification, the latent features are the hidden states of LSTM at the end of a sentence.",3.1 Two Sharing Schemes for Sentence Modeling,[0],[0]
+"Therefore, the sharing schemes are different in how to group the shared features.",3.1 Two Sharing Schemes for Sentence Modeling,[0],[0]
+"Here, we first introduce two sharing schemes with multi-task learning: fully-shared scheme and shared-private scheme.
+",3.1 Two Sharing Schemes for Sentence Modeling,[0],[0]
+Fully-Shared Model (FS-MTL),3.1 Two Sharing Schemes for Sentence Modeling,[0],[0]
+"In fully-shared model, we use a single shared LSTM layer to extract features for all the tasks.",3.1 Two Sharing Schemes for Sentence Modeling,[0],[0]
+"For example, given two tasks m and n, it takes the view that the features of task m can be totally shared by task n and vice versa.",3.1 Two Sharing Schemes for Sentence Modeling,[0],[0]
+This model ignores the fact that some features are task-dependent.,3.1 Two Sharing Schemes for Sentence Modeling,[0],[0]
+"Figure 2a illustrates the fully-shared model.
+",3.1 Two Sharing Schemes for Sentence Modeling,[0],[0]
+Shared-Private Model (SP-MTL),3.1 Two Sharing Schemes for Sentence Modeling,[0],[0]
+"As shown in Figure 2b, the shared-private model introduces two feature spaces for each task: one is used to store task-dependent features, the other is used to capture task-invariant features.",3.1 Two Sharing Schemes for Sentence Modeling,[0],[0]
+"Accordingly, we can see each task is assigned a private LSTM layer and shared LSTM layer.",3.1 Two Sharing Schemes for Sentence Modeling,[0],[0]
+"Formally, for any sentence in task k, we can compute its shared representation skt and task-specific representation h k t as follows:
+skt = LSTM(xt, s k t−1, θs), (8)
+hkt = LSTM(xt,h m t−1, θk) (9)
+where LSTM(., θ) is defined as Eq. (4).",3.1 Two Sharing Schemes for Sentence Modeling,[0],[0]
+The final features are concatenation of the features from private space and shared space.,3.1 Two Sharing Schemes for Sentence Modeling,[0],[0]
+"For a sentence in task k, its feature h(k), emitted by the deep muti-task architectures, is ultimately fed into the corresponding task-specific softmax layer for classification or other tasks.
+",3.2 Task-Specific Output Layer,[0],[0]
+The parameters of the network are trained to minimise the cross-entropy of the predicted and true distributions on all the tasks.,3.2 Task-Specific Output Layer,[0],[0]
+"The loss Ltask can be computed as:
+LTask = K∑
+k=1
+αkL(ŷ (k), y(k))",3.2 Task-Specific Output Layer,[0],[0]
+"(10)
+where αk is the weights for each task k respectively.",3.2 Task-Specific Output Layer,[0],[0]
+"L(ŷ, y) is defined as Eq. 6.",3.2 Task-Specific Output Layer,[0],[0]
+"Although the shared-private model separates the feature space into the shared and private spaces, there is no guarantee that sharable features can not exist in private feature space, or vice versa.",4 Incorporating Adversarial Training,[0],[0]
+"Thus, some useful sharable features could be ignored in shared-private model, and the shared feature space is also vulnerable to contamination by some taskspecific information.
+",4 Incorporating Adversarial Training,[0],[0]
+"Therefore, a simple principle can be applied into multi-task learning that a good shared feature space should contain more common information and no task-specific information.",4 Incorporating Adversarial Training,[0],[0]
+"To address this problem, we introduce adversarial training into multi-task framework as shown in Figure 3 (ASPMTL).",4 Incorporating Adversarial Training,[0],[0]
+"Adversarial networks have recently surfaced and are first used for generative model (Goodfellow et al., 2014).",4.1 Adversarial Network,[0],[0]
+The goal is to learn a generative distribution pG(x) that matches the real data distribution Pdata(x),4.1 Adversarial Network,[0],[0]
+"Specifically, GAN learns a generative network G and discriminative model D, in which G generates samples from the generator distribution pG(x).",4.1 Adversarial Network,[0],[0]
+and D learns to determine whether a sample is from pG(x) or Pdata(x).,4.1 Adversarial Network,[0],[0]
+"This min-max game can be optimized by the following risk:
+φ = min G max D
+( Ex∼Pdata [logD(x)]
++ Ez∼p(z)[log(1−D(G(z)))] )
+(11)
+While originally proposed for generating random samples, adversarial network can be used as a general tool to measure equivalence between distributions (Taigman et al., 2016).",4.1 Adversarial Network,[0],[0]
+"Formally, (Ajakan et al., 2014) linked the adversarial loss to the H-divergence between two distributions and successfully achieve unsupervised domain adaptation with adversarial network.",4.1 Adversarial Network,[0],[0]
+"Motivated by theory on domain adaptation (Ben-David et al., 2010, 2007; Bousmalis et al., 2016) that a transferable feature is one for which an algorithm cannot learn to identify the domain of origin of the input observation.",4.1 Adversarial Network,[0],[0]
+"Inspired by adversarial networks (Goodfellow et al., 2014), we proposed an adversarial sharedprivate model for multi-task learning, in which a shared recurrent neural layer is working adversarially towards a learnable multi-layer perceptron, preventing it from making an accurate prediction about the types of tasks.",4.2 Task Adversarial Loss for MTL,[0],[0]
+"This adversarial training encourages shared space to be more pure and ensure the shared representation not be contaminated by task-specific features.
+",4.2 Task Adversarial Loss for MTL,[0],[0]
+"Task Discriminator Discriminator is used to map the shared representation of sentences into a probability distribution, estimating what kinds of tasks the encoded sentence comes from.
+D(skT , θD) = softmax(b+Us k T ) (12)
+where U ∈ Rd×d is a learnable parameter and b ∈ Rd is a bias.
+",4.2 Task Adversarial Loss for MTL,[0],[0]
+"Adversarial Loss Different with most existing multi-task learning algorithm, we add an extra task adversarial loss LAdv to prevent task-specific feature from creeping in to shared space.",4.2 Task Adversarial Loss for MTL,[0],[0]
+The task adversarial loss is used to train a model to produce shared features such that a classifier cannot reliably predict the task based on these features.,4.2 Task Adversarial Loss for MTL,[0],[0]
+The original loss of adversarial network is limited since it can only be used in binary situation.,4.2 Task Adversarial Loss for MTL,[0],[0]
+"To overcome this, we extend it to multi-class form, which allow our model can be trained together with multiple tasks:
+LAdv = min θs ( λmax θD ( K∑
+k=1
+Nk∑
+i=1
+dki log[D(E(x k))]) )",4.2 Task Adversarial Loss for MTL,[0],[0]
+"(13)
+where dki denotes the ground-truth label indicating the type of the current task.",4.2 Task Adversarial Loss for MTL,[0],[0]
+"Here, there is a minmax optimization and the basic idea is that, given a sentence, the shared LSTM generates a representation to mislead the task discriminator.",4.2 Task Adversarial Loss for MTL,[0],[0]
+"At the same time, the discriminator tries its best to make a correct classification on the type of task.",4.2 Task Adversarial Loss for MTL,[0],[0]
+"After the training phase, the shared feature extractor and task discriminator reach a point at which both cannot improve and the discriminator is unable to differentiate among all the tasks.
+",4.2 Task Adversarial Loss for MTL,[0],[0]
+Semi-supervised Learning Multi-task Learning,4.2 Task Adversarial Loss for MTL,[0],[0]
+"We notice that the LAdv requires only the input sentence x and does not require the corresponding label y, which makes it possible to combine our model with semi-supervised learning.",4.2 Task Adversarial Loss for MTL,[0],[0]
+"Finally, in this semi-supervised multi-task learning framework, our model can not only utilize the data from related tasks, but can employ abundant unlabeled corpora.",4.2 Task Adversarial Loss for MTL,[0],[0]
+We notice that there is a potential drawback of the above model.,4.3 Orthogonality Constraints,[0],[0]
+"That is, the task-invariant features can appear both in shared space and private space.
+",4.3 Orthogonality Constraints,[0],[0]
+"Motivated by recently work(Jia et al., 2010; Salzmann et al., 2010; Bousmalis et al., 2016)
+on shared-private latent space analysis, we introduce orthogonality constraints, which penalize redundant latent representations and encourages the shared and private extractors to encode different aspects of the inputs.
+",4.3 Orthogonality Constraints,[0],[0]
+"After exploring many optional methods, we find below loss is optimal, which is used by Bousmalis et al. (2016) and achieve a better performance:
+Ldiff = K∑
+k=1
+∥∥∥Sk>Hk ∥∥∥ 2
+F , (14)
+where ‖ · ‖2F is the squared Frobenius norm.",4.3 Orthogonality Constraints,[0],[0]
+"Sk and Hk are two matrics, whose rows are the output of shared extractor Es(, ; θs) and task-specific extrator Ek(, ; θk) of a input sentence.",4.3 Orthogonality Constraints,[0],[0]
+"The final loss function of our model can be written as:
+L = LTask + λLAdv + γLDiff",4.4 Put It All Together,[0],[0]
+"(15)
+where λ and γ are hyper-parameter.",4.4 Put It All Together,[0],[0]
+"The networks are trained with backpropagation and this minimax optimization becomes possible via the use of a gradient reversal layer (Ganin and Lempitsky, 2015).",4.4 Put It All Together,[0],[0]
+"To make an extensive evaluation, we collect 16 different datasets from several popular review corpora.
+",5.1 Dataset,[0],[0]
+"The first 14 datasets are product reviews, which contain Amazon product reviews from different domains, such as Books, DVDs, Electronics, ect.",5.1 Dataset,[0],[0]
+The goal is to classify a product review as either positive or negative.,5.1 Dataset,[0],[0]
+"These datasets are collected based on the raw data 1 provided by (Blitzer et al., 2007).",5.1 Dataset,[0],[0]
+"Specifically, we extract the sentences and corresponding labels from the unprocessed original data 2.",5.1 Dataset,[0],[0]
+"The only preprocessing operation of these sentences is tokenized using the Stanford tokenizer 3.
+",5.1 Dataset,[0],[0]
+The remaining two datasets are about movie reviews.,5.1 Dataset,[0],[0]
+"The IMDB dataset4 consists of movie reviews with binary classes (Maas et al., 2011).",5.1 Dataset,[0],[0]
+One key aspect of this dataset is that each movie review has several sentences.,5.1 Dataset,[0],[0]
+"The MR dataset also consists of movie reviews from rotten tomato website with two classes 5(Pang and Lee, 2005).
+",5.1 Dataset,[0],[0]
+"All the datasets in each task are partitioned randomly into training set, development set and testing set with the proportion of 70%, 20% and 10% respectively.",5.1 Dataset,[0],[0]
+The detailed statistics about all the datasets are listed in Table 1.,5.1 Dataset,[0],[0]
+The multi-task frameworks proposed by previous works are various while not all can be applied to the tasks we focused.,5.2 Competitor Methods for Multi-task Learning,[0],[0]
+"Nevertheless, we chose two most related neural models for multi-task learning and implement them as competitor methods.
+",5.2 Competitor Methods for Multi-task Learning,[0],[0]
+• MT-CNN:,5.2 Competitor Methods for Multi-task Learning,[0],[0]
+"This model is proposed by Collobert and Weston (2008) with convolutional layer, in which lookup-tables are shared partially while other layers are task-specific.
+1https://www.cs.jhu.edu/˜mdredze/ datasets/sentiment/
+2Blitzer et al. (2007) also provides two extra processed datasets with the format of Bag-of-Words, which are not proper for neural-based models.
+",5.2 Competitor Methods for Multi-task Learning,[0],[0]
+"3http://nlp.stanford.edu/software/ tokenizer.shtml
+4https://www.cs.jhu.edu/˜mdredze/ datasets/sentiment/unprocessed.tar.gz
+5https://www.cs.cornell.edu/people/ pabo/movie-review-data/.
+• MT-DNN:",5.2 Competitor Methods for Multi-task Learning,[0],[0]
+"The model is proposed by Liu et al. (2015b) with bag-of-words input and multi-layer perceptrons, in which a hidden layer is shared.",5.2 Competitor Methods for Multi-task Learning,[0],[0]
+"The word embeddings for all of the models are initialized with the 200d GloVe vectors ((Pennington et al., 2014)).",5.3 Hyperparameters,[0],[0]
+"The other parameters are initialized by randomly sampling from uniform distribution in [−0.1, 0.1].",5.3 Hyperparameters,[0],[0]
+"The mini-batch size is set to 16.
+",5.3 Hyperparameters,[0],[0]
+"For each task, we take the hyperparameters which achieve the best performance on the development set via an small grid search over combinations of the initial learning rate [0.1, 0.01], λ ∈",5.3 Hyperparameters,[0],[0]
+"[0.01, 0.1], and γ ∈",5.3 Hyperparameters,[0],[0]
+"[0.01, 0.1].",5.3 Hyperparameters,[0],[0]
+"Finally, we chose the learning rate as 0.01, λ as 0.05 and γ as 0.01.",5.3 Hyperparameters,[0],[0]
+Table 2 shows the error rates on 16 text classification tasks.,5.4 Performance Evaluation,[0],[0]
+"The column of “Single Task” shows the results of vanilla LSTM, bidirectional LSTM (BiLSTM), stacked LSTM (sLSTM) and the average error rates of previous three models.",5.4 Performance Evaluation,[0],[0]
+The column of “Multiple Tasks” shows the results achieved by corresponding multi-task models.,5.4 Performance Evaluation,[0],[0]
+"From this table, we can see that the performance of most tasks can be improved with a large margin with the help of multi-task learning, in which our model achieves the lowest error rates.",5.4 Performance Evaluation,[0],[0]
+"More concretely, compared with SP-MTL, ASP-
+MTL achieves 4.1% average improvement surpassing SP-MTL with 1.0%, which indicates the importance of adversarial learning.",5.4 Performance Evaluation,[0],[0]
+"It is noteworthy that for FS-MTL, the performances of some tasks are degraded, since this model puts all private and shared information into a unified space.",5.4 Performance Evaluation,[0],[0]
+"With the help of adversarial learning, the shared feature extractor Es can generate more pure taskinvariant representations, which can be considered as off-the-shelf knowledge and then be used for unseen new tasks.
+",5.5 Shared Knowledge Transfer,[0],[0]
+"To test the transferability of our learned shared extractor, we also design an experiment, in which we take turns choosing 15 tasks to train our model MS with multi-task learning, then the learned shared layer are transferred to a second network MT that is used for the remaining one task.",5.5 Shared Knowledge Transfer,[0],[0]
+"The parameters of transferred layer are kept frozen, and the rest of parameters of the network MT are randomly initialized.
+",5.5 Shared Knowledge Transfer,[0],[0]
+"More formally, we investigate two mechanisms towards the transferred shared extractor.",5.5 Shared Knowledge Transfer,[0],[0]
+As shown in Figure 4.,5.5 Shared Knowledge Transfer,[0],[0]
+"The first one Single Channel (SC) model consists of one shared feature extractor Es from MS , then the extracted representation will be sent to an output layer.",5.5 Shared Knowledge Transfer,[0],[0]
+"By contrast, the BiChannel (BC) model introduces an extra LSTM layer to encode more task-specific information.",5.5 Shared Knowledge Transfer,[0],[0]
+"To evaluate the effectiveness of our introduced adversarial training framework, we also make a compar-
+ison with vanilla multi-task learning method.
+",5.5 Shared Knowledge Transfer,[0],[0]
+"Results and Analysis As shown in Table 3, we can see the shared layer from ASP-MTL achieves a better performance compared with SP-MTL.",5.5 Shared Knowledge Transfer,[0],[0]
+"Besides, for the two kinds of transfer strategies, the Bi-Channel model performs better.",5.5 Shared Knowledge Transfer,[0],[0]
+The reason is that the task-specific layer introduced in the BiChannel model can store some private features.,5.5 Shared Knowledge Transfer,[0],[0]
+"Overall, the results indicate that we can save the existing knowledge into a shared recurrent layer using adversarial multi-task learning, which is quite useful for a new task.",5.5 Shared Knowledge Transfer,[0],[0]
+"To get an intuitive understanding of how the introduced orthogonality constraints worked compared with vanilla shared-private model, we design an experiment to examine the behaviors of neurons from private layer and shared layer.",5.6 Visualization,[0],[0]
+"More concretely, we refer to htj as the activation of the jneuron at time step t, where t ∈ {1, . . .",5.6 Visualization,[0],[0]
+",",5.6 Visualization,[0],[0]
+"n} and
+j ∈ {1, . .",5.6 Visualization,[0],[0]
+.,5.6 Visualization,[0],[0]
+", d}.",5.6 Visualization,[0],[0]
+"By visualizing the hidden state hj and analyzing the maximum activation, we can find what kinds of patterns the current neuron focuses on.
+",5.6 Visualization,[0],[0]
+Figure 5 illustrates this phenomenon.,5.6 Visualization,[0],[0]
+"Here, we randomly sample a sentence from the validation set of Baby task and analyze the changes of the predicted sentiment score at different time steps, which are obtained by SP-MTL and our proposed model.",5.6 Visualization,[0],[0]
+"Additionally, to get more insights into how neurons in shared layer behave diversely towards different input word, we visualize the activation of two typical neurons.",5.6 Visualization,[0],[0]
+"For the positive sentence “Five stars, my baby can fall asleep soon in the stroller”, both models capture the informative pattern “Five stars” 6.",5.6 Visualization,[0],[0]
+"However, SP-MTL makes a wrong prediction due to misunderstanding of the word “asleep”.
+",5.6 Visualization,[0],[0]
+"By contrast, our model makes a correct prediction and the reason can be inferred from the activation of Figure 5-(b), where the shared layer of SP-MTL is so sensitive that many features related to other tasks are included, such as ”asleep”, which misleads the final prediction.",5.6 Visualization,[0],[0]
+"This indicates the importance of introducing adversarial learning to prevent the shared layer from being contaminated by task-specific features.
+",5.6 Visualization,[0],[0]
+"We also list some typical patterns captured by
+6For this case, the vanilla LSTM also give a wrong answer due to ignoring the feature “Five stars”.
+",5.6 Visualization,[0],[0]
+"Model Shared Layer Task-Movie Task-Baby
+SP-MTL
+good, great bad, love, simple, cut, slow, cheap, infantile good, great, well-directed, pointless, cut, cheap, infantile love, bad, cute, safety, mild, broken simple
+ASP-MTL good, great, love, bad poor well-directed, pointless, cut, cheap, infantile cute, safety, mild, broken simple
+Table 4: Typical patterns captured by shared layer and task-specific layer of SP-MTL and ASP-MTL models on Movie and Baby tasks.
+neurons from shared layer and task-specific layer in Table 4, and we have observed that: 1) for SP-MTL, if some patterns are captured by taskspecific layer, they are likely to be placed into shared space.",5.6 Visualization,[0],[0]
+"Clearly, suppose we have many tasks to be trained jointly, the shared layer bear much pressure and must sacrifice substantial amount of capacity to capture the patterns they actually do not need.",5.6 Visualization,[0],[0]
+"Furthermore, some typical taskinvariant features also go into task-specific layer.",5.6 Visualization,[0],[0]
+"2) for ASP-MTL, we find the features captured by shared and task-specific layer have a small amount of intersection, which allows these two kinds of layers can work effectively.",5.6 Visualization,[0],[0]
+There are two threads of related work.,6 Related Work,[0],[0]
+One thread is multi-task learning with neural network.,6 Related Work,[0],[0]
+"Neural networks based multi-task learning has been proven effective in many NLP problems (Collobert and Weston, 2008; Glorot et al., 2011).
+",6 Related Work,[0],[0]
+"Liu et al. (2016c) first utilizes different LSTM layers to construct multi-task learning framwork
+for text classification.",6 Related Work,[0],[0]
+"Liu et al. (2016b) proposes a generic multi-task framework, in which different tasks can share information by an external memory and communicate by a reading/writing mechanism.",6 Related Work,[0],[0]
+"These work has potential limitation of just learning a shared space solely on sharing parameters, while our model introduce two strategies to learn the clear and non-redundant shared-private space.
+",6 Related Work,[0],[0]
+Another thread of work is adversarial network.,6 Related Work,[0],[0]
+Adversarial networks have recently surfaced as a general tool measure equivalence between distributions and it has proven to be effective in a variety of tasks.,6 Related Work,[0],[0]
+"Ajakan et al. (2014); Bousmalis et al. (2016) applied adverarial training to domain adaptation, aiming at transferring the knowledge of one source domain to target domain.",6 Related Work,[0],[0]
+"Park and Im (2016) proposed a novel approach for multimodal representation learning which uses adversarial back-propagation concept.
+",6 Related Work,[0],[0]
+"Different from these models, our model aims to find task-invariant sharable information for multiple related tasks using adversarial training strategy.",6 Related Work,[0],[0]
+"Moreover, we extend binary adversarial training to multi-class, which enable multiple tasks to be jointly trained.",6 Related Work,[0],[0]
+"In this paper, we have proposed an adversarial multi-task learning framework, in which the taskspecific and task-invariant features are learned non-redundantly, therefore capturing the sharedprivate separation of different tasks.",7 Conclusion,[0],[0]
+We have demonstrated the effectiveness of our approach by applying our model to 16 different text classification tasks.,7 Conclusion,[0],[0]
+"We also perform extensive qualitative
+analysis, deriving insights and indirectly explaining the quantitative improvements in the overall performance.",7 Conclusion,[0],[0]
+"We would like to thank the anonymous reviewers for their valuable comments and thank Kaiyu Qian, Gang Niu for useful discussions.",Acknowledgments,[0],[0]
+"This work was partially funded by National Natural Science Foundation of China (No. 61532011 and 61672162), the National High Technology Research and Development Program of China (No. 2015AA015408), Shanghai Municipal Science and Technology Commission (No. 16JC1420401).",Acknowledgments,[0],[0]
+"Neural network models have shown their promising opportunities for multi-task learning, which focus on learning the shared layers to extract the common and task-invariant features.",abstractText,[0],[0]
+"However, in most existing approaches, the extracted shared features are prone to be contaminated by task-specific features or the noise brought by other tasks.",abstractText,[0],[0]
+"In this paper, we propose an adversarial multi-task learning framework, alleviating the shared and private latent feature spaces from interfering with each other.",abstractText,[0],[0]
+"We conduct extensive experiments on 16 different text classification tasks, which demonstrates the benefits of our approach.",abstractText,[0],[0]
+"Besides, we show that the shared knowledge learned by our proposed model can be regarded as off-the-shelf knowledge and easily transferred to new tasks.",abstractText,[0],[0]
+The datasets of all 16 tasks are publicly available at http://nlp.fudan.,abstractText,[0],[0]
+Adversarial Multi-task Learning for Text Classification,title,[0],[0]
+Increasing use of machine learning in adversarial settings has motivated a series of efforts investigating the extent to which learning approaches can be subverted by malicious parties.,1. Introduction,[0],[0]
+"An important class of such attacks involves adversaries changing their behaviors, or features of the environment, to effect an incorrect prediction.",1. Introduction,[1.0],"['An important class of such attacks involves adversaries changing their behaviors, or features of the environment, to effect an incorrect prediction.']"
+"Most previous efforts study this problem as an interaction between a single learner and a single attacker (Brückner & Scheffer, 2011; Dalvi et al., 2004; Li & Vorobeychik, 2014; Zhou et al., 2012).",1. Introduction,[1.0],"['Most previous efforts study this problem as an interaction between a single learner and a single attacker (Brückner & Scheffer, 2011; Dalvi et al., 2004; Li & Vorobeychik, 2014; Zhou et al., 2012).']"
+"However, in reality attackers often target a broad array of potential victim organizations.",1. Introduction,[0],[0]
+"For example, they craft generic spam templates and generic malware, and then disseminate these widely to maximize impact.",1. Introduction,[1.0],"['For example, they craft generic spam templates and generic malware, and then disseminate these widely to maximize impact.']"
+"The resulting
+*Equal contribution 1Department of EECS, Vanderbilt University, Nashville, TN, USA 2Computer Science Department, Amherst College, Amherst, MA, USA.",1. Introduction,[0],[0]
+"Correspondence to: Yevgeniy Vorobeychik <eug.vorobey@gmail.com>.
+",1. Introduction,[0],[0]
+"Proceedings of the 35 th International Conference on Machine Learning, Stockholm, Sweden, PMLR 80, 2018.",1. Introduction,[0],[0]
+"Copyright 2018 by the author(s).
+",1. Introduction,[0],[0]
+"ecology of attack targets reflects not a single learner, but many such learners, all making autonomous decisions about how to detect malicious content, although these decisions often rely on similar training datasets.
+",1. Introduction,[0.9977902618169868],"['The resulting ecology of attack targets reflects not a single learner, but many such learners, all making autonomous decisions about how to detect malicious content, although these decisions often rely on similar training datasets.']"
+"We model the resulting game as an interaction between multiple learners, who simultaneously learn linear regression models, and an attacker, who observes the learned models (as in white-box attacks (Šrndic & Laskov, 2014)), and modifies the original feature vectors at test time in order to induce incorrect predictions.",1. Introduction,[1.0],"['We model the resulting game as an interaction between multiple learners, who simultaneously learn linear regression models, and an attacker, who observes the learned models (as in white-box attacks (Šrndic & Laskov, 2014)), and modifies the original feature vectors at test time in order to induce incorrect predictions.']"
+"Crucially, rather than customizing the attack to each learner (as in typical models), the attacker chooses a single attack for all learners.",1. Introduction,[1.0],"['Crucially, rather than customizing the attack to each learner (as in typical models), the attacker chooses a single attack for all learners.']"
+"We term the resulting game a Multi-Learner Stackelberg Game, to allude to its two stages, with learners jointly acting as Stackelberg leaders, and the attacker being the follower.",1. Introduction,[1.0],"['We term the resulting game a Multi-Learner Stackelberg Game, to allude to its two stages, with learners jointly acting as Stackelberg leaders, and the attacker being the follower.']"
+Our first contribution is the formal model of this game.,1. Introduction,[1.0],['Our first contribution is the formal model of this game.']
+Our second contribution is to approximate this game by deriving upper bounds on the learner loss functions.,1. Introduction,[1.0],['Our second contribution is to approximate this game by deriving upper bounds on the learner loss functions.']
+"The resulting approximation yields a game in which there always exists a symmetric equilibrium, and this equilibrium is unique.",1. Introduction,[1.0],"['The resulting approximation yields a game in which there always exists a symmetric equilibrium, and this equilibrium is unique.']"
+"In addition, we prove that this unique equilibrium can be computed by solving a convex optimization problem.",1. Introduction,[1.0],"['In addition, we prove that this unique equilibrium can be computed by solving a convex optimization problem.']"
+"Our third contribution is to show that the equilibrium of the approximate game is robust, both theoretically (by showing it to be equivalent to a particular robust optimization problem), and through extensive experiments, which demonstrate it to be much more robust to attacks than standard regularization approaches.
+",1. Introduction,[0.9999999969459441],"['Our third contribution is to show that the equilibrium of the approximate game is robust, both theoretically (by showing it to be equivalent to a particular robust optimization problem), and through extensive experiments, which demonstrate it to be much more robust to attacks than standard regularization approaches.']"
+"Related Work Both attacks on and defenses of machine learning approaches have been studied within the literature on adversarial machine learning (Brückner & Scheffer, 2011; Dalvi et al., 2004; Li & Vorobeychik, 2014; Zhou et al., 2012; Lowd & Meek, 2005).",1. Introduction,[0],[0]
+"These approaches commonly assume a single learner, and consider either the problem of finding evasions against a fixed model (Dalvi et al., 2004; Lowd & Meek, 2005; Šrndic & Laskov, 2014), or algorithmic approaches for making learning more robust to attacks (Russu et al., 2016; Brückner & Scheffer, 2011; Dalvi et al., 2004; Li & Vorobeychik, 2014; 2015).",1. Introduction,[1.0],"['These approaches commonly assume a single learner, and consider either the problem of finding evasions against a fixed model (Dalvi et al., 2004; Lowd & Meek, 2005; Šrndic & Laskov, 2014), or algorithmic approaches for making learning more robust to attacks (Russu et al., 2016; Brückner & Scheffer, 2011; Dalvi et al., 2004; Li & Vorobeychik, 2014; 2015).']"
+"Most of these efforts deal specifically with classification learning, but several consider adversarial tampering with regression models (Alfeld et al., 2016; Grosshans et al., 2013), although still within a single-learner and single-attacker framework.",1. Introduction,[0],[0]
+"Stevens & Lowd (2013) study the algorithmic problem of
+attacking multiple linear classifiers, but did not consider the associated game among classifiers.
+",1. Introduction,[1.0000000821070156],"['Stevens & Lowd (2013) study the algorithmic problem of attacking multiple linear classifiers, but did not consider the associated game among classifiers.']"
+"Our work also has a connection to the literature on security games with multiple defenders (Laszka et al., 2016; Smith et al., 2017; Vorobeychik et al., 2011).",1. Introduction,[1.0],"['Our work also has a connection to the literature on security games with multiple defenders (Laszka et al., 2016; Smith et al., 2017; Vorobeychik et al., 2011).']"
+"The key distinction with our paper is that in multi-learner games, the learner strategy space is the space of possible models in a given model class, whereas prior research has focused on significantly simpler strategies (such as protecting a finite collection of attack targets).",1. Introduction,[0],[0]
+"We investigate the interactions between a collection of learners N = {1, 2, ..., n} and an attacker in regression problems, modeled as a Multi-Learner Stackelberg Game (MLSG).",2. Model,[1.0],"['We investigate the interactions between a collection of learners N = {1, 2, ..., n} and an attacker in regression problems, modeled as a Multi-Learner Stackelberg Game (MLSG).']"
+"At the high level, this game involves two stages: first, all learners choose (train) their models from data, and second, the attacker transforms test data (such as features of the environment, at prediction time) to achieve malicious goals.",2. Model,[1.0],"['At the high level, this game involves two stages: first, all learners choose (train) their models from data, and second, the attacker transforms test data (such as features of the environment, at prediction time) to achieve malicious goals.']"
+"Below, we first formalize the model of the learners and the attacker, and then formally describe the full game.",2. Model,[1.0],"['Below, we first formalize the model of the learners and the attacker, and then formally describe the full game.']"
+"At training time, a set of training data (X,y) is drawn from an unknown distribution D. X 2 Rm⇥d is the training sample and y 2 Rm⇥1 is a vector of values of each data in X.",2.1. Modeling the Players,[1.0],"['At training time, a set of training data (X,y) is drawn from an unknown distribution D. X 2 Rm⇥d is the training sample and y 2 Rm⇥1 is a vector of values of each data in X.']"
+"We let xj 2 Rd⇥1 denote the jth instance in the training sample, associated with a corresponding value yj 2 R from y. Hence, X =",2.1. Modeling the Players,[0],[0]
+"[x1, ...,xm]> and y =",2.1. Modeling the Players,[0],[0]
+"[y1, y2, ..., ym]>.",2.1. Modeling the Players,[0],[0]
+"On the other hand, test data can be generated either from D, the same distribution as the training data, or from D0 , a modification of D generated by an attacker.",2.1. Modeling the Players,[0],[0]
+The nature of such malicious modifications is described below.,2.1. Modeling the Players,[0],[0]
+"We let (0   1) represent the probability that a test instance is drawn from D0 (i.e., the malicious distribution), and 1 be the probability that it is generated from D.
+The action of the ith learner is to select a d⇥ 1 vector ✓i as the parameter of the linear regression function ˆyi = X✓i, where ˆyi is the predicted values for data X.",2.1. Modeling the Players,[0],[0]
+"The expected cost function of the ith learner at test time is then
+ci(✓i,D 0 )",2.1. Modeling the Players,[0],[0]
+"= E(X0 ,y)⇠D0 [`(X 0",2.1. Modeling the Players,[0],[0]
+"✓i,y)]
++ (1 )E(X,y)⇠D[`(X✓i,y)].",2.1. Modeling the Players,[0],[0]
+"(1)
+where `(ˆy,y) = ||ˆy",2.1. Modeling the Players,[0],[0]
+y||22.,2.1. Modeling the Players,[0],[0]
+"That is, the cost function of a learner i is a combination of its expected cost from both the attacker and the honest source.
+",2.1. Modeling the Players,[0.9999999875532493],"['That is, the cost function of a learner i is a combination of its expected cost from both the attacker and the honest source.']"
+"Every instance (x, y) generated according to D is, with probability , maliciously modified by the attacker into another, (x0, y), as follows.",2.1. Modeling the Players,[1.0],"['Every instance (x, y) generated according to D is, with probability , maliciously modified by the attacker into another, (x0, y), as follows.']"
+"We assume that the attacker has an instance-specific target z(x), and wishes that the
+prediction made by each learner i on the modified instance, ŷ =",2.1. Modeling the Players,[0],[0]
+"✓>i x 0 , is close to this target.",2.1. Modeling the Players,[0],[0]
+"We measure this objective for the attacker by `(ˆy, z) = ||ˆy z||22 for a vector of predicted and target values ˆy and z, respectively.",2.1. Modeling the Players,[1.0],"['We measure this objective for the attacker by `(ˆy, z) = ||ˆy z||22 for a vector of predicted and target values ˆy and z, respectively.']"
+"In addition, the attacker incurs a cost of transforming a distribution D into D0 , denoted by R(D0 ,D).
+",2.1. Modeling the Players,[0],[0]
+"After a dataset (X 0 ,y) is generated in this way by the attacker, it is used simultaneously against all the learners.",2.1. Modeling the Players,[0],[0]
+"This is natural in most real attacks: for example, spam templates are commonly generated to be used broadly, against many individuals and organizations, and, similarly, malware executables are often produced to be generally effective, rather than custom made for each target.",2.1. Modeling the Players,[0],[0]
+The expected cost function of the attacker is then a sum of its total expected cost for all learners plus the cost of transforming D into D0 with coefficient > 0,2.1. Modeling the Players,[0],[0]
+":
+ca({✓i}ni=1,D 0 )",2.1. Modeling the Players,[0],[0]
+"=
+nX
+i=1
+E(X0 ,y)⇠D0 [`(X 0",2.1. Modeling the Players,[0],[0]
+"✓i, z)]+ R(D 0 ,D).
+",2.1. Modeling the Players,[0],[0]
+"(2)
+As is typical, we estimate the cost functions of the learners and the attacker using training data (X,y), which is also used to simulate attacks.",2.1. Modeling the Players,[0.9999999150866759],"['(2) As is typical, we estimate the cost functions of the learners and the attacker using training data (X,y), which is also used to simulate attacks.']"
+"Consequently, the cost functions of each learner and the attacker are estimated by
+ci(✓i,X 0 ) =",2.1. Modeling the Players,[0],[0]
+`(X 0,2.1. Modeling the Players,[0],[0]
+"✓i,y) +",2.1. Modeling the Players,[0],[0]
+"(1 )`(X✓i,y) (3)
+and
+ca({✓i}ni=1,X 0 )",2.1. Modeling the Players,[0],[0]
+"=
+nX
+i=1
+`(X 0",2.1. Modeling the Players,[0],[0]
+"✓i, z) +",2.1. Modeling the Players,[0],[0]
+"R(X 0 ,X) (4)
+where the attacker’s modification cost is measured by R(X
+0 ,X) = ||X0 X||2F , the squared Frobenius norm.",2.1. Modeling the Players,[0],[0]
+We are now ready to formally define the game between the n learners and the attacker.,2.2. The Multi-Learner Stackerlberg Game,[1.0],['We are now ready to formally define the game between the n learners and the attacker.']
+"The MLSG has two stages: in the first stage, learners simultaneously select their model parameters ✓i, and in the second stage, the attacker makes its decision (manipulating X 0 ) after observing the learners’ model choices {✓i}ni=1.",2.2. The Multi-Learner Stackerlberg Game,[1.0],"['The MLSG has two stages: in the first stage, learners simultaneously select their model parameters ✓i, and in the second stage, the attacker makes its decision (manipulating X 0 ) after observing the learners’ model choices {✓i}ni=1.']"
+"We assume that the proposed game satisfies the following assumptions:
+1.",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"The learners have complete information about parameters , and z.",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"This is a strong assumption, and we relax it in our experimental evaluation (Section 6), providing guidance on how to deal with uncertainty about these parameters.
+2.",2.2. The Multi-Learner Stackerlberg Game,[0.9930737720712992],"['This is a strong assumption, and we relax it in our experimental evaluation (Section 6), providing guidance on how to deal with uncertainty about these parameters.']"
+Each learner has the same action (model parameter) space ⇥,2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"✓ Rd⇥1 which is nonempty, compact and convex.",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"The action space of the attacker is Rm⇥d.
+3.",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"The columns of the training data X are linearly independent.
+",2.2. The Multi-Learner Stackerlberg Game,[1.0000000699966924],['The columns of the training data X are linearly independent.']
+"We use Multi-Learner Stackelberg Equilibrium (MLSE) as the solution for the MLSG, defined as follows.",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+Definition 1 (Multi-Learner Stackelberg Equilibrium (MLSE)).,2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"An action profile ({✓⇤i }ni=1,X⇤) is an MLSE if it satisfies
+✓⇤i = argmin ✓i2⇥ ci(✓i,X ⇤ (✓)), 8i 2 N
+s.t.",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"X⇤(✓) = argmin X02Rm⇥d ca({✓i}ni=1,X 0 ).
+",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"(5)
+where ✓ = {✓i}ni=1 constitutes the joint actions of the learners.
+",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"At the high level, the MLSE is a blend between a Nash equilibrium (among all learners) and a Stackelberg equilibrium (between the learners and the attacker), in which the attacker plays a best response to the observed models ✓ chosen by the learners, and given this behavior by the attacker, all learners’ models",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"✓i are mutually optimal.
+",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+The following lemma characterizes the best response of the attacker to arbitrary model choices {✓i}ni=1 by the learners.,2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+Lemma 1 (Best Response of the Attacker).,2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"Given {✓i}ni=1, the best response of the attacker is
+X ⇤ =",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"( X+ z
+nX
+i=1
+✓>i )(",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"I+ nX
+i=1
+✓i✓ > i ) 1.",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"(6)
+Proof.",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+We derive the best response of the attacker by using the first order condition.,2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"The details are included in the supplementary material.
+",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"Lemma 1 shows that the best response of the attacker, X⇤, has a closed form solution, as a function of learner model parameters {✓i}ni=1.",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+Let,2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"✓ i = {✓j}j 6=i, then ci(✓i,X⇤) in Eq.",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"(5) can be rewritten as
+ci(✓i,✓ i) =",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"`(X ⇤ (✓i,✓ i)✓i,y) + (1 )`(X✓i,y).
+(7) Using Eq. (7), we can then define a Multi-Learner Nash Game (MLNG): Definition 2 (Multi-Learner Nash Game (MLNG)).",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"A static game, denoted as hN ,⇥, (ci)i is a Multi-Learner Nash Game if
+1.",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"The set of players is the set of learners N , 2.",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"the cost function of each learner i is ci(✓i,✓ i) defined
+in Eq.",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"(7), 3.",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"all learners simultaneously select ✓i 2 ⇥.
+",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"We can then define Multi-Learner Nash Equilibrium (MLNE) of the game hN ,⇥, (ci)i: Definition 3 (Multi-Learner Nash Equilibrium (MLNE)).",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"An action profile ✓⇤ = {✓⇤i }ni=1 is a Multi-Learner Nash Equilibrium of the MLNG hN ,⇥, (ci)i if it is the solution of the following set of coupled optimization problem:
+min ✓i2⇥ ci(✓i,✓ i), 8i 2 N .",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"(8)
+Combining the results above, the following result is immediate.",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+Theorem 1.,2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"An action profile ({✓⇤i }ni=1,X⇤) is an MLSE of the multi-learner Stackelberg game if and only if {✓⇤i }ni=1 is a MLNE of the multi-learner Nash game hN ,⇥, (ci)i, with X
+⇤ defined in Eq.",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"(6) for ✓i = ✓⇤i , 8i 2 N .
+",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"Theorem 1 shows that we can reduce the original (n+ 1)- player Stackelberg game to an n-player simultaneous-move game hN ,⇥, (ci)i.",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"In the remaining sections, we focus on analyzing the Nash equilibrium of this multi-learner Nash game.",2.2. The Multi-Learner Stackerlberg Game,[0],[0]
+"In this section, we analyze the game hN ,⇥, (ci)i.",3. Theoretical Analysis,[0],[0]
+As presented in Eq.,3. Theoretical Analysis,[0],[0]
+"(6), there is an inverse of a complicated matrix to compute the best response of the attacker.",3. Theoretical Analysis,[0],[0]
+"Hence, the cost function ci(✓i,✓ i) shown in Eq.",3. Theoretical Analysis,[0],[0]
+(7) is intractable.,3. Theoretical Analysis,[0],[0]
+"To address this challenge, we first derive a new game, hN ,⇥, (eci)i with tractable cost function for its players, to approximate hN ,⇥, (ci)i.",3. Theoretical Analysis,[0],[0]
+"Afterward, we analyze existence and uniqueness of the Nash Equilibirum of hN ,⇥, (eci)i.
+3.1.",3. Theoretical Analysis,[0],[0]
+"Approximation of hN ,⇥, (ci)i We start our analysis by computing ( I + Pn
+i=1",3. Theoretical Analysis,[0],[0]
+"✓i✓ > i ) 1
+presented in Eq.",3. Theoretical Analysis,[0],[0]
+(6).,3. Theoretical Analysis,[0],[0]
+Let matrix An = I +,3. Theoretical Analysis,[0],[0]
+Pn i=1,3. Theoretical Analysis,[0],[0]
+✓i✓ >,3. Theoretical Analysis,[0],[0]
+"i ,
+and A i = I+ P j 6=i ✓j✓ > j .",3. Theoretical Analysis,[0],[0]
+"Then, An = A i + ✓i✓>i .",3. Theoretical Analysis,[0],[0]
+"Similarly, let matrix Bn = X+ z",3. Theoretical Analysis,[0],[0]
+Pn i=1,3. Theoretical Analysis,[0],[0]
+✓ >,3. Theoretical Analysis,[0],[0]
+"i , and B i =
+X + z P
+j 6=i ✓ > j , which implies that Bn = B i + z✓>i
+The best response of the attacker can then be rewritten as X ⇤ = BnA 1 n .",3. Theoretical Analysis,[0],[0]
+"We then obtain the following results.
+",3. Theoretical Analysis,[0],[0]
+Lemma 2.,3. Theoretical Analysis,[0],[0]
+"An and A i satisfy
+1.",3. Theoretical Analysis,[0],[0]
+"An and A i are invertible, and the corresponding invertible matrices, A 1n and A 1 i , are positive definite.
+",3. Theoretical Analysis,[0],[0]
+2.,3. Theoretical Analysis,[0],[0]
+A 1n = A 1,3. Theoretical Analysis,[0],[0]
+"i
+A 1 i✓i✓ >",3. Theoretical Analysis,[0],[0]
+i,3. Theoretical Analysis,[0],[0]
+A 1,3. Theoretical Analysis,[0],[0]
+"i
+1+✓>i",3. Theoretical Analysis,[0],[0]
+"A 1 i✓i
+.
+3.",3. Theoretical Analysis,[0],[0]
+✓>,3. Theoretical Analysis,[0],[0]
+i,3. Theoretical Analysis,[0],[0]
+A 1 i✓i  1 ✓ >,3. Theoretical Analysis,[0],[0]
+"i ✓i.
+Proof.",3. Theoretical Analysis,[0],[0]
+"The proof is included in the supplementary document.
+",3. Theoretical Analysis,[0],[0]
+"Lemma 2 allows us to relax `(X⇤(✓i,✓ i)✓i,y) as follows: Lemma 3.
+",3. Theoretical Analysis,[0],[0]
+"`(X⇤(✓i,✓ i)✓i,y)  `(B iA 1 i✓",3. Theoretical Analysis,[0],[0]
+"i,y)
++
+1 2 ||z y||22(✓>i",3. Theoretical Analysis,[0],[0]
+✓i)2.,3. Theoretical Analysis,[0],[0]
+"(9)
+Proof.",3. Theoretical Analysis,[0],[0]
+"Firstly, by using Sherman-Morrison formula we have
+X ⇤✓i = BnA 1 n",3. Theoretical Analysis,[0],[0]
+"✓i
+= (B i + z✓ > i )(A 1 i A
+1 i✓i✓",3. Theoretical Analysis,[0],[0]
+>,3. Theoretical Analysis,[0],[0]
+i,3. Theoretical Analysis,[0],[0]
+A 1 i 1 +,3. Theoretical Analysis,[0],[0]
+✓>,3. Theoretical Analysis,[0],[0]
+i,3. Theoretical Analysis,[0],[0]
+A 1 i✓i ),3. Theoretical Analysis,[0],[0]
+"✓i
+= B iA 1",3. Theoretical Analysis,[0],[0]
+i✓,3. Theoretical Analysis,[0],[0]
+"i +
+z✓>i",3. Theoretical Analysis,[0],[0]
+A 1 i✓i B iA 1,3. Theoretical Analysis,[0],[0]
+i✓i✓ >,3. Theoretical Analysis,[0],[0]
+i,3. Theoretical Analysis,[0],[0]
+"A 1 i✓i
+1 +",3. Theoretical Analysis,[0],[0]
+✓>,3. Theoretical Analysis,[0],[0]
+i,3. Theoretical Analysis,[0],[0]
+"A 1 i✓i
+=
+(B i + z✓>i )",3. Theoretical Analysis,[0],[0]
+"A 1 i✓i
+1 + ✓>i A 1 i✓i
+=
+BnA 1 i✓i
+1 + ✓>i A 1 i✓i
+.
+",3. Theoretical Analysis,[0],[0]
+"Then,
+`(X⇤✓i,y) = ||",3. Theoretical Analysis,[0],[0]
+"BnA
+1",3. Theoretical Analysis,[0],[0]
+"i✓i
+1 + ✓>i A 1 i✓i
+y||22
+= ||",3. Theoretical Analysis,[0],[0]
+"BnA
+1",3. Theoretical Analysis,[0],[0]
+i✓i y,3. Theoretical Analysis,[0],[0]
+"✓>i A 1 i✓iy
+1 + ✓>i",3. Theoretical Analysis,[0],[0]
+"A 1 i✓i
+||22
+ ||BnA 1",3. Theoretical Analysis,[0],[0]
+i✓i y,3. Theoretical Analysis,[0],[0]
+✓ >,3. Theoretical Analysis,[0],[0]
+i,3. Theoretical Analysis,[0],[0]
+A 1 i✓iy|| 2 2 = ||(B i + z✓>i ),3. Theoretical Analysis,[0],[0]
+A 1 i✓i y,3. Theoretical Analysis,[0],[0]
+✓ >,3. Theoretical Analysis,[0],[0]
+i,3. Theoretical Analysis,[0],[0]
+A 1 i✓iy|| 2 2 = ||B iA 1,3. Theoretical Analysis,[0],[0]
+i✓i y + (z y)✓ >,3. Theoretical Analysis,[0],[0]
+i A 1,3. Theoretical Analysis,[0],[0]
+"i✓i|| 2 2  `(B iA 1 i✓i,y) + ||z y|| 2 2(✓ > i",3. Theoretical Analysis,[0],[0]
+"A 1 i✓i) 2
+By using Lemma 2, we have (✓>i",3. Theoretical Analysis,[0],[0]
+A 1 i✓i) 2  1 2 (✓ >,3. Theoretical Analysis,[0],[0]
+"i ✓i) 2 which completes the proof.
+",3. Theoretical Analysis,[0],[0]
+Note that in Eq.,3. Theoretical Analysis,[0],[0]
+"(9), B i and A i only depend on {✓j}j 6=i. Hence, the RHS of Eq.",3. Theoretical Analysis,[0],[0]
+"(9) is a strictly convex function with respect to ✓i. Lemma 3 shows that `(X⇤(✓i,✓ i)✓i,y) can be relaxed by moving ✓i out of X⇤(✓i,✓ i) and adding a regularizer (✓>i ✓i)2 with its coefficient ||z y||22 2 .",3. Theoretical Analysis,[0],[0]
+"Motivated by this method, we iteratively relax `(X⇤(✓i,✓ i)✓i,y) by adding corresponding regularizers.",3. Theoretical Analysis,[0],[0]
+"We now identify a tractable upper bound function for ci(✓i,✓ i).",3. Theoretical Analysis,[0],[0]
+"Theorem 2.
+",3. Theoretical Analysis,[0],[0]
+"ci(✓i,✓ i)  ",3. Theoretical Analysis,[0],[0]
+"c̄i(✓i,✓ i)
+= `(X✓i,y) + 2 ||z y||22
+nX
+j=1
+(✓>j",3. Theoretical Analysis,[0],[0]
+"✓i) 2 + ✏,
+(10)
+where ✏ is a positive constant and ✏ < +1.
+",3. Theoretical Analysis,[0],[0]
+Proof.,3. Theoretical Analysis,[0],[0]
+We prove by extending the results in Lemma 3 and iteratively relaxing the cost function.,3. Theoretical Analysis,[0],[0]
+"The details are included in the supplementary material.
+",3. Theoretical Analysis,[0],[0]
+As represented in Eq.,3. Theoretical Analysis,[0],[0]
+"(10), c̄i(✓i,✓ i) is strictly convex with respect to ✓i and ✓j(8j 6= i).",3. Theoretical Analysis,[0],[0]
+"We then use the game hN ,⇥, (c̄i)i as an approximation of hN ,⇥, (ci)i.",3. Theoretical Analysis,[0],[0]
+"Let
+eci(✓i,✓ i) = c̄i(✓i,✓ i)",3. Theoretical Analysis,[0],[0]
+"✏
+= `(X✓i,y) + 2 ||z y||22
+nX
+j=1
+(✓>j",3. Theoretical Analysis,[0],[0]
+"✓i) 2,
+(11)
+then hN ,⇥, (eci)i has the same Nash equilibrium with hN ,⇥, (c̄i)i if one exists, as adding or deleting a constant term does not affect the optimal solution.",3. Theoretical Analysis,[0],[0]
+"Hence, we use hN ,⇥, (eci)i to approximate hN ,⇥, (ci)i, and analyze the Nash equilibrium of hN ,⇥, (eci)i in the remaining sections.",3. Theoretical Analysis,[0],[0]
+"As introduced in Section 2, each learner has identical action spaces, and they are trained with the same dataset.",3.2. Existence of Nash Equilibrium,[0],[0]
+"We exploit this symmetry to analyze the existence of a Nash equilibrium of the approximation game hN ,⇥, (eci)i.
+",3.2. Existence of Nash Equilibrium,[0],[0]
+"We first define a Symmetric Game (Cheng et al., 2004):",3.2. Existence of Nash Equilibrium,[0],[0]
+Definition 4 (Symmetric Game).,3.2. Existence of Nash Equilibrium,[0],[0]
+"An n-player game is symmetric if the players have the same action space, and their cost functions",3.2. Existence of Nash Equilibrium,[0],[0]
+"ci(✓i,✓ i) satisfy
+ci(✓i,✓ i) = cj(✓j ,✓ j), 8i, j 2 N (12)
+if ✓i =",3.2. Existence of Nash Equilibrium,[0],[0]
+✓j and ✓,3.2. Existence of Nash Equilibrium,[0],[0]
+"i = ✓ j .
+",3.2. Existence of Nash Equilibrium,[0],[0]
+"In a symmetric game hN ,⇥, (eci)i it is natural to consider a Symmetric Equilibrium:",3.2. Existence of Nash Equilibrium,[0],[0]
+Definition 5 (Symmetric Equilibrium).,3.2. Existence of Nash Equilibrium,[0],[0]
+"An action profile {✓⇤i }ni=1 of hN ,⇥, (eci)i is a symmetric equilibrium if it is a Nash equilibrium and ✓⇤i = ✓⇤j , 8i, j 2 N .
+",3.2. Existence of Nash Equilibrium,[0],[0]
+"We now show that our approximate game is symmetric, and always has a symmetric Nash equilibrium.",3.2. Existence of Nash Equilibrium,[0],[0]
+Theorem 3 (Existence of Nash Equilibrium).,3.2. Existence of Nash Equilibrium,[0],[0]
+"hN ,⇥, (eci)i is a symmetric game and it has at least one symmetric equilibrium.
+",3.2. Existence of Nash Equilibrium,[0],[0]
+Proof.,3.2. Existence of Nash Equilibrium,[0],[0]
+"As described above, the players of hN ,⇥, (eci)i use the same action space and complete information of others.",3.2. Existence of Nash Equilibrium,[0],[0]
+"Hence, the cost function ci is symmetric, making hN ,⇥, (eci)i a symmetric game.",3.2. Existence of Nash Equilibrium,[0],[0]
+"As hN ,⇥, (eci)i has nonempty, compact and convex action space, and the cost function eci is continuous in {✓i}ni=1 and convex in ✓i, according to Theorem 3 in Cheng et al. (2004), hN ,⇥, (eci)i has at least one symmetric Nash equilibrium.",3.2. Existence of Nash Equilibrium,[0],[0]
+"While we showed that the approximate game always admits a symmetric Nash equilibrium, it leaves open the possibility that there may be multiple symmetric equilibria, as well as equilibria which are not symmetric.",3.3. Uniqueness of Nash Equilibrium,[0],[0]
+We now demonstrate that this game in fact has a unique equilibrium (which must therefore be symmetric).,3.3. Uniqueness of Nash Equilibrium,[0],[0]
+Theorem 4 (Uniqueness of Nash Equilibrium).,3.3. Uniqueness of Nash Equilibrium,[0],[0]
+"hN ,⇥, (eci)i has a unique Nash equilibrium, and this unique NE is symmetric.
+",3.3. Uniqueness of Nash Equilibrium,[0],[0]
+Proof.,3.3. Uniqueness of Nash Equilibrium,[0],[0]
+"We have known that hN ,⇥, (eci)i has at least one NE, and each learner has an nonempty, compact and convex action space ⇥.",3.3. Uniqueness of Nash Equilibrium,[0],[0]
+"Hence, we can apply Theorem 2 and Theorem 6 of Rosen (1965).",3.3. Uniqueness of Nash Equilibrium,[0],[0]
+"That is, for some fixed {ri}ni (0 < ri < 1, Pn i=1 ri = 1), if the matrix in Eq.",3.3. Uniqueness of Nash Equilibrium,[0],[0]
+"(13) is positive definite, then hN ,⇥, (eci)i has a unique NE.
+",3.3. Uniqueness of Nash Equilibrium,[0],[0]
+"Jr(✓) =
+2 64 r1r✓1,✓1ec1(✓) . .",3.3. Uniqueness of Nash Equilibrium,[0],[0]
+.,3.3. Uniqueness of Nash Equilibrium,[0],[0]
+"r1r✓1,✓nec1(✓) ...",3.3. Uniqueness of Nash Equilibrium,[0],[0]
+"...
+rnr✓n,✓1ecn(✓) . .",3.3. Uniqueness of Nash Equilibrium,[0],[0]
+.,3.3. Uniqueness of Nash Equilibrium,[0],[0]
+"rnr✓n,✓necn(✓)
+3
+75
+(13) We first let r1 = r2 = ...",3.3. Uniqueness of Nash Equilibrium,[0],[0]
+"= rn = 1n and decompose Jr(✓) as follows,
+Jr(✓) = 2
+n P+ 2",3.3. Uniqueness of Nash Equilibrium,[0],[0]
+||z y||22 2n,3.3. Uniqueness of Nash Equilibrium,[0],[0]
+"(Q+ S+T), (14)
+where P and Q are block diagonal matrices such that Pii = X
+> X, Pij = 0, Qii = 4✓i✓>i +",3.3. Uniqueness of Nash Equilibrium,[0],[0]
+"✓>i ✓iI and Qij = 0, 8i, j 2 N , j 6= i. S and T are block symmetric matrices such that Sii = ✓>i ✓iI, Sij = ✓>i ✓jI, Tii = P j 6=i ✓j✓ > j and Tij = ✓j✓>i , 8i, j 2 N ,",3.3. Uniqueness of Nash Equilibrium,[0],[0]
+j 6=,3.3. Uniqueness of Nash Equilibrium,[0],[0]
+"i.
+",3.3. Uniqueness of Nash Equilibrium,[0],[0]
+"Next, we prove that P is positive definite, and Q, S and T are positive semi-definite.",3.3. Uniqueness of Nash Equilibrium,[0],[0]
+"Hence, Jr(✓) is positive definite, which indicates that hN ,⇥, (eci)i has a unique NE.",3.3. Uniqueness of Nash Equilibrium,[0],[0]
+"As Theorem 3 points out, the game has at least one symmetric NE.",3.3. Uniqueness of Nash Equilibrium,[0],[0]
+"Therefore, the NE is unique and must be symmetric.",3.3. Uniqueness of Nash Equilibrium,[0],[0]
+Due to space limitation the details of this proof are included in the supplementary material.,3.3. Uniqueness of Nash Equilibrium,[0],[0]
+"Having shown that hN ,⇥, (eci)i has a unique symmetric Nash equilibrium, we now consider computing its solution.",4. Computing the Equilibrium,[0],[0]
+We exploit the symmetry of the game which enables to reduce the search space of the game to only symmetric solutions.,4. Computing the Equilibrium,[0],[0]
+"Particularly, we derive the symmetric Nash equilibrium of hN ,⇥, (eci)i by solving a single convex optimization problem.",4. Computing the Equilibrium,[0],[0]
+We obtain the following result.,4. Computing the Equilibrium,[0],[0]
+Theorem 5.,4. Computing the Equilibrium,[0],[0]
+"Let
+f(✓) =",4. Computing the Equilibrium,[0],[0]
+"`(X✓,y)",4. Computing the Equilibrium,[0],[0]
+"+ (n+ 1)
+2 2 ||z y||22(✓>✓)2, (15)
+",4. Computing the Equilibrium,[0],[0]
+"Then, the unique symmetric NE of hN ,⇥, (eci)i, {✓⇤i }ni=1, can be derived by solving the following convex optimization problem
+min ✓2⇥ f(✓) (16)
+and then letting ✓⇤i = ✓⇤, 8i 2 N , where ✓⇤ is the solution of Eq.",4. Computing the Equilibrium,[0],[0]
+"(16).
+",4. Computing the Equilibrium,[0],[0]
+Proof.,4. Computing the Equilibrium,[0],[0]
+We prove this theorem by characterizing the firstorder optimality conditions of each learner’s minimization problem in Eq.,4. Computing the Equilibrium,[0],[0]
+(8) with ci being replaced with its approximation eci.,4. Computing the Equilibrium,[0],[0]
+"Let {✓⇤i }ni=1 be the NE, then it satisfies
+(⌘ ✓⇤i )>",4. Computing the Equilibrium,[0],[0]
+"r✓ieci(✓⇤i ,✓⇤ i) 0, 8⌘ 2 ⇥, 8i 2 N (17)
+where r✓ieci(✓⇤i ,✓⇤ i) is the gradient of eci(✓i,✓ i) with respect to ✓i and is evaluated at {✓⇤i }ni=1.",4. Computing the Equilibrium,[0],[0]
+"Then, Eq. (17) is equivalent to the equations as follows:
+( (⌘ ✓⇤1)>r✓1ec1(✓⇤1 ,✓⇤ 1) 0, 8⌘ 2 ⇥,",4. Computing the Equilibrium,[0],[0]
+"✓⇤1 = ✓ ⇤ j , 8j 2 N \",4. Computing the Equilibrium,[0],[0]
+"{1}
+(18)
+",4. Computing the Equilibrium,[0],[0]
+"The reasons are: first, any solution of Eq.",4. Computing the Equilibrium,[0],[0]
+(17) satisfies Eq.,4. Computing the Equilibrium,[0],[0]
+"(18), as {✓⇤i }ni=1 is symmetric; Second, any solution of Eq.",4. Computing the Equilibrium,[0],[0]
+(18) also satisfies Eq.,4. Computing the Equilibrium,[0],[0]
+(17).,4. Computing the Equilibrium,[0],[0]
+"By definition of symmetric game, if ✓⇤1 = ✓⇤j , then r✓1ec1(✓⇤1 ,✓⇤ 1) = r✓jecj(✓⇤j ,✓⇤ j), and we have
+(⌘ ✓⇤j )>",4. Computing the Equilibrium,[0],[0]
+"r✓jecj(✓⇤j ,✓⇤ j), 8⌘ 2 ⇥, 8j 2 N \ {1}
+Hence, Eq. (17) and Eq.",4. Computing the Equilibrium,[0],[0]
+(18) are equivalent.,4. Computing the Equilibrium,[0],[0]
+Eq.,4. Computing the Equilibrium,[0],[0]
+"(18) can be further rewritten as
+(⌘ ✓⇤1)>r✓1ec1(✓⇤1 ,✓⇤ 1)|✓⇤1=...=✓⇤n 0, 8⌘ 2 ⇥.",4. Computing the Equilibrium,[0],[0]
+"(19)
+We then let F (✓⇤1) = r",4. Computing the Equilibrium,[0],[0]
+"✓1ec1(✓⇤1 ,✓⇤ 1)|✓⇤1=...=✓⇤n
+= 2X >",4. Computing the Equilibrium,[0],[0]
+"(X✓⇤1 y) +
+2 (n+ 1)
+2 ||z y||22✓⇤1 >✓⇤1✓ ⇤ 1 .
+(20)
+",4. Computing the Equilibrium,[0],[0]
+"Then, F (✓⇤1) = r✓1f(✓⇤1) where f(·) is defined in Eq. (15).",4. Computing the Equilibrium,[0],[0]
+"Hence, we have
+(⌘ ✓⇤1)>r✓1f(✓⇤1) 0, 8⌘ 2 ⇥, (21)
+",4. Computing the Equilibrium,[0],[0]
+"This means that ✓⇤1 is the solution of the optimization problem in Eq.(16) which finally completes the proof.
+",4. Computing the Equilibrium,[0],[0]
+A deeper look at Eq.,4. Computing the Equilibrium,[0],[0]
+"(15) reveals that the Nash equilibrium can be obtained by each learner independently, without knowing others’ actions.",4. Computing the Equilibrium,[0],[0]
+This means that the Nash equilibrium can be computed in a distributed manner while the convergence is still guaranteed.,4. Computing the Equilibrium,[0],[0]
+"Hence, our proposed approach is highly scalable, as increasing the number of learners does not impact the complexity of finding the Nash equilibrium.",4. Computing the Equilibrium,[0],[0]
+We investigate the robustness of this equilibrium both using theoretical analysis and experiments in the remaining sections.,4. Computing the Equilibrium,[0],[0]
+"We now draw a connection between the multi-learner equilibrium in the adversarial setting, derived above, and robustness, in the spirit of the analysis by Xu et al. (2009).",5. Robustness Analysis,[0],[0]
+"Specifically, we prove the equivalence between Eq.",5. Robustness Analysis,[0],[0]
+(16) and a robust linear regression problem where data is maliciously corrupted by some disturbance 4.,5. Robustness Analysis,[0],[0]
+"Formally, a robust linear regression solves the following problem:
+min ✓2⇥ max 42U ||y (X+4)✓||22, (22)
+where the uncertainty set U = {4 2 Rm⇥d |4T4 = G : |Gij |  c|✓i✓j | 8i, j}, with c = (n+1)2 2 ||z y|| 2 2.",5. Robustness Analysis,[0],[0]
+"Note that ✓ is a vector and ✓i is the i-th element of ✓.
+",5. Robustness Analysis,[0],[0]
+"From a game-theoretic point of view, in training phase the defender is simulating an attacker.",5. Robustness Analysis,[0],[0]
+The attacker maximizes the training error by adding disturbance to X.,5. Robustness Analysis,[0],[0]
+The magnitude of the disturbance is controlled by a parameter c = (n+1)2 2 ||z y|| 2 2.,5. Robustness Analysis,[0],[0]
+"Consequently, the robustness of Eq.",5. Robustness Analysis,[0],[0]
+(22) is guaranteed if and only if the magnitude reflects the uncertainty interval.,5. Robustness Analysis,[0],[0]
+"This sheds some light on how to choose , and z in practice.",5. Robustness Analysis,[0],[0]
+"One strategy is to overestimate the attacker’s strength, which amounts to choosing small values of , large values of and exaggerated target z.",5. Robustness Analysis,[0],[0]
+The intuition of this strategy is to enlarge the uncertainty set so as to cover potential adversarial behavior.,5. Robustness Analysis,[0],[0]
+In Experiments section we will show this strategy works well in practice.,5. Robustness Analysis,[0],[0]
+Another insight from Eq.,5. Robustness Analysis,[0],[0]
+(22) is that the fundamental reason MLSG is robust is because it proactively takes adversarial behavior into account.,5. Robustness Analysis,[0],[0]
+Theorem 6.,5. Robustness Analysis,[0],[0]
+The optimal solution ✓⇤ of the problem in Eq.,5. Robustness Analysis,[0],[0]
+(16) is an optimal solution to the robust optimization problem in Eq.,5. Robustness Analysis,[0],[0]
+"(22).
+",5. Robustness Analysis,[0],[0]
+Proof.,5. Robustness Analysis,[0],[0]
+"Fix ✓⇤, we show that
+max 42U ||y (X+4)✓⇤||22 = ||y X✓⇤||22 + c(✓⇤ T✓⇤) 2 .
+",5. Robustness Analysis,[0],[0]
+"The left-hand side can be expanded as:
+max 42U ||y (X+4)✓⇤||22
+=max 42U ||y X✓⇤ 4✓⇤||22
+max 42U ||y X✓⇤||22 + max42U ||4✓ ⇤||22
+=max 42U ||y X✓⇤||22 + max42U ✓ ⇤T4T4✓⇤
+(substitute 4T4 = G) =||y X✓⇤||22 +max
+G ✓⇤TG✓⇤
+=||y X✓⇤||22 +max G
+dX
+i=1
+",5. Robustness Analysis,[0],[0]
+"|✓⇤i | 2 Gii + 2
+dX
+j=1
+j 1X
+i=1
+✓⇤i ✓ ⇤ jGij
+||y X✓⇤||22 + c dX
+i=1
+|✓⇤i | 4 + 2c
+dX
+j=1
+j 1X
+i=1
+(✓⇤i ✓ ⇤ j ) 2
+=||y X✓⇤||22 + c dX
+i=1
+|✓⇤i |2 2
+=||y X✓⇤||22 + c(✓⇤ T✓⇤) 2 .
+",5. Robustness Analysis,[0],[0]
+Now we define 4⇤ =,5. Robustness Analysis,[0],[0]
+"[pc✓⇤1u, · · · , p c✓⇤nu], where ✓⇤i is the i-th element of ✓⇤ and u is defined as:
+u , ( y X✓⇤ ||y X✓⇤||2 , if y 6= X✓ ⇤
+any vector with unit L2 norm, otherwise (23)
+",5. Robustness Analysis,[0],[0]
+"Then we have:
+max 42U ky (X+4)✓⇤k22
+||y (X+4⇤)✓⇤||22 =||y X✓⇤ 4⇤✓⇤||22
+=||y X✓⇤ dX
+i=1
+p c|✓⇤i |2u||22
+(u is in the same direction as y X✓⇤ )
+=||y X✓⇤||22 + ||",5. Robustness Analysis,[0],[0]
+"dX
+i=1
+p c|✓⇤i |2u||22
+=||y X✓⇤||22 + c(✓⇤ T✓⇤)
+2
+(24)",5. Robustness Analysis,[0],[0]
+"As previously discussed, a dataset is represented by (X,y), where X is the feature matrix and y is the vector of labels.",6. Experiments,[0],[0]
+"We use (xj ,yj) to denote the j-th instance and its corresponding label.",6. Experiments,[0],[0]
+"The dataset is equally divided into a training set (Xtrain,ytrain) and a testing set (Xtest,ytest).",6. Experiments,[0],[0]
+"We conducted experiments on three datasets: Wine Quality (redwine),PDF malware (PDF), and Boston Housing Market (boston).",6. Experiments,[0],[0]
+The number of learners is set to 5.,6. Experiments,[0],[0]
+"Due to space limitation the experimental results for the boston dataset are included in supplement.
+",6. Experiments,[0],[0]
+"The Wine Quality dataset (Cortez et al., 2009) contains 1599 instances and each instance has 11 features.",6. Experiments,[0],[0]
+Those features are physicochemical and sensory measurements for wine.,6. Experiments,[0],[0]
+"The response variables are quality scores ranging from 0 to 10, where 10 represents for best quality and 0 for least quality.",6. Experiments,[0],[0]
+The PDF malware dataset consists of 18658 PDF files collected from the internet.,6. Experiments,[0],[0]
+"We employed an opensourced tool mimicus1 to extract 135 real-valued features
+1https://github.com/srndic/mimicus
+from PDF files (Šrndic & Laskov, 2014).",6. Experiments,[0],[0]
+"We then applied peepdf 2 to score each PDF between 0 and 10, with a higher score indicating greater likelihood of being malicious.
+",6. Experiments,[0],[0]
+"Throughout, we abbreviate our proposed approach as MLSG, and compare it to three other algorithms: ordinary least squares (OLS) regression, as well as Lasso, and Ridge regression (Ridge).",6. Experiments,[0],[0]
+Lasso and Ridge are ordinary least square with L1 and L2 regularizations.,6. Experiments,[0],[0]
+"In our evaluation, we simulate the attacker for different values of (the probability that a given instance is maliciously manipulated).",6. Experiments,[0],[0]
+The specific attack targets z vary depending on the dataset; we discuss these below.,6. Experiments,[0],[0]
+"For our evaluation, we compute model parameters (for the equilibrium, in the case of MLSG) on training data.",6. Experiments,[0],[0]
+"We then use test data to compute optimal attacks, characterized by Eq.",6. Experiments,[0],[0]
+(6).,6. Experiments,[0],[0]
+"Let X
+0 test be the test feature matrix after adversarial manipulation, ˆyAtest the associated predicted labels on manipulated test data, ˆytest predicted labels on untainted test data, and ytest the ground truth labels for test data.",6. Experiments,[0],[0]
+"We use root expected mean square error (RMSE) as an evaluation metric, where the expectation is with respect to the probability of a particular instance being maliciously manipulated:q
+(ŷAtest ytest) T (ŷAtest ytest)+(1 )(ŷtest ytest)T (ŷtest ytest)
+N , where N is the size of the test data.
+",6. Experiments,[0],[0]
+The redwine dataset: Recall that the response variables in redwine dataset are quality scores ranging from 0 to 10.,6. Experiments,[0],[0]
+We simulated an attacker whose target is to increase the overall scores of testing data.,6. Experiments,[0],[0]
+In practice this could correspond to the scenario that wine sellers try to manipulate the evaluation of third-party organizations.,6. Experiments,[0],[0]
+"We formally define the attacker’s target as z = y + , where y is the ground-truth response variables and is a real-valued vector representing the difference between the attacker’s target and the ground-truth.",6. Experiments,[0],[0]
+"Since the maximum score is 10, any element of z that is greater than 10 is clipped to 10.",6. Experiments,[0],[0]
+We define to be homogeneous (all elements are the same); generalization to heterogeneous values is direct.,6. Experiments,[0],[0]
+The mean and standard deviation of y are µr = 5.64 and r = 0.81.,6. Experiments,[0],[0]
+"We let = 5 r ⇥ 1, where 1 is a vector with all elements equal to one.",6. Experiments,[0],[0]
+The intuition for this definition is to simulate the generating process of adversarial data.,6. Experiments,[0],[0]
+"Specifically, by setting the attacker’s target to an unrealistic value (i.e. in current case outside the 3 r of µr), the generated adversarial data X 0 is supposed to be intrinsically different from X. For ease of exposition we use the term defender to refer to MLSG.
+Remember that in Eq.(11) there are three hyper-parameters in the defender’s loss function: , , and z. is the regularization coefficient in the attacker’s loss function shown in Eq.(4).",6. Experiments,[0],[0]
+"It is negatively proportional to the attacker’s strength.
+",6. Experiments,[0],[0]
+"2https://github.com/rohit-dua/peePDF
+is the probability of a test data being malicious.",6. Experiments,[0],[0]
+z is the predication targets of the attacker.,6. Experiments,[0],[0]
+In practice these three hyper-parameters are externally set by the attacker.,6. Experiments,[0],[0]
+"In the first experiment below we assume the defender knows the values of these three hyper-parameters, which corresponds to the best case.",6. Experiments,[0],[0]
+The result is shown in Figure 1.,6. Experiments,[0],[0]
+"Each bar is averaged over 50 runs, where at each run we randomly sampled training and test data.",6. Experiments,[0],[0]
+The regularization parameters of Lasso and Ridge were selected by cross-validation.,6. Experiments,[0],[0]
+"Figure 1 demonstrates that MLSG approximate equilibrium solution is significantly more robust than conventional linear regression learning, with and without regularization.
+",6. Experiments,[0],[0]
+"In the second experiment we relaxed the assumption that the defender knows , and z, and instead simulated the practical scenario that the defender obtains estimates for these (for example, from historical attack data), but the estimates have error.",6. Experiments,[0],[0]
+We denote by ˆ = 0.5 and ˆ = 0.8 the defender’s estimates of the true and .3,6. Experiments,[0],[0]
+Remember that is the probability of an instance being malicious and is negatively proportional to the attacker’s strength.,6. Experiments,[0],[0]
+So the estimation characterizes a pessimistic defender that is expecting very strong attacks.,6. Experiments,[0],[0]
+"We experimented with two kinds of estimation about z: 1) the defender overestimates z: ˆz = y + t1, where t is a random variable sampled from a uniform distribution over [5 r, 10]; and 2) the defender underestimates z: ˆz = y + t1, where t is sampled from [0, 5 r].",6. Experiments,[0],[0]
+Due to space limitations we only present the results for the latter; the former can be found in the supplementary materials.,6. Experiments,[0],[0]
+"In Figure 2 the y-axis represents the actual values of , and the x-axis represents the actual values of .",6. Experiments,[0],[0]
+The color bar on the right of each figure visualizes the average RMSE.,6. Experiments,[0],[0]
+Each cell is averaged over 50 runs.,6. Experiments,[0],[0]
+"The result shows that even if there is a discrepancy between the defender’s
+3We tried alternative values of ̂ and ̂, and the results are consistent.",6. Experiments,[0],[0]
+"Due to space limitations we include them in supplemental materials.
+estimation and the actual adversarial behavior, MLSG is consistently more robust than the other approaches.
+",6. Experiments,[0],[0]
+The PDF dataset:,6. Experiments,[0],[0]
+The response variables of this dataset are malicious scores ranging between 0 and 10.,6. Experiments,[0],[0]
+The mean and standard deviation of y are µp = 5.56 and p = 2.66.,6. Experiments,[0],[0]
+"Instead of letting the be non-negative as in previous two datasets, the attacker’s target is to descrease the scores of malicious PDFs.",6. Experiments,[0],[0]
+"Consequently, we define = 2 p⇥1M, where M is the set of indices of malicious PDF and 1M is a vector with only those elements indexed by M being one and others being zero.",6. Experiments,[0],[0]
+Our experiments were conducted on a subset (3000 malicious PDF and 3000 benign PDF) randomly sampled from the original dataset.,6. Experiments,[0],[0]
+We evenly divided the subset into training and testing sets.,6. Experiments,[0],[0]
+We applied PCA to reduce dimensionality of the data and selected the top-10 principal components as features.,6. Experiments,[0],[0]
+The result for best case is displayed in Figure 3.,6. Experiments,[0],[0]
+"Notice that when = 0, MLSG is less robust than Lasso.",6. Experiments,[0],[0]
+"This is to be expected, as = 0 corresponds to non-adversarial data.
+",6. Experiments,[0],[0]
+"Similarly as before we relaxed the assumption that the defender knows , and z and let the defender’s estimation of the true and be ˆ = 1.5 and ˆ = 0.5.",6. Experiments,[0],[0]
+We also experimented with both overestimation and underestimation of z. The defender’s estimation is ˆz = y,6. Experiments,[0],[0]
+"t1M. For overestimation setting t is sampled from [2 p, 3 p], and for underestimation setting it is sampled from [ p, 2 p].",6. Experiments,[0],[0]
+The result for underestimated ˆz is showed in Figure 4.,6. Experiments,[0],[0]
+Notice that in the upper left plot of Figure 4 the area inside the blue rectangle corresponds to those cases where ˆ and ˆ are overestimated and they are more robust than the remaining underestimated cases.,6. Experiments,[0],[0]
+Similar patterns can be observed in Figure 2.,6. Experiments,[0],[0]
+This further supports our claim that it is advantageous to overestimate adversarial behavior.,6. Experiments,[0],[0]
+We study the problem of linear regression in adversarial settings involving multiple learners learning from the same or similar data.,7. Conclusion,[0],[0]
+"In our model, learners first simultaneously decide on their models (i.e., learn), and an attacker then modifies test instances to cause predictions to err towards the attacker’s target.",7. Conclusion,[0],[0]
+"We first derive an upper bound on the cost functions of all learners, and the resulting approximate game.",7. Conclusion,[0],[0]
+"We then show that this game has a unique symmetric equilibrium, and present an approach for computing this equilibrium by solving a convex optimization problem.",7. Conclusion,[0],[0]
+"Finally, we show that the equilibrium is robust, both theoretically, and through an extensive experimental evaluation.",7. Conclusion,[0],[0]
+We would like to thank Shiying Li in the Department of Mathematics at Vanderbilt University for her valuable and constructive suggestions for the proof of Theorem 4.,Acknowledgements,[0],[0]
+"This work was partially supported by the National Science Foundation (CNS-1640624, IIS-1526860, IIS-1649972), Office of Naval Research (N00014-15-1-2621), Army Research Office (W911NF-16-1-0069), and National Institutes of Health (R01HG006844-05).",Acknowledgements,[0],[0]
+"Despite the considerable success enjoyed by machine learning techniques in practice, numerous studies demonstrated that many approaches are vulnerable to attacks.",abstractText,[0],[0]
+An important class of such attacks involves adversaries changing features at test time to cause incorrect predictions.,abstractText,[0],[0]
+Previous investigations of this problem pit a single learner against an adversary.,abstractText,[0],[0]
+"However, in many situations an adversary’s decision is aimed at a collection of learners, rather than specifically targeted at each independently.",abstractText,[0],[0]
+We study the problem of adversarial linear regression with multiple learners.,abstractText,[0],[0]
+"We approximate the resulting game by exhibiting an upper bound on learner loss functions, and show that the resulting game has a unique symmetric equilibrium.",abstractText,[0],[0]
+"We present an algorithm for computing this equilibrium, and show through extensive experiments that equilibrium models are significantly more robust than conventional regularized linear regression.",abstractText,[0],[0]
+Adversarial Regression with Multiple Learners,title,[0],[0]

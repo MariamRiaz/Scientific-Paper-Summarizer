@@ -1,0 +1,149 @@
+0,1,label2,summary_sentences
+"Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics (Short Papers), pages 364–369 Melbourne, Australia, July 15 - 20, 2018. c©2018 Association for Computational Linguistics
+364",text,[0],[0]
+"Semantic role labeling (SRL) captures predicateargument relations, such as “who did what to whom.”",1 Introduction,[0],[0]
+"Recent high-performing SRL models (He et al., 2017; Marcheggiani et al., 2017; Tan et al., 2018) are BIO-taggers, labeling argument spans for a single predicate at a time (as shown in Figure 1).",1 Introduction,[0],[0]
+"They are typically only evaluated with gold predicates, and must be pipelined with error-prone predicate identification models for deployment.
+",1 Introduction,[0.9999999486217838],"['They are typically only evaluated with gold predicates, and must be pipelined with error-prone predicate identification models for deployment.']"
+We propose an end-to-end approach for predicting all the predicates and their argument spans in one forward pass.,1 Introduction,[1.0],['We propose an end-to-end approach for predicting all the predicates and their argument spans in one forward pass.']
+"Our model builds on a recent coreference resolution model (Lee et al., 2017), by making central use of learned, contextualized span representations.",1 Introduction,[0],[0]
+We use these representations to predict SRL graphs directly over text spans.,1 Introduction,[0],[0]
+"Each edge is identified by independently predicting which role, if any, holds between every possible pair of text spans, while using aggressive beam
+1Code and models: https://github.com/luheng/lsgn
+pruning for efficiency.",1 Introduction,[0],[0]
+"The final graph is simply the union of predicted SRL roles (edges) and their associated text spans (nodes).
+",1 Introduction,[0.9999999689157528],['The final graph is simply the union of predicted SRL roles (edges) and their associated text spans (nodes).']
+"Our span-graph formulation overcomes a key limitation of semi-markov and BIO-based models (Kong et al., 2016; Zhou and Xu, 2015; Yang and Mitchell, 2017; He et al., 2017; Tan et al., 2018): it can model overlapping spans across different predicates in the same output structure (see Figure 1).",1 Introduction,[0],[0]
+"The span representations also generalize the token-level representations in BIObased models, letting the model dynamically decide which spans and roles to include, without using previously standard syntactic features (Punyakanok et al., 2008; FitzGerald et al., 2015).
+",1 Introduction,[0.9999999595201785],"['The span representations also generalize the token-level representations in BIObased models, letting the model dynamically decide which spans and roles to include, without using previously standard syntactic features (Punyakanok et al., 2008; FitzGerald et al., 2015).']"
+"To the best of our knowledge, this is the first span-based SRL model that does not assume that predicates are given.",1 Introduction,[1.0],"['To the best of our knowledge, this is the first span-based SRL model that does not assume that predicates are given.']"
+"In this more realistic setting, where the predicate must be predicted, our model achieves state-of-the-art performance on PropBank.",1 Introduction,[0],[0]
+"It also reinforces the strong performance of similar span embedding methods for coreference (Lee et al., 2017), suggesting that this style of models could be used for other span-span relation tasks, such as syntactic parsing (Stern et al., 2017), relation extraction (Miwa and Bansal, 2016), and QA-SRL (FitzGerald et al., 2018).",1 Introduction,[0],[0]
+"We consider the space of possible predicates to be all the tokens in the input sentence, and the space of arguments to be all continuous spans.",2 Model,[1.0],"['We consider the space of possible predicates to be all the tokens in the input sentence, and the space of arguments to be all continuous spans.']"
+"Our model decides what relation exists between each predicate-argument pair (including no relation).
+",2 Model,[0],[0]
+"Formally, given a sequence X = w1, . . .",2 Model,[0],[0]
+", wn, we wish to predict a set of labeled predicateargument relations Y ⊆ P ×",2 Model,[0],[0]
+"A × L, where P = {w1, . . .",2 Model,[0],[0]
+", wn} is the set of all tokens (predicates), A = {(wi, . . .",2 Model,[0],[0]
+", wj) | 1 ≤",2 Model,[0],[0]
+"i ≤ j ≤ n} contains all the spans (arguments), and L is the space of semantic role labels, including a null label indicating no relation.",2 Model,[0],[0]
+"The final SRL output would be all the non-empty relations {(p, a, l) ∈ Y",2 Model,[0],[0]
+"| l 6= }.
+",2 Model,[0],[0]
+"We then define a set of random variables, where each random variable yp,a corresponds to a predicate p ∈ P and an argument a ∈ A, taking value from the discrete label space L.",2 Model,[0],[0]
+"The random variables yp,a are conditionally independent of each other given the input X:
+P (Y | X) = ∏
+p∈P,a∈A P (yp,a | X) (1)
+P (yp,a = l | X) = exp(φ(p, a, l))∑
+l′∈L exp(φ(p, a, l′))
+",2 Model,[0],[0]
+"(2)
+Where φ(p, a, l) is a scoring function for a possible (predicate, argument, label) combination.",2 Model,[0],[0]
+"φ is decomposed into two unary scores on the predicate and the argument (defined in Section 3), as well as a label-specific score for the relation:
+φ(p, a, l) = Φa(a) + Φp(p) +",2 Model,[0],[0]
+"Φ (l) rel (a, p) (3)
+",2 Model,[0],[0]
+"The score for the null label is set to a constant: φ(p, a, ) = 0, similar to logistic regression.
+",2 Model,[0],[0]
+"Learning For each input X , we minimize the negative log likelihood of the gold structure Y ∗:
+",2 Model,[0],[0]
+J (X) =,2 Model,[0],[0]
+"− logP (Y ∗ | X) (4)
+Beam pruning As our model deals with O(n2) possible argument spans and O(n) possible predicates, it needs to consider O(n3|L|) possible relations, which is computationally impractical.",2 Model,[0],[0]
+"To overcome this issue, we define two beams Ba and Bp for storing the candidate arguments and predicates, respectively.",2 Model,[1.0],"['To overcome this issue, we define two beams Ba and Bp for storing the candidate arguments and predicates, respectively.']"
+The candidates in each beam are ranked by their unary score (Φa or Φp).,2 Model,[0],[0]
+The sizes of the beams are limited by λan and λpn.,2 Model,[0],[0]
+"Elements that fall out of the beam do not participate
+in computing the edge factors Φ(l)rel , reducing the overall number of relational factors evaluated by the model to O(n2|L|).",2 Model,[0.9999999033537496],"['Elements that fall out of the beam do not participate in computing the edge factors Φ(l)rel , reducing the overall number of relational factors evaluated by the model to O(n2|L|).']"
+"We also limit the maximum width of spans to a fixed number W (e.g. W = 30), further reducing the number of computed unary factors to O(n).",2 Model,[0],[0]
+"Our model builds contextualized representations for argument spans a and predicate words p based on BiLSTM outputs (Figure 2) and uses feedforward networks to compute the factor scores in φ(p, a, l) described in Section 2 (Figure 3).
+",3 Neural Architecture,[1.0000000423159094],"['Our model builds contextualized representations for argument spans a and predicate words p based on BiLSTM outputs (Figure 2) and uses feedforward networks to compute the factor scores in φ(p, a, l) described in Section 2 (Figure 3).']"
+"Word-level contexts The bottom layer consists of pre-trained word embeddings concatenated with character-based representations, i.e. for each token wi, we have xi = [WORDEMB(wi); CHARCNN(wi)].",3 Neural Architecture,[0],[0]
+"We then contextualize each xi using an m-layered bidirectional LSTM with highway connections (Zhang et al., 2016), which we denote as x̄i.
+Argument and predicate representation We build contextualized representations for all candidate arguments a ∈ A and predicates p ∈ P .",3 Neural Architecture,[0],[0]
+"The argument representation contains the following: end points from the BiLSTM outputs (x̄START(a), x̄END(a)), a soft head word xh(a), and embedded span width features f(a), similar to Lee et al. (2017).",3 Neural Architecture,[1.0],"['The argument representation contains the following: end points from the BiLSTM outputs (x̄START(a), x̄END(a)), a soft head word xh(a), and embedded span width features f(a), similar to Lee et al. (2017).']"
+"The predicate representation is simply the BiLSTM output at the position INDEX(p).
+",3 Neural Architecture,[0],[0]
+"g(a) =[x̄START(a); x̄END(a); xh(a); f(a)] (5)
+g(p) =x̄INDEX(p) (6)
+The soft head representation xh(a) is an attention mechanism over word inputs x in the argument span, where the weights e(a) are computed via a linear layer over the BiLSTM outputs x̄.
+xh(a) = xSTART(a):END(a)e(s) ᵀ (7) e(a)",3 Neural Architecture,[0.9907115681646125],"['g(a) =[x̄START(a); x̄END(a); xh(a); f(a)] (5) g(p) =x̄INDEX(p) (6) The soft head representation xh(a) is an attention mechanism over word inputs x in the argument span, where the weights e(a) are computed via a linear layer over the BiLSTM outputs x̄.']"
+"= SOFTMAX(wᵀe x̄START(a):END(a)) (8)
+xSTART(a):END(a) is a shorthand for stacking a list of vectors xt, where START(a) ≤ t ≤ END(a).
+",3 Neural Architecture,[0],[0]
+"Scoring The scoring functions Φ are implemented with feed-forward networks based on the predicate and argument representations g:
+Φa(a) =w ᵀ a MLPa(g(a))",3 Neural Architecture,[0],[0]
+(9) Φp(p),3 Neural Architecture,[0],[0]
+"=w ᵀ pMLPp(g(p)) (10)
+Φ (l) rel (a, p) =w (l)ᵀ r MLPr([g(a); g(p)]) (11)",3 Neural Architecture,[0],[0]
+"We experiment on the CoNLL 2005 (Carreras and Màrquez, 2005) and CoNLL 2012 (OntoNotes 5.0, (Pradhan et al., 2013)) benchmarks, using two SRL setups: end-to-end and gold predicates.",4 Experiments,[0],[0]
+"In the end-to-end setup, a system takes a tokenized sentence as input, and predicts all the predicates and their arguments.",4 Experiments,[1.0],"['In the end-to-end setup, a system takes a tokenized sentence as input, and predicts all the predicates and their arguments.']"
+"Systems are evaluated on the micro-averaged F1 for correctly predicting (predicate, argument span, label) tuples.",4 Experiments,[0],[0]
+"For comparison with previous systems, we also report results with gold predicates, in which the complete set of predicates in the input sentence is given as well.",4 Experiments,[1.0],"['For comparison with previous systems, we also report results with gold predicates, in which the complete set of predicates in the input sentence is given as well.']"
+"Other experimental setups and hyperparameteres are listed in Appendix A.1.
+ELMo embeddings To further improve performance, we also add ELMo word representations (Peters et al., 2018) to the BiLSTM input (in the +ELMo rows).",4 Experiments,[0],[0]
+"Since the contextualized representations ELMo provides can be applied to most previous neural systems, the improvement is orthogonal to our contribution.",4 Experiments,[0],[0]
+"In Table 1 and 2, we organize all the results into two categories: the comparable single model systems, and the mod-
+els augmented with ELMo or ensembling (in the PoE rows).
+",4 Experiments,[1.00000001111097],"['In Table 1 and 2, we organize all the results into two categories: the comparable single model systems, and the mod- els augmented with ELMo or ensembling (in the PoE rows).']"
+"End-to-end results As shown in Table 1,2 our joint model outperforms the previous best pipeline system (He et al., 2017) by an F1 difference of anywhere between 1.3 and 6.0 in every setting.",4 Experiments,[1.0],"['End-to-end results As shown in Table 1,2 our joint model outperforms the previous best pipeline system (He et al., 2017) by an F1 difference of anywhere between 1.3 and 6.0 in every setting.']"
+"The improvement is larger on the Brown test set, which is out-of-domain, and the CoNLL 2012 test set, which contains nominal predicates.",4 Experiments,[1.0],"['The improvement is larger on the Brown test set, which is out-of-domain, and the CoNLL 2012 test set, which contains nominal predicates.']"
+"On all datasets, our model is able to predict over 40% of the sentences completely correctly.
+",4 Experiments,[0],[0]
+"Results with gold predicates To compare with additional previous systems, we also conduct experiments with gold predicates by constraining our predicate beam to be gold predicates only.",4 Experiments,[1.0],"['Results with gold predicates To compare with additional previous systems, we also conduct experiments with gold predicates by constraining our predicate beam to be gold predicates only.']"
+"As shown in Table 2, our model significantly out-performs He et al. (2017), but falls short of Tan et al. (2018), a very recent attention-based (Vaswani et al., 2017)",4 Experiments,[0],[0]
+BIO-tagging model that was developed concurrently with our work.,4 Experiments,[0],[0]
+"By adding the contextualized ELMo representations, we are able to out-perform all previous systems, including Peters et al. (2018), which applies ELMo to the SRL model introduced in He et al. (2017).",4 Experiments,[0],[0]
+Our model’s architecture differs significantly from previous BIO systems in terms of both input and decision space.,5 Analysis,[0],[0]
+"To better understand our model’s strengths and weaknesses, we perform three analyses following Lee et al. (2017) and He et al. (2017), studying (1) the effectiveness of beam
+2For the end-to-end setting on CoNLL 2012, we used a subset of the train/dev data from previous work due to noise in the dataset; the dev result is not directly comparable.",5 Analysis,[0],[0]
+"See Appendix A.2 for detailed explanation.
+",5 Analysis,[0],[0]
+"pruning, (2) the ability to capture long-range dependencies, (3) agreement with syntactic spans, and (4) the ability to predict globally consistent SRL structures.",5 Analysis,[0],[0]
+The analyses are performed on the development sets without using ELMo embeddings.,5 Analysis,[0],[0]
+"3
+Effectiveness of beam pruning Figure 4 shows the predicate and argument spans kept in the beam, sorted with their unary scores.",5 Analysis,[0],[0]
+"Our model efficiently prunes unlikely argument spans and predicates, significantly reduces the number of edges it needs to consider.",5 Analysis,[0],[0]
+Figure 5 shows the recall of predicate words on the CoNLL 2012 development set.,5 Analysis,[0],[0]
+"By retaining λp = 0.4 predicates per word, we are able to keep over 99.7% argument-bearing predicates.",5 Analysis,[0],[0]
+"Compared to having a part-of-speech tagger (POS:X in Figure 5), our joint beam pruning allowing the model to have a soft trade-off between efficiency and recall.4
+Long-distance dependencies Figure 6 shows the performance breakdown by binned distance between arguments to the given predicates.",5 Analysis,[0],[0]
+"Our model is better at accurately predicting arguments that are farther away from the predicates, even
+3For comparability with prior work, analyses (2)-(4) are performed on the CoNLL 05 dev set with gold predicates.
+",5 Analysis,[0],[0]
+"4The predicate ID accuracy of our model is not comparable with that reported in He et al. (2017), since our model does not predict non-argument-bearing predicates.
+",5 Analysis,[0],[0]
+"compared to an ensemble model (He et al., 2017) that has a higher overall F1.",5 Analysis,[0],[0]
+"This is very likely due to architectural differences; in a BIO tagger, predicate information passes through many LSTM timesteps before reaching a long-distance argument, whereas our architecture enables direct connections between all predicates-arguments pairs.
+Agreement with syntax As mentioned in He et al. (2017), their BIO-based SRL system has good agreement with gold syntactic span boundaries (94.3%) but falls short of previous syntaxbased systems (Punyakanok et al., 2004).",5 Analysis,[0],[0]
+"By directly modeling span information, our model achieves comparable syntactic agreement (95.0%) to Punyakanok et al. (2004) without explicitly modeling syntax.
+",5 Analysis,[0],[0]
+"Global consistency On the other hand, our model suffers from global consistency issues.",5 Analysis,[0],[0]
+"For example, on the CoNLL 2005 test set, our model has lower complete-predicate accuracy (62.6%) than the BIO systems (He et al., 2017; Tan et al., 2018) (64.3%-66.4%).",5 Analysis,[0],[0]
+"Table 3 shows its viola-
+tions of global structural constraints5 compared to previous systems.",5 Analysis,[0],[0]
+Our model made more constraint violations compared to previous systems.,5 Analysis,[0],[0]
+"For example, our model predicts duplicate core arguments6 (shown in the U column in Table 3) more often than previous work.",5 Analysis,[1.0],"['For example, our model predicts duplicate core arguments6 (shown in the U column in Table 3) more often than previous work.']"
+"This is due to the fact that our model uses independent classifiers to label each predicate-argument pair, making it difficult for them to implicitly track the decisions made for several arguments with the same predicate.
+",5 Analysis,[1.000000020783608],"['This is due to the fact that our model uses independent classifiers to label each predicate-argument pair, making it difficult for them to implicitly track the decisions made for several arguments with the same predicate.']"
+"The Ours+decode row in Table 3 shows SRL performance after enforcing the U-constraint using dynamic programming (Täckström et al., 2015) at decoding time.",5 Analysis,[0],[0]
+"Constrained decoding at test time is effective at eliminating all the core-role inconsistencies (shown in the U-column), but did not bring significant gain on the end result (shown
+5Punyakanok et al. (2008) described a list of global constraints for SRL systems, e.g., there can be at most one core argument of each type for each predicate.
+6Arguments with labels ARG0,ARG1,. . .",5 Analysis,[0],[0]
+",",5 Analysis,[0],[0]
+"ARG5 and AA.
+in SRL F1), which only evaluates the piece-wise predicate-argument structures.",5 Analysis,[0],[0]
+"We proposed a new SRL model that is able to jointly predict all predicates and argument spans, generalized from a recent coreference system (Lee et al., 2017).",6 Conclusion and Future Work,[1.0],"['We proposed a new SRL model that is able to jointly predict all predicates and argument spans, generalized from a recent coreference system (Lee et al., 2017).']"
+"Compared to previous BIO systems, our new model supports joint predicate identification and is able to incorporate span-level features.",6 Conclusion and Future Work,[0],[0]
+"Empirically, the model does better at longrange dependencies and agreement with syntactic boundaries, but is weaker at global consistency, due to our strong independence assumption.
+",6 Conclusion and Future Work,[1.0000000109696556],"['Empirically, the model does better at longrange dependencies and agreement with syntactic boundaries, but is weaker at global consistency, due to our strong independence assumption.']"
+"In the future, we could incorporate higher-order inference methods (Lee et al., 2018) to relax this assumption.",6 Conclusion and Future Work,[1.0],"['In the future, we could incorporate higher-order inference methods (Lee et al., 2018) to relax this assumption.']"
+"It would also be interesting to combine our span-based architecture with the selfattention layers (Tan et al., 2018; Strubell et al., 2018) for more effective contextualization.",6 Conclusion and Future Work,[1.0],"['It would also be interesting to combine our span-based architecture with the selfattention layers (Tan et al., 2018; Strubell et al., 2018) for more effective contextualization.']"
+"This research was supported in part by the ARO (W911NF-16-1-0121), the NSF (IIS-1252835, IIS-1562364), a gift from Tencent, and an Allen Distinguished Investigator Award.",Acknowledgments,[0],[0]
+"We thank Eunsol Choi, Dipanjan Das, Nicholas Fitzgerald, Ariel Holtzman, Julian Michael, Noah Smith, Swabha Swayamdipta, and our anonymous reviewers for helpful feedback.",Acknowledgments,[0],[0]
+"Recent BIO-tagging-based neural semantic role labeling models are very high performing, but assume gold predicates as part of the input and cannot incorporate span-level features.",abstractText,[0],[0]
+"We propose an endto-end approach for jointly predicting all predicates, arguments spans, and the relations between them.",abstractText,[0],[0]
+"The model makes independent decisions about what relationship, if any, holds between every possible word-span pair, and learns contextualized span representations that provide rich, shared input features for each decision.",abstractText,[0],[0]
+Experiments demonstrate that this approach sets a new state of the art on PropBank SRL without gold predicates.1,abstractText,[0],[0]
+Jointly Predicting Predicates and Arguments in Neural Semantic Role Labeling,title,[0],[0]

@@ -1,0 +1,293 @@
+0,1,label2,summary_sentences
+"Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics (Short Papers), pages 364–369 Melbourne, Australia, July 15 - 20, 2018. c©2018 Association for Computational Linguistics
+364",text,[0],[0]
+"Semantic role labeling (SRL) captures predicateargument relations, such as “who did what to whom.”",1 Introduction,[0],[0]
+"Recent high-performing SRL models (He et al., 2017; Marcheggiani et al., 2017; Tan et al., 2018) are BIO-taggers, labeling argument spans for a single predicate at a time (as shown in Figure 1).",1 Introduction,[0],[0]
+"They are typically only evaluated with gold predicates, and must be pipelined with error-prone predicate identification models for deployment.
+",1 Introduction,[0],[0]
+We propose an end-to-end approach for predicting all the predicates and their argument spans in one forward pass.,1 Introduction,[0],[0]
+"Our model builds on a recent coreference resolution model (Lee et al., 2017), by making central use of learned, contextualized span representations.",1 Introduction,[0],[0]
+We use these representations to predict SRL graphs directly over text spans.,1 Introduction,[0],[0]
+"Each edge is identified by independently predicting which role, if any, holds between every possible pair of text spans, while using aggressive beam
+1Code and models: https://github.com/luheng/lsgn
+pruning for efficiency.",1 Introduction,[0],[0]
+"The final graph is simply the union of predicted SRL roles (edges) and their associated text spans (nodes).
+",1 Introduction,[0],[0]
+"Our span-graph formulation overcomes a key limitation of semi-markov and BIO-based models (Kong et al., 2016; Zhou and Xu, 2015; Yang and Mitchell, 2017; He et al., 2017; Tan et al., 2018): it can model overlapping spans across different predicates in the same output structure (see Figure 1).",1 Introduction,[0],[0]
+"The span representations also generalize the token-level representations in BIObased models, letting the model dynamically decide which spans and roles to include, without using previously standard syntactic features (Punyakanok et al., 2008; FitzGerald et al., 2015).
+",1 Introduction,[0],[0]
+"To the best of our knowledge, this is the first span-based SRL model that does not assume that predicates are given.",1 Introduction,[0],[0]
+"In this more realistic setting, where the predicate must be predicted, our model achieves state-of-the-art performance on PropBank.",1 Introduction,[0],[0]
+"It also reinforces the strong performance of similar span embedding methods for coreference (Lee et al., 2017), suggesting that this style of models could be used for other span-span relation tasks, such as syntactic parsing (Stern et al., 2017), relation extraction (Miwa and Bansal, 2016), and QA-SRL (FitzGerald et al., 2018).",1 Introduction,[0],[0]
+"We consider the space of possible predicates to be all the tokens in the input sentence, and the space of arguments to be all continuous spans.",2 Model,[0],[0]
+"Our model decides what relation exists between each predicate-argument pair (including no relation).
+",2 Model,[0],[0]
+"Formally, given a sequence X = w1, . . .",2 Model,[0],[0]
+", wn, we wish to predict a set of labeled predicateargument relations Y ⊆ P ×",2 Model,[0],[0]
+"A × L, where P = {w1, . . .",2 Model,[0],[0]
+", wn} is the set of all tokens (predicates), A = {(wi, . . .",2 Model,[0],[0]
+", wj) | 1 ≤",2 Model,[0],[0]
+"i ≤ j ≤ n} contains all the spans (arguments), and L is the space of semantic role labels, including a null label indicating no relation.",2 Model,[0],[0]
+"The final SRL output would be all the non-empty relations {(p, a, l) ∈ Y",2 Model,[0],[0]
+"| l 6= }.
+",2 Model,[0],[0]
+"We then define a set of random variables, where each random variable yp,a corresponds to a predicate p ∈ P and an argument a ∈ A, taking value from the discrete label space L.",2 Model,[0],[0]
+"The random variables yp,a are conditionally independent of each other given the input X:
+P (Y | X) = ∏
+p∈P,a∈A P (yp,a | X) (1)
+P (yp,a = l | X) = exp(φ(p, a, l))∑
+l′∈L exp(φ(p, a, l′))
+",2 Model,[0],[0]
+"(2)
+Where φ(p, a, l) is a scoring function for a possible (predicate, argument, label) combination.",2 Model,[0],[0]
+"φ is decomposed into two unary scores on the predicate and the argument (defined in Section 3), as well as a label-specific score for the relation:
+φ(p, a, l) = Φa(a) + Φp(p) +",2 Model,[0],[0]
+"Φ (l) rel (a, p) (3)
+",2 Model,[0],[0]
+"The score for the null label is set to a constant: φ(p, a, ) = 0, similar to logistic regression.
+",2 Model,[0],[0]
+"Learning For each input X , we minimize the negative log likelihood of the gold structure Y ∗:
+",2 Model,[0],[0]
+J (X) =,2 Model,[0],[0]
+"− logP (Y ∗ | X) (4)
+Beam pruning As our model deals with O(n2) possible argument spans and O(n) possible predicates, it needs to consider O(n3|L|) possible relations, which is computationally impractical.",2 Model,[0],[0]
+"To overcome this issue, we define two beams Ba and Bp for storing the candidate arguments and predicates, respectively.",2 Model,[0],[0]
+The candidates in each beam are ranked by their unary score (Φa or Φp).,2 Model,[0],[0]
+The sizes of the beams are limited by λan and λpn.,2 Model,[0],[0]
+"Elements that fall out of the beam do not participate
+in computing the edge factors Φ(l)rel , reducing the overall number of relational factors evaluated by the model to O(n2|L|).",2 Model,[0],[0]
+"We also limit the maximum width of spans to a fixed number W (e.g. W = 30), further reducing the number of computed unary factors to O(n).",2 Model,[0],[0]
+"Our model builds contextualized representations for argument spans a and predicate words p based on BiLSTM outputs (Figure 2) and uses feedforward networks to compute the factor scores in φ(p, a, l) described in Section 2 (Figure 3).
+",3 Neural Architecture,[0],[0]
+"Word-level contexts The bottom layer consists of pre-trained word embeddings concatenated with character-based representations, i.e. for each token wi, we have xi = [WORDEMB(wi); CHARCNN(wi)].",3 Neural Architecture,[0],[0]
+"We then contextualize each xi using an m-layered bidirectional LSTM with highway connections (Zhang et al., 2016), which we denote as x̄i.
+Argument and predicate representation We build contextualized representations for all candidate arguments a ∈ A and predicates p ∈ P .",3 Neural Architecture,[0],[0]
+"The argument representation contains the following: end points from the BiLSTM outputs (x̄START(a), x̄END(a)), a soft head word xh(a), and embedded span width features f(a), similar to Lee et al. (2017).",3 Neural Architecture,[0],[0]
+"The predicate representation is simply the BiLSTM output at the position INDEX(p).
+",3 Neural Architecture,[0],[0]
+"g(a) =[x̄START(a); x̄END(a); xh(a); f(a)] (5)
+g(p) =x̄INDEX(p) (6)
+The soft head representation xh(a) is an attention mechanism over word inputs x in the argument span, where the weights e(a) are computed via a linear layer over the BiLSTM outputs x̄.
+xh(a) = xSTART(a):END(a)e(s) ᵀ (7) e(a)",3 Neural Architecture,[0],[0]
+"= SOFTMAX(wᵀe x̄START(a):END(a)) (8)
+xSTART(a):END(a) is a shorthand for stacking a list of vectors xt, where START(a) ≤ t ≤ END(a).
+",3 Neural Architecture,[0],[0]
+"Scoring The scoring functions Φ are implemented with feed-forward networks based on the predicate and argument representations g:
+Φa(a) =w ᵀ a MLPa(g(a))",3 Neural Architecture,[0],[0]
+(9) Φp(p),3 Neural Architecture,[0],[0]
+"=w ᵀ pMLPp(g(p)) (10)
+Φ (l) rel (a, p) =w (l)ᵀ r MLPr([g(a); g(p)]) (11)",3 Neural Architecture,[0],[0]
+"We experiment on the CoNLL 2005 (Carreras and Màrquez, 2005) and CoNLL 2012 (OntoNotes 5.0, (Pradhan et al., 2013)) benchmarks, using two SRL setups: end-to-end and gold predicates.",4 Experiments,[0],[0]
+"In the end-to-end setup, a system takes a tokenized sentence as input, and predicts all the predicates and their arguments.",4 Experiments,[0],[0]
+"Systems are evaluated on the micro-averaged F1 for correctly predicting (predicate, argument span, label) tuples.",4 Experiments,[0],[0]
+"For comparison with previous systems, we also report results with gold predicates, in which the complete set of predicates in the input sentence is given as well.",4 Experiments,[0],[0]
+"Other experimental setups and hyperparameteres are listed in Appendix A.1.
+ELMo embeddings To further improve performance, we also add ELMo word representations (Peters et al., 2018) to the BiLSTM input (in the +ELMo rows).",4 Experiments,[0],[0]
+"Since the contextualized representations ELMo provides can be applied to most previous neural systems, the improvement is orthogonal to our contribution.",4 Experiments,[0],[0]
+"In Table 1 and 2, we organize all the results into two categories: the comparable single model systems, and the mod-
+els augmented with ELMo or ensembling (in the PoE rows).
+",4 Experiments,[0],[0]
+"End-to-end results As shown in Table 1,2 our joint model outperforms the previous best pipeline system (He et al., 2017) by an F1 difference of anywhere between 1.3 and 6.0 in every setting.",4 Experiments,[0],[0]
+"The improvement is larger on the Brown test set, which is out-of-domain, and the CoNLL 2012 test set, which contains nominal predicates.",4 Experiments,[0],[0]
+"On all datasets, our model is able to predict over 40% of the sentences completely correctly.
+",4 Experiments,[0],[0]
+"Results with gold predicates To compare with additional previous systems, we also conduct experiments with gold predicates by constraining our predicate beam to be gold predicates only.",4 Experiments,[0],[0]
+"As shown in Table 2, our model significantly out-performs He et al. (2017), but falls short of Tan et al. (2018), a very recent attention-based (Vaswani et al., 2017)",4 Experiments,[0],[0]
+BIO-tagging model that was developed concurrently with our work.,4 Experiments,[0],[0]
+"By adding the contextualized ELMo representations, we are able to out-perform all previous systems, including Peters et al. (2018), which applies ELMo to the SRL model introduced in He et al. (2017).",4 Experiments,[0],[0]
+Our model’s architecture differs significantly from previous BIO systems in terms of both input and decision space.,5 Analysis,[0],[0]
+"To better understand our model’s strengths and weaknesses, we perform three analyses following Lee et al. (2017) and He et al. (2017), studying (1) the effectiveness of beam
+2For the end-to-end setting on CoNLL 2012, we used a subset of the train/dev data from previous work due to noise in the dataset; the dev result is not directly comparable.",5 Analysis,[0],[0]
+"See Appendix A.2 for detailed explanation.
+",5 Analysis,[0],[0]
+"pruning, (2) the ability to capture long-range dependencies, (3) agreement with syntactic spans, and (4) the ability to predict globally consistent SRL structures.",5 Analysis,[0],[0]
+The analyses are performed on the development sets without using ELMo embeddings.,5 Analysis,[0],[0]
+"3
+Effectiveness of beam pruning Figure 4 shows the predicate and argument spans kept in the beam, sorted with their unary scores.",5 Analysis,[0],[0]
+"Our model efficiently prunes unlikely argument spans and predicates, significantly reduces the number of edges it needs to consider.",5 Analysis,[0],[0]
+Figure 5 shows the recall of predicate words on the CoNLL 2012 development set.,5 Analysis,[0],[0]
+"By retaining λp = 0.4 predicates per word, we are able to keep over 99.7% argument-bearing predicates.",5 Analysis,[0],[0]
+"Compared to having a part-of-speech tagger (POS:X in Figure 5), our joint beam pruning allowing the model to have a soft trade-off between efficiency and recall.4
+Long-distance dependencies Figure 6 shows the performance breakdown by binned distance between arguments to the given predicates.",5 Analysis,[0],[0]
+"Our model is better at accurately predicting arguments that are farther away from the predicates, even
+3For comparability with prior work, analyses (2)-(4) are performed on the CoNLL 05 dev set with gold predicates.
+",5 Analysis,[0],[0]
+"4The predicate ID accuracy of our model is not comparable with that reported in He et al. (2017), since our model does not predict non-argument-bearing predicates.
+",5 Analysis,[0],[0]
+"compared to an ensemble model (He et al., 2017) that has a higher overall F1.",5 Analysis,[0],[0]
+"This is very likely due to architectural differences; in a BIO tagger, predicate information passes through many LSTM timesteps before reaching a long-distance argument, whereas our architecture enables direct connections between all predicates-arguments pairs.
+Agreement with syntax As mentioned in He et al. (2017), their BIO-based SRL system has good agreement with gold syntactic span boundaries (94.3%) but falls short of previous syntaxbased systems (Punyakanok et al., 2004).",5 Analysis,[0],[0]
+"By directly modeling span information, our model achieves comparable syntactic agreement (95.0%) to Punyakanok et al. (2004) without explicitly modeling syntax.
+",5 Analysis,[0],[0]
+"Global consistency On the other hand, our model suffers from global consistency issues.",5 Analysis,[0],[0]
+"For example, on the CoNLL 2005 test set, our model has lower complete-predicate accuracy (62.6%) than the BIO systems (He et al., 2017; Tan et al., 2018) (64.3%-66.4%).",5 Analysis,[0],[0]
+"Table 3 shows its viola-
+tions of global structural constraints5 compared to previous systems.",5 Analysis,[0],[0]
+Our model made more constraint violations compared to previous systems.,5 Analysis,[0],[0]
+"For example, our model predicts duplicate core arguments6 (shown in the U column in Table 3) more often than previous work.",5 Analysis,[0],[0]
+"This is due to the fact that our model uses independent classifiers to label each predicate-argument pair, making it difficult for them to implicitly track the decisions made for several arguments with the same predicate.
+",5 Analysis,[0],[0]
+"The Ours+decode row in Table 3 shows SRL performance after enforcing the U-constraint using dynamic programming (Täckström et al., 2015) at decoding time.",5 Analysis,[0],[0]
+"Constrained decoding at test time is effective at eliminating all the core-role inconsistencies (shown in the U-column), but did not bring significant gain on the end result (shown
+5Punyakanok et al. (2008) described a list of global constraints for SRL systems, e.g., there can be at most one core argument of each type for each predicate.
+6Arguments with labels ARG0,ARG1,. . .",5 Analysis,[0],[0]
+",",5 Analysis,[0],[0]
+"ARG5 and AA.
+in SRL F1), which only evaluates the piece-wise predicate-argument structures.",5 Analysis,[0],[0]
+"We proposed a new SRL model that is able to jointly predict all predicates and argument spans, generalized from a recent coreference system (Lee et al., 2017).",6 Conclusion and Future Work,[0],[0]
+"Compared to previous BIO systems, our new model supports joint predicate identification and is able to incorporate span-level features.",6 Conclusion and Future Work,[0],[0]
+"Empirically, the model does better at longrange dependencies and agreement with syntactic boundaries, but is weaker at global consistency, due to our strong independence assumption.
+",6 Conclusion and Future Work,[0],[0]
+"In the future, we could incorporate higher-order inference methods (Lee et al., 2018) to relax this assumption.",6 Conclusion and Future Work,[0],[0]
+"It would also be interesting to combine our span-based architecture with the selfattention layers (Tan et al., 2018; Strubell et al., 2018) for more effective contextualization.",6 Conclusion and Future Work,[0],[0]
+"This research was supported in part by the ARO (W911NF-16-1-0121), the NSF (IIS-1252835, IIS-1562364), a gift from Tencent, and an Allen Distinguished Investigator Award.",Acknowledgments,[0],[0]
+"We thank Eunsol Choi, Dipanjan Das, Nicholas Fitzgerald, Ariel Holtzman, Julian Michael, Noah Smith, Swabha Swayamdipta, and our anonymous reviewers for helpful feedback.",Acknowledgments,[0],[0]
+"Recent BIO-tagging-based neural semantic role labeling models are very high performing, but assume gold predicates as part of the input and cannot incorporate span-level features.",abstractText,[0],[0]
+"We propose an endto-end approach for jointly predicting all predicates, arguments spans, and the relations between them.",abstractText,[0],[0]
+"The model makes independent decisions about what relationship, if any, holds between every possible word-span pair, and learns contextualized span representations that provide rich, shared input features for each decision.",abstractText,[0],[0]
+Experiments demonstrate that this approach sets a new state of the art on PropBank SRL without gold predicates.1,abstractText,[0],[0]
+Jointly Predicting Predicates and Arguments in Neural Semantic Role Labeling,title,[0],[0]
+"Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics (Short Papers), pages 401–406 Melbourne, Australia, July 15 - 20, 2018. c©2018 Association for Computational Linguistics
+401",text,[0],[0]
+"Neural NER trains a deep neural network for the NER task and has become quite popular as they minimize the need for hand-crafted features and, learn feature representations from the training data itself.",1 Introduction,[1.0],"['Neural NER trains a deep neural network for the NER task and has become quite popular as they minimize the need for hand-crafted features and, learn feature representations from the training data itself.']"
+"Recently, multilingual learning has been shown to benefit Neural NER in a resource-rich language setting (Gillick et al., 2016; Yang et al., 2017).",1 Introduction,[0],[0]
+Multilingual learning aims to improve the NER performance on the language under consideration (primary language) by adding training data from one or more assisting languages.,1 Introduction,[1.0],['Multilingual learning aims to improve the NER performance on the language under consideration (primary language) by adding training data from one or more assisting languages.']
+The neural network is trained on the combined data of the primary (DP ) and the assisting languages (DA).,1 Introduction,[1.0],['The neural network is trained on the combined data of the primary (DP ) and the assisting languages (DA).']
+"The neural network has a combination of languagedependent and language-independent layers, and, the network learns better cross-lingual features via these language-independent layers.
+∗This work began when the second author was a research scholar at IIT Bombay
+Existing approaches add all training sentences from the assisting language to the primary language and train the neural network on the combined data.",1 Introduction,[0],[0]
+"However, data from assisting languages can introduce a drift in the tag distribution for named entities, since the common named entities from the two languages may have vastly divergent tag distributions.",1 Introduction,[1.0],"['However, data from assisting languages can introduce a drift in the tag distribution for named entities, since the common named entities from the two languages may have vastly divergent tag distributions.']"
+"For example, the entity China appears in training split of Spanish (primary) and English (assisting) (Tjong Kim Sang, 2002; Tjong Kim Sang and De Meulder, 2003) with the corresponding tag frequencies, Spanish = { Loc : 20, Org : 49, Misc : 1 } and English = { Loc : 91, Org : 7 }.",1 Introduction,[1.0],"['For example, the entity China appears in training split of Spanish (primary) and English (assisting) (Tjong Kim Sang, 2002; Tjong Kim Sang and De Meulder, 2003) with the corresponding tag frequencies, Spanish = { Loc : 20, Org : 49, Misc : 1 } and English = { Loc : 91, Org : 7 }.']"
+"By adding English data to Spanish, the tag distribution of China is skewed towards Location entity in Spanish.",1 Introduction,[1.0],"['By adding English data to Spanish, the tag distribution of China is skewed towards Location entity in Spanish.']"
+This leads to a drop in named entity recognition performance.,1 Introduction,[0],[0]
+"In this work, we address this problem of drift in tag distribution owing to adding training data from a supporting language.
+",1 Introduction,[0.9999999451680798],"['In this work, we address this problem of drift in tag distribution owing to adding training data from a supporting language.']"
+"The problem is similar to the problem of data selection for domain adaptation of various NLP tasks, except that additional complexity is introduced due to the multilingual nature of the learning task.",1 Introduction,[1.0],"['The problem is similar to the problem of data selection for domain adaptation of various NLP tasks, except that additional complexity is introduced due to the multilingual nature of the learning task.']"
+"For domain adaptation in various NLP tasks, several approaches have been proposed to address drift in data distribution (Moore and Lewis, 2010; Axelrod et al., 2011; Ruder and Plank, 2017).",1 Introduction,[1.0],"['For domain adaptation in various NLP tasks, several approaches have been proposed to address drift in data distribution (Moore and Lewis, 2010; Axelrod et al., 2011; Ruder and Plank, 2017).']"
+"For instance, in machine translation, sentences from out-of-domain data are selected based on a suitably defined metric (Moore and Lewis, 2010; Axelrod et al., 2011).",1 Introduction,[1.0],"['For instance, in machine translation, sentences from out-of-domain data are selected based on a suitably defined metric (Moore and Lewis, 2010; Axelrod et al., 2011).']"
+The metric attempts to capture similarity of the out-of-domain sentences with the in-domain data.,1 Introduction,[0],[0]
+"Out-of-domain sentences most similar to the in-domain data are added.
+",1 Introduction,[0],[0]
+"Like the domain adaptation techniques summarized above, we propose to judiciously add sentences from the assisting language to the primary language data based on the divergence between the tag distributions of named entities in the train-
+ing instances.",1 Introduction,[0],[0]
+"Adding assisting language sentences with lower divergence reduces the possibility of entity drift enabling the multilingual model to learn better cross-lingual features.
+",1 Introduction,[0],[0]
+Following are the contributions of the paper: (a) We present a simple approach to select assisting language sentences based on symmetric KLDivergence of overlapping entities (b) We demonstrate the benefits of multilingual Neural NER on low-resource languages.,1 Introduction,[0],[0]
+"We compare the proposed data selection approach with monolingual Neural NER system, and the multilingual Neural NER system trained using all assisting language sentences.",1 Introduction,[0],[0]
+"To the best of our knowledge, ours is the first work for judiciously selecting a subset of sentences from an assisting language for multilingual Neural NER.",1 Introduction,[0],[0]
+"For every assisting language sentence, we calculate the sentence score based on the average symmetric KL-Divergence score of overlapping entities present in that sentence.",2 Judicious Selection of Assisting Language Sentences,[1.0],"['For every assisting language sentence, we calculate the sentence score based on the average symmetric KL-Divergence score of overlapping entities present in that sentence.']"
+"By overlapping entities, we mean entities whose surface form appears in both the languages’ training data.",2 Judicious Selection of Assisting Language Sentences,[0],[0]
+"The symmetric KL-Divergence SKL(x), of a named entity x, is defined as follows,
+SKL(x) =",2 Judicious Selection of Assisting Language Sentences,[0],[0]
+[ KL( Pp(x) || Pa(x) ),2 Judicious Selection of Assisting Language Sentences,[0],[0]
++KL( Pa(x) ||,2 Judicious Selection of Assisting Language Sentences,[0],[0]
+Pp(x) ) ] /2,2 Judicious Selection of Assisting Language Sentences,[0],[0]
+"(1)
+where Pp(x) and Pa(x) are the probability distributions for entity x in the primary (p) and the assisting (a) languages respectively.",2 Judicious Selection of Assisting Language Sentences,[0],[0]
+"KL refers to the standard KL-Divergence score between the two probability distributions.
+",2 Judicious Selection of Assisting Language Sentences,[0],[0]
+KL-Divergence calculates the distance between the two probability distributions.,2 Judicious Selection of Assisting Language Sentences,[0],[0]
+"Lower the KLDivergence score, higher is the tag agreement for an entity in both the languages thereby, reducing the possibility of entity drift in multilingual learning.",2 Judicious Selection of Assisting Language Sentences,[0],[0]
+Assisting language sentences with the sentence score below a threshold value are added to the primary language data for multilingual learning.,2 Judicious Selection of Assisting Language Sentences,[1.0],['Assisting language sentences with the sentence score below a threshold value are added to the primary language data for multilingual learning.']
+"If an assisting language sentence contains no overlapping entities, the corresponding sentence score is zero resulting in its selection.
+",2 Judicious Selection of Assisting Language Sentences,[0],[0]
+"Network Architecture
+Several deep learning models (Collobert et al., 2011; Ma and Hovy, 2016; Murthy and Bhattacharyya, 2016; Lample et al., 2016; Yang et al., 2017) have been proposed for monolingual NER in the literature.",2 Judicious Selection of Assisting Language Sentences,[0],[0]
+"Apart from the model by Collobert et al. (2011), remaining approaches extract sub-word features using either Convolution Neural Networks (CNNs) or Bi-LSTMs.",2 Judicious Selection of Assisting Language Sentences,[0],[0]
+The proposed data selection strategy for multilingual Neural NER can be used with any of the existing models.,2 Judicious Selection of Assisting Language Sentences,[0],[0]
+"We choose the model by Murthy and Bhattacharyya (2016)1 in our experiments.
+",2 Judicious Selection of Assisting Language Sentences,[0],[0]
+"Multilingual Learning
+We consider two parameter sharing configurations for multilingual learning (i) sub-word feature extractors shared across languages (Yang et al., 2017)",2 Judicious Selection of Assisting Language Sentences,[0],[0]
+(Sub-word) (ii) the entire network trained in a language independent way (All).,2 Judicious Selection of Assisting Language Sentences,[0],[0]
+"As Murthy and Bhattacharyya (2016) use CNNs to extract sub-word features, only the character-level CNNs are shared for the Sub-word configuration.
+",2 Judicious Selection of Assisting Language Sentences,[0],[0]
+1The code is available here: https://github.com/ murthyrudra/NeuralNER,2 Judicious Selection of Assisting Language Sentences,[0],[0]
+In this section we list the datasets used and the network configurations used in our experiments.,3 Experimental Setup,[0],[0]
+The Table 1 lists the datasets used in our experiments along with pre-trained word embeddings used and other dataset statistics.,3.1 Datasets,[1.0],['The Table 1 lists the datasets used in our experiments along with pre-trained word embeddings used and other dataset statistics.']
+"For German NER, we use ep-96-04-16.conll to create train and development splits, and use ep-96-04-15.conll as test split.",3.1 Datasets,[0],[0]
+"As Italian has a different tag set compared to English, Spanish and Dutch, we do not share output layer for All configuration in multilingual experiments involving Italian.",3.1 Datasets,[0],[0]
+"Even though the languages considered are resource-rich languages, we consider German and Italian as primary languages due to their relatively lower number of train tokens.",3.1 Datasets,[0],[0]
+"The German NER data followed IO notation and for all experiments involving German, we converted other language data to IO notation.",3.1 Datasets,[0],[0]
+"Similarly, the Italian NER data followed IOBES notation and for all experiments involving Italian, we converted other language data to IOBES notation.
+",3.1 Datasets,[0],[0]
+"For low-resource language setup, we consider the following Indian languages: Hindi, Marathi2, Bengali, Tamil and Malayalam.",3.1 Datasets,[0],[0]
+Except for Hindi all are low-resource languages.,3.1 Datasets,[0],[0]
+"We consider only Person, Location and Organization tags.",3.1 Datasets,[0],[0]
+"Though the scripts of these languages are different, they share the same set of phonemes making script mapping across languages easier.",3.1 Datasets,[0],[0]
+"We convert Tamil, Bengali and Malayalam data to the Devanagari script using the Indic NLP li-
+2Data is available here: http://www.cfilt.iitb.",3.1 Datasets,[0],[0]
+"ac.in/ner/annotated_corpus/
+brary3 (Kunchukuttan et al., 2015)",3.1 Datasets,[0],[0]
+"thereby, allowing sharing of sub-word features across the Indian languages.",3.1 Datasets,[0],[0]
+"For Indian languages, the annotated data followed the IOB format.",3.1 Datasets,[0],[0]
+"With the exception of English, Spanish and Dutch, remaining language datasets did not have official train and development splits provided.",3.2 Network Hyper-parameters,[0],[0]
+We randomly select 70% of the train split for training the model and remaining as development split.,3.2 Network Hyper-parameters,[0],[0]
+"The threshold for sentence score SKL, is selected based on cross-validation for every language pair.",3.2 Network Hyper-parameters,[0],[0]
+The dimensions of the Bi-LSTM hidden layer are 200 and 400 for the monolingual and multilingual experiments respectively.,3.2 Network Hyper-parameters,[0],[0]
+"We extract 20 features per convolution filter, with width varying from 1 to 9.",3.2 Network Hyper-parameters,[0],[0]
+The initial learning rate is 0.4 and multiplied by 0.7 when validation error increases.,3.2 Network Hyper-parameters,[0],[0]
+The training is stopped when the learning rate drops below 0.002.,3.2 Network Hyper-parameters,[0],[0]
+"We assign a weight of 0.1 to assisting language sentences and oversample primary language sentences to match the assisting language sentence count in all multilingual experiments.
+",3.2 Network Hyper-parameters,[0],[0]
+"For European languages, we have performed hyper-parameter tuning for both the monolingual and multilingual learning (with all assisting language sentences) configurations.",3.2 Network Hyper-parameters,[0],[0]
+The best hyperparameter values for the language pair involved were observed to be within similar range.,3.2 Network Hyper-parameters,[0],[0]
+"Hence, we chose the same set of hyper-parameter values for all languages.
+",3.2 Network Hyper-parameters,[0],[0]
+3https://github.com/anoopkunchukuttan/ indic_nlp_library,3.2 Network Hyper-parameters,[0],[0]
+We now present the results on both resource-rich and resource-poor languages.,4 Results,[0],[0]
+Table 2 presents the results for German and Italian NER.,4.1 Resource-Rich Languages,[0],[0]
+"We consistently observe improvements for German and Italian NER using our data selection strategy, irrespective of whether only subword features are shared (Sub-word) or the entire network (All) is shared across languages.
+",4.1 Resource-Rich Languages,[1.0000000282750763],"['We consistently observe improvements for German and Italian NER using our data selection strategy, irrespective of whether only subword features are shared (Sub-word) or the entire network (All) is shared across languages.']"
+Adding all Spanish/Dutch sentences to Italian data leads to drop in Italian NER performance when all layers are shared.,4.1 Resource-Rich Languages,[0],[0]
+Label drift from overlapping entities is one of the reasons for the poor results.,4.1 Resource-Rich Languages,[0],[0]
+This can be observed by comparing the histograms of English and Spanish sentences ranked by the SKL scores for Italian multilingual learning (Figure 1).,4.1 Resource-Rich Languages,[1.0],['This can be observed by comparing the histograms of English and Spanish sentences ranked by the SKL scores for Italian multilingual learning (Figure 1).']
+Most English sentences have lower SKL scores indicating higher tag agreement for overlapping entities and lower drift in tag distribution.,4.1 Resource-Rich Languages,[0],[0]
+"Hence, adding all English sentences improves Italian NER accuracy.",4.1 Resource-Rich Languages,[0],[0]
+"In contrast, most Spanish sentences have larger SKL
+scores and adding these sentences adversely impacts Italian NER performance.",4.1 Resource-Rich Languages,[0],[0]
+"By judiciously selecting assisting language sentences, we eliminate sentences which are responsible for drift occurring during multilingual learning.
+",4.1 Resource-Rich Languages,[0],[0]
+"To understand how overlapping entities impact the NER performance, we study the statistics of overlapping named entities between ItalianEnglish and Italian-Spanish pairs.",4.1 Resource-Rich Languages,[0],[0]
+911 and 916 unique entities out of 4061 unique Italian entities appear in the English and Spanish data respectively.,4.1 Resource-Rich Languages,[0],[0]
+We had hypothesized that entities with divergent tag distribution are responsible for hindering the performance in multilingual learning.,4.1 Resource-Rich Languages,[0],[0]
+If we sort the common entities based on their SKL divergence value.,4.1 Resource-Rich Languages,[0],[0]
+We observe that 484 out of 911 common entities in English and 535 out of 916 common entities in Spanish have an SKL score greater than 1.0. 162 out of 484 common entities in English-Italian data having SKL divergence value greater than 1.0 also appear more than 10 times in the English corpus.,4.1 Resource-Rich Languages,[0],[0]
+"Similarly, 123 out of 535 common entities in Spanish-Italian data having SKL divergence value greater than 1.0 also appear more than 10 times in the Spanish corpus.",4.1 Resource-Rich Languages,[0],[0]
+"However, these common 162 entities have a combined frequency of 12893 in English, meanwhile the 123 common entities have a combined frequency of 34945 in Spanish.",4.1 Resource-Rich Languages,[0],[0]
+"To summarize, although the number of overlapping entities is comparable in English and Spanish sentences, entities with larger SKL divergence score appears more frequently in Spanish sentences compared to English sentences.",4.1 Resource-Rich Languages,[0],[0]
+"As a consequence, adding all Spanish sentences leads to significant drop in Italian NER performance which is not the case when all English sentences are added.",4.1 Resource-Rich Languages,[0],[0]
+"As Indian languages exhibit high lexical overlap (Kunchukuttan and Bhattacharyya, 2016) and syntactic relatedness (V Subbãrão, 2012), we share all layers of the network across languages.",4.2 Resource-Poor Languages,[0],[0]
+Table 3 presents the results.,4.2 Resource-Poor Languages,[0],[0]
+"Bengali, Malayalam, and Tamil (low-resource languages) benefits from our data selection strategy.",4.2 Resource-Poor Languages,[1.0],"['Bengali, Malayalam, and Tamil (low-resource languages) benefits from our data selection strategy.']"
+"Hindi and Marathi NER performance improves when the other is used as assisting language.
+",4.2 Resource-Poor Languages,[0],[0]
+"Bengali, Malayalam, and Tamil have weaker baselines compared to Hindi and Marathi, and are benefited from our approach irrespective of the assisting language chosen.",4.2 Resource-Poor Languages,[1.0],"['Bengali, Malayalam, and Tamil have weaker baselines compared to Hindi and Marathi, and are benefited from our approach irrespective of the assisting language chosen.']"
+"However, Hindi and Marathi are not benefited from multilingual learning with Bengali, Malayalam and Tamil.",4.2 Resource-Poor Languages,[0],[0]
+Malayalam and Tamil being morphologically rich have low entity overlap (surface level) with Hindi and Marathi.,4.2 Resource-Poor Languages,[1.0],['Malayalam and Tamil being morphologically rich have low entity overlap (surface level) with Hindi and Marathi.']
+"As a result, only 2-3% of Malayalam and Tamil sentences are eliminated from our approach, leading to no gains from multilingual learning.",4.2 Resource-Poor Languages,[0],[0]
+Hindi and Marathi are negatively impacted by noisy Bengali data.,4.2 Resource-Poor Languages,[1.0],['Hindi and Marathi are negatively impacted by noisy Bengali data.']
+"Bengali has less training sentences compared to other languages and, choosing a low SKL threshold results in selecting very few Bengali sentences for multilingual learning.",4.2 Resource-Poor Languages,[1.0],"['Bengali has less training sentences compared to other languages and, choosing a low SKL threshold results in selecting very few Bengali sentences for multilingual learning.']"
+"Here, we study the influence of SKL score threshold on the NER performance.",4.3 Influence of SKL Threshold,[0],[0]
+We run experiments for Italian NER by adding Spanish training sentences and sharing all layers except for output layer across languages.,4.3 Influence of SKL Threshold,[1.0],['We run experiments for Italian NER by adding Spanish training sentences and sharing all layers except for output layer across languages.']
+"We vary the threshold value from 1.0 to 9.0 in steps of 1, and select sentences with score less than the threshold.",4.3 Influence of SKL Threshold,[0],[0]
+"A threshold of 0.0 indicates monolingual training and threshold greater than 9.0 indicates all assist-
+ing language sentences considered.",4.3 Influence of SKL Threshold,[0],[0]
+The plot of Italian test F-Score against SKL score is shown in the Figure 2.,4.3 Influence of SKL Threshold,[1.0],['The plot of Italian test F-Score against SKL score is shown in the Figure 2.']
+Italian test F-Score increases initially as we add more and more Spanish sentences and then drops due to influence of drift becoming significant.,4.3 Influence of SKL Threshold,[0],[0]
+"Finding the right SKL threshold is important, hence we use a validation set to tune the SKL threshold.",4.3 Influence of SKL Threshold,[0],[0]
+"In this paper, we address the problem of divergence in tag distribution between primary and assisting languages for multilingual Neural NER.",5 Conclusion,[0],[0]
+We show that filtering out the assisting language sentences exhibiting significant divergence in the tag distribution can improve NER accuracy.,5 Conclusion,[1.0],['We show that filtering out the assisting language sentences exhibiting significant divergence in the tag distribution can improve NER accuracy.']
+We propose to use the symmetric KL-Divergence metric to measure the tag distribution divergence.,5 Conclusion,[1.0],['We propose to use the symmetric KL-Divergence metric to measure the tag distribution divergence.']
+We observe consistent improvements in multilingual Neural NER performance using our data selection strategy.,5 Conclusion,[1.0],['We observe consistent improvements in multilingual Neural NER performance using our data selection strategy.']
+"The strategy shows benefits for extremely low resource primary languages too.
+",5 Conclusion,[0],[0]
+"This problem of drift in data distribution may not be unique to multilingual NER, and we plan to study the influence of data selection for multilingual learning on other NLP tasks like sentiment analysis, question answering, neural machine translation, etc.",5 Conclusion,[1.0],"['This problem of drift in data distribution may not be unique to multilingual NER, and we plan to study the influence of data selection for multilingual learning on other NLP tasks like sentiment analysis, question answering, neural machine translation, etc.']"
+"We also plan to explore more metrics for multilingual learning, specifically for morphologically rich languages.",5 Conclusion,[1.0],"['We also plan to explore more metrics for multilingual learning, specifically for morphologically rich languages.']"
+"We thank Gajanan Rane and Geetanjali Rane for annotating the Marathi data, which was created as part of the CLIA project.",Acknowledgements,[0],[0]
+Multilingual learning for Neural Named Entity Recognition (NNER) involves jointly training a neural network for multiple languages.,abstractText,[0],[0]
+"Typically, the goal is improving the NER performance of one of the languages (the primary language) using the other assisting languages.",abstractText,[0],[0]
+We show that the divergence in the tag distributions of the common named entities between the primary and assisting languages can reduce the effectiveness of multilingual learning.,abstractText,[0],[0]
+"To alleviate this problem, we propose a metric based on symmetric KL divergence to filter out the highly divergent training instances in the assisting language.",abstractText,[0],[0]
+"We empirically show that our data selection strategy improves NER performance in many languages, including those with very limited training data.",abstractText,[0],[0]
+Judicious Selection of Training Data in Assisting Language for Multilingual Neural NER,title,[0],[0]

@@ -1,0 +1,874 @@
+0,1,label2,summary_sentences
+A key to the success of probabilistic modeling is the pairing of rich probability models with fast and accurate inference algorithms.,1. Introduction,[0],[0]
+Probabilistic graphical models enable this by providing a flexible class of probability distributions together with algorithms that exploit the graph structure for efficient inference.,1. Introduction,[0],[0]
+"However, exact inference algorithms are only available when both the distributions involved and the graph structure are simple enough.",1. Introduction,[0],[0]
+"How-
+",1. Introduction,[0],[0]
+"1College of Information and Computer Sciences, University of Massachusetts Amherst 2Department of Computer Science, Mount Holyoke College.",1. Introduction,[0],[0]
+"Correspondence to: Kevin Winner <kwinner@cs.umass.edu>.
+",1. Introduction,[0],[0]
+"Proceedings of the 34 th International Conference on Machine Learning, Sydney, Australia, PMLR 70, 2017.",1. Introduction,[0],[0]
+"Copyright 2017 by the author(s).
+ever, this situation is rare and consequently, much research today is devoted to general-purpose approximate inference techniques (e.g. Ranganath et al., 2014; Kingma & Welling, 2014; Carpenter et al., 2016).
+",1. Introduction,[0],[0]
+"Despite many advances in probabilistic inference, there remain relatively simple (and useful) models for which exact inference algorithms are not available.",1. Introduction,[0],[0]
+This paper considers the case of graphical models with a simple structure but with (unbounded) latent count random variables.,1. Introduction,[0],[0]
+"These are a natural modeling choice for many real world problems in ecology (Zonneveld, 1991; Royle, 2004; Dail & Madsen, 2011) and epidemiology (Farrington et al., 2003; Panaretos, 2007; Kvitkovicova & Panaretos, 2011).",1. Introduction,[0],[0]
+"However, they pose a unique challenge for inference: even though algorithms like belief propagation (Pearl, 1986) or variable elimination (Zhang & Poole, 1994) are well defined mathematically, they cannot be implemented in an obvious way because factors have a countably infinite number of entries.",1. Introduction,[0],[0]
+"As a result, approximations like truncating the support of the random variables or MCMC are applied (Royle, 2004; Gross et al., 2007; Chandler et al., 2011; Dail & Madsen, 2011; Zipkin et al., 2014; Winner et al., 2015).
+",1. Introduction,[0],[0]
+"Recently, Winner & Sheldon (2016) introduced a new technique for exact inference in models with latent count variables.",1. Introduction,[0],[0]
+"Their approach executes the same operations as variable elimination, but with factors, which are infinite sequences of values, represented in a compact way using probability generating functions (PGFs).",1. Introduction,[0],[0]
+"They developed an efficient exact inference algorithm for a specific class of Poisson hidden Markov models (HMMs) that represent a population undergoing mortality and immigration, and noisy observations of the population over time.
+",1. Introduction,[0],[0]
+A key open question is the extent to which PGF-based inference generalizes to a broader class of models.,1. Introduction,[0],[0]
+There are two primary considerations.,1. Introduction,[0],[0]
+"First, for what types of factors can the required operations (multiplication, marginalization, and conditioning) be “lifted” to PGF-based representations?",1. Introduction,[0],[0]
+"Here, there is significant room for generalization: the mathematical PGF operations developed in (Winner & Sheldon, 2016) already apply to a broad class of nonPoisson immigration models, and we will generalize the models further to allow richer models of population survival and growth.",1. Introduction,[0],[0]
+"Second, and more significantly, for what
+types of PGFs can the requisite mathematical operations be implemented efficiently?",1. Introduction,[0],[0]
+Winner & Sheldon (2016) manipulated PGFs symbolically.,1. Introduction,[0],[0]
+"Their compact symbolic representation seems to rely crucially on properties of the Poisson distribution; it remains unclear whether symbolic PGF inference can be generalized beyond Poisson models.
+",1. Introduction,[0],[0]
+"This paper introduces a new algorithmic technique based on higher-order automatic differentiation (Griewank & Walther, 2008) for inference with PGFs.",1. Introduction,[0],[0]
+A key insight is that most inference tasks do not require a full symbolic representation of the PGF.,1. Introduction,[0],[0]
+"For example, the likelihood is computed by evaluating a PGF F (s) at s = 1.",1. Introduction,[0],[0]
+Other probability queries can be posed in terms of derivatives F (k)(s) evaluated at either s = 0 or s = 1.,1. Introduction,[0],[0]
+"In all cases, it suffices to evaluate F and its higher-order derivatives at particular values of s, as opposed to computing a compact symbolic representation of F .",1. Introduction,[0],[0]
+"It may seem that this problem is then solved by standard techniques, such as higher-order forward-mode automatic differentiation (Griewank & Walther, 2008).",1. Introduction,[0],[0]
+"However, the requisite PGF F is complex—it is defined recursively in terms of higher-order derivatives of other PGFs—and offthe-shelf automatic differentiation methods do not apply.",1. Introduction,[0],[0]
+"We therefore develop a novel recursive procedure using building blocks of forward-mode automatic differentiation (generalized dual numbers and univariate Taylor polynomials; Griewank & Walther, 2008) to evaluate F and its derivatives.
+",1. Introduction,[0],[0]
+"Our algorithmic contribution leads to the first efficient exact algorithms for a class of HMMs that includes many well-known models as special cases, and has many applications.",1. Introduction,[0],[0]
+"The hidden variables represent a population that undergoes three different processes: mortality (or emigration), immigration, and growth.",1. Introduction,[0],[0]
+A variety of different distributional assumptions may be made about each process.,1. Introduction,[0],[0]
+The models may also be viewed without this interpretation as a flexible class of models for integer-valued time series.,1. Introduction,[0],[0]
+"Special cases include models from population ecology (Royle, 2004; Gross et al., 2007; Dail & Madsen, 2011), branching processes (Watson & Galton, 1875; Heathcote, 1965), queueing theory (Eick et al., 1993), and integer-valued autoregressive models (McKenzie, 2003).",1. Introduction,[0],[0]
+Additional details about the relation to these models are given in Section 2.,1. Introduction,[0],[0]
+"Our algorithms permit exact calculation of the likelihood for all of these models even when they are partially observed.
+",1. Introduction,[0],[0]
+"We demonstrate experimentally that our new exact inference algorithms are more scalable than competing approximate approaches, and support learning via exact likelihood calculations in a broad class of models for which this was not previously possible.",1. Introduction,[0],[0]
+"We consider a hidden Markov model with integer latent variables N
+1 , . . .",2. Model and Problem Statement,[0],[0]
+", NK and integer observed variables Y 1
+, . . .",2. Model and Problem Statement,[0],[0]
+", YK .",2. Model and Problem Statement,[0],[0]
+All variables are assumed to be non-negative.,2. Model and Problem Statement,[0],[0]
+"The model is most easily understood in the context of its application to population ecology or branching processes (which are similar): in these cases, the variable Nk represents the size of a hidden population at time tk, and Yk represents the number of individuals that are observed at time tk.",2. Model and Problem Statement,[0],[0]
+"However, the model is equally valid without this interpretation as a flexible class of autoregressive processes (McKenzie, 2003).
+",2. Model and Problem Statement,[0],[0]
+We introduce some notation to describe the model.,2. Model and Problem Statement,[0],[0]
+"For an integer random variable N , write Y = ⇢ N to mean that Y ⇠ Binomial(N, ⇢).",2. Model and Problem Statement,[0],[0]
+This operation is known as “binomial thinning”: the count Y is the number of “survivors” from the original count N .,2. Model and Problem Statement,[0],[0]
+We can equivalently write Y = PN i=1,2. Model and Problem Statement,[0],[0]
+Xi for iid Xi ⇠ Bernoulli(⇢) to highlight the fact that this is a compound distribution.,2. Model and Problem Statement,[0],[0]
+"Indeed, compound distributions will play a key role: for independent integer random variables N and X , let Z = N X denote the compound random variable Z = PN i=1",2. Model and Problem Statement,[0],[0]
+"Xi, where {Xi} are independent copies of X .",2. Model and Problem Statement,[0],[0]
+"Now, we can describe our model as:
+Nk = (Nk 1 Xk) +Mk, (1) Yk = ⇢k Nk. (2)
+",2. Model and Problem Statement,[0],[0]
+The variable Nk represents the population size at time tk.,2. Model and Problem Statement,[0],[0]
+The random variable Nk 1 Xk 1 = PNk 1 i=1,2. Model and Problem Statement,[0],[0]
+"Xk 1,i is the number of offspring of individuals from the previous time step, where Xk 1,i is the total number of individuals “caused by” the ith individual alive at time tk 1.",2. Model and Problem Statement,[0],[0]
+"This definition of offspring is flexible enough to model immediate offspring, surviving individuals, and descendants of more than one generation.",2. Model and Problem Statement,[0],[0]
+"The random variable Mk is the number of immigrants at time tk, and Yk is the number of individuals observed at time tk, with the assumption that each individual is observed independently with probability ⇢",2. Model and Problem Statement,[0],[0]
+"k. We have left unspecified the distributions of Mk and Xk, which we term the immigration and offspring distributions, respectively.",2. Model and Problem Statement,[0],[0]
+These may be arbitrary distributions over non-negative integers.,2. Model and Problem Statement,[0],[0]
+"We will assume the initial condition N
+0 = 0, though the model can easily be extended to accommodate arbitrary initial distributions.
+",2. Model and Problem Statement,[0],[0]
+Problem Statement We use lower case variables to denote specific settings of random variables.,2. Model and Problem Statement,[0],[0]
+"Let yi:j = (yi, . . .",2. Model and Problem Statement,[0],[0]
+", yj) and ni:j = (ni, . . .",2. Model and Problem Statement,[0],[0]
+", nj).",2. Model and Problem Statement,[0],[0]
+"The model above defines a joint probability mass function (pmf) p(n
+1:K , y1:K ; ✓) where we introduce the vector ✓ containing parameters of all component distributions when necessary.",2. Model and Problem Statement,[0],[0]
+"It is clear that the density factors according to a hidden Markov model: p(n
+1:K , y1:K) =
+QK k=1 p(nk |nk 1)p(yk |nk).",2. Model and Problem Statement,[0],[0]
+"We will consider several inference problems that are standard for HMMs, but pose unique challenges when the hidden variables have countably infinite support.",2. Model and Problem Statement,[0],[0]
+"Specifically, suppose y
+1:K are observed, then we seek to:
+• Compute the likelihood L(✓) = p(y 1:K ; ✓) for any ✓,
+• Compute moments and values of the pmf of the filtered marginals p(nk | y1:k; ✓), for any k, ✓,
+• Estimate parameters ✓ by maximizing the likelihood.
+",2. Model and Problem Statement,[0],[0]
+"We focus technically on the first two problems, which will enable numerical optimization to maximize the likelihood.",2. Model and Problem Statement,[0],[0]
+Another standard problem is to compute smoothed marginals p(nk | y1:K ; ✓) given both past and future observations relative to time step k.,2. Model and Problem Statement,[0],[0]
+"Although this is interesting, it is technically more difficult, and we defer it for future work.
+",2. Model and Problem Statement,[0],[0]
+Connections to Other Models This model specializes to capture many different models in the literature.,2. Model and Problem Statement,[0],[0]
+The latent process of Eq.,2. Model and Problem Statement,[0],[0]
+"(1) is a Galton-Watson branching process with immigration (Watson & Galton, 1875; Heathcote, 1965).",2. Model and Problem Statement,[0],[0]
+"It also captures a number of different AR(1) (first-order autoregressive) processes for integer variables (McKenzie, 2003); these typically assume Xk ⇠ Bernoulli( k), i.e., that the offspring process is binomial thinning of the current individuals.",2. Model and Problem Statement,[0],[0]
+"For clarity when describing this as an offspring distribution, we will refer to it as Bernoulli offspring.",2. Model and Problem Statement,[0],[0]
+"With Bernoulli offspring and time-homogenous Poisson immigration, the model is an M/M/1 queue (McKenzie, 2003); with time-varying Poisson immigration it is an Mt/M/1 queue (Eick et al., 1993).",2. Model and Problem Statement,[0],[0]
+"For each of these models, we contribute the first known algorithms for exact inference and likelihood calculations when the process is partially observed.",2. Model and Problem Statement,[0],[0]
+"This allows estimation from data that is noisy and has variability that should not be modeled by the latent process.
+",2. Model and Problem Statement,[0],[0]
+Special cases of our model with noisy observations occur in statistical estimation problems in population ecology.,2. Model and Problem Statement,[0],[0]
+"When immigration is zero after the first time step and Xk = 1, the population size is a fixed random variable, and we recover the N -mixture model of Royle (2004) for estimating the size of an animal population from repeated counts.",2. Model and Problem Statement,[0],[0]
+"With Poisson immigration and Bernoulli offspring, we recover the basic model of Dail & Madsen (2011) for open metapopulations; extended versions with overdispersion and population growth also fall within our framework by using negative-binomial immigration and Poisson offspring.",2. Model and Problem Statement,[0],[0]
+"Related models for insect populations also fall within our framework (Zonneveld, 1991; Gross et al., 2007; Winner et al., 2015).",2. Model and Problem Statement,[0],[0]
+The main goal in most of this literature is parameter estimation.,2. Model and Problem Statement,[0],[0]
+"Until very recently, no exact algorithms were known to compute the likelihood, so ap-
+proximations such as truncating the support of the latent variables (Royle, 2004; Fiske & Chandler, 2011; Chandler et al., 2011; Dail & Madsen, 2011) or MCMC (Gross et al., 2007; Winner et al., 2015) were used.",2. Model and Problem Statement,[0],[0]
+Winner & Sheldon (2016) introduced PGF-based exact algorithms for the restricted version of the model with Bernoulli offspring and Poisson immigration.,2. Model and Problem Statement,[0],[0]
+We will build on that work to provide exact inference and likelihood algorithms for all of the aforementioned models.,2. Model and Problem Statement,[0],[0]
+"The standard approach for inference in HMMs is the forward-backward algorithm (Rabiner, 1989), which is a special case of more general propagation or messagepassing algorithms (Pearl, 1986; Lauritzen & Spiegelhalter, 1988; Jensen et al., 1990; Shenoy & Shafer, 1990).",3. Methods,[0],[0]
+"Winner & Sheldon (2016) showed how to implement the forward algorithm using PGFs for models with Bernoulli offspring and Poisson immigration.
+",3. Methods,[0],[0]
+Forward Algorithm,3. Methods,[0],[0]
+"The forward algorithm recursively computes “messages”, which are unnormalized distributions of subsets of the variables.",3. Methods,[0],[0]
+"Specifically, define ↵k(nk) :",3. Methods,[0],[0]
+"= p(nk, y1:k) and k(nk)",3. Methods,[0],[0]
+":= p(nk, y1:k 1).",3. Methods,[0],[0]
+"These satisfy the recurrence:
+k(nk) =",3. Methods,[0],[0]
+"X
+nk 1
+↵k 1(nk 1)p(nk |nk 1), (3)
+↵k(nk) = k(nk)p(yk |nk).",3. Methods,[0],[0]
+"(4)
+We will refer to Equation (3) as the prediction step (the value of nk is predicted based on the observations y1:k 1), and Equation (4) as the evidence step (the new evidence yk is incorporated).",3. Methods,[0],[0]
+"In finite models, the forward algorithm can compute the ↵k messages for k = 1, . . .",3. Methods,[0],[0]
+",K directly using Equations (3) and (4).",3. Methods,[0],[0]
+"However, if nk is unbounded, this cannot be done directly; for example, ↵k(nk) is an infinite sequence, and Equation (3) contains an infinite sum.",3. Methods,[0],[0]
+"Winner & Sheldon (2016) observed that, for some conditional distributions p(nk |nk 1) and p(yk |nk), the operations of the forward algorithm can be carried out using PGFs.",3.1. Forward Algorithm with PGFs,[0],[0]
+"Specifically, define the PGFs k(uk) and Ak(sk) of k(nk) and ↵k(nk), respectively, as:
+k(uk) := 1X
+nk=0
+k(nk)u nk k , (5)
+Ak(sk) := 1X
+nk=0
+↵k(nk)s nk k .",3.1. Forward Algorithm with PGFs,[0],[0]
+"(6)
+The PGFs k and Ak are power series in the variables uk and sk with coefficients equal to the message entries.
+",3.1. Forward Algorithm with PGFs,[0],[0]
+These functions capture all relevant information about the associated distributions.,3.1. Forward Algorithm with PGFs,[0],[0]
+"Technically, k and Ak are unnormalized PGFs because the coefficients do not sum to one.",3.1. Forward Algorithm with PGFs,[0],[0]
+"However, the normalization constants are easily recovered by evaluating the PGF on input value 1: for example, Ak(1) =",3.1. Forward Algorithm with PGFs,[0],[0]
+"P nk
+↵k(nk) = p(y1:k).",3.1. Forward Algorithm with PGFs,[0],[0]
+This also shows that we can recover the likelihood as AK(1) = p(y1:K).,3.1. Forward Algorithm with PGFs,[0],[0]
+"After normalizing, the PGFs can be interpreted as expectations, for example Ak(sk)/Ak(1) =",3.1. Forward Algorithm with PGFs,[0],[0]
+E[sNkk,3.1. Forward Algorithm with PGFs,[0],[0]
+"| y1:k].
+In general, it is well known that the PGF F (s) of a nonnegative integer-valued random variable X uniquely defines the entries of the probability mass function and the moments of X , which are recovered from (higher-order) derivatives of F evaluated at zero and one, respectively:
+Pr(X = r)",3.1. Forward Algorithm with PGFs,[0],[0]
+=,3.1. Forward Algorithm with PGFs,[0],[0]
+"F (r)(0)/r!, (7)
+E[X] = F (1)(1), (8)
+Var(X) = F (2)(1)",3.1. Forward Algorithm with PGFs,[0],[0]
+h F (1)(1),3.1. Forward Algorithm with PGFs,[0],[0]
+i 2 + F (1)(1).,3.1. Forward Algorithm with PGFs,[0],[0]
+"(9)
+More generally, the first q moments are determined by the derivatives F (r)(1) for r  q.",3.1. Forward Algorithm with PGFs,[0],[0]
+"Therefore, if we can evaluate the PGF Ak and its derivatives for sk 2 {0, 1}, we can answer arbitrary queries about the filtering distributions p(nk, y1:k), and, in particular, solve our three stated inference problems.
+",3.1. Forward Algorithm with PGFs,[0],[0]
+"But how can we compute values of Ak, k, and their derivatives?",3.1. Forward Algorithm with PGFs,[0],[0]
+What form do these PGFs have?,3.1. Forward Algorithm with PGFs,[0],[0]
+"One key result of Winner & Sheldon (2016), which we generalize here, is the fact that there is also a recurrence relation among the PGFs.",3.1. Forward Algorithm with PGFs,[0],[0]
+Proposition 1.,3.1. Forward Algorithm with PGFs,[0],[0]
+Consider the probability model defined in Equations (1) and (2).,3.1. Forward Algorithm with PGFs,[0],[0]
+"Let Fk be the PGF of the offspring random variable Xk, and let Gk be the PGF of the immigration random variable Mk.",3.1. Forward Algorithm with PGFs,[0],[0]
+"Then k and Ak satisfy the following recurrence:
+k(uk) =",3.1. Forward Algorithm with PGFs,[0],[0]
+"Ak 1 Fk(uk) ·Gk(uk) (10)
+Ak(sk)",3.1. Forward Algorithm with PGFs,[0],[0]
+"= (sk⇢k)yk
+yk! · (yk)k sk(1 ⇢k)
+",3.1. Forward Algorithm with PGFs,[0],[0]
+"(11)
+Proof.",3.1. Forward Algorithm with PGFs,[0],[0]
+"A slightly less general version of Equation (10) appeared in Winner & Sheldon (2016); the general version appears in the literature on branching processes with immigration (Heathcote, 1965).",3.1. Forward Algorithm with PGFs,[0],[0]
+"Equation (11) follows directly from general PGF operations outlined in (Winner & Sheldon, 2016).
+",3.1. Forward Algorithm with PGFs,[0],[0]
+The PGF recurrence has the same two elements as the pmf recurrence in equations (3) and (4).,3.1. Forward Algorithm with PGFs,[0],[0]
+"Equation (10) is the prediction step: it describes the PGF of k(nk) = p(nk, y1:k 1) in terms of previous PGFs.",3.1. Forward Algorithm with PGFs,[0],[0]
+"Equation (11) is the evidence step: it describes the PGF for ↵k(nk) =
+p(nk, y1:k) in terms of the previous PGF and the new observation yk.",3.1. Forward Algorithm with PGFs,[0],[0]
+"Note that the evidence step involves the ykth derivative of the PGF k from the prediction step, where yk is the observed count.",3.1. Forward Algorithm with PGFs,[0],[0]
+These high-order derivatives complicate the calculation of the PGFs.,3.1. Forward Algorithm with PGFs,[0],[0]
+The recurrence reveals structure about Ak and k but does not immediately imply an algorithm.,3.2. Evaluating Ak via Automatic Differentiation,[0],[0]
+"Winner & Sheldon (2016) showed how to use the recurrence to compute symbolic representations of all PGFs in the special case of Bernoulli offspring and Poisson immigration: in this case, they proved that all PGFs have the form F (s) = f(s)",3.2. Evaluating Ak via Automatic Differentiation,[0],[0]
+"exp(as + b), where f is a polynomial of bounded degree.",3.2. Evaluating Ak via Automatic Differentiation,[0],[0]
+"Hence, they can be represented compactly and computed efficiently using the recurrence.",3.2. Evaluating Ak via Automatic Differentiation,[0],[0]
+"The result is a symbolic representation, so, for example, one obtains a closed form representation of the final PGF AK , from which the likelihood, entries of the pmf, and moments can be calculated.",3.2. Evaluating Ak via Automatic Differentiation,[0],[0]
+"However, the compact functional form f(s) exp(as + b) seems to rely crucially on properties of the Poisson distribution.",3.2. Evaluating Ak via Automatic Differentiation,[0],[0]
+"When other distributions are used, the size of the symbolic PGF representation grows quickly with K. It is an open question whether the symbolic methods can be extended to other classes of PGFs.
+",3.2. Evaluating Ak via Automatic Differentiation,[0],[0]
+This motivates an alternate approach.,3.2. Evaluating Ak via Automatic Differentiation,[0],[0]
+"Instead of computing Ak symbolically, we will evaluate Ak and its derivatives at particular values of sk corresponding to the queries we wish to make (cf. Equations (7)–(9)).",3.2. Evaluating Ak via Automatic Differentiation,[0],[0]
+"To develop the approach, it is helpful to consider the feed-forward computation for evaluating Ak at a particular value sk.",3.2. Evaluating Ak via Automatic Differentiation,[0],[0]
+"The circuit diagram in Figure 1 is a directed acyclic graph that describes this calculation; the nodes are intermediate quantities in the calculation, and the shaded rectangles illustrate the recursively nested PGFs.
+",3.2. Evaluating Ak via Automatic Differentiation,[0],[0]
+"Now, we can consider techniques from automatic differentiation (autodiff) to compute Ak and its derivatives.",3.2. Evaluating Ak via Automatic Differentiation,[0],[0]
+"How-
+ever, these will not apply directly.",3.2. Evaluating Ak via Automatic Differentiation,[0],[0]
+"Note that Ak is defined in terms of higher-order derivatives of the function k, which depends on higher-order derivatives of k 1, and so forth.",3.2. Evaluating Ak via Automatic Differentiation,[0],[0]
+Standard autodiff techniques cannot handle these recursively nested derivatives.,3.2. Evaluating Ak via Automatic Differentiation,[0],[0]
+"Therefore, we will develop a novel algorithm.",3.2. Evaluating Ak via Automatic Differentiation,[0],[0]
+We now develop basic notation and building blocks that we will assemble to construct our algorithm.,3.2.1. COMPUTATION MODEL AND DUAL NUMBERS,[0],[0]
+"It is helpful to abstract from our particular setting and describe a general model for derivatives within a feed-forward computation, following Griewank & Walther (2008).",3.2.1. COMPUTATION MODEL AND DUAL NUMBERS,[0],[0]
+"We consider a procedure that assigns values to a sequence of variables v 0 , v 1
+, . . .",3.2.1. COMPUTATION MODEL AND DUAL NUMBERS,[0],[0]
+", vn, where v0 is the input variable, vn is the output variable, and each intermediate variable vj is computed via a function 'j(vi)i j of some subset (vi)i j of the variables v
+0:j 1.",3.2.1. COMPUTATION MODEL AND DUAL NUMBERS,[0],[0]
+Here the dependence relation,3.2.1. COMPUTATION MODEL AND DUAL NUMBERS,[0],[0]
+"i j simply means that 'j depends directly on vi, and (vi)i j is the vector of variables for which that is true.",3.2.1. COMPUTATION MODEL AND DUAL NUMBERS,[0],[0]
+"Note that the dependence relation defines a directed acyclic graph G (e.g., the circuit in Figure 1), and v
+0 , . . .",3.2.1. COMPUTATION MODEL AND DUAL NUMBERS,[0],[0]
+", vn is a topological ordering of G.
+We will be concerned with the values of a variable v` and its derivatives with respect to some earlier variable vi.",3.2.1. COMPUTATION MODEL AND DUAL NUMBERS,[0],[0]
+"To represent this cleanly, we first introduce a notation to capture the partial computation between the assignment of vi and v`.",3.2.1. COMPUTATION MODEL AND DUAL NUMBERS,[0],[0]
+"For i  `, define fi`(v0:i) to be the value that is assigned to v` if the values of the first i variables are given by v 0:i (now treated as fixed input values).",3.2.1. COMPUTATION MODEL AND DUAL NUMBERS,[0],[0]
+"This can be defined formally in an inductive fashion:
+fi`(v0:i) = '`(uij)j `, uij = ( vj if j  i fij(v0:i) if j >",3.2.1. COMPUTATION MODEL AND DUAL NUMBERS,[0],[0]
+"i
+This can be interpreted as recursion with memoization for v 0:i. When '` “requests” the value of uij of vj : if j  i, this value was given as an input argument of fi`, so we just “look it up”; but if j > i, we recursively compute the correct value via the partial computation from i to j. Now, we define a notation to capture derivatives of a variable v` with respect to an earlier variable vi.",3.2.1. COMPUTATION MODEL AND DUAL NUMBERS,[0],[0]
+Definition 1 (Dual numbers).,3.2.1. COMPUTATION MODEL AND DUAL NUMBERS,[0],[0]
+"The generalized dual number hv`, dviiq for 0  i  ` and q > 0 is the sequence consisting of v` and its first q derivatives with respect to vi:
+hv`,",3.2.1. COMPUTATION MODEL AND DUAL NUMBERS,[0],[0]
+"dviiq = ✓ @p
+@vpi fi`(v0:i)
+◆q
+p=0
+We say that hv`, dviiq is a dual number of order q with respect to vi.",3.2.1. COMPUTATION MODEL AND DUAL NUMBERS,[0],[0]
+Let DRq be the set of dual numbers of order q.,3.2.1. COMPUTATION MODEL AND DUAL NUMBERS,[0],[0]
+"We will commonly write dual numbers as:
+hs, duiq = ⇣ s, ds
+du , . . .",3.2.1. COMPUTATION MODEL AND DUAL NUMBERS,[0],[0]
+",
+dqs
+duq
+⌘
+in which case it is understood that s = v` and u = vi for some 0  i  `, and the function fi`(·) will be clear from context.
+",3.2.1. COMPUTATION MODEL AND DUAL NUMBERS,[0],[0]
+Our treatment of dual numbers and partial computations is more explicit than what is standard.,3.2.1. COMPUTATION MODEL AND DUAL NUMBERS,[0],[0]
+"In particular, we are explicit both about the variable v` we are differentiating and the variable vi with respect to which we are differentiating.",3.2.1. COMPUTATION MODEL AND DUAL NUMBERS,[0],[0]
+"This is important for our algorithm, and also helps distinguish our approach from traditional automatic differentiation approaches.",3.2.1. COMPUTATION MODEL AND DUAL NUMBERS,[0],[0]
+"Forward-mode autodiff computes derivatives of all variables with respect to v
+0 , i.e., it computes hvj , dv0iq for j = 1, . . .",3.2.1. COMPUTATION MODEL AND DUAL NUMBERS,[0],[0]
+", n. Reverse-mode autodiff computes derivatives of vn with respect to all variables, i.e., it computes hvn, dviiq for i = n 1, . . .",3.2.1. COMPUTATION MODEL AND DUAL NUMBERS,[0],[0]
+", 0.",3.2.1. COMPUTATION MODEL AND DUAL NUMBERS,[0],[0]
+"In each case, one of the two variables is fixed, so the notation can be simplified.",3.2.1. COMPUTATION MODEL AND DUAL NUMBERS,[0],[0]
+The general idea of our algorithm will resemble forwardmode autodiff.,3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"Instead of sequentially calculating the values v
+1 , . .",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+.,3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+", vn in our feed-forward computation, we will calculate dual numbers hv
+1 , dvi1iq1 , . . .",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+", hvn, dviniqn , where we leave unspecified (for now) the variables with respect to which we differentiate, and the order of the dual numbers.",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+We will require three high-level operations on dual numbers.,3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"The first one is “lifting” a scalar function.
+",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+Definition 2 (Lifted Function).,3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+Let f : Rm !,3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"R be a function of variables x
+1 , . . .",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+", xm.",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+The qth-order lifted function Lqf : (DRq)m !,3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"DRq is the function that accepts as input dual numbers hx
+1 , duiq, . . .",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+", hxm, duiq of order q with respect to the same variable u, and returns the value⌦ f(x
+1 , . . .",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+", xm), du ↵ q .
+",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+Lifting is the basic operation of higher-order forward mode autodiff.,3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"For functions f consisting only of “primitive operations”, the lifted function Lqf can be computed at a modest overhead relative to computing f .
+",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"Proposition 2 (Griewank & Walther, 2008).",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+Let f : Rm !,3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"R be a function that consists only of the following primitive operations, where x and y are arbitrary input variables and all other numbers are constants: x",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"+ cy, x ⇤ y, x/y, xr, ln(x), exp(x), sin(x), cos(x).",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"Then Lqf can be computed in time O(q2) times the running time of f .
+",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"Based on this proposition, we will write algebraic operations on dual numbers, e.g., hx, duiq⇥hy, duiq , and understand these to be lifted versions of the corresponding scalar operations.",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"The standard lifting approach is to represent dual numbers as univariate Taylor polynomials (UTPs), in which case many operations (e.g., multiplication, addition) translate directly to the corresponding operations on polynomials.",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"We will use UTPs in the proof of Theorem 1.
+",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+The second operation we will require is composition.,3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+Say that variable vj separates vi from v` if all paths from vi to v` in G go through vj .,3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+Theorem 1 (Composition).,3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+Suppose vj separates vi from v`.,3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"In this case, the dual number hv`, dviiq depends only on the dual numbers hv`, dvjiq and hvj , dviiq , and we define the composition operation:
+hv`, dvjiq hvj , dviiq := hv`, dviiq
+If vj does not separate vi from v`, the written composition operation is undefined.",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"The composition operation can be performed in O(q2 log q) time by composing two UTPs.
+",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+Proof.,3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"If all paths from vi to v` go through vj , then vj is a “bottleneck” in the partial computation fil.",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"Specifically, there exist functions F and H such that vj = F (vi) and v` = H(vj).",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"Here, the notation suppresses dependence on variables that either are not reachable from vi, or do not have a path to v`, and hence may be treated as constants because they they do not impact the dual number hv`, viiq .",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+A detailed justification of this is given in the supplementary material.,3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"Now, our goal is to compute the higher-order derivatives of v` = H(F (vi)).",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"Let ˆF and ˆH be infinite Taylor expansions about vi and vj , respectively, omitting the constant terms F (vi) and H(vj):
+ˆF ("") := 1X
+p=1
+F (p)(vi)
+p!",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"""p, ˆH("") :=
+1X
+p=1
+H(p)(vj)
+p!",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"""p.
+These are polynomials in "", and the first q coefficients are given in the input dual numbers.",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"The coefficient of ""p in ˆU("") := ˆH( ˆF ("")) for p 1 is exactly dpv`/dvpi (see Wheeler, 1987, where the composition of Taylor polynomials is related directly to the higher-order chain rule known as Faà dı́ Bruno’s Formula).",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+So it suffices to compute the first q coefficients of ˆH( ˆF (✏)).,3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"This can be done by executing Horner’s method (Horner, 1819) in truncated Taylor polynomial arithmetic (Griewank & Walther, 2008), which keeps only the first q coefficients of all polynomials (i.e., it assumes ✏p = 0 for p > q).",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"After truncation, Horner’s method involves q additions and q multiplications of polynomials of degree at most q. Polynomial multiplication takes time O(q log q) using the FFT, so the overall running time is O(q2 log q).
+",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+The final operation we will require is differentiation.,3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"This will support local functions '` that differentiate a previous value, e.g., v` = '`(vj) = dpvj/dvpi .",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+Definition 3 (Differential Operator).,3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"Let hs, duiq be a dual number.",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"For p  q, the differential operator Dp applied to hs, duiq returns the dual number of order q p given by:
+Dphs, duiq := ⇣ dps dup , . . .",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+", dqs duq ⌘
+The differential operator can be applied in O(q) time.
+",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"This operation was defined in (Kalaba & Tesfatsion, 1986).",3.2.2. OPERATIONS ON DUAL NUMBERS,[0],[0]
+"We will now use these operations to lift the function Ak to compute h↵k, skiq = LA hsk, dskiq), i.e., the output of Ak and its derivatives with respect to its input.",3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+Algorithm 1 gives a sequence of mathematical operations to compute Ak(sk).,3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+Algorithm 2 shows the corresponding operations on dual numbers; we call this algorithm the generalized dual-number forward algorithm or GDUALFORWARD.,3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+"Note that a dual number of a variable with respect to itself is simply hx, dxiq = (x, 1, 0, . . .",3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+", 0); such expressions are used without explicit initialization in Algorithm 2.",3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+"Also, if the dual number hx, dyiq has been assigned, we will assume the scalar value x is also available, for example, to initialize a new dual variable hx, dxiq (cf.",3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+the dual number on the RHS of Line 3).,3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+Note that Algorithm 1 contains a non-primitive operation on Line 5: the derivative dyk k/duykk .,3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+"To evaluate this in Algorithm 2, we must manipulate the dual number of k to be taken with respect to uk, and not the original input value sk, as in forward-mode autodiff.",3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+"Our approach can be viewed as following a different recursive principle from either forward or reverse-mode autodiff: in the circuit diagram of Figure 1, we calculate derivatives of each nested circuit with respect to its own input, starting with the innermost circuit and working out.",3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+Theorem 2.,3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+"LAK computes h↵k, dskiq in time O K(q",3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+"+
+Y )2 log(q + Y ) where Y = PK
+k=1 yk is the sum of the observed counts and q is the requested number of derivatives.",3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+"Therefore, the likelihood can be computed in O(KY 2 log Y ) time, and the first q moments or the first q entries of the filtered marginals can be computed in time",3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+O K(q,3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+"+ Y )2 log(q + Y ) .
+",3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+Proof.,3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+"To see that GDUAL-FORWARD is correct, note that it corresponds to Algorithm 1, but applies the three operations from the previous section to operate on dual numbers instead of scalars.",3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+We will verify that the conditions for applying each operation are met.,3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+Lines 2–5 each use lifting of algebraic operations or the functions,3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+"Fk and Gk, which are assumed to consist only of primitive operations.",3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+"Lines 4 and 5 apply the composition operation; here, we can verify from Figure 1 that sk 1 separates uk and ↵k 1 (Line 4) and that uk separates sk and k (Line 5).",3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+"The conditions for applying the differential operator on Line 5 are also met.
+",3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+"For the running time, note that the total number of operations on dual numbers in LAK , including recursive calls, is O(K).",3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+"The order of the dual numbers is initially q, but increases by yk in each recursive call (Line 4).",3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+"Therefore, the maximum value is q + Y .",3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+"Each of the operations on
+Algorithm 1 Ak(sk) if k = 0 then
+1: return ↵k = 1 end if 2: uk = sk(1 ⇢k) 3: sk 1 = Fk(uk) 4: k = Ak 1(sk 1) ·Gk(uk) 5: ↵k = d yk
+du yk k k · (sk⇢k)yk/yk! 6: return ↵k
+Algorithm 2 LAk(hsk, dskiq) — GDUAL-FORWARD if k = 0 then
+1: return h↵k, dskiq = (1, 0, . . .",3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+", 0) end if 2: huk, dskiq = hsk, dskiq · (1 ⇢k) 3: hsk 1, dukiq+yk = LFk huk, dukiq+yk
+4: h k, dukiq+yk = ⇥ LAk 1",3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+"hsk 1, dsk 1iq+yk hsk 1, dukiq+yk ⇤ ⇥",3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+"LGk huk, dukiq+yk 5: h↵k, dskiq = ⇥",3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+"Dyk h k, dukiq+yk huk, dskiq ⇤ ⇥ ⇢khsk, dskiq
+yk/yk! 6: return h↵k, dskiq
+dual numbers is O(p2 log p) for dual numbers of order p, so the total is O(K(q + Y )2 log(q + Y )).",3.2.3. THE GDUAL-FORWARD ALGORITHM,[0],[0]
+"In this section we describe simulation experiments to evaluate the running time of GDUAL-FORWARD against other algorithms, and to assess the ability to learn a wide variety of models for which exact likelihood calculations were not previously possible, by using GDUAL-FORWARD within a parameter estimation routine.
+",4. Experiments,[0],[0]
+Running time vs Y .,4. Experiments,[0],[0]
+"We compared the running time of GDUAL-FORWARD with the PGF-FORWARD algorithm from (Winner & Sheldon, 2016) as well as TRUNC, the standard truncated forward algorithm (Dail & Madsen, 2011).",4. Experiments,[0],[0]
+"PGF-FORWARD is only applicable to the Poisson HMM from (Winner & Sheldon, 2016), which, in our terminology, is a model with a Poisson immigration distribution and a Bernoulli offspring distribution.",4. Experiments,[0],[0]
+"TRUNC applies to any choice of distributions, but is approximate.",4. Experiments,[0],[0]
+"For these experiments, we restrict to Poisson HMMs for the sake of comparison with the less general PGF-FORWARD algorithm.
+",4. Experiments,[0],[0]
+A primary factor affecting running time is the magnitude of the counts.,4. Experiments,[0],[0]
+We measured the running time for all algorithms to compute the likelihood p(y; ✓) for vectors y,4. Experiments,[0],[0]
+:= y 1:K = c ⇥,4. Experiments,[0],[0]
+"(1, 1, 1, 1, 1) with increasing c.",4. Experiments,[0],[0]
+"In this case, Y = P k yk = 5c.",4. Experiments,[0],[0]
+"PGF-FORWARD and GDUAL-FORWARD have running times O(KY 2) and O(KY 2 log Y ), respectively, which depend only on Y and not ✓.",4. Experiments,[0],[0]
+"The running time of an FFT-based implementation of TRUNC is O(KN2
+max
+logN max ), where N max is the value used to truncate the support of each latent variable.",4. Experiments,[0],[0]
+"A heuristic is required to choose N
+max so that it captures most of the probability mass of p(y; ✓) but is not too big.",4. Experiments,[0],[0]
+"The appropriate value depends strongly on ✓, which in practice may be unknown.",4. Experiments,[0],[0]
+"In preliminary experiments with realistic immigration and offspring models (see below) and known parameters, we found that an excellent heuristic is N
+max = 0.4Y/⇢, which we use here.",4. Experiments,[0],[0]
+"With this heuristic, TRUNC’s running time is O(K⇢2Y 2 log Y ).
+",4. Experiments,[0],[0]
+"Figure 3 shows the results for ⇢ 2 {0.15, 0.85}, averaged over 20 trials with error bars showing 95% confidence intervals of the mean.",4. Experiments,[0],[0]
+"GDUAL-FORWARD and TRUNC have the same asymptotic dependence on Y but GDUALFORWARD scales better empirically, and is exact.",4. Experiments,[0],[0]
+"It is about 8x faster than TRUNC for the largest Y when ⇢ = 0.15, and 2x faster for ⇢ = 0.85.",4. Experiments,[0],[0]
+"PGF-FORWARD is faster by a factor of log Y in theory and scales better in practice, but applies to fewer models.
+",4. Experiments,[0],[0]
+Running time for different ✓.,4. Experiments,[0],[0]
+"We also conducted experiments where we varied parameters and used an oracle method to select N
+max for TRUNC.",4. Experiments,[0],[0]
+"This was done by running the algorithm for increasing values of N
+max and selecting the smallest one such that the likelihood was within 10 6 of the true value (see Winner & Sheldon, 2016).
+",4. Experiments,[0],[0]
+"We simulated data from Poisson HMMs and measured the time to compute the likelihood p(y; ✓) for the true parameters ✓ = ( , , ⇢), where is a vector whose kth entry is the mean of the Poisson immigration distribution at time k, and and ⇢ are scalars representing the Bernoulli survival probability and detection probability, respectively, which are shared across time steps.",4. Experiments,[0],[0]
+"We set and to mimic three different biological models; for each, we varied ⇢ from 0.05 to 0.95.",4. Experiments,[0],[0]
+"The biological models were as follows: ‘PHMM’ follows a temporal model for insect populations (Zonneveld, 1991) with = (5.13, 23.26, 42.08, 30.09, 8.56) and = 0.26; ‘PHMM-peaked’ is similar, but sets = (0.04, 10.26, 74.93, 25.13, 4.14) so the immigration is temporally “peaked” at the middle time step; ‘NMix’ sets = (80, 0, 0, 0, 0) and = 0.4, which is similar to the N-mixture model (Royle, 2004), with no immigration following the first time step.
+",4. Experiments,[0],[0]
+Figure 2 shows the running time of all three methods versus ⇢.,4. Experiments,[0],[0]
+"In these models, E[Y ] is proportional to ⇢, and the running times of GDUAL-FORWARD and PGF-FORWARD increase with ⇢ due to the corresponding increase in Y .",4. Experiments,[0],[0]
+"PGFFORWARD is faster by a factor of log Y , but is applicable to fewer models.",4. Experiments,[0],[0]
+"GDUAL-FORWARD perfoms best relative to PGF-FORWARD for the NMix model, because it is fastest when counts occur in early time steps.
+",4. Experiments,[0],[0]
+"Recall that the running time of TRUNC is O(N2
+max
+logN max ).",4. Experiments,[0],[0]
+"For these models, the distribution of the hidden population depends only on and , and these are the primary factors determining N
+max .",4. Experiments,[0],[0]
+"Running time decreases slightly as ⇢ increases, because the observation model p(y |n; ⇢) exerts more influence restricting implausible settings of n when the detection probability is higher.
+",4. Experiments,[0],[0]
+Parameter Estimation.,4. Experiments,[0],[0]
+"To demonstrate the flexibility of the method, we used GDUAL-FORWARD within an optimization routine to compute maximum likelihood estimates (MLEs) for models with different immigration and growth distributions.",4. Experiments,[0],[0]
+"In each experiment, we generated 10 independent observation vectors for K = 7 time steps from the same model p(y; ✓), and then used the L-BFGS-B algorithm to numerically find ✓ to maximize the loglikelihood of the 10 replicates.",4. Experiments,[0],[0]
+We varied the distributional forms of the immigration and offspring distributions as well as the mean R := E[Xk] of the offspring distribution.,4. Experiments,[0],[0]
+"We fixed the mean immigration := E[Mk] = 6 and the de-
+tection probability to ⇢ = 0.6 across all time steps.",4. Experiments,[0],[0]
+"The quantity R is the “basic reproduction number”, or the average number of offspring produced by a single individual, and is of paramount importance for disease and population models.",4. Experiments,[0],[0]
+"We varied R, which was also shared across time steps, between 0.2 and 1.2.",4. Experiments,[0],[0]
+"The parameters and R were learned, and ⇢ was fixed to resolve ambiguity between population size and detection probability.",4. Experiments,[0],[0]
+"Each experiment was repeated 50 times; a very small number of optimizer runs failed to converge after 10 random restarts and were excluded.
+",4. Experiments,[0],[0]
+Figure 4 shows the distribution of 50 MLE estimates for R vs. the true values for each model.,4. Experiments,[0],[0]
+Results for two additional models appear in the supplementary material.,4. Experiments,[0],[0]
+In all cases the distribution of the estimate is centered around the true parameter.,4. Experiments,[0],[0]
+It is evident that GDUAL-FORWARD can be used effectively to produce parameter estimates across a variety of models for which exact likelihood computations were not previously possible.,4. Experiments,[0],[0]
+This material is based upon work supported by the National Science Foundation under Grant No. 1617533.,Acknowledgments,[0],[0]
+Graphical models with latent count variables arise in a number of areas.,abstractText,[0],[0]
+"However, standard inference algorithms do not apply to these models due to the infinite support of the latent variables.",abstractText,[0],[0]
+"Winner & Sheldon (2016) recently developed a new technique using probability generating functions (PGFs) to perform efficient, exact inference for certain Poisson latent variable models.",abstractText,[0],[0]
+"However, the method relies on symbolic manipulation of PGFs, and it is unclear whether this can be extended to more general models.",abstractText,[0],[0]
+"In this paper we introduce a new approach for inference with PGFs: instead of manipulating PGFs symbolically, we adapt techniques from the autodiff literature to compute the higher-order derivatives necessary for inference.",abstractText,[0],[0]
+"This substantially generalizes the class of models for which efficient, exact inference algorithms are available.",abstractText,[0],[0]
+"Specifically, our results apply to a class of models that includes branching processes, which are widely used in applied mathematics and population ecology, and autoregressive models for integer data.",abstractText,[0],[0]
+Experiments show that our techniques are more scalable than existing approximate methods and enable new applications.,abstractText,[0],[0]
+Exact Inference for Integer Latent-Variable Models,title,[0],[0]
+"Given a graphical model, one essential problem is MAP inference, that is, finding the most likely configuration of states according to the model. Although this problem is NP-hard, large instances can be solved in practice and it is a major open question is to explain why this is true. We give a natural condition under which we can provably perform MAP inference in polynomial time—we require that the number of fractional vertices in the LP relaxation exceeding the optimal solution is bounded by a polynomial in the problem size. This resolves an open question by Dimakis, Gohari, and Wainwright. In contrast, for general LP relaxations of integer programs, known techniques can only handle a constant number of fractional vertices whose value exceeds the optimal solution. We experimentally verify this condition and demonstrate how efficient various integer programming methods are at removing fractional solutions.",text,[0],[0]
+"Given a graphical model, one essential problem is MAP inference, that is, finding the most likely configuration of states according to the model.
+",1. Introduction,[0],[0]
+"Consider graphical models with binary random variables and pairwise interactions, also known as Ising models.",1. Introduction,[0],[0]
+"For a graph G = (V,E) with node weights θ ∈ RV and edge weights W ∈ RE , the probability of a variable configura-
+1Department of Electrical and Computer Engineering, University of Texas at Austin, USA 2Department of Computer Science, University of Texas at Austin, USA.",1. Introduction,[0],[0]
+Correspondence to:,1. Introduction,[0],[0]
+"Erik M. Lindgren <erikml@utexas.edu>, Alexandros G. Dimakis <dimakis@austin.utexas.edu>, Adam Klivans <klivans@cs.utexas.edu>.
+",1. Introduction,[0],[0]
+"Proceedings of the 34 th International Conference on Machine Learning, Sydney, Australia, PMLR 70, 2017.",1. Introduction,[0],[0]
+"Copyright 2017 by the author(s).
+tion is given by
+P(X = x) = 1
+Z exp ∑ i∈V θixi + ∑ ij∈E",1. Introduction,[0],[0]
+"Wijxixj  , (1) where Z is a normalization constant.
+",1. Introduction,[0],[0]
+"The MAP problem is to find the configuration x ∈ {0, 1}V that maximizes Equation (1).",1. Introduction,[0],[0]
+"We can write this as an integer linear program (ILP) as follows:
+max q∈RV ∪E ∑ i∈V θiqi + ∑ ij∈E",1. Introduction,[0],[0]
+"Wijqij
+s.t. qi ∈ {0, 1} ∀i ∈ V qij ≥ max{0, qi + qj",1. Introduction,[0],[0]
+− 1} ∀ij ∈,1. Introduction,[0],[0]
+E,1. Introduction,[0],[0]
+qij ≤,1. Introduction,[0],[0]
+"min{qi, qj} ∀ij ∈",1. Introduction,[0],[0]
+"E. (2)
+",1. Introduction,[0],[0]
+"The MAP problem on binary, pairwise graphical models contains, as a special case, the Max-cut problem and is therefore NP-hard.",1. Introduction,[0],[0]
+"For this reason, a significant amount of attention has focused on analyzing the LP relaxation of the ILP, which can be solved efficiently in practice.
+",1. Introduction,[0],[0]
+max q∈RV ∪E ∑ i∈V θiqi + ∑ ij∈E,1. Introduction,[0],[0]
+"Wijqij
+s.t. 0 ≤ qi ≤ 1 ∀i ∈ V qij ≥ max{0, qi + qj",1. Introduction,[0],[0]
+− 1} ∀ij ∈,1. Introduction,[0],[0]
+E,1. Introduction,[0],[0]
+qij ≤,1. Introduction,[0],[0]
+"min{qi, qj} ∀ij ∈ E (3)
+",1. Introduction,[0],[0]
+This relaxation has been an area of intense research in machine learning and statistics.,1. Introduction,[0],[0]
+"In (Meshi et al., 2016), the authors state that a major open question is to identify why real world instances of Problem (2) can be solved efficiently despite the theoretical worst case complexity.
+",1. Introduction,[0],[0]
+"We make progress on this open problem by analyzing the fractional vertices of the LP relaxation, that is, the extreme points of the polytope with fractional coordinates.",1. Introduction,[0],[0]
+Vertices of the relaxed polytope with fractional coordinates are called pseudomarginals for graphical models and pseudocodewords in coding theory.,1. Introduction,[0],[0]
+"If a fractional vertex has higher objective value (i.e. likelihood) compared to the best integral one, the LP relaxation fails.",1. Introduction,[0],[0]
+"We call fractional vertices with an objective value at least as good as the objective
+value of the optimal integral vertex confounding vertices.",1. Introduction,[0],[0]
+"Our main result is that it is possible to prune all confounding vertices efficiently when their number is polynomial.
+",1. Introduction,[0],[0]
+"Our contributions:
+• Our first contribution is a general result on integer programs.",1. Introduction,[0],[0]
+"We show that any 0-1 integer linear program (ILP) can be solved exactly in polynomial time, if the number confounding vertices is bounded by a polynomial.",1. Introduction,[1.0],"['We show that any 0-1 integer linear program (ILP) can be solved exactly in polynomial time, if the number confounding vertices is bounded by a polynomial.']"
+This applies to MAP inference for a graphical model over any alphabet size and any order of connection.,1. Introduction,[0],[0]
+"The same result (exact solution if the number of confounding vertices is bounded by a polynomial) was established by (Dimakis et al., 2009) for the special case of LP decoding of LDPC codes (Feldman et al., 2005).",1. Introduction,[0],[0]
+"The algorithm from (Dimakis et al., 2009) relies on the special structure of the graphical models that correspond to LDPC codes.",1. Introduction,[1.0],"['The algorithm from (Dimakis et al., 2009) relies on the special structure of the graphical models that correspond to LDPC codes.']"
+In this paper we generalize this result for any ILP in the unit hypercube.,1. Introduction,[0],[0]
+"Our results extend to finding all integral vertices among the M -best vertices.
+",1. Introduction,[0],[0]
+"• Given our condition, one may be tempted to think that we generate the top M -best vertices of a linear program (for M polynomial) and output the best integral one in this list.",1. Introduction,[1.0],"['• Given our condition, one may be tempted to think that we generate the top M -best vertices of a linear program (for M polynomial) and output the best integral one in this list.']"
+We actually show that such an approach would be computationally intractable.,1. Introduction,[1.0],['We actually show that such an approach would be computationally intractable.']
+"Specifically, we show that it is NP-hard to produce a list of the M -best vertices if M = O(nε) for any fixed ε > 0.",1. Introduction,[0],[0]
+This result holds even if the list is allowed to be approximate.,1. Introduction,[1.0],['This result holds even if the list is allowed to be approximate.']
+"This strengthens the previously known hardness result (Angulo et al., 2014) which was M = O(n) for the exact M -best vertices.",1. Introduction,[0],[0]
+"In terms of achievability, the best previously known result (from (Angulo et al., 2014)) can only solve the ILP if there is at most a constant number of confounding vertices.
+",1. Introduction,[1.0000000578538177],"['In terms of achievability, the best previously known result (from (Angulo et al., 2014)) can only solve the ILP if there is at most a constant number of confounding vertices.']"
+"• We obtain a complete characterization of the fractional vertices of the local polytope for binary, pairwise graphical models.",1. Introduction,[0],[0]
+We show that any variable in the fractional support must be connected to a frustrated cycle by other fractional variables in the graphical model.,1. Introduction,[0],[0]
+"This is a complete structural characterization that was not previously known, to the best of our knowledge.
+",1. Introduction,[0],[0]
+• We develop an approach to estimate the number of confounding vertices of a half-integral polytope.,1. Introduction,[0],[0]
+We use this method in an empirical evaluation of the number of confounding vertices of previously studied problems and analyze how well common integer programming techniques perform at pruning confounding vertices.,1. Introduction,[1.0],['We use this method in an empirical evaluation of the number of confounding vertices of previously studied problems and analyze how well common integer programming techniques perform at pruning confounding vertices.']
+"For some classes of graphical models, it is possible to solve the MAP problem exactly.",2. Background and Related Work,[0],[0]
+"For example see (Weller et al., 2016) for balanced and almost balanced models, (Jebara, 2009) for perfect graphs, and (Wainwright et al., 2008) for graphs with constant tree-width.
+",2. Background and Related Work,[0],[0]
+These conditions are often not true in practice and a wide variety of general purpose algorithms are able to solve the MAP problem for large inputs.,2. Background and Related Work,[0],[0]
+"One class is belief propagation and its variants (Yedidia et al., 2000; Wainwright et al., 2003; Sontag et al., 2008).",2. Background and Related Work,[0],[0]
+"Another class involves general ILP optimization methods (see e.g. (Nemhauser & Wolsey, 1999)).",2. Background and Related Work,[0],[0]
+"Techniques specialized to graphical models include cutting-plane methods based on the cycle inequalities (Sontag & Jaakkola, 2007; Komodakis & Paragios, 2008; Sontag et al., 2012).",2. Background and Related Work,[0],[0]
+"See also (Kappes et al., 2013) for a comparative survey of techniques.
+",2. Background and Related Work,[0],[0]
+"In (Weller et al., 2014), the authors investigate how pseudomarginals and relaxations relate to the success of the Bethe approximation of the partition function.
+",2. Background and Related Work,[0],[0]
+"There has been substantial prior work on improving inference building on these LP relaxations, especially for LDPC codes in the information theory community.",2. Background and Related Work,[0],[0]
+"This work ranges from very fast solvers that exploit the special structure of the polytope (Burshtein, 2009), connections to unequal error protection (Dimakis et al., 2007), and graphical model covers (Koetter et al., 2007).",2. Background and Related Work,[0],[0]
+"LP decoding currently provides the best known finite-length error-correction bounds for LDPC codes both for random (Daskalakis et al., 2008; Arora et al., 2009), and adversarial bit-flipping errors (Feldman et al., 2007).
+",2. Background and Related Work,[0],[0]
+"For binary graphical models, there is a body of work which tries to exploit the persistency of the LP relaxation, that is, the property that integer components in the solution of the relaxation must take the same value in the optimal solution, under some regularity assumptions (Boros & Hammer, 2002; Rother et al., 2007; Fix et al., 2012).
+",2. Background and Related Work,[0],[0]
+"Fast algorithms for solving large graphical models in practice include (Ihler et al., 2012; Dechter & Rish, 2003).
+",2. Background and Related Work,[0],[0]
+"The work most closely related to this paper involves eliminating fractional vertices (so-called pseudocodewords in coding theory) by changing the polytope or the objective function (Zhang & Siegel, 2012; Chertkov & Stepanov, 2008; Liu et al., 2012).",2. Background and Related Work,[0],[0]
+"A binary integer linear program is an optimization problem of the following form.
+",3. Provable Integer Programming,[0],[0]
+"max x
+cTx
+subject to Ax ≤ b x ∈ {0, 1}n
+which is relaxed to a linear program by replacing the x ∈ {0, 1}n constraint with 0 ≤ x ≤ 1.",3. Provable Integer Programming,[0],[0]
+For binary integer programs with the box constraints 0 ≤,3. Provable Integer Programming,[0],[0]
+"xi ≤ 1 for all i, every integral vector x is a vertex of the polytope described by the constraints of the LP relaxation.",3. Provable Integer Programming,[0],[0]
+"However fraction vertices may also be in this polytope, and fractional solutions can potentially have an objective value larger than every integral vertex.
+",3. Provable Integer Programming,[0],[0]
+"If the optimal solution to the linear program happens to be integral, then this is the optimal solution to the original integer linear program.",3. Provable Integer Programming,[0],[0]
+"If the optimal solution is fractional, then a variety of techniques are available to tighten the LP relaxation and eliminate the fractional solution.
+",3. Provable Integer Programming,[0],[0]
+"We establish a success condition for integer programming based on the number of confounding vertices, which to the best of our knowledge was unknown.",3. Provable Integer Programming,[0],[0]
+"The algorithm used in proving Theorem 1 is a version of branch-and-bound, a classic technique in integer programming (Land & Doig, 1960) (see (Nemhauser & Wolsey, 1999) for a modern reference on integer programming).",3. Provable Integer Programming,[0],[0]
+"This algorithm works by starting with a root node, then branching on a fractional coordinate by making two new linear programs with all the constraints of the parent node, with the constraint xi = 0 added to one new leaf and xi = 1 added to the other.",3. Provable Integer Programming,[1.0],"['This algorithm works by starting with a root node, then branching on a fractional coordinate by making two new linear programs with all the constraints of the parent node, with the constraint xi = 0 added to one new leaf and xi = 1 added to the other.']"
+The decision on which leaf of the tree to branch on next is based on which leaf has the best objective value.,3. Provable Integer Programming,[0],[0]
+"When the best leaf is integral, we know that this is the best integral solution.",3. Provable Integer Programming,[1.0],"['When the best leaf is integral, we know that this is the best integral solution.']"
+"This algorithm is formally written in Algorithm 1.
+",3. Provable Integer Programming,[0],[0]
+Theorem 1.,3. Provable Integer Programming,[0],[0]
+"Let x∗ be the optimal integral solution and let {v1, v2, . . .",3. Provable Integer Programming,[0],[0]
+", vM} be the set of confounding vertices in the LP relaxation.",3. Provable Integer Programming,[1.0],"[', vM} be the set of confounding vertices in the LP relaxation.']"
+"Algorithm 1 will find the optimal integral solution x∗ after 2M calls to an LP solver.
+",3. Provable Integer Programming,[0.999999965181011],['Algorithm 1 will find the optimal integral solution x∗ after 2M calls to an LP solver.']
+"Since MAP inference is a binary integer program regardless of the alphabet size of the variables and order of the clique potentials, we have the following corollary:
+Corollary 2.",3. Provable Integer Programming,[1.000000027769853],"['Since MAP inference is a binary integer program regardless of the alphabet size of the variables and order of the clique potentials, we have the following corollary: Corollary 2.']"
+"Given a graphical model such that the local polytope has M as cofounding variables, Algorithm 1 can find the optimal MAP configuration with 2M calls to an LP solver.
+",3. Provable Integer Programming,[1.0000000204074635],"['Given a graphical model such that the local polytope has M as cofounding variables, Algorithm 1 can find the optimal MAP configuration with 2M calls to an LP solver.']"
+"Cutting-plane methods, which remove a fractional vertex by introducing a new constraint in the polytope may not have this property, since this cut may create new confound-
+Algorithm 1 Branch and Bound test Input: an LP {min cTx :",3. Provable Integer Programming,[0],[0]
+"Ax ≤ b, 0 ≤ x ≤ 1}
+# branch (v, I0, I1) means v is optimal LP # with xI0 = 0 and xI1 = 1.",3. Provable Integer Programming,[0],[0]
+"def LP(I0, I1): v∗ ← argmax cTx subject to:",3. Provable Integer Programming,[0],[0]
+Ax ≤ b xI0 = 0,3. Provable Integer Programming,[0],[0]
+"xI1 = 1
+return v∗ if feasible, else return null
+v ← LP(∅, ∅)",3. Provable Integer Programming,[0],[0]
+"B ← {(v, ∅, ∅)} while optimal integral vertex not found:
+(v, I0, I1)←",3. Provable Integer Programming,[0],[0]
+"argmax(v,I0,I1)∈B c T v if v is integral: return v else: find a fractional coordinate i v(0)",3. Provable Integer Programming,[0],[0]
+"← LP(I0 ∪ {i}, I1) v(1) ← LP(I0, I1 ∪ {i}) remove (v, I0, I1) from B add (v(0), I0 ∪ {i}, I1) to B if feasible add (v(1), I0, I1 ∪ {i}) to B if feasible
+ing vertices.",3. Provable Integer Programming,[0],[0]
+This branch-and-bound algorithm has the desirable property that it never creates a new fractional vertex.,3. Provable Integer Programming,[0],[0]
+"We note that other branching algorithms, such as the algorithm presented by the authors in (Marinescu & Dechter, 2009), do not immediately allow us to prove our desired theorem.
+",3. Provable Integer Programming,[0],[0]
+Note that warm starting a linear program with slightly modified constraints allows subsequent calls to an LP solver to be much more efficient after the root LP has been solved.,3. Provable Integer Programming,[0],[0]
+"The proof follows from the following invariants:
+• At every iteration we remove at least one fractional vertex.
+•",3.1. Proof of Theorem 1,[0],[0]
+"Every integral vertex is in exactly one branch.
+",3.1. Proof of Theorem 1,[0],[0]
+•,3.1. Proof of Theorem 1,[0],[0]
+"Every fractional vertex is in at most one branch.
+",3.1. Proof of Theorem 1,[0],[0]
+•,3.1. Proof of Theorem 1,[0],[0]
+"No fractional vertices are created by the new constraints.
+",3.1. Proof of Theorem 1,[0],[0]
+"To see the last invariant, note that every vertex of a polytope can be identified by the set of inequality constraints that are satisfied with equality (see (Bertsimas & Tsitsiklis, 1997)).",3.1. Proof of Theorem 1,[1.0],"['To see the last invariant, note that every vertex of a polytope can be identified by the set of inequality constraints that are satisfied with equality (see (Bertsimas & Tsitsiklis, 1997)).']"
+"By forcing an inequality constraint to be tight, we cannot possibly introduce new vertices.",3.1. Proof of Theorem 1,[0],[0]
+"As mentioned in the introduction, the algorithm used to prove Theorem 1 does not enumerate all the fractional vertices until it finds an integral vertex.",3.2. The M -Best LP Problem,[1.0],"['As mentioned in the introduction, the algorithm used to prove Theorem 1 does not enumerate all the fractional vertices until it finds an integral vertex.']"
+"Enumerating the M - best vertices of a linear program is theM -best LP problem.
+",3.2. The M -Best LP Problem,[0],[0]
+Definition.,3.2. The M -Best LP Problem,[0],[0]
+"Given a linear program {min cTx : x ∈ P} over a polytope P and a positive integer M , the M -best LP problem is to optimize
+max {v1,...,vM}⊆V (P ) M∑",3.2. The M -Best LP Problem,[0],[0]
+"k=1 cT vk.
+",3.2. The M -Best LP Problem,[0],[0]
+"This was established by (Angulo et al., 2014) to be NP-hard when M = O(n).",3.2. The M -Best LP Problem,[1.0],"['This was established by (Angulo et al., 2014) to be NP-hard when M = O(n).']"
+"We strengthen this result to hardness of approximation even when M = nε for any ε > 0.
+Theorem 3.",3.2. The M -Best LP Problem,[0],[0]
+"It is NP-hard to approximate the M -best LP problem by a factor better than O(n ε
+M ) for any fixed ε > 0.
+",3.2. The M -Best LP Problem,[1.0000000464510044],['It is NP-hard to approximate the M -best LP problem by a factor better than O(n ε M ) for any fixed ε > 0.']
+Proof.,3.2. The M -Best LP Problem,[0],[0]
+"Consider the circulation polytope described in (Khachiyan et al., 2008), with the graph and weight vector w described in (Boros et al., 2011).",3.2. The M -Best LP Problem,[0],[0]
+"By adding anO(logM) long series of 2×2 bipartite subgraphs, we can make it such that one long path in the original graph implies M long paths in the new graph, and thus it is NP-hard to find any of these long paths in the new graph.",3.2. The M -Best LP Problem,[0],[0]
+"By adding the constraint vector wTx ≤ 0, and using the cost function −w, the vertices corresponding to the short paths have value 1/2, the vertices corresponding to the long paths have value O(1/n), and all other vertices have value 0.",3.2. The M -Best LP Problem,[1.0],"['By adding the constraint vector wTx ≤ 0, and using the cost function −w, the vertices corresponding to the short paths have value 1/2, the vertices corresponding to the long paths have value O(1/n), and all other vertices have value 0.']"
+Thus the optimal set has value O(n+ Mn ).,3.2. The M -Best LP Problem,[0],[0]
+"However it is NP-hard to find a set of value greater than O(n) in polynomial time, which gives an O( nM ) approximation.",3.2. The M -Best LP Problem,[0],[0]
+"Using a padding argument, we can replace n with nε.
+",3.2. The M -Best LP Problem,[0],[0]
+"The best known algorithm for the M -best LP problem is a generalization of the facet guessing algorithm (Dimakis et al., 2009) developed in (Angulo et al., 2014), which would require O(mM ) calls to an LP solver, where m is the number of constraints of the LP.",3.2. The M -Best LP Problem,[1.0],"['The best known algorithm for the M -best LP problem is a generalization of the facet guessing algorithm (Dimakis et al., 2009) developed in (Angulo et al., 2014), which would require O(mM ) calls to an LP solver, where m is the number of constraints of the LP.']"
+"Since we only care about integral solutions, we can find the single best integral vertex with O(M) calls to an LP solver, and if we want all of the K-best integral solutions among the top M vertices of the polytope, we can find these with O(nK",3.2. The M -Best LP Problem,[0],[0]
+"+M) calls to an LP-solver, as we will see in the next section.
+3.3.",3.2. The M -Best LP Problem,[0],[0]
+"K-Best Integral Solutions
+Finding the K-best solutions to general optimization problems has been uses in several machine learning applications.",3.2. The M -Best LP Problem,[0.9999999919678124],['K-Best Integral Solutions Finding the K-best solutions to general optimization problems has been uses in several machine learning applications.']
+Producing multiple high-value outputs can be naturally combined with post-processing algorithms that select the most desired solution using additional sideinformation.,3.2. The M -Best LP Problem,[1.0],['Producing multiple high-value outputs can be naturally combined with post-processing algorithms that select the most desired solution using additional sideinformation.']
+"There is a significant volume of work in the general area, see (Fromer & Globerson, 2009; Batra et al., 2012) for MAP solutions in graphical models and (Eppstein, 2014) for a survey on M -best problems.
+",3.2. The M -Best LP Problem,[0],[0]
+We further generalize our theorem to find the K-best integral solutions.,3.2. The M -Best LP Problem,[0],[0]
+Theorem 4.,3.2. The M -Best LP Problem,[0],[0]
+"Under the assumption that there are less than M fractional vertices with objective value at least as good as the K-best integral solutions, we can find all of the Kbest integral solutions, O(nK",3.2. The M -Best LP Problem,[0],[0]
+"+M) calls to an LP solver.
+",3.2. The M -Best LP Problem,[0],[0]
+The algorithm used in this theorem is Algorithm 2.,3.2. The M -Best LP Problem,[0],[0]
+"It combines Algorithm 1 with the space partitioning technique used in (Murty, 1968; Lawler, 1972).",3.2. The M -Best LP Problem,[0],[0]
+"If the current optimal solution in the solution tree is fractional, then we use the branching technique in Algorithm 1.",3.2. The M -Best LP Problem,[0],[0]
+"If the current optimal solution in the solution tree x∗ is integral, then we branch by creating a new leaf for every i not currently constrained by the parent with the constraint",3.2. The M -Best LP Problem,[0],[0]
+xi = ¬x∗i .,3.2. The M -Best LP Problem,[0],[0]
+"We now describe the fractional vertices of the local polytope for binary, pairwise graphical models, which is described in Equation 3.",4. Fractional Vertices of the Local Polytope,[0],[0]
+"It was shown in (Padberg, 1989) that all the vertices of this polytope are half-integral, that is, all coordinates have a value from {0, 12 , 1} (see (Weller et al., 2016) for a new proof of this).
+",4. Fractional Vertices of the Local Polytope,[0],[0]
+"Given a half-integral point q ∈ {0, 12 , 1} V ∪E in the local polytope, we say that a cycle C = (VC , EC) ⊆ G is frustrated if there is an odd number of edges ij ∈ EC such that qij = 0.",4. Fractional Vertices of the Local Polytope,[0],[0]
+"If a point q has a frustrated cycle, then it is a pseudomarginal, as no probability distribution exists that has as its singleton and pairwise marginals the coordinates of q. Half-integral points q with a frustrated cycle do not satisfy the cycle inequalities (Sontag & Jaakkola, 2007; Wainwright et al., 2008), for all cycles C = (VC , EC), F = (VF , EF ) ⊆ C, |EF",4. Fractional Vertices of the Local Polytope,[0],[0]
+| odd we must have∑ ij∈EF qi+qj−2qij− ∑ ij∈EC\EF qi+qj−2qij ≤ |FC |−1.,4. Fractional Vertices of the Local Polytope,[0],[0]
+"(4)
+Frustrated cycles allow a solution to be zero on negative weights in a way that is not possible for any integral solution.
+",4. Fractional Vertices of the Local Polytope,[0],[0]
+"We have the following theorem describing all the vertices of the local polytope for binary, pairwise graphical models.
+",4. Fractional Vertices of the Local Polytope,[0],[0]
+Algorithm 2 M -best Integral Input: an LP {max cTx :,4. Fractional Vertices of the Local Polytope,[0],[0]
+"Ax ≤ b, 0 ≤ x ≤ 1} Input: number of solutions K
+def LP(I0, I1): same as Algorithm 1
+def SplitIntegral(v, I0, I1): P ← { } for i ∈",4. Fractional Vertices of the Local Polytope,[0],[0]
+[n] if i /∈,4. Fractional Vertices of the Local Polytope,[0],[0]
+"I0 ∪ I1: a← ¬vi I ′0, I ′",4. Fractional Vertices of the Local Polytope,[0],[0]
+"1 ← copy(I0, I1)
+add i to I ′a v′",4. Fractional Vertices of the Local Polytope,[0],[0]
+"← LP(I ′0, I ′1) add (v′, I ′0, I ′ a) to P if feasible
+return P
+v ← LP(∅, ∅)",4. Fractional Vertices of the Local Polytope,[0],[0]
+"B ← {(v, ∅, ∅)} results← { } while K integral vertices not found: (v, I0, I1)←",4. Fractional Vertices of the Local Polytope,[0],[0]
+"argmax(v,I0,I1)∈B c
+T v if v is integral:
+add v to results add SplitIntegeral(v, I0, I1) to B remove (v, I0, I1) from B
+else: find a fractional coordinate i v(0)",4. Fractional Vertices of the Local Polytope,[0],[0]
+"← LP(I0 ∪ {i}, I1) v(1) ← LP(I0, I1 ∪ {i}) remove (v, I0, I1) from B add (v(0), I0 ∪ {i}, I1) to B if feasible add (v(1), I0, I1 ∪ {i}) to B if feasible
+return results
+Theorem 5.",4. Fractional Vertices of the Local Polytope,[0],[0]
+"Given a point q in the local polytope, q is a vertex of this polytope if and only if q ∈ {0, 12 , 1}
+V ∪E and the induced subgraph on the fractional nodes of q is such that every connected component of this subgraph contains a frustrated cycle.",4. Fractional Vertices of the Local Polytope,[0],[0]
+"Every vertex q of an n-dimensional polytope is such that there are n constraints such that q satisfies them with equality, known as active constraints (see (Bertsimas & Tsitsiklis, 1997)).",4.1. Proof of Theorem 5,[0],[0]
+Every integral q is thus a vertex of the local polytope.,4.1. Proof of Theorem 5,[0],[0]
+"We now describe the fractional vertices of the local polytope.
+Definition.",4.1. Proof of Theorem 5,[0],[0]
+"Let q ∈ {0, 12 , 1} n+m be a point of the local polytope.",4.1. Proof of Theorem 5,[0],[0]
+"Let GF = (VF , EF ) be an induced subgraph of points such that qi = 12 for all i ∈ VF .",4.1. Proof of Theorem 5,[0],[0]
+"We say that GF is
+full rank if the following system of equations is full rank.
+",4.1. Proof of Theorem 5,[0],[0]
+qi + qj,4.1. Proof of Theorem 5,[0],[0]
+− qij = 1 ∀ij ∈ EF such that qij = 0 qij = 0,4.1. Proof of Theorem 5,[0],[0]
+"∀ij ∈ EF such that qij = 0
+qi",4.1. Proof of Theorem 5,[0],[0]
+"− qij = 0 ∀ij ∈ EF such that qij = 1
+2
+qj",4.1. Proof of Theorem 5,[0],[0]
+"− qij = 0 ∀ij ∈ EF such that qij = 1
+2
+(5)
+Theorem 5 follows from the following lemmas.
+",4.1. Proof of Theorem 5,[0],[0]
+Lemma 6.,4.1. Proof of Theorem 5,[0],[0]
+"Let q ∈ {0, 12 , 1} n+m be a point of the local polytope.",4.1. Proof of Theorem 5,[0],[0]
+"Let GF = (VF , EF ) be the subgraph induced by the nodes i ∈ V such that qi = 12 .",4.1. Proof of Theorem 5,[0],[0]
+"The point q is a vertex if and only if every connected component of GF is full rank.
+",4.1. Proof of Theorem 5,[0],[0]
+Lemma 7.,4.1. Proof of Theorem 5,[0],[0]
+"Let q ∈ {0, 12 , 1} n+m be a point of the local polytope.",4.1. Proof of Theorem 5,[0],[0]
+"Let GF = (VF , EF ) be a connected subgraph induced from nodes such that such that qi = 12 for all i ∈ VF .",4.1. Proof of Theorem 5,[0],[0]
+"GF is full rank if and only if GF contains cycle that is full rank.
+",4.1. Proof of Theorem 5,[0],[0]
+Lemma 8.,4.1. Proof of Theorem 5,[0],[0]
+"Let q ∈ {0, 12 , 1} n+m be a point of the local polytope.",4.1. Proof of Theorem 5,[0],[0]
+"Let C = (VC , EC) be a cycle of G such that qi is fractional for all i ∈ VC .",4.1. Proof of Theorem 5,[0],[0]
+"C is full rank if and only if C is a frustrated cycle.
+",4.1. Proof of Theorem 5,[0],[0]
+Proof of Lemma 6.,4.1. Proof of Theorem 5,[0],[0]
+Suppose every connected component is full rank.,4.1. Proof of Theorem 5,[0],[0]
+Then every fractional node and edge between fractional nodes is fully specified by their corresponding equations in Problem 3.,4.1. Proof of Theorem 5,[0],[0]
+"It is easy to check that all integral nodes, edges between integral nodes, and edges between integral and fractional nodes is also fixed.",4.1. Proof of Theorem 5,[0],[0]
+"Thus q is a vertex.
+",4.1. Proof of Theorem 5,[0],[0]
+Now suppose that there exists a connected component that is not full rank.,4.1. Proof of Theorem 5,[0],[0]
+The only other constraints involving this connected component are those between fractional nodes and integral nodes.,4.1. Proof of Theorem 5,[0],[0]
+"However, note that these constraints are always rank 1, and also introduce a new edge variable.",4.1. Proof of Theorem 5,[0],[0]
+"Thus all the constraints where q is tight do not make a full rank system of equations.
+",4.1. Proof of Theorem 5,[0],[0]
+Proof of Lemma 7.,4.1. Proof of Theorem 5,[0],[0]
+Suppose GF has a full rank cycle.,4.1. Proof of Theorem 5,[0],[0]
+We will build the graph starting with the full rank cycle then adding one connected edge at a time.,4.1. Proof of Theorem 5,[0],[0]
+"It is easy to see from Equations 5 that all new variables introduced to the system of equations have a fixed value, and thus the whole connected component is full rank.
+",4.1. Proof of Theorem 5,[0],[0]
+Now suppose GF has no full rank cycle.,4.1. Proof of Theorem 5,[0],[0]
+We will again build the graph starting from the cycle then adding one connected edge at a time.,4.1. Proof of Theorem 5,[0],[0]
+"If we add an edge that connects to a new node, then we added two variables and two equations, thus we did not make the graph full rank.",4.1. Proof of Theorem 5,[0],[0]
+"If we add an edge between two existing nodes, then we have a cycle involving this edge.",4.1. Proof of Theorem 5,[0],[0]
+"We introduce two new equations, however with
+one of the equations and the other cycle equations, we can produce the other equation, thus we can increase the rank by one but we also introduced a new edge.",4.1. Proof of Theorem 5,[0],[0]
+"Thus the whole graph cannot be full rank.
+",4.1. Proof of Theorem 5,[0],[0]
+"The proof of Lemma 8 from the following lemma.
+",4.1. Proof of Theorem 5,[0],[0]
+Lemma 9.,4.1. Proof of Theorem 5,[0],[0]
+"Consider a collection of n vectors
+v1 = (1, t1, 0, . . .",4.1. Proof of Theorem 5,[0],[0]
+", 0)
+",4.1. Proof of Theorem 5,[0],[0]
+"v2 = (0, 1, t2, 0, . . .",4.1. Proof of Theorem 5,[0],[0]
+", 0)
+",4.1. Proof of Theorem 5,[0],[0]
+"v3 = (0, 0, 1, t3, 0, . . .",4.1. Proof of Theorem 5,[0],[0]
+", 0)
+...
+",4.1. Proof of Theorem 5,[0],[0]
+"vn−1 = (0, . . .",4.1. Proof of Theorem 5,[0],[0]
+", 0, 1, tn−1)
+vn = (tn, 0, . . .",4.1. Proof of Theorem 5,[0],[0]
+", 0, 1)
+",4.1. Proof of Theorem 5,[0],[0]
+"for ti ∈ {−1, 1}.",4.1. Proof of Theorem 5,[0],[0]
+"We have rank(v1, v2, . . .",4.1. Proof of Theorem 5,[0],[0]
+", vn) = n",4.1. Proof of Theorem 5,[0],[0]
+"if and only if there is an odd number of vectors such that ti = 1.
+",4.1. Proof of Theorem 5,[0],[0]
+Proof of Lemma 9.,4.1. Proof of Theorem 5,[0],[0]
+Let k be the number of vectors such that ti = 1.,4.1. Proof of Theorem 5,[0],[0]
+"Let S1 = v1 and define
+Si+1 = { Si − vi+1",4.1. Proof of Theorem 5,[0],[0]
+"if Si(i+ 1) = 1 Si + vi+1 if Si(i+ 1) = −1
+for i = 2, . .",4.1. Proof of Theorem 5,[0],[0]
+.,4.1. Proof of Theorem 5,[0],[0]
+", n− 1.
+Note that if ti+1 = −1 then Si+1(i+2) = Si(i+1) and if ti+1 = 1 then Si+1(i+2) = −Si(i+1).",4.1. Proof of Theorem 5,[0],[0]
+"Thus the number of times the sign changes is exactly the number of ti = 1 for i ∈ {2, . . .",4.1. Proof of Theorem 5,[0],[0]
+", n− 1}.
+",4.1. Proof of Theorem 5,[0],[0]
+"Using the value of Sn−1 we can now we can check for all values of t1 and tn that the following is true.
+",4.1. Proof of Theorem 5,[0],[0]
+"• If k is odd then (1, 0, . . .",4.1. Proof of Theorem 5,[0],[0]
+", 0) ∈ span(v1, v2, . . .",4.1. Proof of Theorem 5,[0],[0]
+", vn), which allows us to create the entire standard basis, showing the vectors are full rank.
+",4.1. Proof of Theorem 5,[0],[0]
+"• If k is even then vn ∈ span(v1, v2, . . .",4.1. Proof of Theorem 5,[0],[0]
+", vn−1) and thus the vectors are not full rank.",4.1. Proof of Theorem 5,[0],[0]
+For this section we generalize generalize Theorem 1.,5. Estimating the number of Confounding Singleton Marginals,[0],[0]
+We see after every iteration we potentially remove more than one confounding vertex—we remove all confounding vertices that agree with xI0 = 0 and xI1,5. Estimating the number of Confounding Singleton Marginals,[0],[0]
+= 1 and are fractional with any value at coordinate i.,5. Estimating the number of Confounding Singleton Marginals,[0],[0]
+"We also observe that we can
+handle a mixed integer program (MIP) with the same algorithm.
+",5. Estimating the number of Confounding Singleton Marginals,[0],[0]
+"max x
+cTx+ dT",5. Estimating the number of Confounding Singleton Marginals,[0],[0]
+"z
+subject to Ax+Bz ≤ b x ∈ {0, 1}n
+",5. Estimating the number of Confounding Singleton Marginals,[0],[0]
+"We will call a vertex (x, z) fractional if its x component is fractional.",5. Estimating the number of Confounding Singleton Marginals,[0],[0]
+"For each fractional vertex (x, z), we create a half-integral vector S(x) such that
+S(x)i =  0",5. Estimating the number of Confounding Singleton Marginals,[0],[0]
+"if xi = 0 1 2 if xi is fractional 1 if xi = 1
+For a set of vertices V , we define S(V ) to be the set {S(x) : (x, z) ∈ V }, i.e. we remove all duplicate entries.",5. Estimating the number of Confounding Singleton Marginals,[0],[0]
+Theorem 10.,5. Estimating the number of Confounding Singleton Marginals,[0],[0]
+"Let (x∗, z∗) be the optimal integral solution and let VC be the set of confounding vertices.",5. Estimating the number of Confounding Singleton Marginals,[0],[0]
+"Algorithm 1 will find the optimal integral solution (x∗, z∗) after 2|S(VC)| calls to an LP solver.
+",5. Estimating the number of Confounding Singleton Marginals,[0],[0]
+"For MAP inference in graphical models, S(VC) refers to the fractional singleton marginals qV such that there exists a set of pairwise pseudomarginals qE such that (qV , qE) is a cofounding vertex.",5. Estimating the number of Confounding Singleton Marginals,[0],[0]
+In this case we call qV a confounding singleton marginal.,5. Estimating the number of Confounding Singleton Marginals,[0],[0]
+We develop Algorithm 3 to estimate the number of confounding singleton marginals for our experiments section.,5. Estimating the number of Confounding Singleton Marginals,[0],[0]
+"It is based on the k-best enumeration method developed in (Murty, 1968; Lawler, 1972).
+",5. Estimating the number of Confounding Singleton Marginals,[0],[0]
+Algorithm 3 works by a branching argument.,5. Estimating the number of Confounding Singleton Marginals,[0],[0]
+The root node is the original LP.,5. Estimating the number of Confounding Singleton Marginals,[0],[0]
+"A leaf node is branched on by introducing a new leaf for every node in V and every element of {0, 12 , 1} such that qi 6=",5. Estimating the number of Confounding Singleton Marginals,[0],[0]
+a in the parent node and the constraint {qi = a} is not in the constraints for the parent node.,5. Estimating the number of Confounding Singleton Marginals,[0],[0]
+"For i ∈ V , a ∈ {0, 12 , 1}, we create the leaf such that it has all the constraints of its parents plus the constraint qi = a.
+Note that Algorithm 3 actually generates a superset of the elements of S(VC), since the introduction of constraints of the type qi = 12 introduce vertices into the new polytope that were not in the original polytope.",5. Estimating the number of Confounding Singleton Marginals,[0],[0]
+"This does not seem to be an issue for the experiments we consider, however this does occur for other graphs.",5. Estimating the number of Confounding Singleton Marginals,[0],[0]
+An interesting question is if the vertices of the local polytope can be provably enumerated.,5. Estimating the number of Confounding Singleton Marginals,[0],[0]
+"We consider a synthetic experiment on randomly created graphical models, which were also used in (Sontag & Jaakkola, 2007; Weller, 2016; Weller et al., 2014).",6. Experiments,[0],[0]
+The graph topology used is the complete graph on 12 nodes.,6. Experiments,[0],[0]
+"We first reparametrize the model to use the sufficient statistics
+Algorithm 3 Estimate S(VC) for Binary, Pairwise Graphical Models
+Input: a binary, pairwise graphical model LP
+# branch (v, I0, I 1 2 , I1) means v is optimal LP # with xI0 = 0, xI 1 2 = 12 , and xI1 = 1.",6. Experiments,[0],[0]
+"def LP(I0, I 1 2 , I1):
+optimize LP with additional constraints: xI0 = 0 xI 1
+2 = 12 xI1 = 1
+return q∗ if feasible, else return null
+q ← LP(∅, ∅, ∅)",6. Experiments,[0],[0]
+"B ← {(q, ∅, ∅, ∅)}",6. Experiments,[0],[0]
+"solution← { } while optimal integral vertex not found: (q, I0, I 1
+2 , I1)←",6. Experiments,[0],[0]
+"argmax(q,I0,I 1 2 ,I1)∈B objective val
+add q to solution remove (q, I0, I 1
+2 , I1) from B
+for i ∈ V if i /∈",6. Experiments,[0],[0]
+"I0 ∪ I 1 2 ∪ I1:
+for a ∈ {0, 12 , 1} if qi 6=",6. Experiments,[0],[0]
+"a: I ′0, I
+′ 1 2 , I ′1 ← copy(I0, I 12 , I1)",6. Experiments,[0],[0]
+I ′a ←,6. Experiments,[0],[0]
+I ′a ∪ {i} q′,6. Experiments,[0],[0]
+"← LP(I ′0, I ′1
+2
+, I ′1)
+add (q′, I ′0, I ′ 1 2 , I ′1) to B if feasible return solution
+1(xi = xj) and 1(xi = 1).",6. Experiments,[0],[0]
+"The node weights are drawn θi ∼ Uniform(−1, 1) and the edge weights are drawn Wij ∼ Uniform(−w,w) for varying w.",6. Experiments,[0],[0]
+The quantity w determines how strong the connections are between nodes.,6. Experiments,[0],[0]
+"We do 100 draws for each choice of edge strength w.
+For the complete graph, we observe that Algorithm 3 does not yield any points that do not correspond to vertices, however this does occur for other topologies.
+",6. Experiments,[0],[0]
+We first compare how the number of fractional singleton marginals |S(VC)| changes with the connection strengthw.,6. Experiments,[0],[0]
+"In Figure 1, we plot the sample CDF of the probability that |S(VC)| is some given value.",6. Experiments,[0],[0]
+We observe that |S(VC)| increases as the connection strength increases.,6. Experiments,[0],[0]
+"Further we see that while most instances have a small number for |S(VC)|, there are rare instances where |S(VC)| is quite large.
+",6. Experiments,[0],[0]
+Now we compare how the number of cycle constraints from Equation (4) that need to be introduced to find the best integral solution changes with the number of confounding singleton marginals in Figure 2.,6. Experiments,[0],[0]
+"We use the algorithm for finding the most frustrated cycle in (Sontag & Jaakkola, 2007) to introduce new constraints.",6. Experiments,[0],[0]
+"We observe that each constraint seems to remove many confounding singleton
+marginals.
+",6. Experiments,[0],[0]
+"We also observe the number of introduced confounding singleton marginals that are introduced by the cycle constraints increases with the number of confounding singleton marginals in Figure 3.
+",6. Experiments,[0],[0]
+Finally we compare the number of branches needed to find the optimal solution increases with the number of confounding singleton marginals in Figure 4.,6. Experiments,[0],[0]
+A similar trend arises as with the number of cycle inequalities introduced.,6. Experiments,[0],[0]
+"To compare the methods, note that branch-and-bound uses twice as many LP calls as there are branches.",6. Experiments,[0],[0]
+"For this family of graphical models, branch-and-bound tends to require less calls to an LP solver than the cut constraints.",6. Experiments,[0],[0]
+"Perhaps the most interesting follow-up question to our work is to determine when, in theory and practice, our condition on the number of confounding pseudomarginals in the LP relaxation is small.",7. Conclusion,[0],[0]
+Another interesting question is to see if it is possible to prune the number of confounding pseudomarginals at a faster rate.,7. Conclusion,[0],[0]
+The algorithm presented for our main theorem removes one pseudomarginal after two calls to an LP solver.,7. Conclusion,[0],[0]
+Is it possible to do this at a faster rate?,7. Conclusion,[0],[0]
+"From our experiments, this seems to be the case in practice.",7. Conclusion,[0],[0]
+"This material is based upon work supported by the National Science Foundation Graduate Research Fellowship under Grant No. DGE-1110007 as well as NSF Grants CCF 1344364, 1407278, 1422549, 1618689, 1018829 and ARO YIP W911NF-14-1-0258.",Acknowledgements,[0],[0]
+"Given a graphical model, one essential problem is MAP inference, that is, finding the most likely configuration of states according to the model.",abstractText,[0],[0]
+"Although this problem is NP-hard, large instances can be solved in practice and it is a major open question is to explain why this is true.",abstractText,[0],[0]
+We give a natural condition under which we can provably perform MAP inference in polynomial time—we require that the number of fractional vertices in the LP relaxation exceeding the optimal solution is bounded by a polynomial in the problem size.,abstractText,[0],[0]
+"This resolves an open question by Dimakis, Gohari, and Wainwright.",abstractText,[0],[0]
+"In contrast, for general LP relaxations of integer programs, known techniques can only handle a constant number of fractional vertices whose value exceeds the optimal solution.",abstractText,[0],[0]
+We experimentally verify this condition and demonstrate how efficient various integer programming methods are at removing fractional solutions.,abstractText,[0],[0]
+Exact MAP Inference by Avoiding Fractional Vertices,title,[0],[0]

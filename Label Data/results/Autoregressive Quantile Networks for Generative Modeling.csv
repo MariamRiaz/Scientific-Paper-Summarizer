@@ -1,0 +1,629 @@
+0,1,label2,summary_sentences
+"Proceedings of the 2015 Conference on Empirical Methods in Natural Language Processing, pages 908–916, Lisbon, Portugal, 17-21 September 2015. c©2015 Association for Computational Linguistics.",text,[0],[0]
+Neural networks have proven to be highly effective at many tasks in natural language.,1 Introduction,[0],[0]
+"For example, neural language models and joint language/translation models improve machine translation quality significantly (Vaswani et al., 2013; Devlin et al., 2014).",1 Introduction,[0],[0]
+"However, neural networks can be complicated to design and train well.",1 Introduction,[0],[0]
+"Many decisions need to be made, and performance can be highly dependent on making them correctly.",1 Introduction,[0],[0]
+"Yet the optimal settings are non-obvious and can be laborious to find, often requiring an extensive grid search involving numerous experiments.
+",1 Introduction,[0],[0]
+"In this paper, we focus on the choice of the sizes of hidden layers.",1 Introduction,[0],[0]
+"We introduce a method for automatically pruning out hidden layer units, by adding a sparsity-inducing regularizer that encourages units to deactivate if not needed, so that
+they can be removed from the network.",1 Introduction,[0],[0]
+"Thus, after training with more units than necessary, a network is produced that has hidden layers correctly sized, saving both time and memory when actually putting the network to use.
+",1 Introduction,[0],[0]
+"Using a neural n-gram language model (Bengio et al., 2003), we are able to show that our novel auto-sizing method is able to learn models that are smaller than models trained without the method, while maintaining nearly the same perplexity.",1 Introduction,[0],[0]
+"The method has only a single hyperparameter to adjust (as opposed to adjusting the sizes of each of the hidden layers), and we find that the same setting works consistently well across different training data sizes, vocabulary sizes, and n-gram sizes.",1 Introduction,[0],[0]
+"In addition, we show that incorporating these models into a machine translation decoder still results in large BLEU point improvements.",1 Introduction,[0],[0]
+The result is that fewer experiments are needed to obtain models that perform well and are correctly sized.,1 Introduction,[0],[0]
+Language models are often used in natural language processing tasks involving generation of text.,2 Background,[0],[0]
+"For instance, in machine translation, the language model helps to output fluent translations, and in speech recognition, the language model helps to disambiguate among possible utterances.
+",2 Background,[0],[0]
+"Current language models are usually n-gram models, which look at the previous (n− 1) words to predict the nth word in a sequence, based on (smoothed) counts of n-grams collected from training data.",2 Background,[0],[0]
+"These models are simple but very effective in improving the performance of natural language systems.
+",2 Background,[0],[0]
+"However, n-gram models suffer from some limitations, such as data sparsity and memory usage.",2 Background,[0],[0]
+"As an alternative, researchers have begun exploring the use of neural networks for language modeling.",2 Background,[0],[0]
+"For modeling n-grams, the most common approach is the feedforward network of Bengio et
+908
+al. (2003), shown in Figure 1.",2 Background,[0],[0]
+"Each node represents a unit or “neuron,” which has a real valued activation.",2 Background,[0],[0]
+The units are organized into real-vector valued layers.,2 Background,[0],[0]
+The activations at each layer are computed as follows.,2 Background,[0],[0]
+(We assume n = 3; the generalization is easy.),2 Background,[0],[0]
+"The two preceding words, w1, w2, are mapped into lowerdimensional word embeddings,
+x1",2 Background,[0],[0]
+= A:w1 x2 =,2 Background,[0],[0]
+"A:w2
+then passed through two hidden layers,
+y = f(B1x1 +",2 Background,[0],[0]
+B2x2 + b) z,2 Background,[0],[0]
+"= f(Cy + c)
+where f is an elementwise nonlinear activation (or transfer) function.",2 Background,[0],[0]
+"Commonly used activation functions are the hyperbolic tangent, logistic function, and rectified linear units, to name a few.",2 Background,[0],[0]
+"Finally, the result is mapped via a softmax to an output probability distribution,
+P (wn | w1 · · ·wn−1) ∝",2 Background,[0],[0]
+exp([Dz + d]wn).,2 Background,[0],[0]
+"The parameters of the model are A, B1, B2, b, C, c, D, and d, which are learned by minimizing the negative log-likelihood of the the training data using stochastic gradient descent (also known as backpropagation) or variants.
+",2 Background,[0],[0]
+"Vaswani et al. (2013) showed that this model, with some improvements, can be used effectively during decoding in machine translation.",2 Background,[0],[0]
+"In this paper, we use and extend their implementation.",2 Background,[0],[0]
+Our method is focused on the challenge of choosing the number of units in the hidden layers of a feed-forward neural network.,3 Methods,[0],[0]
+"The networks used for different tasks require different numbers of units, and the layers in a single network also require different numbers of units.",3 Methods,[0],[0]
+"Choosing too few units can impair the performance of the network, and choosing too many units can lead to overfitting.",3 Methods,[0],[0]
+"It can also slow down computations with the network, which can be a major concern for many applications such as integrating neural language models into a machine translation decoder.
+",3 Methods,[0],[0]
+Our method starts out with a large number of units in each layer and then jointly trains the network while pruning out individual units when possible.,3 Methods,[0],[0]
+"The goal is to end up with a trained network
+that also has the optimal number of units in each layer.
+",3 Methods,[0],[0]
+We do this by adding a regularizer to the objective function.,3 Methods,[0],[0]
+"For simplicity, consider a single layer without bias, y = f(Wx).",3 Methods,[0],[0]
+Let L(W) be the negative log-likelihood of the model.,3 Methods,[0],[0]
+"Instead of minimizing L(W) alone, we want to minimize L(W)",3 Methods,[0],[0]
+"+ λR(W), where R(W) is a convex regularizer.",3 Methods,[0],[0]
+"The `1 norm, R(W) = ‖W‖1 =∑
+i,j |Wij |, is a common choice for pushing parameters to zero, which can be useful for preventing overfitting and reducing model size.",3 Methods,[0],[0]
+"However, we are interested not only in reducing the number of parameters but the number of units.",3 Methods,[0],[0]
+"To do this, we need a different regularizer.
+",3 Methods,[0],[0]
+"We assume activation functions that satisfy f(0) = 0, such as the hyperbolic tangent or rectified linear unit (f(x) = max{0, x}).",3 Methods,[0],[0]
+"Then, if we push the incoming weights of a unit yi to zero, that is, Wij = 0 for all j (as well as the bias, if any: bi = 0), then yi = f(0) = 0 is independent of the previous layers and contributes nothing to subsequent layers.",3 Methods,[0],[0]
+So the unit can be removed without affecting the network at all.,3 Methods,[0],[0]
+"Therefore, we need a regularizer that pushes all the incoming connection weights to a unit together towards zero.
+",3 Methods,[0],[0]
+"Here, we experiment with two, the `2,1 norm and the `∞,1 norm.1 The `2,1 norm on a ma-
+1In the notation `p,q , the subscript p corresponds to the norm over each group of parameters, and q corresponds to the norm over the group norms.",3 Methods,[0],[0]
+"Contrary to more common usage, in this paper, the groups are rows, not columns.
+",3 Methods,[0],[0]
+"trix W is
+R(W) =",3 Methods,[0],[0]
+∑ i ‖Wi:‖2 = ∑ i ∑ j W 2ij  12 .,3 Methods,[0],[0]
+"(1) (If there are biases bi, they should be included as well.)",3 Methods,[0],[0]
+"This puts equal pressure on each row, but within each row, the larger values contribute more, and therefore there is more pressure on larger values towards zero.",3 Methods,[0],[0]
+"The `∞,1 norm is
+R(W) =",3 Methods,[0],[0]
+∑ i ‖Wi:‖∞ = ∑ i max j |Wij |.,3 Methods,[0],[0]
+"(2)
+Again, this puts equal pressure on each row, but within each row, only the maximum value (or values) matter, and therefore the pressure towards zero is entirely on the maximum value(s).
+",3 Methods,[0],[0]
+Figure 2 visualizes the sparsity-inducing behavior of the two regularizers on a single row.,3 Methods,[0],[0]
+Both have a sharp tip at the origin that encourages all the parameters in a row to become exactly zero.,3 Methods,[0],[0]
+"However, this also means that sparsity-inducing regularizers are not differentiable at zero, making gradient-based optimization methods trickier to apply.",4 Optimization,[0],[0]
+"The methods we use are discussed in detail elsewhere (Duchi et al., 2008; Duchi and Singer, 2009); in this section, we include a short description of these methods for completeness.",4 Optimization,[0],[0]
+"Most work on learning with regularizers, including this work, can be thought of as instances of the proximal gradient method (Parikh and Boyd, 2014).",4.1 Proximal gradient method,[0],[0]
+"Our objective function can be split into two parts, a convex and differentiable part (L) and a
+convex but non-differentiable part (λR).",4.1 Proximal gradient method,[0],[0]
+"In proximal gradient descent, we alternate between improving L alone and λR alone.",4.1 Proximal gradient method,[0],[0]
+Let u be the parameter values from the previous iteration.,4.1 Proximal gradient method,[0],[0]
+"We compute new parameter values w using:
+v← u− η∇L(u) (3)
+w← arg max w",4.1 Proximal gradient method,[0],[0]
+( 1 2η ‖w − v‖2 + λR(w) ),4.1 Proximal gradient method,[0],[0]
+"(4)
+and repeat until convergence.",4.1 Proximal gradient method,[0],[0]
+The first update is just a standard gradient descent update on L; the second is known as the proximal operator for λR and in many cases has a closed-form solution.,4.1 Proximal gradient method,[0],[0]
+"In the rest of this section, we provide some justification for this method, and in Sections 4.2 and 4.3 we show how to compute the proximal operator for the `2 and `∞ norms.
+",4.1 Proximal gradient method,[0],[0]
+We can think of the gradient descent update (3) on L as follows.,4.1 Proximal gradient method,[0],[0]
+"Approximate L around u by the tangent plane,
+L̄(v) = L(u) +∇L(u)(v − u) (5)
+and move v to minimize L̄, but don’t move it too far from u; that is, minimize
+F (v) = 1",4.1 Proximal gradient method,[0],[0]
+2η ‖v,4.1 Proximal gradient method,[0],[0]
+"− u‖2 + L̄(v).
+",4.1 Proximal gradient method,[0],[0]
+"Setting partial derivatives to zero, we get
+∂F ∂v = 1 η
+(v − u) +∇L(u) = 0 v = u− η∇L(u).
+",4.1 Proximal gradient method,[0],[0]
+"By a similar strategy, we can derive the second step (4).",4.1 Proximal gradient method,[0],[0]
+"Again we want to move w to minimize the objective function, but don’t want to move it too far from u; that is, we want to minimize:
+G(w) = 1 2η ‖w",4.1 Proximal gradient method,[0],[0]
+"− u‖2 + L̄(w) + λR(w).
+",4.1 Proximal gradient method,[0],[0]
+Note that we have not approximated R by a tangent plane.,4.1 Proximal gradient method,[0],[0]
+We can simplify this by substituting in (3).,4.1 Proximal gradient method,[0],[0]
+"The first term becomes
+1 2η ‖w",4.1 Proximal gradient method,[0],[0]
+− u‖2 = 1 2η ‖w,4.1 Proximal gradient method,[0],[0]
+"− v − η∇L(u)‖2
+= 1 2η ‖w − v‖2 −∇L(u)(w − v)
++ η
+2 ‖∇L(u)‖2
+and the second term becomes
+L̄(w) = L(u) +∇L(u)(w − u) = L(u) +∇L(u)(w",4.1 Proximal gradient method,[0],[0]
+"− v − η∇L(u)).
+",4.1 Proximal gradient method,[0],[0]
+"The ∇L(u)(w − v) terms cancel out, and we can ignore terms not involving w, giving
+G(w) = 1 2η ‖w",4.1 Proximal gradient method,[0],[0]
+"− v‖2 + λR(w) + const.
+which is minimized by the update (4).",4.1 Proximal gradient method,[0],[0]
+"Thus, we have split the optimization step into two easier steps: first, do the update for L (3), then do the update for λR (4).",4.1 Proximal gradient method,[0],[0]
+The latter can often be done exactly (without approximating R by a tangent plane).,4.1 Proximal gradient method,[0],[0]
+"We show next how to do this for the `2 and `∞ norms.
+4.2 `2 and `2,1 regularization Since the `2,1 norm on matrices (1) is separable into the `2 norm of each row, we can treat each row separately.",4.1 Proximal gradient method,[0],[0]
+"Thus, for simplicity, assume that we have a single row and want to minimize
+G(w) = 1 2η ‖w − v‖2 +",4.1 Proximal gradient method,[0],[0]
+"λ‖w‖+ const.
+",4.1 Proximal gradient method,[0],[0]
+"The minimum is either at w = 0 (the tip of the cone) or where the partial derivatives are zero (Figure 3):
+∂G ∂w = 1 η (w − v) + λ w‖w‖",4.1 Proximal gradient method,[0],[0]
+"= 0.
+",4.1 Proximal gradient method,[0],[0]
+"Clearly, w and v must have the same direction and differ only in magnitude, that is, w = α v‖v‖ .",4.1 Proximal gradient method,[0],[0]
+"Substituting this into the above equation, we get the solution
+α = ‖v‖",4.1 Proximal gradient method,[0],[0]
+− ηλ.,4.1 Proximal gradient method,[0],[0]
+"Therefore the update is
+w = α v ‖v‖
+α = max(0, ‖v‖ − ηλ).",4.1 Proximal gradient method,[0],[0]
+"As above, since the `∞,1 norm on matrices (2) is separable into the `∞ norm of each row, we can treat each row separately; thus, we want to minimize
+G(w) = 1 2η ‖w − v‖2 + λmax j |xj |+ const.
+","4.3 `∞ and `∞,1 regularization",[0],[0]
+"Intuitively, the solution can be characterized as: Decrease all of the maximal |xj | until the total decrease reaches ηλ or all the xj are zero.","4.3 `∞ and `∞,1 regularization",[0],[0]
+"See Figure 4.
+","4.3 `∞ and `∞,1 regularization",[0],[0]
+"If we pre-sort the |xj | in nonincreasing order, it’s easy to see how to compute this: for ρ = 1, . . .","4.3 `∞ and `∞,1 regularization",[0],[0]
+", n, see if there is a value ξ ≤ xρ","4.3 `∞ and `∞,1 regularization",[0],[0]
+"such that decreasing all the x1, . . .","4.3 `∞ and `∞,1 regularization",[0],[0]
+", xρ to ξ amounts to a total decrease of ηλ.","4.3 `∞ and `∞,1 regularization",[0],[0]
+"The largest ρ for which this is possible gives the correct solution.
+","4.3 `∞ and `∞,1 regularization",[0],[0]
+"But this situation seems similar to another optimization problem, projection onto the `1-ball, which Duchi et al. (2008) solve in linear time without pre-sorting.","4.3 `∞ and `∞,1 regularization",[0],[0]
+"In fact, the two problems can be solved by nearly identical algorithms, because they are convex conjugates of each other (Duchi and Singer, 2009; Bach et al., 2012).","4.3 `∞ and `∞,1 regularization",[0],[0]
+"Intuitively, the `1 projection of v is exactly what is cut out by the `∞ proximal operator, and vice versa (Figure 4).
+","4.3 `∞ and `∞,1 regularization",[0],[0]
+Duchi et al.’s algorithm modified for the present problem is shown as Algorithm 1.,"4.3 `∞ and `∞,1 regularization",[0],[0]
+It partitions the xj about a pivot element (line 6) and tests whether it and the elements to its left can be decreased to a value ξ such that the total decrease is δ (line 8).,"4.3 `∞ and `∞,1 regularization",[0],[0]
+"If so, it recursively searches the right side; if not, the
+left side.","4.3 `∞ and `∞,1 regularization",[0],[0]
+"At the conclusion of the algorithm, ρ is set to the largest value that passes the test (line 13), and finally the new xj are computed (line 16) – the only difference from Duchi et al.’s algorithm.
+","4.3 `∞ and `∞,1 regularization",[0],[0]
+This algorithm is asymptotically faster than that of Quattoni et al. (2009).,"4.3 `∞ and `∞,1 regularization",[0],[0]
+"They reformulate `∞,1 regularization as a constrained optimization problem (in which the `∞,1 norm is bounded by µ) and provide a solution inO(n log n) time.","4.3 `∞ and `∞,1 regularization",[0],[0]
+"The method shown here is simpler and faster because it can work on each row separately.
+","4.3 `∞ and `∞,1 regularization",[0],[0]
+"Algorithm 1 Linear-time algorithm for the proximal operator of the `∞ norm.
+1: procedure UPDATE(w, δ) 2: lo, hi← 1, n 3: s← 0 4:","4.3 `∞ and `∞,1 regularization",[0],[0]
+"while lo ≤ hi do 5: select md randomly from lo, . . .","4.3 `∞ and `∞,1 regularization",[0],[0]
+", hi 6: ρ← PARTITION(w, lo,md, hi) 7: ξ ← 1ρ","4.3 `∞ and `∞,1 regularization",[0],[0]
+"( s+ ∑ρ i=lo |xi| − δ
+) 8: if ξ ≤ |xρ| then 9: s← s+∑ρi=lo |xi|
+10: lo← ρ+ 1 11: else 12: hi← ρ− 1 13: ρ← hi 14: ξ ← 1ρ (s− δ) 15: for i← 1, . . .","4.3 `∞ and `∞,1 regularization",[0],[0]
+", n","4.3 `∞ and `∞,1 regularization",[0],[0]
+"do 16: xi ← min(max(xi,−ξ), ξ) 17: procedure PARTITION(w, lo,md, hi) 18: swap xlo and xmd 19: i← lo + 1 20: for j ← lo + 1, . . .","4.3 `∞ and `∞,1 regularization",[0],[0]
+", hi do 21: if xj ≥ xlo then 22: swap xi and xj 23: i← i+ 1 24: swap xlo and xi−1 25: return i− 1","4.3 `∞ and `∞,1 regularization",[0],[0]
+"We evaluate our model using the open-source NPLM toolkit released by Vaswani et al. (2013), extending it to use the additional regularizers as described in this paper.2 We use a vocabulary size of 100k and word embeddings with 50 dimensions.",5 Experiments,[0],[0]
+"We use two hidden layers of rectified linear units (Nair and Hinton, 2010).
+",5 Experiments,[0],[0]
+"2These extensions have been contributed to the NPLM project.
+",5 Experiments,[0],[0]
+"We train neural language models (LMs) on two natural language corpora, Europarl v7 English and the AFP portion of English Gigaword 5.",5 Experiments,[0],[0]
+"After tokenization, Europarl has 56M tokens and Gigaword AFP has 870M tokens.",5 Experiments,[0],[0]
+"For both corpora, we hold out a validation set of 5,000 tokens.",5 Experiments,[0],[0]
+"We train each model for 10 iterations over the training data.
+",5 Experiments,[0],[0]
+Our experiments break down into three parts.,5 Experiments,[0],[0]
+"First, we look at the impact of our pruning method on perplexity of a held-out validation set, across a variety of settings.",5 Experiments,[0],[0]
+"Second, we take a closer look at how the model evolves through the training process.",5 Experiments,[0],[0]
+"Finally, we explore the downstream impact of our method on a statistical phrase-based machine translation system.",5 Experiments,[0],[0]
+"We first look at the impact that the `∞,1 regularizer has on the perplexity of our validation set.",5.1 Evaluating perplexity and network size,[0],[0]
+The main results are shown in Table 1.,5.1 Evaluating perplexity and network size,[0],[0]
+"For λ ≤ 0.01, the regularizer seems to have little impact: no hidden units are pruned, and perplexity is also not affected.",5.1 Evaluating perplexity and network size,[0],[0]
+"For λ = 1, on the other hand, most hidden units are pruned – apparently too many, since perplexity is worse.",5.1 Evaluating perplexity and network size,[0],[0]
+"But for λ = 0.1, we see that we are able to prune out many hidden units: up to half of the first layer, with little impact on perplexity.",5.1 Evaluating perplexity and network size,[0],[0]
+"We found this to be consistent across all our experiments, varying n-gram size, initial hidden layer size, and vocabulary size.
+",5.1 Evaluating perplexity and network size,[0],[0]
+Table 2 shows the same information for 5-gram models trained on the larger Gigaword AFP corpus.,5.1 Evaluating perplexity and network size,[0],[0]
+"These numbers look very similar to those on Europarl: again λ = 0.1 works best, and, counter to expectation, even the final number of units is similar.
+",5.1 Evaluating perplexity and network size,[0],[0]
+"Table 3 shows the result of varying the vocabulary size: again λ = 0.1 works best, and, although it is not shown in the table, we also found that the final number of units did not depend strongly on the vocabulary size.
+",5.1 Evaluating perplexity and network size,[0],[0]
+"Table 4 shows results using the `2,1 norm (Europarl corpus, 5-grams, 100k vocabulary).",5.1 Evaluating perplexity and network size,[0],[0]
+"Since this is a different regularizer, there isn’t any reason to expect that λ behaves the same way, and indeed, a smaller value of λ seems to work best.",5.1 Evaluating perplexity and network size,[0],[0]
+We also studied the evolution of the network over the training process to gain some insights into how the method works.,5.2 A closer look at training,[0],[0]
+"The first question we want to
+answer is whether the method is simply removing units, or converging on an optimal number of units.",5.2 A closer look at training,[0],[0]
+"Figure 5 suggests that it is a little of both: if we start with too many units (900 or 1000), the method converges to the same number regardless of how many extra units there were initially.",5.2 A closer look at training,[0],[0]
+"But if we start with a smaller number of units, the method still prunes away about 50 units.
+",5.2 A closer look at training,[0],[0]
+"Next, we look at the behavior over time of different regularization strengths λ.",5.2 A closer look at training,[0],[0]
+"We found that not only does λ = 1 prune out too many units, it does so at the very first iteration (Figure 6, above), perhaps prematurely.",5.2 A closer look at training,[0],[0]
+"By contrast, the λ = 0.1 run prunes out units gradually.",5.2 A closer look at training,[0],[0]
+"By plotting these curves together with perplexity (Figure 6, below), we can see that the λ = 0.1 run is fitting the model and pruning it at the same time, which seems preferable to fitting without any pruning (λ =
+0.01) or pruning first and then fitting (λ = 1).",5.2 A closer look at training,[0],[0]
+"We can also visualize the weight matrix itself over time (Figure 7), for λ = 0.1.",5.2 A closer look at training,[0],[0]
+"It is striking that although this setting fits the model and prunes it at the same time, as argued above, by the first iteration it already seems to have decided roughly how many units it will eventually prune.",5.2 A closer look at training,[0],[0]
+We also looked at the impact of our method on statistical machine translation systems.,5.3 Evaluating on machine translation,[0],[0]
+"We used the Moses toolkit (Koehn et al., 2007) to build a phrase based machine translation system with a traditional 5-gram LM trained on the target side of our bitext.",5.3 Evaluating on machine translation,[0],[0]
+We augmented this system with neural LMs trained on the Europarl data and the Gigaword AFP data.,5.3 Evaluating on machine translation,[0],[0]
+"Based on the results from the perplexity experiments, we looked at models both built with a λ = 0.1 regularizer, and without regularization (λ = 0).
+",5.3 Evaluating on machine translation,[0],[0]
+We built our system using the newscommentary dataset v8.,5.3 Evaluating on machine translation,[0],[0]
+We tuned our model using newstest13 and evaluated using newstest14.,5.3 Evaluating on machine translation,[0],[0]
+"After standard cleaning and tokenization, there were 155k parallel sentences in the newscommentary dataset, and 3,000 sentences each for the tuning and test sets.
+",5.3 Evaluating on machine translation,[0],[0]
+"Table 5 shows that the addition of a neural LM helps substantially over the baseline, with improvements of up to 2 BLEU.",5.3 Evaluating on machine translation,[0],[0]
+"Using the Europarl model, the BLEU scores obtained without and with regularization were not significantly different (p ≥ 0.05), consistent with the negligible perplexity difference between these models.",5.3 Evaluating on machine translation,[0],[0]
+"On the Gigaword AFP model, regularization did decrease the BLEU score by 0.3, consistent with the small perplexity increase of the regularized model.",5.3 Evaluating on machine translation,[0],[0]
+"The decrease is statistically significant, but small compared with the overall benefit of adding a neural LM.",5.3 Evaluating on machine translation,[0],[0]
+Researchers have been exploring the use of neural networks for language modeling for a long time.,6 Related Work,[0],[0]
+Schmidhuber and Heil (1996) proposed a character n-gram model using neural networks which they used for text compression.,6 Related Work,[0],[0]
+"Xu and Rudnicky (2000) proposed a word-based probability model using a softmax output layer trained using cross-entropy, but only for bigrams.",6 Related Work,[0],[0]
+Bengio et al. (2003) defined a probabilistic word n-gram model and demonstrated improvements over conventional smoothed language models.,6 Related Work,[0],[0]
+Mnih and Teh (2012) sped up training of log-bilinear language models through the use of noise-contrastive estimation (NCE).,6 Related Work,[0],[0]
+"Vaswani et al. (2013) also used NCE to train the architecture of Bengio et al. (2003), and were able to integrate a largevocabulary language model directly into a machine translation decoder.",6 Related Work,[0],[0]
+"Baltescu et al. (2014) describe a similar model, with extensions like a hierarchical softmax (based on Brown clustering) and direct n-gram features.
+",6 Related Work,[0],[0]
+"Beyond feed-forward neural network language models, researchers have explored using more complicated neural network architectures.",6 Related Work,[0],[0]
+"RNNLM is an open-source implementation of a language model using recurrent neural networks (RNN) where connections between units can form directed cycles (Mikolov et al., 2011).",6 Related Work,[0],[0]
+Sundermeyer et al. (2015) use the long-short term memory (LSTM) neural architecture to show a perplexity improvement over the RNNLM toolkit.,6 Related Work,[0],[0]
+"In future work, we plan on exploring how our method could improve these more complicated neural models as well.
+",6 Related Work,[0],[0]
+Automatically limiting the size of neural networks is an old idea.,6 Related Work,[0],[0]
+"The “Optimal Brain Damage” (OBD) technique (LeCun et al., 1989) computes a saliency based on the second derivative of the objective function with respect to each parameter.",6 Related Work,[0],[0]
+"The parameters are then sorted by saliency, and the lowest-saliency parameters are pruned.",6 Related Work,[0],[0]
+"The pruning process is separate from the training process, whereas regularization performs training and pruning simultaneously.",6 Related Work,[0],[0]
+"Regularization in neural networks is also an old idea; for example, Nowland and Hinton (1992) mention both `22 and `0 regularization.",6 Related Work,[0],[0]
+"Our method develops on this idea by using a mixed norm to prune units, rather than parameters.
+",6 Related Work,[0],[0]
+"Srivastava et al. introduce a method called dropout in which units are directly deactivated at random during training (Srivastava et al., 2014), which induces sparsity in the hidden unit activations.",6 Related Work,[0],[0]
+"However, at the end of training, all units are reactivated, as the goal of dropout is to reduce overfitting, not to reduce network size.",6 Related Work,[0],[0]
+"Thus, dropout and our method seem to be complementary.",6 Related Work,[0],[0]
+"We have presented a method for auto-sizing a neural network during training by removing units using a `∞,1 regularizer.",7 Conclusion,[0],[0]
+"This regularizer drives a unit’s input weights as a group down to zero, allowing the unit to be pruned.",7 Conclusion,[0],[0]
+"We can thus prune units out of our network during training with minimal impact to held-out perplexity or downstream performance of a machine translation system.
+",7 Conclusion,[0],[0]
+"Our results showed empirically that the choice
+of a regularization coefficient of 0.1 was robust to initial configuration parameters of initial network size, vocabulary size, n-gram order, and training corpus.",7 Conclusion,[0],[0]
+"Furthermore, imposing a single regularizer on the objective function can tune all of the hidden layers of a network with one setting.",7 Conclusion,[0],[0]
+"This reduces the need to conduct expensive, multi-dimensional grid searches in order to determine optimal sizes.
+",7 Conclusion,[0],[0]
+We have demonstrated the power and efficacy of this method on a feed-forward neural network for language modeling though experiments on perplexity and machine translation.,7 Conclusion,[0],[0]
+"However, this method is general enough that it should be applicable to other domains, both inside natural language processing and outside.",7 Conclusion,[0],[0]
+"As neural models become more pervasive in natural language processing, the ability to auto-size networks for fast experimentation and quick exploration will become increasingly important.",7 Conclusion,[0],[0]
+"We would like to thank Tomer Levinboim, Antonios Anastasopoulos, and Ashish Vaswani for their helpful discussions, as well as the reviewers for their assistance and feedback.",Acknowledgments,[0],[0]
+Neural networks have been shown to improve performance across a range of natural-language tasks.,abstractText,[0],[0]
+"However, designing and training them can be complicated.",abstractText,[0],[0]
+"Frequently, researchers resort to repeated experimentation to pick optimal settings.",abstractText,[0],[0]
+"In this paper, we address the issue of choosing the correct number of units in hidden layers.",abstractText,[0],[0]
+"We introduce a method for automatically adjusting network size by pruning out hidden units through `∞,1 and `2,1 regularization.",abstractText,[0],[0]
+We apply this method to language modeling and demonstrate its ability to correctly choose the number of hidden units while maintaining perplexity.,abstractText,[0],[0]
+We also include these models in a machine translation decoder and show that these smaller neural models maintain the significant improvements of their unpruned versions.,abstractText,[0],[0]
+Auto-Sizing Neural Networks: With Applications to n-gram Language Models,title,[0],[0]
+"There has been a staggering increase in progress on generative modeling in recent years, built largely upon fundamental advances such as generative adversarial networks (Goodfellow et al., 2014), variational inference (Kingma & Welling, 2013), and autoregressive density estimation (van den Oord et al., 2016c).",1. Introduction,[0],[0]
+"These have led to breakthroughs in state-ofthe-art generation of natural images (Karras et al., 2017) and audio (van den Oord et al., 2016a), and even been used for unsupervised learning of disentangled representations (Higgins et al., 2017; Chen et al., 2016).",1. Introduction,[0],[0]
+"These domains often have real-valued distributions with underlying metrics; that is, there is a domain-specific notion of similarity between data points.",1. Introduction,[0],[0]
+"This similarity is ignored by the predominant work-horse of generative modeling, the Kullback-Leibler (KL) divergence.",1. Introduction,[0],[0]
+"Progress is now being made towards algorithms that optimize with respect to these underlying metrics (Arjovsky et al., 2017; Bousquet et al., 2017).
+",1. Introduction,[0],[0]
+"*Equal contribution 1DeepMind, London, UK.",1. Introduction,[0],[0]
+"Correspondence to: Georg Ostrovski <ostrovski@google.com>, Will Dabney <wdabney@google.com>.
+",1. Introduction,[0],[0]
+"Proceedings of the 35 th International Conference on Machine Learning, Stockholm, Sweden, PMLR 80, 2018.",1. Introduction,[0],[0]
+"Copyright 2018 by the author(s).
+",1. Introduction,[0],[0]
+"In this paper, we present a novel approach to generative modeling, that, while strikingly different from existing methods, is grounded in the well-understood statistical methods of quantile regression.",1. Introduction,[0],[0]
+"Unlike the majority of recent work, we approach generative modeling without the use of the KL divergence, and without explicitly approximating a likelihood model.",1. Introduction,[0],[0]
+"Like GANs, in this way we produce an implicitly defined model, but unlike GANs our optimization procedure is inherently stable and lacks degenerate solutions which cause loss of diversity and mode collapse.
+",1. Introduction,[0],[0]
+"Much of the recent research on GANs has been focused on improving stability (Radford et al., 2015; Arjovsky et al., 2017; Daskalakis et al., 2017) and sample diversity (Gulrajani et al., 2017; Salimans et al., 2016; 2018).",1. Introduction,[0],[0]
+"By stark contrast, methods such as PixelCNN (van den Oord et al., 2016b) readily produce high diversity, but due to their use of KL divergence are unable to make reasonable trade-offs between likelihood and perceptual similarity (Theis et al., 2015; Bellemare et al., 2017; Bousquet et al., 2017).
+",1. Introduction,[0],[0]
+"Our proposed method, autoregressive implicit quantile networks (AIQN), combines the benefits of both: a loss function that respects the underlying metric of the data leading to improved perceptual quality, and a stable optimization process leading to highly diverse samples.",1. Introduction,[0],[0]
+"While there has been an increasing tendency towards complex architectures (Chen et al., 2017; Salimans et al., 2017) and multiple objective loss functions to overcome these challenges, AIQN is conceptually simple and does not rely on any special architecture or optimization techniques.",1. Introduction,[0],[0]
+"Empirically it proves to be robust to hyperparameter variations and easy to optimize.
+",1. Introduction,[0],[0]
+"Our work is motivated by the recent advances achieved by reframing GANs in terms of optimal transport, leading to the Wasserstein GAN algorithm (Arjovsky et al., 2017), as well as work towards understanding the relationship between optimal transport and both GANs and VAEs (Bousquet et al., 2017).",1. Introduction,[0],[0]
+"In agreement with these results, we focus on loss functions grounded in perceptually meaningful metrics.",1. Introduction,[0],[0]
+"We build upon recent work in distributional reinforcement learning (Dabney et al., 2018a), which has begun to bridge the gap between approaches in reinforcement learning and unsupervised learning.",1. Introduction,[1.0],"['We build upon recent work in distributional reinforcement learning (Dabney et al., 2018a), which has begun to bridge the gap between approaches in reinforcement learning and unsupervised learning.']"
+"Towards a practical algorithm we base our experimental results on Gated PixelCNN (van den Oord et al., 2016b), and show that using AIQN significantly im-
+proves objective performance on CIFAR-10 and ImageNet 32x32 in terms of Fréchet Inception Distance (FID) and Inception score, as well as subjective perceptual quality in image samples and inpainting.",1. Introduction,[0],[0]
+"We begin by establishing some notation, before turning to a review of three of the most prevalent methods for generative modeling.",2. Background,[0],[0]
+"Calligraphic letters (e.g.X ) denote sets or spaces, capital letters (e.g. X) denote random variables, and lower case letters (e.g. x) indicate values.",2. Background,[0],[0]
+"A probability distribution with random variable X ∈ X is denoted pX ∈P(X ), its cumulative distribution function (c.d.f.)",2. Background,[0],[0]
+"FX , and inverse c.d.f. or quantile function QX = F−1X .",2. Background,[0],[0]
+When probability distributions or quantile functions are parameterized by some θ,2. Background,[0],[0]
+"we will write pθ or Qθ recognizing that here we do not view θ as a random variable.
+",2. Background,[0],[0]
+"Perhaps the simplest way to approach generative modeling of a random variableX ∈ X is by fixing some discretization ofX into n separate values, say x1, . . .",2. Background,[0],[0]
+", xn ∈ X , and parameterize the approximate distribution with pθ(xi) ∝",2. Background,[0],[0]
+exp(θi).,2. Background,[0],[0]
+"This type of categorical parameterization is widely used, only slightly less commonly when X does not lend itself naturally to such a partitioning.",2. Background,[0],[0]
+"Typically, the parameters θ are optimized to minimize the Kullback-Leibler (KL) divergence between observed values of X and the model pθ, θ∗ = arg minθDKL(pX‖pθ).",2. Background,[0],[0]
+"However, this is only tractable whenX is a small discrete set or at best low-dimensional.",2. Background,[0],[0]
+A common method for extending a generative model or density estimator to multivariate distributions is to factor the density as a product of scalarvalued conditional distributions.,2. Background,[0],[0]
+"Let X = (X1, . . .",2. Background,[0],[0]
+", Xn), then for any permutation of the dimensions σ :",2. Background,[0],[0]
+"Nn → Nn,
+pX(x) =",2. Background,[0],[0]
+"n∏ i=1 pXσ(i)(xσ(i)|xσ(1), . . .",2. Background,[0],[0]
+", xσ(i−1)).",2. Background,[0],[0]
+"(1)
+When the conditional density is modeled by a simple (e.g. Gaussian) base distribution, the ordering of the dimensions can be crucial (Papamakarios et al., 2017).",2. Background,[0],[0]
+"However, it is common practice to choose an arbitrary ordering and rely upon a more powerful conditional model to avoid these problems.",2. Background,[0],[0]
+"This class of models includes PixelRNN and PixelCNN (van den Oord et al., 2016c;b), MAF (Papamakarios et al., 2017), MADE (Germain et al., 2015), and many others.",2. Background,[0],[0]
+"Fundamentally, all these approaches use the KL divergence as their loss function.
+",2. Background,[0],[0]
+"Another class of methods, generally known as latent variable methods, can bypass the need for autoregressive models using a different modeling assumption.",2. Background,[0],[0]
+"Specifically, consider the Variational Autoencoder (VAE) (Kingma & Welling, 2013; Rezende et al., 2014), which represents
+pθ as the marginalization over a latent random variable Z ∈ Z .",2. Background,[0],[0]
+"The VAE is trained to maximize an approximate lower bound of the log-likelihood of the observations:
+log pθ(x) ≥ −DKL(qθ(z|x)‖p(z))",2. Background,[0],[0]
++,2. Background,[0],[0]
+E,2. Background,[0],[0]
+"[log pθ(x|z)] .
+",2. Background,[0],[0]
+"Although VAEs are straightforward to implement and optimize, and effective at capturing structure in highdimensional spaces, they often miss fine-grained detail, resulting in blurry images.
+",2. Background,[0],[0]
+"Generative Adversarial Networks (GANs) (Goodfellow et al., 2014) pose the problem of learning a generative model as a two-player zero-sum game between a discriminator D, attempting to distinguish between x ∼ pX (real data) and x ∼ pθ (generated data), and a generator G, attempting to generate data indistinguishable from real data.",2. Background,[0],[0]
+"The generator is an implicit latent variable model that reparameterizes samples, typically from an isotropic Gaussian distribution, into values in X .",2. Background,[1.0],"['The generator is an implicit latent variable model that reparameterizes samples, typically from an isotropic Gaussian distribution, into values in X .']"
+"The original formulation of GANs,
+arg min G sup D",2. Background,[0],[0]
+[ E X log(D(X)),2. Background,[0],[0]
+"+ E Z log(1−D(G(Z))) ] ,
+can be seen as minimizing a lower-bound on the JensenShannon divergence (Goodfellow et al., 2014; Bousquet et al., 2017).",2. Background,[0],[0]
+"That is, even in the case of GANs we are often minimizing functions of the KL divergence1.
+",2. Background,[0],[0]
+"Many recent advances have come from principled combinations of these three fundamental methods (Makhzani et al., 2015; Dumoulin et al., 2016; Rosca et al., 2017).",2. Background,[0],[0]
+"A common perspective in generative modeling is that the choice of model should encode existing metric assumptions about the domain, combined with a generic likelihoodfocused loss such as the KL divergence.",2.1. Distance Metrics and Loss Functions,[0],[0]
+"Under this view, the KL’s general applicability and robust optimization properties make it a natural choice, and most implementations of the methods we reviewed in the previous section attempt to, at least indirectly, minimize a version of the KL.
+",2.1. Distance Metrics and Loss Functions,[0],[0]
+"On the other hand, as every model inevitably makes tradeoffs when constrained by capacity or limited training, it is desirable for its optimization goal to incentivize trade-offs prioritizing approximately correct solutions, when the data space is endowed with a metric supporting a meaningful (albeit potentially subjective) notion of approximation.",2.1. Distance Metrics and Loss Functions,[0],[0]
+"It has been argued (Theis et al., 2015; Bousquet et al., 2017; Arjovsky et al., 2017; Bellemare et al., 2017) that the KL may not always be appropriate from this perspective, by making sub-optimal trade-offs between likelihood and similarity.
+",2.1. Distance Metrics and Loss Functions,[0],[0]
+"1The Jensen-Shannon divergence is the sum of KLs between distributions P,Q and their uniform mixture M = 0.5(P +Q): JSD(P ||Q)",2.1. Distance Metrics and Loss Functions,[0],[0]
+"= 0.5(DKL(P ||M) +DKL(Q||M)).
+",2.1. Distance Metrics and Loss Functions,[0],[0]
+"Indeed, many limitations of existing models can be traced back to the use of KL, and the resulting trade-offs in approximate solutions it implies.",2.1. Distance Metrics and Loss Functions,[0],[0]
+"For instance, its use appears to play a central role in one of the primary failure modes of VAEs, that of blurry samples.",2.1. Distance Metrics and Loss Functions,[0],[0]
+"Zhao et al. (2017) argue that the Gaussian posterior pθ(x|z) implies an overly simple model, which, when unable to perfectly fit the data, is forced to average (thus creating blur), and is not incentivized by the KL towards an alternative notion of approximate solution.",2.1. Distance Metrics and Loss Functions,[0],[0]
+"Theis et al. (2015) emphasized that an improvement of log-likelihood does not necessarily translate to higher perceptual quality, and that the KL loss is more likely to produce atypical samples than some other training criteria.
+",2.1. Distance Metrics and Loss Functions,[1.0000000117553902],"['Theis et al. (2015) emphasized that an improvement of log-likelihood does not necessarily translate to higher perceptual quality, and that the KL loss is more likely to produce atypical samples than some other training criteria.']"
+"We offer an alternative perspective: a good model should encode assumptions about the data distribution, whereas a good loss should encode the notion of similarity, that is, the underlying metric on the data space.",2.1. Distance Metrics and Loss Functions,[1.0],"['We offer an alternative perspective: a good model should encode assumptions about the data distribution, whereas a good loss should encode the notion of similarity, that is, the underlying metric on the data space.']"
+"From this point of view, the KL corresponds to an actual absence of explicit underlying metric, with complete focus on probability.
+",2.1. Distance Metrics and Loss Functions,[0],[0]
+"The optimal transport metrics Wc, for underlying metric c(x, x′), and in particular the p-Wasserstein distance, when c is an Lp metric, have frequently been proposed as being well-suited replacements to KL (Bousquet et al., 2017; Genevay et al., 2017).",2.1. Distance Metrics and Loss Functions,[1.0],"['The optimal transport metrics Wc, for underlying metric c(x, x′), and in particular the p-Wasserstein distance, when c is an Lp metric, have frequently been proposed as being well-suited replacements to KL (Bousquet et al., 2017; Genevay et al., 2017).']"
+"Briefly, the advantages are (1) avoidance of mode collapse (no need to choose between spreading over modes or collapsing to a single mode as in KL), and (2) the ability to trade off errors and incentivize approximations that respect the underlying metric.
+",2.1. Distance Metrics and Loss Functions,[0],[0]
+"Recently, Arjovsky et al. (2017) introduced the Wasserstein
+GAN, reposing the two-player game as the estimation of the gradient of the 1-Wasserstein distance between the data and generator distributions.",2.1. Distance Metrics and Loss Functions,[0],[0]
+"They reframe this in terms of the dual form of the 1-Wasserstein, with the critic estimating a function f which maximally separates the two distributions.",2.1. Distance Metrics and Loss Functions,[0],[0]
+"While this is an exciting line of work, it still faces limitations when the critic solution is approximate, i.e. when f∗ is not found before each update.",2.1. Distance Metrics and Loss Functions,[0],[0]
+"In this case, due to insufficient training of the critic (Bellemare et al., 2017) or limitations of the function approximator, the gradient direction produced can be arbitrarily bad (Bousquet et al., 2017).
+",2.1. Distance Metrics and Loss Functions,[0],[0]
+"Thus, we are left with the question of how to minimize a distribution loss respecting an underlying metric.",2.1. Distance Metrics and Loss Functions,[0],[0]
+"Recent work in distributional reinforcement learning has proposed the use of quantile regression as a method for minimizing the 1-Wasserstein in the univariate case when approximating using a mixture of Dirac functions (Dabney et al., 2018b).",2.1. Distance Metrics and Loss Functions,[1.0],"['Recent work in distributional reinforcement learning has proposed the use of quantile regression as a method for minimizing the 1-Wasserstein in the univariate case when approximating using a mixture of Dirac functions (Dabney et al., 2018b).']"
+"In this section, we review quantile regression as a method for estimating the quantile function of a distribution at specific points, i.e. its inverse cumulative distribution function.",2.2. Quantile Regression,[0],[0]
+"This leads to recent work on approximating a distribution by a neural network approximation of its quantile function, acting as a reparameterization of a random sample from the uniform distribution.
+",2.2. Quantile Regression,[0],[0]
+"The quantile regression loss (Koenker & Hallock, 2001) for a quantile at τ ∈",2.2. Quantile Regression,[0],[0]
+"[0, 1] and error u (positive for underestimation and negative for overestimation) is given by ρτ (u) =",2.2. Quantile Regression,[0],[0]
+(τ − I{u ≤,2.2. Quantile Regression,[0],[0]
+0})u.,2.2. Quantile Regression,[0],[0]
+It is an asymmetric loss function penalizing underestimation by weight τ and overestimation by weight 1,2.2. Quantile Regression,[0],[0]
+− τ .,2.2. Quantile Regression,[0],[0]
+"For a given scalar distribution Z with c.d.f. FZ and a quantile τ , the inverse c.d.f. q = F−1Z (τ) minimizes the expected quantile regression loss Ez∼Z",2.2. Quantile Regression,[0],[0]
+[ρτ (z − q)].,2.2. Quantile Regression,[0],[0]
+Using this loss allows one to train a neural network to approximate a scalar distribution represented by its inverse c.d.f.,2.2. Quantile Regression,[0],[0]
+"For this, the network can output a fixed grid of quantiles (Dabney et al., 2018b), with the respective quantile regression losses being applied to each output independently.",2.2. Quantile Regression,[0],[0]
+"A more effective approach is to provide the desired quantile τ as an additional input to the network, and train it to output the corresponding value of F−1Z (τ).",2.2. Quantile Regression,[1.0],"['A more effective approach is to provide the desired quantile τ as an additional input to the network, and train it to output the corresponding value of F−1Z (τ).']"
+"The implicit quantile network (IQN) model (Dabney et al., 2018a) reparameterizes a sample τ ∼ U([0, 1]) through a deterministic function to produce samples from the underlying data distribution.",2.2. Quantile Regression,[1.0],"['The implicit quantile network (IQN) model (Dabney et al., 2018a) reparameterizes a sample τ ∼ U([0, 1]) through a deterministic function to produce samples from the underlying data distribution.']"
+These two methods can be seen to belong to the top-right and bottom-right categories in Figure 1.,2.2. Quantile Regression,[0],[0]
+"An IQN Qθ can be trained by stochastic gradient descent on the quantile regression loss, with u = z −Qθ(τ) and training samples (z, τ) drawn from z ∼ Z and τ ∼ U([0, 1]).
+",2.2. Quantile Regression,[1.0000000321202298],"['An IQN Qθ can be trained by stochastic gradient descent on the quantile regression loss, with u = z −Qθ(τ) and training samples (z, τ) drawn from z ∼ Z and τ ∼ U([0, 1]).']"
+"One drawback to the quantile regression loss is that gradients do not scale with the magnitude of the error, but instead with the sign of the error and the quantile weight τ .",2.2. Quantile Regression,[0],[0]
+This increases gradient variance and can negatively impact the final model’s sample quality.,2.2. Quantile Regression,[1.0],['This increases gradient variance and can negatively impact the final model’s sample quality.']
+"Increasing the batch size, and thus averaging over more values of τ , would have the effect of lowering this variance.",2.2. Quantile Regression,[0],[0]
+"Alternatively, we can smooth the gradients as the model converges by allowing errors, under some threshold κ, to be scaled with their magnitude, reverting to an expectile loss.",2.2. Quantile Regression,[1.0],"['Alternatively, we can smooth the gradients as the model converges by allowing errors, under some threshold κ, to be scaled with their magnitude, reverting to an expectile loss.']"
+"This results in the Huber quantile loss (Huber, 1964; Dabney et al., 2018b):
+ρκτ (u) =
+{ |τ−I{u≤0}| 2κ u
+2, if |u| ≤ κ, |τ −",2.2. Quantile Regression,[0],[0]
+I{u ≤ 0}|(|u|,2.2. Quantile Regression,[0],[0]
+"− 12κ), otherwise.",2.2. Quantile Regression,[0],[0]
+(2),2.2. Quantile Regression,[0],[0]
+"Let X = (X1, . . .",3. Autoregressive Implicit Quantiles,[0],[0]
+", Xn) ∈",3. Autoregressive Implicit Quantiles,[0],[0]
+X1 × · · · × Xn = X be an ndimensional random variable.,3. Autoregressive Implicit Quantiles,[0],[0]
+"We begin by analyzing the effect of two naive applications of IQN to modeling the distribution of X .
+",3. Autoregressive Implicit Quantiles,[0],[0]
+"First, suppose we use the same quantile target, τ ∈",3. Autoregressive Implicit Quantiles,[0],[0]
+"[0, 1], for every output dimension.",3. Autoregressive Implicit Quantiles,[0],[0]
+"The only modification to IQN would be to output n dimensions instead of 1, the loss being applied to each output dimension independently.",3. Autoregressive Implicit Quantiles,[0],[0]
+This is equivalent to assuming that the dimensions of X are comonotonic.,3. Autoregressive Implicit Quantiles,[0],[0]
+"Two random variables are comonotonic if and only if they can be expressed as nondecreasing (deterministic) functions of a single random variable (Dhaene et al., 2006).",3. Autoregressive Implicit Quantiles,[0],[0]
+Thus a joint quantile function for a comonotonic X can be written as F−1X (τ) =,3. Autoregressive Implicit Quantiles,[0],[0]
+"(F−1X1 (τ), F −1 X2
+(τ), . . .",3. Autoregressive Implicit Quantiles,[0],[0]
+", F−1Xn(τ)).",3. Autoregressive Implicit Quantiles,[0],[0]
+"While there are many interesting uses for comonotonic random variables, we believe this assumption is too strong to be useful more broadly.
+",3. Autoregressive Implicit Quantiles,[0],[0]
+"Second, one could use a separate value τi ∈",3. Autoregressive Implicit Quantiles,[0],[0]
+"[0, 1] for each Xi, with the IQN being unchanged from the first case.",3. Autoregressive Implicit Quantiles,[0],[0]
+This corresponds to making an independence assumption on the dimensions of X .,3. Autoregressive Implicit Quantiles,[0],[0]
+"Again we would expect this to be an unreasonably restrictive modeling assumption for many domains, such as the case of natural images.
+",3. Autoregressive Implicit Quantiles,[0],[0]
+"Now, we turn to our proposed approach of extending IQN to multivariate distributions.",3. Autoregressive Implicit Quantiles,[0],[0]
+We fix an ordering of the n dimensions.,3. Autoregressive Implicit Quantiles,[0],[0]
+"If the density function pX is expressed as a product of conditional likelihoods, as in Equation 1, then the joint c.d.f. can be written as
+FX(x) = P(X1 ≤",3. Autoregressive Implicit Quantiles,[0],[0]
+"x1, . .",3. Autoregressive Implicit Quantiles,[0],[0]
+.,3. Autoregressive Implicit Quantiles,[0],[0]
+", Xn ≤ xn),
+",3. Autoregressive Implicit Quantiles,[0],[0]
+= n∏ i=1,3. Autoregressive Implicit Quantiles,[0],[0]
+"FXi|Xi−1,...,X1(xi).
+",3. Autoregressive Implicit Quantiles,[0],[0]
+"Furthermore, for τjoint = ∏n i=1 τi, we can write the jointquantile function of X as
+F−1X (τjoint) =",3. Autoregressive Implicit Quantiles,[0],[0]
+"(F −1 X1 (τ1), . . .",3. Autoregressive Implicit Quantiles,[0],[0]
+", F −1 Xn|Xn−1,...(τn)).
+",3. Autoregressive Implicit Quantiles,[0],[0]
+"This approach has been used previously by Koenker & Xiao (2006), who introduced a quantile autoregression model for quantile regression on time-series.
+",3. Autoregressive Implicit Quantiles,[0],[0]
+We propose to extend IQN to an autoregressive model of the above conditional form of a joint-quantile function.,3. Autoregressive Implicit Quantiles,[0],[0]
+"Denoting X1:i = X1 × · · · × Xi, let X̃ := ⋃n i=0 X1:i be the space of ‘partial’ data points.",3. Autoregressive Implicit Quantiles,[0],[0]
+We can define the autoregressive IQN as a deterministic functionQθ :,3. Autoregressive Implicit Quantiles,[0],[0]
+X̃ ×,3. Autoregressive Implicit Quantiles,[0],[0]
+"[0, 1]n → X̃ , mapping partial samples x̃ ∈ X̃ and quantile targets τi ∈",3. Autoregressive Implicit Quantiles,[0],[0]
+"[0, 1] to estimates of F−1X .",3. Autoregressive Implicit Quantiles,[0],[0]
+We can then train Qθ using a quantile regression loss (Equation 2).,3. Autoregressive Implicit Quantiles,[0],[0]
+"For generation, one can iterate x1:i = Qθ(x1:i−1, τi), on a sequence of growing partial samples2 x1:i−1 and independently sampled τi ∼ U([0, 1]), for i = 1, . . .",3. Autoregressive Implicit Quantiles,[0],[0]
+", n, to finally obtain a sample x = x1:n.",3. Autoregressive Implicit Quantiles,[0],[0]
+"As previously mentioned, for the restricted model class of a uniform mixture of Diracs, quantile regression can be shown to minimize the 1-Wasserstein metric (Dabney et al., 2018b).",3.1. Quantile Regression and the Wasserstein,[0],[0]
+"We extend this analysis for the case of arbitrary approximate quantile functions, and find that quantile regression minimizes a closely related divergence which we call quantile divergence, defined, for any distributions P and Q, as
+q(P,Q) := ∫ 1 0",3.1. Quantile Regression and the Wasserstein,[0],[0]
+[∫ F−1Q (τ),3.1. Quantile Regression and the Wasserstein,[0],[0]
+"F−1P (τ) (FP (x)− τ)dx ] dτ.
+",3.1. Quantile Regression and the Wasserstein,[0],[0]
+"Indeed, the expected quantile loss of any parameterized quantile function Q̄θ equals, up to a constant, the quantile divergence between P and the distribution Qθ implicitly defined by Q̄θ:
+E τ∼U([0,1])",3.1. Quantile Regression and the Wasserstein,[0],[0]
+[ E z∼P [ρτ (z − Q̄θ(τ))],3.1. Quantile Regression and the Wasserstein,[0],[0]
+"] = q(P,Qθ) + h(P ),
+where h(P ) does not depend on Qθ.",3.1. Quantile Regression and the Wasserstein,[0],[0]
+"Thus quantile regression minimizes the quantile divergence q(P,Qθ) and the sample gradient ∇θρτ (z − Q̄θ(τ))",3.1. Quantile Regression and the Wasserstein,[0],[0]
+"(for τ ∼ U([0, 1]) and z ∼ P ) is an unbiased estimate of ∇θq(P,Qθ).",3.1. Quantile Regression and the Wasserstein,[0],[0]
+See Appendix for proofs.,3.1. Quantile Regression and the Wasserstein,[0],[0]
+"Although IQN does not directly model the log-likelihood of the data distribution, observe that we can still query the implied density at a point (Jones, 1992):
+∂
+∂τ F−1X (τ) =
+1
+pX(F −1 X (τ))
+.
+",3.2. Quantile Density Function,[0],[0]
+"Indeed, this quantity, known as the sparsity function (Tukey, 1965) or the quantile-density function (Parzen, 1979) plays
+2Throughout we understand x0 = x1:0 ∈ X1:0 to denote the ‘empty tuple’, and the function Qθ to map this to a single unconditional sample x1 = x1:1 = Qθ(x0, τ1).
+",3.2. Quantile Density Function,[0],[0]
+"a central role in the analysis of quantile regression models (Koenker, 1994).",3.2. Quantile Density Function,[0],[0]
+"A common approach involves choosing a bandwidth parameter h and estimating this quantity through finite-differences around the value of interest as (F−1X (τ+h)−F−1X (τ−h))/2h (Siddiqui, 1960).",3.2. Quantile Density Function,[0],[0]
+"However, as we have the full quantile function, the quantile-density function can be computed exactly using a single step of back-propagation to compute ∂F
+−1(τ) ∂τ .",3.2. Quantile Density Function,[0],[0]
+"As this only allows
+querying the density given the value of τ , application to general likelihoods would require finding the value of τ that produces the closest approximation to the query point x.",3.2. Quantile Density Function,[0],[0]
+"Though arguably too inefficient for training, this could potentially be used to interrogate the model.",3.2. Quantile Density Function,[0],[0]
+"To test our proposed method, which is architecturally compatible with many generative model approaches, we wanted to compare and contrast IQN, that is quantile regression and quantile reparameterization, with a method trained with an explicit parameterization to minimize KL divergence.",4. PixelIQN,[0],[0]
+"A natural choice for this was PixelCNN, specifically we build upon the Gated PixelCNN of van den Oord et al. (2016b).
+",4. PixelIQN,[0],[0]
+"The Gated PixelCNN takes as input an image x ∼ X , sampled from the training distribution at training time, and potentially all zeros or partially generated at generation time, as well as a location-dependent context s.",4. PixelIQN,[0],[0]
+"The model consists of a number of residual layer blocks, whose structure is chosen to allow each output pixel to be a function of all preceding input pixels (in a raster-scan order).",4. PixelIQN,[0],[0]
+"At its core, each layer block computes two gated activations of the form
+y = tanh(Wk,f ∗ x+ Vk,f ∗ s) σ(Wk,g ∗ x+",4. PixelIQN,[0],[0]
+"Vk,g ∗ s), with k the layer index, ∗ denoting convolution, and Vk,f and Vk,g being 1 × 1 convolution kernels.",4. PixelIQN,[0],[0]
+"See Figure 2 for a full schematic depiction of a Gated PixelCNN layer
+block.",4. PixelIQN,[1.0000000052935563],['See Figure 2 for a full schematic depiction of a Gated PixelCNN layer block.']
+"After a number of such layer blocks, the PixelCNN produces a final output layer with shape (n, n, 3, 256), with a softmax across the final dimension, corresponding to the approximate conditional likelihood for the value of each pixel-channel.",4. PixelIQN,[0],[0]
+"That is, the conditional likelihood is the product of these individual autoregressive models,
+p(x|s) = 3n2∏ i=1",4. PixelIQN,[0],[0]
+"p(xi|x1, . . .",4. PixelIQN,[0],[0]
+", xi−1, si).
+",4. PixelIQN,[0],[0]
+"Typically the location-dependent conditioning term was used to condition on class labels, but here, we will use it to condition on the sample point3 τ ∈",4. PixelIQN,[0],[0]
+"[0, 1]3n2 .",4. PixelIQN,[0],[0]
+"Thus, in addition to the input image x we input, in place of s, the sample points τ = (τ1, . . .",4. PixelIQN,[0],[0]
+", τ3n2) to be reparameterized, with each τi ∼ U([0, 1]).",4. PixelIQN,[0],[0]
+"Finally, our network outputs only the full sample image of shape (n, n, 3), without the need for an additional softmax layer.",4. PixelIQN,[0],[0]
+Note that the number of τ values generated exactly corresponds to the number of random draws from softmax distributions in the original PixelCNN.,4. PixelIQN,[0],[0]
+"We are simply changing the role of the randomness, from a draw at the output to a part of the input.
+",4. PixelIQN,[0],[0]
+"Architecturally, our proposed model, PixelIQN, is exactly the network given by van den Oord et al. (2016b), with the one exception that we output only a single value per pixel-channel and do not require the softmax activations.
+",4. PixelIQN,[0],[0]
+"In PixelCNN training is done by passing the training image through the network, and training each output softmax distribution using the KL divergence between the training image and the approximate distribution,∑
+i
+DKL(δxi , p(·|x1, . . .",4. PixelIQN,[0.996485125936801],"['In PixelCNN training is done by passing the training image through the network, and training each output softmax distribution using the KL divergence between the training image and the approximate distribution,∑ i DKL(δxi , p(·|x1, .']"
+", xi−1)).
+",4. PixelIQN,[0],[0]
+"For PixelIQN, the input is the training image x and a sample point τ ∼ U([0, 1]3n2).",4. PixelIQN,[0],[0]
+"The output values Qx(τ) ∈ R3n 2 are interpreted as the approximate quantile function at τ , Qx(τ)i = QX(τi|xi−1, . . .), trained with a single step of quantile regression towards the observed sample",4. PixelIQN,[0],[0]
+"x:∑
+i
+",4. PixelIQN,[0],[0]
+"ρκτi(xi −QX(τi|xi−1, . .",4. PixelIQN,[0],[0]
+.)).,4. PixelIQN,[0],[0]
+"We begin by demonstrating PixelIQN on CIFAR-10 (Krizhevsky & Hinton, 2009).",4.1. CIFAR-10,[0],[0]
+"For comparison, we train both a baseline Gated PixelCNN and a PixelIQN.",4.1. CIFAR-10,[0],[0]
+"Both models correspond to the 15-layer network variant in (van den Oord et al., 2016b), see Appendix for detailed hyperparameters and training procedure.",4.1. CIFAR-10,[0],[0]
+"The two methods have substantially different loss functions, so we performed a
+3Conditioning on labels remains possible (see Section 4.2).
+hyperparameter search using a short training run, with the same number (500) of hyperparameter configurations evaluated for both models.",4.1. CIFAR-10,[0],[0]
+"For all results, we report full training runs using the best found hyperparameters in each case.",4.1. CIFAR-10,[0],[0]
+"The evaluation metric used for the hyperparameter search was the Fréchet Inception Distance (FID) (Heusel et al., 2017), see Appendix for details.",4.1. CIFAR-10,[0],[0]
+"In addition to FID, we report Inception score (Salimans et al., 2016) for both models.
+",4.1. CIFAR-10,[0],[0]
+Figure 4 (left) shows Inception score and FID for both models evaluated at several points throughout training.,4.1. CIFAR-10,[0],[0]
+"The fully trained PixelCNN achieves an Inception score and FID of 4.6 and 65.9 respectively, while PixelIQN substantially outperforms it with an Inception score of 5.3 and FID of 49.5.",4.1. CIFAR-10,[0],[0]
+"This also compares favorably with e.g. WGAN (Arjovsky et al., 2017), which reaches an Inception score of 3.8.",4.1. CIFAR-10,[0],[0]
+"For subjective evaluations, we give samples from both models in Figure 3.",4.1. CIFAR-10,[1.0],"['For subjective evaluations, we give samples from both models in Figure 3.']"
+Samples coming from PixelIQN are much more visually coherent.,4.1. CIFAR-10,[0],[0]
+"Of note, the PixelIQN model achieves
+a performance level comparable to that of the fully trained PixelCNN with only about one third the number of training updates (and about one third of the wall-clock time).",4.1. CIFAR-10,[0],[0]
+"Next, we turn to the small ImageNet dataset (Russakovsky et al., 2015), first used for generative modeling in the PixelRNN work (van den Oord et al., 2016c).",4.2. ImageNet 32x32,[0],[0]
+"Again, we evaluate using FID and Inception score.",4.2. ImageNet 32x32,[0],[0]
+"For this much harder dataset, we base our PixelCNN and PixelIQN models on the larger 20-layer variant used in (van den Oord et al., 2016b).",4.2. ImageNet 32x32,[0],[0]
+"Due to substantially longer training time for this model, we did not perform additional hyperparameter tuning, and mostly used the same hyperparameter values as in the previous sections for both models; details can be found in the Appendix.
+",4.2. ImageNet 32x32,[0],[0]
+Figure 4 shows Inception score and FID throughout training of PixelCNN and PixelIQN.,4.2. ImageNet 32x32,[0],[0]
+"Again, PixelIQN substan-
+tially outperforms the baseline in terms of final performance and sample complexity.",4.2. ImageNet 32x32,[0],[0]
+"For final scores and a comparison to state-of-the-art GAN models, see Table 1.",4.2. ImageNet 32x32,[0],[0]
+Figure 5 shows random (non-cherry-picked) samples from both models.,4.2. ImageNet 32x32,[0],[0]
+"Compared to PixelCNN, PixelIQN samples appear to have superior quality with more global consistency and less ‘high-frequency noise’.
+",4.2. ImageNet 32x32,[0],[0]
+"In Figure 6, we show the inpainting performance of PixelIQN, by fixing the top half of a validation set image as input and sampling repeatedly from the model to generate different completions.",4.2. ImageNet 32x32,[0],[0]
+We note that the model consistently generates plausible completions with significant diversity between different completion samples for the same input image.,4.2. ImageNet 32x32,[1.0],['We note that the model consistently generates plausible completions with significant diversity between different completion samples for the same input image.']
+"Meanwhile, WGAN-GP has been seen to produce deterministic completions (Bellemare et al., 2017).
+",4.2. ImageNet 32x32,[1.000000030720872],"['Meanwhile, WGAN-GP has been seen to produce deterministic completions (Bellemare et al., 2017).']"
+"Following (van den Oord et al., 2016b), we also trained a class-conditional PixelIQN variant, providing to the model the one-hot class label corresponding to a training image (in addition to a τ sample).",4.2. ImageNet 32x32,[1.0],"['Following (van den Oord et al., 2016b), we also trained a class-conditional PixelIQN variant, providing to the model the one-hot class label corresponding to a training image (in addition to a τ sample).']"
+"Samples from a class-conditional model can be expected to have higher visual quality, as the class label provides log2(1000)",4.2. ImageNet 32x32,[0],[0]
+"≈ 10 bits of information, see Figure 7.",4.2. ImageNet 32x32,[0],[0]
+"As seen in Figure 4 and Table 1, class conditioning also further improves Inception score and FID.",4.2. ImageNet 32x32,[0],[0]
+"To generate each sample for the computation of these scores, we sample one of 1000 class labels randomly, then generate an image conditioned on this label via the trained model.
+",4.2. ImageNet 32x32,[0.9999999967059413],"['To generate each sample for the computation of these scores, we sample one of 1000 class labels randomly, then generate an image conditioned on this label via the trained model.']"
+"Finally, motivated by the very long training time for the large PixelCNN model (approximately 1 day per 100K training steps, on 16 NVIDIA Tesla P100 GPUs), we also trained smaller 15-layer versions of the models (same as the ones used on CIFAR-10) on the small ImageNet dataset.",4.2. ImageNet 32x32,[1.0],"['Finally, motivated by the very long training time for the large PixelCNN model (approximately 1 day per 100K training steps, on 16 NVIDIA Tesla P100 GPUs), we also trained smaller 15-layer versions of the models (same as the ones used on CIFAR-10) on the small ImageNet dataset.']"
+"For comparison, these take approximately 12 hours for 100K training steps on a single P100 GPU, or less than 3 hours on 8 P100 GPUs.",4.2. ImageNet 32x32,[1.0],"['For comparison, these take approximately 12 hours for 100K training steps on a single P100 GPU, or less than 3 hours on 8 P100 GPUs.']"
+"As expected, little PixelCNN, while suitable
+for the CIFAR-10 dataset, fails to achieve competitive scores on the ImageNet dataset, achieving Inception score 5.1 and FID 66.4.",4.2. ImageNet 32x32,[0],[0]
+"Astonishingly, little PixelIQN on this dataset reaches Inception score 7.3 and FID 38.5, see Figure 4 (right).",4.2. ImageNet 32x32,[1.0],"['Astonishingly, little PixelIQN on this dataset reaches Inception score 7.3 and FID 38.5, see Figure 4 (right).']"
+"It thereby not only outperforms the little PixelCNN, but also the larger 20-layer version!",4.2. ImageNet 32x32,[1.0],"['It thereby not only outperforms the little PixelCNN, but also the larger 20-layer version!']"
+"This strongly supports the hypothesis that PixelCNN, and potentially many other models, are constrained not only by their model capacity, but crucially also by the sub-optimal trade-offs made by their log-likelihood training criterion, failing to align with perceptual or evaluation metrics.",4.2. ImageNet 32x32,[0],[0]
+Most existing generative models for images belong to one of two classes.,5. Discussion and Conclusions,[1.0],['Most existing generative models for images belong to one of two classes.']
+"The first are likelihood-based models, trained with an elementwise KL reconstruction loss, which,
+while perceptually meaningless, provides robust optimization properties and high sample diversity.",5. Discussion and Conclusions,[1.0000000080536224],"['The first are likelihood-based models, trained with an elementwise KL reconstruction loss, which, while perceptually meaningless, provides robust optimization properties and high sample diversity.']"
+"The second are GANs, trained based on a discriminator loss, typically better aligned with a perceptual metric and enabling the generator to produce realistic, globally consistent samples.",5. Discussion and Conclusions,[0],[0]
+"Their advantages come at the cost of a harder optimization problem, high parameter sensitivity, and most importantly, a tendency to collapse modes of the data distribution.
+",5. Discussion and Conclusions,[0],[0]
+"AIQNs are a new, fundamentally different, technique for generative modeling.",5. Discussion and Conclusions,[0],[0]
+"By using a quantile regression loss instead of KL divergence, they combine some of the best properties of the two model classes.",5. Discussion and Conclusions,[1.0],"['By using a quantile regression loss instead of KL divergence, they combine some of the best properties of the two model classes.']"
+"By their nature, they preserve modes of the learned distribution, while producing perceptually appealing high-quality samples.",5. Discussion and Conclusions,[0],[0]
+The inevitable approximation trade-offs a generative model makes when constrained by capacity or insufficient training can vary significantly depending on the loss used.,5. Discussion and Conclusions,[1.0],['The inevitable approximation trade-offs a generative model makes when constrained by capacity or insufficient training can vary significantly depending on the loss used.']
+"We argue that the proposed quantile regression loss aligns more effectively with a given metric and therefore makes subjectively more advantageous trade-offs.
+",5. Discussion and Conclusions,[0],[0]
+Devising methods for quantile regression over multidimensional outputs is an active area of research.,5. Discussion and Conclusions,[0],[0]
+"New methods are continuing to be investigated (Carlier et al., 2016; Hallin & Miroslav, 2016), and a promising direction for future work is to find ways to use these to replace autoregressive models.",5. Discussion and Conclusions,[0],[0]
+"One approach to reducing the computational burden of such models is to apply AIQN to the latent dimensions
+of a VAE.",5. Discussion and Conclusions,[0],[0]
+"Similar in spirit to Rosca et al. (2017), this would use the VAE to reduce the dimensionality of the problem and the AIQN to sample from the true latent distribution.",5. Discussion and Conclusions,[0],[0]
+"In the Appendix we give preliminary results using such an technique, on CelebA 64× 64 (Liu et al., 2015).",5. Discussion and Conclusions,[0],[0]
+"We have shown that IQN, computationally cheap and technically simple, can be readily applied to existing architectures, PixelCNN and VAE (Appendix), improving robustness and sampling quality of the underlying model.",5. Discussion and Conclusions,[0],[0]
+"We demonstrated that PixelIQN produces more realistic, globally coherent samples, and improves Inception score and FID.
+",5. Discussion and Conclusions,[0],[0]
+We further point out that many recent advances in generative models could be easily combined with our proposed method.,5. Discussion and Conclusions,[0],[0]
+"Recent algorithmic improvements to GANs such as mini-batch discrimination and progressive growing (Salimans et al., 2016; Karras et al., 2017), while not strictly necessary in our work, could be applied to further improve performance.",5. Discussion and Conclusions,[0],[0]
+"PixelCNN++ (Salimans et al., 2017) is an architectural improvement of PixelCNN, with several beneficial modifications supported by experimental evidence.",5. Discussion and Conclusions,[0],[0]
+"Although we have built upon the original Gated PixelCNN in this work, we believe all of these modifications to be compatible with our work, except for the use of a mixture of logistics in place of PixelCNN’s softmax.",5. Discussion and Conclusions,[0],[0]
+"As we have entirely replaced this model component, this change does not map onto our model.",5. Discussion and Conclusions,[0],[0]
+"Of note, the motivation behind this change closely mirrors our own, in looking for a loss that respects the underlying metric between examples.",5. Discussion and Conclusions,[0],[0]
+"The recent PixelSNAIL model (Chen et al., 2017) achieves stateof-the-art modeling performance by enhancing PixelCNN with ELU nonlinearities, modified block structure, and an attention mechanism.",5. Discussion and Conclusions,[0],[0]
+"Again, all of these are fully compatible with our work and should improve results further.
+",5. Discussion and Conclusions,[0],[0]
+"Finally, the implicit quantile formulation lifts a number of architectural restrictions of previous generative models.",5. Discussion and Conclusions,[0],[0]
+"Most importantly, the reparameterization as an inverse c.d.f. allows to learn distributions over continuous ranges without pre-specified boundaries or quantization.",5. Discussion and Conclusions,[0],[0]
+"This enables modeling continuous-valued variables, for example for generation of sound (van den Oord et al., 2016a), opening multiple interesting avenues for further investigation.",5. Discussion and Conclusions,[0],[0]
+We would like to acknowledge the important role many of our colleagues at DeepMind played for this work.,Acknowledgements,[0],[0]
+"We especially thank Aäron van den Oord and Sander Dieleman for invaluable advice on the PixelCNN model; Ivo Danihelka and Danilo J. Rezende for careful reading and insightful comments on an earlier version of the paper; Igor Babuschkin, Alexandre Galashov, Dominik Grewe, Jacob Menick, and Mihaela Rosca for technical help.",Acknowledgements,[0],[0]
+"We introduce autoregressive implicit quantile networks (AIQN), a fundamentally different approach to generative modeling than those commonly used, that implicitly captures the distribution using quantile regression.",abstractText,[0],[0]
+"AIQN is able to achieve superior perceptual quality and improvements in evaluation metrics, without incurring a loss of sample diversity.",abstractText,[0],[0]
+The method can be applied to many existing models and architectures.,abstractText,[0],[0]
+"In this work we extend the PixelCNN model with AIQN and demonstrate results on CIFAR-10 and ImageNet using Inception score, FID, non-cherrypicked samples, and inpainting results.",abstractText,[0],[0]
+We consistently observe that AIQN yields a highly stable algorithm that improves perceptual quality while maintaining a highly diverse distribution.,abstractText,[0],[0]
+Autoregressive Quantile Networks for Generative Modeling,title,[0],[0]

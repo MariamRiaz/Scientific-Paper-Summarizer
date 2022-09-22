@@ -1,0 +1,1049 @@
+0,1,label2,summary_sentences
+"Proceedings of the 2015 Conference on Empirical Methods in Natural Language Processing, pages 2081–2087, Lisbon, Portugal, 17-21 September 2015. c©2015 Association for Computational Linguistics.",text,[0],[0]
+"When translating between two languages that differ in their degree of morphological synthesis, syntactic structures in one language may be realized as morphological structures in the other.",1 Introduction,[0],[0]
+"Machine Translation models that treat words as atomic units have poor learning capabilities for such translation units, and morphological segmentations are commonly used (Koehn and Knight, 2003).",1 Introduction,[0],[0]
+"Like words in a sentence, the morphemes of a word have a hierarchical structure that is relevant in translation.",1 Introduction,[0],[0]
+"For instance, compounds in Germanic languages are head-final, and the head is the segment that determines agreement within the noun phrase, and is relevant for selectional preferences of verbs.
+",1 Introduction,[0],[0]
+"1. sie erheben eine Hand|gepäck|gebühr.
+",1 Introduction,[0],[0]
+"they charge a carry-on bag fee.
+",1 Introduction,[0],[0]
+"In example 1, agreement in case, number and gender is enforced between eine ’a’ and Gebühr ’fee’, and selectional preference between erheben ’charge’ and Gebühr ’fee’.",1 Introduction,[0],[0]
+"A flat representation, as is common in phrase-based SMT, does not encode these relationships, but a dependency representation does so through dependency links.
+",1 Introduction,[0],[0]
+"In this paper, we investigate a dependency representation of morphologically segmented words for SMT.",1 Introduction,[0],[0]
+"Our representation encodes syntactic and morphological structure jointly, allowing a single model to learn the translation of both.",1 Introduction,[0],[0]
+"Specifically, we work with a string-to-tree model with GHKM-style rules (Galley et al., 2006), and a relational dependency language model (Sennrich, 2015).",1 Introduction,[0],[0]
+"We focus on the representation of German syntax and morphology in an English-to-German system, and two morphologically complex word classes in German that are challenging for translation, compounds and particle verbs.
+",1 Introduction,[0],[0]
+"German makes heavy use of compounding, and compounds such as Abwasserbehandlungsanlage ‘waste water treatment plant’ are translated into complex noun phrases in other languages, such as French station d’épuration des eaux résiduaires.
+",1 Introduction,[0],[0]
+German particle verbs are difficult to model because their surface realization differs depending on the finiteness of the verb and the type of clause.,1 Introduction,[0],[0]
+"Verb particles are separated from the finite verb in
+2081
+main clauses, but prefixed to the verb in subordinated clauses, or when the verb is non-finite.",1 Introduction,[0],[0]
+"The infinitive marker zu ’to’, which is normally a premodifying particle, appears as an infix in particle verbs.",1 Introduction,[0],[0]
+Table 1 shows an illustrating example.,1 Introduction,[0],[0]
+"The main focus of research on compound splitting has been on the splitting algorithm (Popovic et al., 2006; Nießen and Ney, 2000; Weller et al., 2014; Macherey et al., 2011).",2 A Dependency Representation of Compounds and Particle Verbs,[0],[0]
+"Our focus is not the splitting algorithm, but the representation of compounds.",2 A Dependency Representation of Compounds and Particle Verbs,[0],[0]
+"For splitting, we use an approach similar to (Fritzinger and Fraser, 2010), with segmentation candidates identified by a finite-state morphology (Schmid et al., 2004; Sennrich and Kunz, 2014), and statistical evidence from the training corpus to select a split (Koehn and Knight, 2003).
+",2 A Dependency Representation of Compounds and Particle Verbs,[0],[0]
+"German compounds are head-final, and premodifiers can be added recursively.",2 A Dependency Representation of Compounds and Particle Verbs,[0],[0]
+Compounds are structurally ambiguous if there is more than one modifier.,2 A Dependency Representation of Compounds and Particle Verbs,[0],[0]
+Consider the distinction between (Stadtteil)projekt (literally: ’(city part) project)’) and Stadt(teilprojekt) ’city sub-project’.,2 A Dependency Representation of Compounds and Particle Verbs,[0],[0]
+"We opt for a left-branching representation by default.1 We also split linking elements, and represent them as a postmodifier of each non-final segment, including the empty string ("" "").",2 A Dependency Representation of Compounds and Particle Verbs,[0],[0]
+"We use the same representation for noun compounds and adjective compounds.
+",2 A Dependency Representation of Compounds and Particle Verbs,[0],[0]
+An example of the original2 and the proposed compound representation is shown in Figure 1.,2 A Dependency Representation of Compounds and Particle Verbs,[0],[0]
+"Importantly, the head of the compound is also the parent of the determiners and attributes in the noun phrase, which makes a bigram dependency language model sufficient to enforce agreement.",2 A Dependency Representation of Compounds and Particle Verbs,[0],[0]
+"Since we model morphosyntactic agreement within the main translation step, and not in a separate step as in (Fraser et al., 2012), we deem it useful that inflection is marked at the head of the compound.",2 A Dependency Representation of Compounds and Particle Verbs,[0],[0]
+"Consequently, we do not split off inflectional or derivational morphemes.
+",2 A Dependency Representation of Compounds and Particle Verbs,[0],[0]
+"For German particle verbs, we define a common representation that abstracts away from the various surface realizations (see Table 1).",2 A Dependency Representation of Compounds and Particle Verbs,[0],[0]
+"Separated
+1We follow prior work in leaving frequent words or subwords unsplit, which has a disambiguating effect.",2 A Dependency Representation of Compounds and Particle Verbs,[0],[0]
+"With more aggressive splitting, frequency information could be used for the structural disambiguation of internal structure.
+",2 A Dependency Representation of Compounds and Particle Verbs,[0],[0]
+"2The original dependency trees follow the annotation guidelines by Foth (2005).
+verb particles are reordered to be the closest premodifier of the verb.",2 A Dependency Representation of Compounds and Particle Verbs,[0],[0]
+"Prefixed particles and the zuinfix are identified by the finite-state-morphology, and split from the verb so that the particle is the closest, the zu marker the next-closest premodifier of the verb, as shown in Figure 2.",2 A Dependency Representation of Compounds and Particle Verbs,[0],[0]
+"Agreement, selectional preferences, and other phenomena involve the verb and its dependents, and the proposed representation retains these dependency links, but reduces data sparsity from affixation and avoids discontinuity of the verb and its particle.",2 A Dependency Representation of Compounds and Particle Verbs,[0],[0]
+"We follow Williams et al. (2014) and map dependency trees into a constituency representation, which allows for the extraction of GHKM-style translation rules (Galley et al., 2006).",3 Tree Binarization,[0],[0]
+"This conversion is lossless, and we can still apply a de-
+pendency language model (RDLM).",3 Tree Binarization,[0],[0]
+"Figure 3 (a) shows the constituency representation of the example in Figure 1.
+",3 Tree Binarization,[0],[0]
+"Our model should not only be able to produce new words productively, but also to memorize words it has observed during training.",3 Tree Binarization,[0],[0]
+"Looking at the compound Handgepäckgebühr in Figure 3 (a), we can see that it does not form a constituent, and cannot be extracted with GHKM extraction heuristics.",3 Tree Binarization,[0],[0]
+"To address this, we binarize the trees in our training data (Wang et al., 2007).
+",3 Tree Binarization,[0],[0]
+A complicating factor is that the binarization should not impair the RDLM.,3 Tree Binarization,[0],[0]
+"During decoding, we map the internal tree structure of each hypothesis back to the unbinarized form, which is then scored by the RDLM.",3 Tree Binarization,[0],[0]
+Virtual nodes introduced by the binarization must also be scorable by RDLM if they form the root of a translation hypothesis.,3 Tree Binarization,[0],[0]
+A simple right or left binarization would produce virtual nodes without head and without meaningful dependency representation.,3 Tree Binarization,[0],[0]
+We ensure that each virtual node dominates the head of the full constituent through a mixed binarization.3,3 Tree Binarization,[0],[0]
+"Specifically, we perform right binarization of the head and all pre-modifiers, then left binarization of all post-modifiers.",3 Tree Binarization,[0],[0]
+"This head-binarized representation is illustrated in Figure 3 (b).4
+Head binarization ensures that even hypotheses whose root is a virtual node can be scored by the RDLM.",3 Tree Binarization,[0],[0]
+"This score is only relevant for pruning, and discarded when the full constituent is scored.",3 Tree Binarization,[0],[0]
+"Still, these hypotheses require special treatment in the RDLM to mitigate search errors.",3 Tree Binarization,[0],[0]
+"The virtual node labels (such as OBJA) are unknown symbols to the RDLM, and we simply replace them with the original label (OBJA).",3 Tree Binarization,[0],[0]
+"The RDLM uses sibling context, and this is normally padded with special start and stop symbols, analogous to BOS/EOS symbols in n-gram models.",3 Tree Binarization,[0],[0]
+These start and stop symbols let the RDLM compute the probability that a node is the first or last child of its ancestor node.,3 Tree Binarization,[0],[0]
+"However, computing these probabilities for virtual nodes would unfairly bias the search, since the first/last child of a virtual node is not necessarily the first/last child of the full constituent.",3 Tree Binarization,[0],[0]
+"We adapt the representation of virtual nodes in
+3In other words, every node is a fixed well-formed dependency structure (Shen et al., 2010) with our binarization.
+",3 Tree Binarization,[0],[0]
+"4Note that our definition of head binarization is different from that of Wang et al. (2007), who left-binarize a node if the head is the first child, and right-binarize otherwise.",3 Tree Binarization,[0],[0]
+"Our algorithm also covers cases where the head has both pre- and post-modifiers, as erheben and gepäck do in Figure 3.
+RDLM to take this into account.",3 Tree Binarization,[0],[0]
+"We distinguish between virtual nodes based on whether their span is a string prefix, suffix, or infix of the full constituent.",3 Tree Binarization,[0],[0]
+"For prefixes and infixes, we do not add a stop symbol at the end, and use null symbols, which denote unavailable context, for padding to the right.",3 Tree Binarization,[0],[0]
+"For suffixes and infixes, we do the same at the start.",3 Tree Binarization,[0],[0]
+"For SMT, all German training and development data is converted into the representation described in sections 2–3.",4 Post-Processing,[0],[0]
+"To restore the original representation, we start from the tree output of the stringto-tree decoder.",4 Post-Processing,[0],[0]
+"Merging compounds is trivial: all segments and linking elements can be identified by the tree structure, and are concatenated.
+",4 Post-Processing,[0],[0]
+"For verbs that dominate a verb particle, the original order is restored through three rules:
+1. non-finite verbs are concatenated with the particle, and zu-markers are infixed.
+2. finite verbs that head a subordinated clause (identified by its dependency label) are concatenated with the particle.
+3.",4 Post-Processing,[0],[0]
+"finite verbs that head a main clause have the
+particle moved to the right clause",4 Post-Processing,[0],[0]
+"bracket.5
+Previous work on particle verb translation into German proposed to predict the position of particles with an n-gram language model (Nießen and Ney, 2001).",4 Post-Processing,[0],[0]
+"Our rules have the advantage that they are informed by the syntax of the sentence and consider the finiteness of the verb.
+",4 Post-Processing,[0],[0]
+Our rules only produce projective trees.,4 Post-Processing,[0],[0]
+"Verb particles may also appear in positions that violate projectivity, and we leave it to future research to determine if our limitation to projective trees affects translation quality, and how to produce nonprojective trees.",4 Post-Processing,[0],[0]
+We train English–German string-to-tree SMT systems on the training data of the shared translation task of the Workshop on Statistical Machine Translation (WMT) 2015.,5.1 Data and Models,[0],[0]
+"The data set consists of 4.2 million sentence pairs of parallel data, and 160 million sentences of monolingual German data.
+",5.1 Data and Models,[0],[0]
+We base our systems on that of Williams et al. (2014).,5.1 Data and Models,[0],[0]
+"It is a string-to-tree GHKM translation system implemented in Moses (Koehn et al., 2007), and using the dependency annotation by ParZu (Sennrich et al., 2013).",5.1 Data and Models,[0],[0]
+"Additionally, our baseline system contains a dependency language model (RDLM) (Sennrich, 2015), trained on the target-side of the parallel training data.
+",5.1 Data and Models,[0],[0]
+"We report case-sensitive BLEU scores on the newstest2014/5 test sets from WMT, averaged over 3 optimization runs of k-batch MIRA (Cherry and Foster, 2012) on a subset of newstest2008-12.6
+We split all particle verbs and hyphenated compounds, but other compounds are only split if they are rare (frequency in parallel text < 5).
+",5.1 Data and Models,[0],[0]
+"For comparison with the state-of-the-art, we train a full system on our restructured representation, which incorporates all models and settings of our WMT 2015 submission system (Williams et al., 2015).7 Note that our WMT 2015 submission
+5We use the last position in the clause as default location, but put the particle before any subordinated and coordinated clauses, which occur in the Nachfeld (the ‘final field’ in topological field theory).
+",5.1 Data and Models,[0],[0]
+"6We use mteval-v13a.pl for comparability to official WMT results; all significance values reported are obtained with MultEval (Clark et al., 2011).
+",5.1 Data and Models,[0],[0]
+"7In contrast to our other systems in this paper, RDLM is trained on all monolingual data for the full system, and two models are added: a 5-gram Neural Network language model
+uses the dependency representation of compounds and tree binarization introduced in this paper; we achieve additional gains over the submission system through particle verb restructuring.",5.1 Data and Models,[0],[0]
+Table 2 shows translation quality (BLEU) with different representations of German compounds and particle verbs.,5.2 SMT Results,[0],[0]
+"Head binarization not only yields improvements over the baseline, but also allows for larger gains from morphological segmentation.",5.2 SMT Results,[0],[0]
+"We attribute this to the fact that full compounds, and prefixed particle verbs, are not always a constituent in the segmented representation, and that binarization compensates this theoretical drawback.
+",5.2 SMT Results,[0],[0]
+"With head binarization, we find substantial improvements from compound splitting of 0.7–1.1 BLEU.",5.2 SMT Results,[0],[0]
+"On newstest2014, the improvement is almost twice of that reported in related work (Williams et al., 2014), which also uses a hierarchical representation of compounds, albeit one that does not allow for dependency modelling.",5.2 SMT Results,[0],[0]
+"Examples of correct, unseen compounds generated include Staubsauger|roboter ’vacuum cleaner robot’, Gravitation|s|wellen ’gravitational waves’, and NPD|-|verbot|s|verfahren ’NPD banning process’.8
+(Vaswani et al., 2013), and soft source-syntactic constraints (Huck et al., 2014).
+",5.2 SMT Results,[0],[0]
+"8Note that Staubsauger, despite being a compound, is not
+Particle verb restructuring yields additional gains of 0.1–0.4 BLEU.",5.2 SMT Results,[0],[0]
+"One reason for the smaller effect of particle verb restructuring is that the difficult cases – separated particle verbs and those with infixation – are rarer than compounds, with 2841 rare compounds [that would be split by our compound splitter] in the reference texts, in contrast to 553 separated particle verbs, and 176 particle verbs with infixation, as Table 3 illustrates.",5.2 SMT Results,[0],[0]
+"If we only evaluate the sentences containing a particle verb with zu-infix in the reference, 165 in total for newstest2014/5, we observe an improvement of 0.8 BLEU on this subset (22.1→22.9), significant with p < 0.05.
+",5.2 SMT Results,[0],[0]
+The positive effect of restructuring is also apparent in frequency statistics.,5.2 SMT Results,[0],[0]
+Table 3 shows that the baseline system severely undergenerates compounds and separated/infixed particle verbs.,5.2 SMT Results,[0],[0]
+"Binarization, compound splitting, and particle verb restructuring all contribute to bringing the distribution of compounds and particle verbs closer to the reference.
+",5.2 SMT Results,[0],[0]
+"In total, the restructured representation yields improvements of 1.4–1.8 BLEU over our baseline.",5.2 SMT Results,[0],[0]
+The full system is competitive with official submissions to the WMT 2015 shared translation tasks.,5.2 SMT Results,[0],[0]
+"It outperforms our submission (Williams et al., 2015) by 0.4 BLEU, and outperforms other phrase-based and syntax-based submissions by 0.8 BLEU or more.",5.2 SMT Results,[0],[0]
+"The best reported result according to BLEU is an ensemble of Neural MT systems (Jean et al., 2015), which achieves 24.9 BLEU.",5.2 SMT Results,[0],[0]
+"In the human evaluation, both our submission and the Neural MT system were ranked 1–2 (out of 16), with no significant difference between them.",5.2 SMT Results,[0],[0]
+We perform a synthetic experiment to test our claim that a dependency representation allows for the modelling of agreement between morphemes.,5.3 Synthetic LM Experiment,[0],[0]
+"For 200 rare compounds [that would be split by our compound splitter] in the newstest2014/5 references, we artificially introduce agreement errors by changing the gender of the determiner.",5.3 Synthetic LM Experiment,[0],[0]
+"For instance, we create the erroneous sentence sie erheben ein Handgepäckgebühr as a complement to Example 1.",5.3 Synthetic LM Experiment,[0],[0]
+We measure the ability of language models to prefer (give a higher probability to) the original reference sentence over the erroneous one.,5.3 Synthetic LM Experiment,[0],[0]
+"In the original representation, both a Kneser-
+segmented due to its frequency.
+",5.3 Synthetic LM Experiment,[0],[0]
+"Ney 5-gram LM and RDLM perform poorly due to data sparseness, with 70% and 57.5% accuracy, respectively.",5.3 Synthetic LM Experiment,[0],[0]
+"In the split representation, the RDLM reliably prefers the correct agreement (96.5% accuracy), whilst the performance of the 5-gram model even deteriorates (to 60% accuracy).",5.3 Synthetic LM Experiment,[0],[0]
+"This is because the gender of the first segment(s) is irrelevant, or even misleading, for agreement.",5.3 Synthetic LM Experiment,[0],[0]
+"For instance, Handgepäck is neuter, which could lead a morpheme-level n-gram model to prefer the determiner ein, but Handgepäckgebühr is feminine and requires eine.",5.3 Synthetic LM Experiment,[0],[0]
+Our main contribution is that we exploit the hierarchical structure of morphemes to model them jointly with syntax in a dependency-based stringto-tree SMT model.,6 Conclusion,[0],[0]
+"We describe the dependency annotation of two morphologically complex word classes in German, compounds and particle verbs, and show that our tree representation yields improvements in translation quality of 1.4–1.8 BLEU in the WMT English–German translation task.9
+The principle of jointly representing syntactic and morphological structure in dependency trees can be applied to other language pairs, and we expect this to be helpful for languages with a high degree of morphological synthesis.",6 Conclusion,[0],[0]
+"However, the annotation needs to be adapted to the respective languages.",6 Conclusion,[0],[0]
+"For example, French compounds such as arc-en-ciel ’rainbow’ are head-initial, in contrast to head-final Germanic compounds.",6 Conclusion,[0],[0]
+This project received funding from the European Union’s Horizon 2020 research and innovation programme under grant agreements 645452,Acknowledgments,[0],[0]
+"(QT21), 644402 (HimL), 644333 (TraMOOC), and from the Swiss National Science Foundation under grant P2ZHP1_148717.",Acknowledgments,[0],[0]
+"When translating between two languages that differ in their degree of morphological synthesis, syntactic structures in one language may be realized as morphological structures in the other, and SMT models need a mechanism to learn such translations.",abstractText,[0],[0]
+"Prior work has used morpheme splitting with flat representations that do not encode the hierarchical structure between morphemes, but this structure is relevant for learning morphosyntactic constraints and selectional preferences.",abstractText,[0],[0]
+"We propose to model syntactic and morphological structure jointly in a dependency translation model, allowing the system to generalize to the level of morphemes.",abstractText,[0],[0]
+We present a dependency representation of German compounds and particle verbs that results in improvements in translation quality of 1.4–1.8 BLEU in the WMT English–German translation task.,abstractText,[0],[0]
+A Joint Dependency Model of Morphological and Syntactic Structure for Statistical Machine Translation,title,[0],[0]
+"Proceedings of the 52nd Annual Meeting of the Association for Computational Linguistics, pages 1512–1523, Baltimore, Maryland, USA, June 23-25 2014. c©2014 Association for Computational Linguistics",text,[0],[0]
+"The daily life of Chinese people heavily depends on Chinese input method engine (IME), no matter whether one is composing an E-mail, writing an article, or sending a text message.",1.1 Chinese Input Method,[0],[0]
+"However, every Chinese word inputted into computer or cellphone cannot be typed through one-to-one mapping of key-to-letter inputting directly, but has to go through an IME as there are thousands of Chinese characters for inputting while only 26 letter keys are available in the keyboard.",1.1 Chinese Input Method,[0],[0]
+An IME is an essential software interface that maps Chinese characters into English letter combinations.,1.1 Chinese Input Method,[0],[0]
+"An ef-
+∗This work was partially supported by the National Natural Science Foundation of China (Grant No.60903119, Grant No.61170114, and Grant No.61272248), the National Basic Research Program of China (Grant No.2013CB329401), the Science and Technology Commission of Shanghai Municipality (Grant No.13511500200), and the European Union Seventh Framework Program (Grant No.247619).
+",1.1 Chinese Input Method,[0],[0]
+"†Corresponding author
+ficient IME will largely improve the user experience of Chinese information processing.
+",1.1 Chinese Input Method,[0],[0]
+Nowadays most of Chinese IMEs are pinyin based.,1.1 Chinese Input Method,[0],[0]
+"Pinyin is originally designed as the phonetic symbol of a Chinese character (based on the standard modern Chinese, mandarin) , using Latin letters as its syllable notation.",1.1 Chinese Input Method,[0],[0]
+"For example, the pinyin of the Chinese character “爱”(love) is “ài”.",1.1 Chinese Input Method,[0],[0]
+"Most characters usually have unique pinyin representations, while a few Chinese characters may be pronounced in several different ways, so they may have multiple pinyin representations.",1.1 Chinese Input Method,[0],[0]
+The advantage of pinyin IME is that it only adopts the pronunciation perspective of Chinese characters so that it is simple and easy to learn.,1.1 Chinese Input Method,[0],[0]
+"But there are only less than 500 pinyin syllables in standard modern Chinese, compared with over 6,000 commonly used Chinese characters, which leads to serious ambiguities for pinyin-to-charactermapping.",1.1 Chinese Input Method,[0],[0]
+"Modern pinyin IMEsmostly use a “sentencebased” decoding technique (Chen and Lee, 2000) to alleviate the ambiguities.",1.1 Chinese Input Method,[0],[0]
+“Sentence based” means that IME generates a sequence of Chinese characters upon a sequence of pinyin inputs with respect to certain statistical criteria.,1.1 Chinese Input Method,[0],[0]
+"Written in Chinese characters but not alphabets, spell checking for Chinese language is quite different from the same task for other languages.",1.2 Typos and Chinese Spell Checking,[0],[0]
+"Since Chinese characters are entered via IME, those user-made typos do not immediately lead to spelling errors.",1.2 Typos and Chinese Spell Checking,[0],[0]
+"When a user types a wrong letter, IME will be very likely to fail to generate the expected Chinese character sequence.",1.2 Typos and Chinese Spell Checking,[0],[0]
+"Normally, the user may immediately notice the inputting error and then make corrections, which usually means doing a bunch of extra operations like cursor
+1512
+movement, deletion and re-typing.",1.2 Typos and Chinese Spell Checking,[0],[0]
+"Thus there are two separated sub-tasks for Chinese spell checking: 1. typo checking for user typed pinyin sequences which should be a built-in module in IME, and 2. spell checking for Chinese texts in its narrow sense, which is typically a module of word processing applications (Yang et al., 2012b).",1.2 Typos and Chinese Spell Checking,[0],[0]
+"These two terms are often confused especially in IME related works such as (Chen and Lee, 2000) and (Wu et al., 2009).
+",1.2 Typos and Chinese Spell Checking,[0],[0]
+Pinyin typos have always been a serious problem for Chinese pinyin IMEs.,1.2 Typos and Chinese Spell Checking,[0],[0]
+The user may fail to input the completely right pinyin simply because he/she is a dialect speaker and does not know the exact pronunciation for the expected character.,1.2 Typos and Chinese Spell Checking,[0],[0]
+"This may be a very common situation since there are about seven quite different dialects in Chinese, among which being spoken languages, six are far different from the standard modern Chinese, mandarin.",1.2 Typos and Chinese Spell Checking,[0],[0]
+"With the boom of smart-phones, pinyin typos worsen due to the limited size of soft keyboard, and the lack of physical feedback on the touch screen.",1.2 Typos and Chinese Spell Checking,[0],[0]
+"However, existing practical IMEs only provide small patches to deal with typos such as Fuzzy Pinyin (Wu and Chen, 2004) and other language specific errors (Zheng et al., 2011b).
+",1.2 Typos and Chinese Spell Checking,[0],[0]
+Typo checking and correction has an important impact on IME performance.,1.2 Typos and Chinese Spell Checking,[0],[0]
+"When IME fails to correct a typo and generate the expected sentence, the user will have to takemuch extra effort to move the cursor back to the mistyped letter and correct it, which leads to very poor user experience (Jia and Zhao, 2013).",1.2 Typos and Chinese Spell Checking,[0],[0]
+"The very first approach for Chinese input with typo correction was made by (Chen and Lee, 2000), which was also the initial attempt of “sentence-based” IME.",2 Related Works,[0],[0]
+"The idea of “statistical input method” was proposed by modeling PTC conversion as a hidden Markov model (HMM), and using Viterbi (Viterbi, 1967) algorithm to decode the sequence.",2 Related Works,[0],[0]
+They solved the typo correction problem by decomposing the conditional probability P (H|P ) of Chinese character sequence H given pinyin sequence P into a language model P (wi|wi−1) and a typing model P (pi|wi).,2 Related Works,[0],[0]
+The typing model that was estimated on real user input data was for typo correction.,2 Related Works,[0],[0]
+"However, real user input data can be very noisy and not very convenient to obtain.",2 Related Works,[0],[0]
+"As we will propose a joint model
+in this paper, such an individual typing model is not necessarily built in our approach.
+",2 Related Works,[0],[0]
+"(Zheng et al., 2011a) developed an IME system with typo correction called CHIME using noisy channel error model and language-specific features.",2 Related Works,[0],[0]
+However their model depended on a very strong assumption that input pinyin sequence should have been segmented into pinyin words by the user.,2 Related Works,[0],[0]
+This assumption does not really hold in modern “sentence-based” IMEs.,2 Related Works,[0],[0]
+"We release this assumption since our model solves segmentation, typo correction and PTC conversion jointly.
+",2 Related Works,[0],[0]
+"Besides the common HMM approach for PTC conversion, there are also variousmethods such as: support vector machine (Jiang et al., 2007), maximum entropy (ME) model (Wang et al., 2006), conditional random field (CRF) (Li et al., 2009) and statistical machine translation (SMT) (Yang et al., 2012a; Wang et al., 2013c; Zhang and Zhao, 2013), etc.
+",2 Related Works,[0],[0]
+"Spell checking or typo checking was first proposed for English (Peterson, 1980).",2 Related Works,[0],[0]
+"(Mays et al., 1991) addressed that spell checking should be done within a context, i.e., a sentence or a long phrase with a certain meaning, instead of only in one word.",2 Related Works,[0],[0]
+"A recent spell correction work is (Li et al., 2006), where a distributional similarity was introduced for spell correction of web queries.
+",2 Related Works,[0],[0]
+"Early attempts for Chinese spelling checking could date back to (Chang, 1994) where character tables for similar shape, pronunciation, meaning, and input-method-code characters were proposed.",2 Related Works,[0],[0]
+"More recently, the 7th SIGHANWorkshop on Chinese Language Processing (Yu et al., 2013) held a shared task on Chinese spell checking.",2 Related Works,[0],[0]
+"Various approaches were made for the task including language model (LM) based methods (Chen et al., 2013), ME model (Han and Chang, 2013), CRF (Wang et al., 2013d; Wang et al., 2013a), SMT (Chiu et al., 2013; Liu et al., 2013), and graph model (Jia et al., 2013), etc.",2 Related Works,[0],[0]
+It is a rather long journey from the first English letter typed on the keyboard to finally a completed Chinese sentence generated by IME.,3.1 From English Letter to Chinese Sentence,[0],[0]
+"We will first take an overview of the entire process.
+",3.1 From English Letter to Chinese Sentence,[0],[0]
+The average length of pinyin syllables is about 3 letters.,3.1 From English Letter to Chinese Sentence,[0],[0]
+There are about 410 pinyin syllables used in the current pinyin system.,3.1 From English Letter to Chinese Sentence,[0],[0]
+"Each pinyin sylla-
+ble has a bunch of corresponding Chinese characters which share the same pronunciation represented by the syllable.",3.1 From English Letter to Chinese Sentence,[0],[0]
+The number of those homophones ranges from 1 to over 300.,3.1 From English Letter to Chinese Sentence,[0],[0]
+Chinese characters then form words.,3.1 From English Letter to Chinese Sentence,[0],[0]
+But word in Chinese is a rather vague concept.,3.1 From English Letter to Chinese Sentence,[0],[0]
+"Without word delimiters, linguists have argued on what a Chinese word really is for a long time and that is why there is always a primary word segmentation treatment in most Chinese language processing tasks (Zhao et al., 2006; Huang and Zhao, 2007; Zhao and Kit, 2008; Zhao et al., 2010; Zhao and Kit, 2011; Zhao et al., 2013).",3.1 From English Letter to Chinese Sentence,[0],[0]
+A Chinese word may contain from 1 to over 10 characters due to different word segmentation conventions.,3.1 From English Letter to Chinese Sentence,[0],[0]
+"Figure 1 demonstrates the relationship of pinyin andword, from pinyin letters “nihao” to the word “你好 (hello)”.",3.1 From English Letter to Chinese Sentence,[0],[0]
+"Typically, an IME takes the pinyin input, segments it into syllables, looks up corresponding words in a dictionary and generates a sentence with the candidate words.",3.1 From English Letter to Chinese Sentence,[0],[0]
+"Non-Chinese users may feel confused or even surprised if they know that when typing pinyin through an IME, Chinese IME users will never enter delimiters such as “Space” key to segment either pinyin syllables or pinyin words, but just input the entire un-segmented pinyin sequence.",3.2 Pinyin Segmentation and Typo Correction,[0],[0]
+"For example, if one wants to input “你好世界 (Hello world)”, he will just type “nihaoshijie” instead of segmented pinyin sequence “ni hao shi jie”.",3.2 Pinyin Segmentation and Typo Correction,[0],[0]
+"Nevertheless, pinyin syllable segmentation is a much easier problem compared to Chinese word segmentation.",3.2 Pinyin Segmentation and Typo Correction,[0],[0]
+"Since pinyin syllables have a very limited vocabulary and follow a set of regularities strictly, it is convenient to perform pinyin sylla-
+ble segmentation by using rules.",3.2 Pinyin Segmentation and Typo Correction,[0],[0]
+"But as the pinyin input is not segmented, it is nearly impossible to adopt previous spell checking methods for English to pinyin typo checking, although techniques for English spell checking have been well developed.",3.2 Pinyin Segmentation and Typo Correction,[0],[0]
+"A bit confusing but interesting, pinyin typo correction and segmentation come as two sides of one problem: when a pinyin sequence is mistyped, it is unlikely to be correctly segmented; when it is segmented in an awkward way, it is likely to be mistyped.
+",3.2 Pinyin Segmentation and Typo Correction,[0],[0]
+"Inspired by (Yang et al., 2012b) and (Jia et al., 2013), we adopt the graph model for Chinese spell checking for pinyin segmentation and typo correction, which is based on the shortest path word segmentation algorithm (Casey and Lecolinet, 1996).",3.2 Pinyin Segmentation and Typo Correction,[0],[0]
+The model has two major steps: segmentation and correction.,3.2 Pinyin Segmentation and Typo Correction,[0],[0]
+The shortest path segmentation algorithm is based on the idea that a reasonable segmentation should minimize the number of segmented units.,3.2.1 Pinyin Segmentation,[0],[0]
+For a pinyin sequence p1p2 . . .,3.2.1 Pinyin Segmentation,[0],[0]
+"pL, where pi is a letter, first a directed acyclic graph (DAG)",3.2.1 Pinyin Segmentation,[0],[0]
+"GS = (V, E) is built for pinyin segmentation step.",3.2.1 Pinyin Segmentation,[0],[0]
+"The vertex set V consists of the following parts:
+• Virtual start vertex S0 and end vertex SE ; • Possible legal syllables fetched from dictionary Dp according to the input pinyin sequence:
+{Si,j |Si,j = pi . . .",3.2.1 Pinyin Segmentation,[0],[0]
+"pj ∈ Dp}; • The letter itself as a fallback no matter if it is a legal pinyin syllable or not:
+{Si|Si = pi}.",3.2.1 Pinyin Segmentation,[0],[0]
+The vertex weights wS are all set to 0.,3.2.1 Pinyin Segmentation,[0],[0]
+"The edges are from a syllable to all syllables next to it:
+E = {E(Si,j → Sj+1,k)|Si,j , Sj+1,k ∈ V}.",3.2.1 Pinyin Segmentation,[0],[0]
+"The edge weight the negative logarithm of conditional probability P (Sj+1,k|Si,j) that a syllable Si,j is followed by Sj+1,k, which is give by a bigram language model of pinyin syllables:
+WE(Si,j→Sj+1,k) =",3.2.1 Pinyin Segmentation,[0],[0]
+"− logP (Sj+1,k|Si,j)",3.2.1 Pinyin Segmentation,[0],[0]
+"The shortest path P ∗ on the graph is the path P with the least sum of weights:
+P ∗ = argmin (v,E)∈G∧(v,E)∈P ∑ v wv + ∑ E WE .
+",3.2.1 Pinyin Segmentation,[0],[0]
+Computing the shortest path from S0 to SE on GS yields the best segmentation.,3.2.1 Pinyin Segmentation,[0],[0]
+"This is the single source shortest path (SSSP) problem on DAG which has an efficient algorithm by preprocessing the DAG with topology sort, then traversing vertices and edges in topological order.",3.2.1 Pinyin Segmentation,[0],[0]
+It has the time complexity of O(|V|+ |E|).,3.2.1 Pinyin Segmentation,[0],[0]
+"For example, one intends to input “你好世界 (Hello world)”",3.2.1 Pinyin Segmentation,[0],[0]
+"by typing “nihaoshijie”, but mistyped as “mihaoshijiw”.",3.2.1 Pinyin Segmentation,[0],[0]
+The graph for this input is shown in Figure 2.,3.2.1 Pinyin Segmentation,[0],[0]
+"The shortest path, i.e., the best segmentation is “mi hao shi ji w”.",3.2.1 Pinyin Segmentation,[0],[0]
+We will continue to use this example in the rest of this paper.,3.2.1 Pinyin Segmentation,[0],[0]
+"Next in the correction step, for the segmented pinyin sequence S1, S2, . . .",3.2.2 Pinyin Typo Correction,[0],[0]
+", SM , a graph Gc is constructed to perform typo correction.",3.2.2 Pinyin Typo Correction,[0],[0]
+"The vertex set V consists of the following parts:
+• Virtual start vertex S′0 and end vertex S′E with vertex weights of 0;
+•",3.2.2 Pinyin Typo Correction,[0],[0]
+All possible syllables similar to original syllable in Gs.,3.2.2 Pinyin Typo Correction,[0],[0]
+"If the adjacent syllables can be merged into a legal syllable, the merged syllable is also added into V:
+{S′i,j |S′i,j = S′i . . .",3.2.2 Pinyin Typo Correction,[0],[0]
+"S′j ∈ Dp, S′k ∼ Sk, k = i ≤ j},
+where the similarity ∼ is measured in Levenshtein distance (Levenshtein, 1966).",3.2.2 Pinyin Typo Correction,[0],[0]
+"Syllables with Levenshtein distance under a certain threshold are considered as similar:
+L(Si, Sj) <",3.2.2 Pinyin Typo Correction,[0],[0]
+"T ↔ Si ∼ Sj .
+",3.2.2 Pinyin Typo Correction,[0],[0]
+"The vertex weight is the Levenshtein distance multiply by a normalization parameter:
+wS′i,j = β j∑
+k−i L(S′k, Sk).
+",3.2.2 Pinyin Typo Correction,[0],[0]
+"Similar toGs, the edges are from one syllable to all syllables next to it and edge weights are the conditional probabilities between them.",3.2.2 Pinyin Typo Correction,[0],[0]
+Computing the shortest path from S′0 to S′E on Gc yields the best typo correction result.,3.2.2 Pinyin Typo Correction,[0],[0]
+"In addition, the result has been segmented so far.",3.2.2 Pinyin Typo Correction,[0],[0]
+"Considering our running example, the graph Gc is shown in Figure 3, and the typo correction result is “mi hao shi jie”.
+",3.2.2 Pinyin Typo Correction,[0],[0]
+"Merely using the above model, the typo correction result is not satisfying yet, no matter how much effort is paid.",3.2.2 Pinyin Typo Correction,[0],[0]
+The major reason is that the basic semantic unit of Chinese language is actually word (tough vaguely defined) which is usually composed of several characters.,3.2.2 Pinyin Typo Correction,[0],[0]
+Thus the conditional probability between characters does not make much sense.,3.2.2 Pinyin Typo Correction,[0],[0]
+"In addition, a pinyin syllable usually maps to dozens or even hundreds of corresponding homophonic characters, which makes the conditional probability between syllablesmuch more noisy.",3.2.2 Pinyin Typo Correction,[0],[0]
+"However, using pinyin words instead of syllables is not a wise choice because pinyin word segmentation is not so easy a task as syllable segmentation.",3.2.2 Pinyin Typo Correction,[0],[0]
+"To make typo correction better, we consider to integrate it with PTC conversion using a joint model.",3.2.2 Pinyin Typo Correction,[0],[0]
+PTC conversion has long been viewed as a decoding problem using HMM.,3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+We continue to follow this formalization.,3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+"The best Chinese character sequence W ∗ for a given pinyin syllable sequence S is the one with the highest conditional probability P (W |S) that W ∗ = argmax
+W P (W |S)
+",3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+"= argmax W P (W )P (S|W ) P (S)
+= argmax W
+P (W )P (S|W )
+= argmax w1,ww,...,wM ∏ wi P (wi|wi−1) ∏ wi P (si|wi)
+",3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+"In the HMM for pinyin IME, observation states are pinyin syllables, hidden states are Chinese words, emission probability is P (si|wi), and transition probability is P (wi|wi−1).",3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+Note the transition probability is the conditional probability between words instead of characters.,3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+PTC conversion is to decode the Chinese word sequence from the pinyin sequence.,3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+"The Viterbi algorithm (Viterbi, 1967) is used for the decoding.
+",3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+The shortest path algorithm for typo correction and Viterbi algorithm for PTC conversion are very closely related.,3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+"It has been strictly proven by (Forney, 1973) that the sequence decoding problem on HMM is formally identical to finding a shortest path on a certain graph, which can be constructed in the following manner.
+",3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+"Consider a first order HMM with all possible observations O = {o1, o2, . . .",3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+", oM}, hidden states S = {s1, s2, . . .",3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+", sN}, a special start state s0, emission probabilities (Esi,ok) = P (ok|si), transition probabilities (Tsi,sj )",3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+"= P (sj |si), and start probabilities (Ssi) = P (si|s0).",3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+"For an observation sequence of T time periods Y = {y1, y2, . . .",3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+", yT |yt ∈",3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+"O, t = 1, . . .",3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+", T}, the decoding problem is to find the best corresponding hidden state sequence X∗ with the highest probability, i.e.,
+X∗",3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+"= argmax x1,xt∈S
+Sx1Ex1,y1 T∏
+t=2
+Ext,ytTxt−1,xt .",3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+"(1)
+Thenwewill construct a DAGG = (V, E) upon the HMM.",3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+"The vertex set V includes:
+• Virtual start vertex v0 and end vertex vE with vertex weight of 0;
+• Normal vertices vxt , where t = 1, . . .",3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+", T , and ∀xt ∈ S.",3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+"The vertex weight is the negative logarithm of emission probability:
+wvxt",3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+"= − log Ext,yt .
+",3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+"The edge set E includes:
+• Edges from the start vertexE(v0 → vx1)with edge weight
+WE(v0→vx1 ) =",3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+"− logSx1 ,
+where ∀x1 ∈ S; • Edges to the end vertex E(vxT → vE) with vertex weights of 0;
+• Edges between adjacent time periods E(vxt−1 → vxt) with edge weight
+WE(vxt−1→vxt ) =",3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+"− log Txt−1,xt ,
+where t = 2, . . .",3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+", T , and ∀xt, xt−1 ∈ S.
+The shortest path P ∗ from v0 to vE is the one with the least sum of vertex and edge weights, i.e.,
+P ∗ = argmin vxt∈V T∑ t=1",3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+"(wvxt + WE(vxt−1→vxt ))
+",3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+"= argmin vx1 ,vxt∈V
+{− logSx1 − log Ex1,y1
++ T∑
+t=2
+(− log Ext,yt",3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+"− log Txt−1,xt)}
+= argmax vx1 ,vxt∈V
+Sx1Ex1,y1 T∏
+t=2
+Ext,ytTxt−1,xt .",3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+"(2)
+",3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+The optimization goal of P ∗ in Equation (2) is identical to that of X∗ in Equation (1).,3.3 Hidden Markov Model for Pinyin-to-Chinese Conversion,[0],[0]
+"Given HMM decoding problem is identical to SSSP problem on DAG, we propose a joint graph model for PTC conversion with typo correction.",3.4 Joint Graph Model For Pinyin IME,[0],[0]
+The joint graph model aims to find the global optimal for both PTC conversion and typo correction on the entire input pinyin sequence.,3.4 Joint Graph Model For Pinyin IME,[0],[0]
+"The graph G = (V, E) is constructed based on graph Gc for typo correction in Section 3.2.",3.4 Joint Graph Model For Pinyin IME,[0],[0]
+"The vertex set V consists of the following parts:
+• Virtual start vertex V0 and end vertex VE with vertex weight of 0;
+• Adjacent pinyin syllables in Gc are merged into pinyin words.",3.4 Joint Graph Model For Pinyin IME,[0],[0]
+"Corresponding Chinese words are fetched from a PTC dictionary Dc, which is a dictionary maps pinyin words to Chinese words, and added as vertices:
+{Vi,j |∀Vi,j ∈ Dc[S′i . . .",3.4 Joint Graph Model For Pinyin IME,[0],[0]
+"S′j ], i ≤ j};
+The vertex weight consists of two parts: 1.",3.4 Joint Graph Model For Pinyin IME,[0],[0]
+"the vertex weights of syllables in Gc, and 2.",3.4 Joint Graph Model For Pinyin IME,[0],[0]
+"the emission probability:
+wVi,j =β j∑
+k=i
+L(S′k, Sk)
+",3.4 Joint Graph Model For Pinyin IME,[0],[0]
+− γ logP (S′i . . .,3.4 Joint Graph Model For Pinyin IME,[0],[0]
+"S′j |Vi,j);
+If the corresponding pinyin syllables in Gc have an edge between them, the vertices in G also have an edge:
+E = {E(Vi,j → Vj+1,k)|E(Si,j → Sj+1,k) ∈ Gc}.
+",3.4 Joint Graph Model For Pinyin IME,[0],[0]
+"The edge weights are the negative logarithm of the transition probabilities:
+WE(Vi,j→Vj+1,k) =",3.4 Joint Graph Model For Pinyin IME,[0],[0]
+"− logP (Vj+1,k|Vi,j)
+",3.4 Joint Graph Model For Pinyin IME,[0],[0]
+"Although the model is formulated on first order HMM, i.e., the LM used for transition probability is a bigram one, it is easy to extend the model to take advantage of higher order n-gram LM, by tracking longer history while traversing the graph.
+",3.4 Joint Graph Model For Pinyin IME,[0],[0]
+Computing the shortest path from V0 to VE onG yields the best pinyin-to-Chinese conversion with typo correction result.,3.4 Joint Graph Model For Pinyin IME,[0],[0]
+"Considering our running example, the graph G is shown in Figure 4.
+",3.4 Joint Graph Model For Pinyin IME,[0],[0]
+The joint graph is rather huge and density.,3.4 Joint Graph Model For Pinyin IME,[0],[0]
+"According to our empirical statistics, when setting threshold T = 2, for a sentence of M characters, the joint graph will have |V| = M × 1, 000, and |E| = M × 1, 000, 000. 3.5 K-Shortest Paths To reduce the scale of graph G, we filter graph Gc by searching itsK-shortest paths first to getG′c and construct G on top of G′c.",3.4 Joint Graph Model For Pinyin IME,[0],[0]
+Figure 5 shows the 3- shortest paths filtered graphG′c and Figure 6 shows the correspondingG for our running example.,3.4 Joint Graph Model For Pinyin IME,[0],[0]
+"The scale of graph may be thus drastically reduced.
+",3.4 Joint Graph Model For Pinyin IME,[0],[0]
+"An efficient heap data structure is required in K-shortest paths algorithm (Eppstein, 1998) for
+backtracking the best paths to current vertex while traversing.",3.4 Joint Graph Model For Pinyin IME,[0],[0]
+The heap is implemented as a priority queue of size K sorted according to path length that should support efficient push and pop operations.,3.4 Joint Graph Model For Pinyin IME,[0],[0]
+"Fibonacci heap (Fredman and Tarjan, 1987) is adopted for the heap implementation since it has a push complexity of O(1) which is better than the O(K) for other heap structures.
+",3.4 Joint Graph Model For Pinyin IME,[0],[0]
+"Another benefit provided by K-shortest paths is that it can be used for generating N -best candidates of PTC conversion, which may be helpful for further performance improvement.",3.4 Joint Graph Model For Pinyin IME,[0],[0]
+"The corpus for evaluation is the one provided in (Yang et al., 2012a), which is originally extracted from the People’s Daily corpus and labeled with pinyin.","4.1 Corpora, Tools and Experiment Settings",[0],[0]
+"The corpus has already been split into training T, development D and test T sets as shown in Table 1.
+","4.1 Corpora, Tools and Experiment Settings",[0],[0]
+"SRILM (Stolcke, 2002) is adopted for languagemodel training andKenLM (Heafield, 2011; Heafield et al., 2013) for language model query.","4.1 Corpora, Tools and Experiment Settings",[0],[0]
+The Chinese part of the corpus is segmented into words before LM training.,"4.1 Corpora, Tools and Experiment Settings",[0],[0]
+"Maximum matching word segmentation is used with a large word vocabulary V extracted from web data provided by (Wang et al., 2013b).","4.1 Corpora, Tools and Experiment Settings",[0],[0]
+The pinyin part is segmented according to the Chinese part.,"4.1 Corpora, Tools and Experiment Settings",[0],[0]
+This vocabulary V also serves as the PTC dictionary.,"4.1 Corpora, Tools and Experiment Settings",[0],[0]
+"The original vocabulary is not labeled with pinyin, thus we use the PTC dictionary of sunpinyin1 which is an open source Chinese pinyin IME, to label the
+1http://code.google.com/p/sunpinyin/
+vocabulary V with pinyin.","4.1 Corpora, Tools and Experiment Settings",[0],[0]
+"The emission probabilities are estimated using the lexical translation module of MOSES (Koehn et al., 2007) as “translation probability” from pinyin to Chinese.","4.1 Corpora, Tools and Experiment Settings",[0],[0]
+"Wewill use conventional sequence labeling evaluation metrics such as sequence accuracy and character accuracy2.
+Chinese characters in a sentence may be separated by digits, punctuation and alphabets which are directly inputted without the IME.",4.2 Evaluation Metrics,[0],[0]
+"We follow the so-called term Max Input Unit (MIU), the longest consecutive Chinese character sequence proposed by (Jia and Zhao, 2013).",4.2 Evaluation Metrics,[0],[0]
+"We will mainly consider MIU accuracy (MIU-Acc) which is the ratio of the number of completely corrected generated MIUs over the number of all MIUs, and character accuracy (Ch-Acc), but the sentence accuracy (S-Acc) will also be reported in evaluation results.
+",4.2 Evaluation Metrics,[0],[0]
+"We will also report the conversion error rate (ConvER) proposed by (Zheng et al., 2011a), which is the ratio of the number of mistyped pinyin word that is not converted to the right Chinese word over the total number of mistyped pinyin words3.",4.2 Evaluation Metrics,[0],[0]
+Firstly we build a baseline system without typo correction which is a pipeline of pinyin syllable segmentation and PTC conversion.,4.3 Baseline System without Typo Correction,[0],[0]
+"The baseline system takes a pinyin input sequence, segments it into syllables, and then converts it to Chinese character sequence.
+",4.3 Baseline System without Typo Correction,[0],[0]
+The pinyin syllable segmentation already has very high (over 98%) accuracy with a trigram LM using improved Kneser-Ney smoothing.,4.3 Baseline System without Typo Correction,[0],[0]
+"According to our empirical observation, emission probabilities are mostly 1 since most Chinese words have unique pronunciation.",4.3 Baseline System without Typo Correction,[0],[0]
+So in this step we set γ = 0.,4.3 Baseline System without Typo Correction,[0],[0]
+"We consider different LM smoothing methods including Kneser-Ney (KN), improved Kneser-Ney (IKN), and Witten-Bell (WB).",4.3 Baseline System without Typo Correction,[0],[0]
+"All of the three smoothing methods for bigram and trigram LMs are examined both using back-off mod-
+2We only work on the PTC conversion part of IME, thus we are unable to use existing evaluation systems (Jia and Zhao, 2013) for full Chinese IME functions.
+",4.3 Baseline System without Typo Correction,[0],[0]
+"3Other evaluation metrics are also proposed by (Zheng et al., 2011a) which is only suitable for their system since our system uses a joint model
+els and interpolated models.",4.3 Baseline System without Typo Correction,[0],[0]
+The number of N - best candidates for PTC conversion is set to 10.,4.3 Baseline System without Typo Correction,[0],[0]
+The results on D are shown in Figure 7 in which the “-i” suffix indicates using interpolated model.,4.3 Baseline System without Typo Correction,[0],[0]
+"According to the results, we then choose the trigram LM using Kneser-Ney smoothing with interpolation.
+",4.3 Baseline System without Typo Correction,[0],[0]
+The choice of the number of N -best candidates for PTC conversion also has a strong impact on the results.,4.3 Baseline System without Typo Correction,[0],[0]
+"Figure 8 shows the results onDwith differentNs, of which theN axis is drawn in logarithmic scale.",4.3 Baseline System without Typo Correction,[0],[0]
+"We can observe that MIU-Acc slightly decreases while N goes up, but Ch-Acc largely increases.",4.3 Baseline System without Typo Correction,[0],[0]
+"We therefore chooseN = 10 as trade-off.
+",4.3 Baseline System without Typo Correction,[0],[0]
+The parameter γ determines emission probability.,4.3 Baseline System without Typo Correction,[0],[0]
+"Results with different γ on D is shown in Figure 9, of which the γ axis is drawn in logarithmic scale.",4.3 Baseline System without Typo Correction,[0],[0]
+"γ = 0.03 is chosen at last.
+",4.3 Baseline System without Typo Correction,[0],[0]
+We compare our baseline system with several practical pinyin IMEs including sunpinyin and Google Input Tools (Online version)4.,4.3 Baseline System without Typo Correction,[0],[0]
+"The results on D are shown in Table 2.
+4http://www.google.com/inputtools/try/",4.3 Baseline System without Typo Correction,[0],[0]
+"Based upon the baseline system, we build the joint system of PTC conversion with typo correction.
+",4.4 PTC Conversion with Typo Correction,[0],[0]
+We simulate user typos by randomly generating errors automatically on the corpus.,4.4 PTC Conversion with Typo Correction,[0],[0]
+The typo rate is set according to previous Human-Computer Interaction (HCI) studies.,4.4 PTC Conversion with Typo Correction,[0],[0]
+"Due to few works have been done on modeling Chinese text entry, we have to refer to those corresponding results on English (Wobbrock and Myers, 2006; MacKenzie and Soukoreff, 2002; Clarkson et al., 2005), which show that the average typo rate is about 2%.",4.4 PTC Conversion with Typo Correction,[0],[0]
+"(Zheng et al., 2011a) performed an experiment that 2,000 sentences of 11,968 Chinese words were entered by 5 native speakers.",4.4 PTC Conversion with Typo Correction,[0],[0]
+"The collected data consists of 775 mistyped pinyin words caused by one edit operation, and 85 caused by two edit operations.",4.4 PTC Conversion with Typo Correction,[0],[0]
+"As we observe on T that the average pinyin word length is 5.24, then typo rate in the experiment of (Zheng et al., 2011a) can be roughly estimated as:
+775 + 85× 2 11968× 5.24 = 1.51%,
+which is similar to the conclusion on English.",4.4 PTC Conversion with Typo Correction,[0],[0]
+"Thus we generate corpora from D with typo rate of 0% (0-P), 2% (2-P), and 5% (5-P) to evaluate the system.
+",4.4 PTC Conversion with Typo Correction,[0],[0]
+"According to (Zheng et al., 2011a) most mistyped pinyin words are caused by one edit operation.",4.4 PTC Conversion with Typo Correction,[0],[0]
+"Since pinyin syllable is much shorter than
+pinyin word, this ratio can be higher for pinyin syllables.",4.4 PTC Conversion with Typo Correction,[0],[0]
+"From our statistics on T, with 2% randomly generated typos, Pr(L(S′, S) < 2) = 99.86%.",4.4 PTC Conversion with Typo Correction,[0],[0]
+"Thus we set the threshold T for L to 2.
+",4.4 PTC Conversion with Typo Correction,[0],[0]
+We first set K-shortest paths filter to K = 10 and tune β.,4.4 PTC Conversion with Typo Correction,[0],[0]
+Results with different β are shown in Figure 10.,4.4 PTC Conversion with Typo Correction,[0],[0]
+"With β = 3.5, we select K. Re-
+sults with different K are shown in Figure 11.",4.4 PTC Conversion with Typo Correction,[0],[0]
+"We choose K = 20 since there is no significant improvement when K > 20.
+",4.4 PTC Conversion with Typo Correction,[0],[0]
+The selection of K also directly guarantees the running time of the joint model.,4.4 PTC Conversion with Typo Correction,[0],[0]
+"With K = 20, on a normal PC with Intel Pentium Dual-Core E6700 CPU, the PTC conversion rate is over 2000 characters-per-minute (cpm), which is much faster than the normal typing rate of 200 cpm.
+",4.4 PTC Conversion with Typo Correction,[0],[0]
+"With all parameters optimized, results on T
+using the proposed joint model are shown in Table 3 and Table 4.",4.4 PTC Conversion with Typo Correction,[0],[0]
+Our results are compared to the baseline system without typo correction and Google Input Tool.,4.4 PTC Conversion with Typo Correction,[0],[0]
+"Since sunpinyin does not have typo correction module and performs much poorer than our baseline system, we do not include it in the comparison.",4.4 PTC Conversion with Typo Correction,[0],[0]
+"Though no direct proofs can be found to indicate if Google Input Tool has an independent typo correction component, its outputs show that such a component is unlikely available.
+",4.4 PTC Conversion with Typo Correction,[0],[0]
+Since Google Input Tool has to be accessed through a web interface and the network connection cannot be guaranteed.,4.4 PTC Conversion with Typo Correction,[0],[0]
+"we only take a subset of 10K sentences of T to perform the experiments, and the results are shown in Table 3.
+",4.4 PTC Conversion with Typo Correction,[0],[0]
+"The scores reported in (Zheng et al., 2011a) are not listed in Table 4 since the data set is different.",4.4 PTC Conversion with Typo Correction,[0],[0]
+"They reported a ConvER of 53.56%, which is given here for reference.
+",4.4 PTC Conversion with Typo Correction,[0],[0]
+"Additionally, to further inspect the robustness of ourmodel, performance with typo rate ranges from 0% to 5% is shown in Figure 12.",4.4 PTC Conversion with Typo Correction,[0],[0]
+"Although the performance decreases while typo rate goes up, it is still quite satisfying around typo rate of 2% which is assumed to be the real world situation.",4.4 PTC Conversion with Typo Correction,[0],[0]
+"In this paper, we have developed a joint graph model for pinyin-to-Chinese conversion with typo correction.",5 Conclusion,[0],[0]
+This model finds a joint global optimal for typo correction and PTC conversion on the entire input pinyin sequence.,5 Conclusion,[0],[0]
+The evaluation results show that our model outperforms both previous academic systems and existing commercial products.,5 Conclusion,[0],[0]
+"In addition, the joint model is efficient enough for practical use.",5 Conclusion,[0],[0]
+"It is very import for Chinese language processing with the aid of an efficient input method engine (IME), of which pinyinto-Chinese (PTC) conversion is the core part.",abstractText,[0],[0]
+"Meanwhile, though typos are inevitable during user pinyin inputting, existing IMEs paid little attention to such big inconvenience.",abstractText,[0],[0]
+"In this paper, motivated by a key equivalence of two decoding algorithms, we propose a joint graph model to globally optimize PTC and typo correction for IME.",abstractText,[0],[0]
+The evaluation results show that the proposed method outperforms both existing academic and commercial IMEs.,abstractText,[0],[0]
+A Joint Graph Model for Pinyin-to-Chinese Conversion with Typo Correction,title,[0],[0]
+"Proceedings of NAACL-HLT 2013, pages 888–896, Atlanta, Georgia, 9–14 June 2013. c©2013 Association for Computational Linguistics
+In a meeting, it is often desirable to extract keywords from each utterance as soon as it is spoken. Thus, this paper proposes a just-intime keyword extraction from meeting transcripts. The proposed method considers two major factors that make it different from keyword extraction from normal texts. The first factor is the temporal history of preceding utterances that grants higher importance to recent utterances than old ones, and the second is topic relevance that forces only the preceding utterances relevant to the current utterance to be considered in keyword extraction. Our experiments on two data sets in English and Korean show that the consideration of the factors results in performance improvement in keyword extraction from meeting transcripts.",text,[0],[0]
+A meeting is generally accomplished by a number of participants and a wide range of subjects are discussed.,1 Introduction,[0],[0]
+"Therefore, it would be helpful to meeting participants to provide them with some additional information related to the current subject.",1 Introduction,[0],[0]
+"For instance, assume that a participant is discussing a specific topic with other participants at a meeting.",1 Introduction,[0],[0]
+"The summary of previous meetings on the topic is then one of the most important resources for her discussion.
+",1 Introduction,[0],[0]
+"In order to provide information on a topic to participants, keywords should be first generated for the topic since keywords are often representatives of a topic.",1 Introduction,[0],[0]
+"A number of techniques have been proposed
+for automatic keyword extraction (Frank et al., 1999; Turney, 2000; Mihalcea and Tarau, 2004; Wan et al., 2007), and they are designed to extract keywords from a written document.",1 Introduction,[0],[0]
+"However, they are not suitable for meeting transcripts.",1 Introduction,[0],[0]
+"In a meeting, it is often desirable to extract keywords at the time at which a new utterance is made for just-in-time service of additional information.",1 Introduction,[0],[0]
+"Otherwise, the extracted keywords become just the important words at the end of the meeting.
+",1 Introduction,[0],[0]
+Two key factors for just-in-time keyword extraction from meeting transcripts are time of preceding utterances and topic of current utterance.,1 Introduction,[0],[0]
+"First, current utterance is affected by temporal history of preceding utterances.",1 Introduction,[0],[0]
+"That is, when a new utterance is made it is likely to be related more closely with latest utterances than old ones.",1 Introduction,[0],[0]
+"Second, the preceding utterances which carry similar topics to current utterance are more important than irrelevant utterances.",1 Introduction,[0],[0]
+"Since a meeting consists of several topics, the utterances that have nothing to do with current utterance are inappropriate as a history of the current utterance.
+",1 Introduction,[0],[0]
+This paper proposes a graph-based keyword extraction to reflect these factors.,1 Introduction,[0],[0]
+The proposed method represents an utterance as a graph of which nodes are candidate keywords.,1 Introduction,[0],[0]
+The preceding utterances are also expressed as a history graph in which the weight of an edge is the temporal importance of the keywords connected by the edge.,1 Introduction,[0],[0]
+"To reflect the temporal history of utterances, forgetting curve (Wozniak, 1999) is adopted in updating the weights of edges in the history graph.",1 Introduction,[0],[0]
+"It expresses effectively not only the reciprocal relation between memory re-
+888
+tention and time, but also active recall that makes frequent words more consequential in keyword extraction.",1 Introduction,[0],[0]
+"Then, a subgraph that is relevant to the current utterance is derived from the history graph, and used as an actual history of the current utterance.",1 Introduction,[0],[0]
+"The keywords of the current utterance are extracted by TextRank (Mihalcea and Tarau, 2004) from the merged graph of the current utterance and the history graphs.
+",1 Introduction,[0],[0]
+"The proposed method is evaluated with two kinds of data sets: the National Assembly transcripts in Korean and the ICSI meeting corpus (Janin et al., 2003) in English.",1 Introduction,[0],[0]
+"The experimental results show that it outperforms both the TFIDF framework (Frank et al., 1999; Liu et al., 2009) and the PageRank-based graph model (Wan et al., 2007).",1 Introduction,[0],[0]
+One thing to note is that the proposed method improves even the supervised methods that do not reflect utterance time and topic relevance for the ICSI corpus.,1 Introduction,[0],[0]
+"This proves that it is critical to consider time and content of utterances simultaneously in keyword extraction from meeting transcripts.
+",1 Introduction,[0],[0]
+The rest of the paper is organized as follows.,1 Introduction,[0],[0]
+Section 2 reviews the related studies on keyword extraction.,1 Introduction,[0],[0]
+"Section 3 explains the overall process of the proposed method, and Section 4 addresses its detailed description how to reflect meeting characteristics.",1 Introduction,[0],[0]
+Experimental results are presented in Section 5.,1 Introduction,[0],[0]
+"Finally, Section 6 draws some conclusions.",1 Introduction,[0],[0]
+"Keyword extraction has been of interest for a long time in various fields such as information retrieval, document clustering, summarization, and so on.",2 Related Work,[0],[0]
+"Thus, there have been many studies on automatic keyword extraction.",2 Related Work,[0],[0]
+"The frequency-based keyword extraction with TFIDF weighting (Frank et al., 1999) and the graph-based keyword extraction (Mihalcea and Tarau, 2004) are two base models for this task.",2 Related Work,[0],[0]
+"Many studies recently tried to extend them by incorporating specific information such as linguistic knowledge (Hulth, 2003), web-based resource (Turney, 2003), and semantic knowledge (Chen et al., 2010).",2 Related Work,[0],[0]
+"As a result, they show good performance on written text.",2 Related Work,[0],[0]
+"However, it is difficult to use them directly for spoken genres, since spoken genres have significantly different characteristics from written
+text.
+",2 Related Work,[0],[0]
+There have been a few studies focused on keyword extraction from spoken genres.,2 Related Work,[0],[0]
+"Among them, the extraction from meetings has attracted more concern, since the need for grasping important points of a meeting or an opinion of each participant has increased.",2 Related Work,[0],[0]
+The studies on meetings focused on the exterior features of meeting dialogues such as unstructured and ill-formed sentences.,2 Related Work,[0],[0]
+"Liu et al. (2009) used some knowledge sources such as Partof-Speech (POS) filtering, word clustering, and sentence salience to reflect dialogue features, and they found out that a simple TFIDF-based keyword extraction using these knowledge sources works reasonably well.",2 Related Work,[0],[0]
+"They also extended their work by adopting various features such as decision making sentence features, speech-related features, and summary features that reflect meeting transcripts better (Liu et al., 2011).",2 Related Work,[0],[0]
+Chen et al. (2010) extracted keywords from spoken course lectures.,2 Related Work,[0],[0]
+"In this study, they considered prosodic information from HKT forced alignment and topics in a lecture generated by Probabilistic Latent Semantic Analysis (pLSA).",2 Related Work,[0],[0]
+"These studies focused on the exterior characteristics of spoken genres, since they assumed that entire scripts are given in advance and then they extracted keywords that best describe the scripts.",2 Related Work,[0],[0]
+"However, to the best of our knowledge, there is no previous study considered time of utterances which is an intrinsic element of spoken genres.
+",2 Related Work,[0],[0]
+The relevance between current utterance and preceding utterances is also a critical feature in keyword extraction from meeting transcripts.,2 Related Work,[0],[0]
+The study that considers this relevance explicitly is CollabRank proposed by Wan and Xiao (2008).,2 Related Work,[0],[0]
+This is collaborative approach to extract keywords in a document.,2 Related Work,[0],[0]
+"In this study, it is assumed that a few neighbor documents close to a current document can help extract keywords.",2 Related Work,[0],[0]
+"Therefore, they applied a clustering algorithm to a document set and then extracted words that are reinforced by the documents within a cluster.",2 Related Work,[0],[0]
+"However, this method also does not consider the utterance time, since it is designed to extract keywords from normal documents.",2 Related Work,[0],[0]
+"As a result, if it is applied to meeting transcripts, all preceding utterances would affect the current utterance uniformly, which leads to a poor performance.",2 Related Work,[0],[0]
+Figure 1 depicts the overall process of extracting keywords from an utterance as soon as it is spoken.,3 Just-In-Time Keyword Extraction for a Meeting,[0],[0]
+We represent all the components in a meeting as graphs.,3 Just-In-Time Keyword Extraction for a Meeting,[0],[0]
+"This is because graphs are effective to express the relationship between words, and the graph operations that are required for keyword extraction are also efficiently performed.",3 Just-In-Time Keyword Extraction for a Meeting,[0],[0]
+"That is, whenever an utterance is spoken, it is represented as a graph (G1) of which nodes are the potential keywords in the utterance.",3 Just-In-Time Keyword Extraction for a Meeting,[0],[0]
+"This graph is named as current utterance graph.
+",3 Just-In-Time Keyword Extraction for a Meeting,[0],[0]
+The summary of all preceding utterances is also represented as a history graph (G2).,3 Just-In-Time Keyword Extraction for a Meeting,[0],[0]
+We assume that only the preceding utterances that are directly related with the current utterance are important for extracting keywords from the current utterance.,3 Just-In-Time Keyword Extraction for a Meeting,[0],[0]
+"Therefore, a subgraph of G2 that maximally covers the current utterance graph (G1) is extracted.",3 Just-In-Time Keyword Extraction for a Meeting,[0],[0]
+This subgraph is labeled as G3 in Figure 1.,3 Just-In-Time Keyword Extraction for a Meeting,[0],[0]
+"Then, the current utterance graph G1 is expanded by merging it and G3.",3 Just-In-Time Keyword Extraction for a Meeting,[0],[0]
+"This expanded graph (G4) is a combined representation of the current and preceding utterances,
+and then the keywords of the current utterance is extracted from this graph.",3 Just-In-Time Keyword Extraction for a Meeting,[0],[0]
+"The keywords are so-called hub nodes of G4.
+",3 Just-In-Time Keyword Extraction for a Meeting,[0],[0]
+"After keywords are extracted from the current utterance, the current utterance becomes a part of the history graph for the next utterance.",3 Just-In-Time Keyword Extraction for a Meeting,[0],[0]
+"For this, the extracted keywords are also represented as a graph (G5), and it is merged into the current history G2.",3 Just-In-Time Keyword Extraction for a Meeting,[0],[0]
+This merged graph becomes a new history graph for the next utterance.,3 Just-In-Time Keyword Extraction for a Meeting,[0],[0]
+"In merging two graphs, the weight of each edge in G2 is updated to reflect the temporal history.",3 Just-In-Time Keyword Extraction for a Meeting,[0],[0]
+"If an edge is connecting two nouns from an old utterance, its weight becomes small.",3 Just-In-Time Keyword Extraction for a Meeting,[0],[0]
+"In the same way, the weights for the edges from recent utterances get large.",3 Just-In-Time Keyword Extraction for a Meeting,[0],[0]
+"The weights of the edges from G5 are 1, the largest possible value.",3 Just-In-Time Keyword Extraction for a Meeting,[0],[0]
+Current utterance graph is a graph-representation of the current utterance.,4.1 Current Utterance Graph and History Graph,[0],[0]
+"When current utterance consists of m words, we first extract the potential key-
+words from the current utterance.",4.1 Current Utterance Graph and History Graph,[0],[0]
+"Since all words within the current utterance are not keywords, some words are filtered out.",4.1 Current Utterance Graph and History Graph,[0],[0]
+"For this filtering out, we follow the POS filtering approach proposed by Liu et al. (2009).",4.1 Current Utterance Graph and History Graph,[0],[0]
+This approach filters out non-keywords using a stop-word list and POS tags of the words.,4.1 Current Utterance Graph and History Graph,[0],[0]
+"Assume that n words remain after the filtering out, where n ≤",4.1 Current Utterance Graph and History Graph,[0],[0]
+"m. These n words become the vertices of the current utterance graph.
+",4.1 Current Utterance Graph and History Graph,[0],[0]
+"Formally, the current utterance graph G1 = (V1, E1) is an undirected graph, where |V1| = n. E1 is a set of edges and each edge implies that the nouns connected by the edge co-occur within a window sizedW .",4.1 Current Utterance Graph and History Graph,[0],[0]
+"For each e1ij ∈ E1 that connects nodes v1i and v 1 j , its weight is given by
+w1ij =
+{ 1 if v1i &v 1 j cooccur within the window,
+0 otherwise.",4.1 Current Utterance Graph and History Graph,[0],[0]
+"(1)
+In a meeting, preceding utterances affect the current utterance.",4.1 Current Utterance Graph and History Graph,[0],[0]
+We assume that only the keywords of preceding utterances are effective.,4.1 Current Utterance Graph and History Graph,[0],[0]
+"Therefore, the history graph G2 = (V2, E2) is an undirected graph of keywords in the preceding utterances.",4.1 Current Utterance Graph and History Graph,[0],[0]
+"That is, all vertices in V2 are keywords extracted from one or more previous utterances, and the edge between two keywords implies that they co-occurred at least once.",4.1 Current Utterance Graph and History Graph,[0],[0]
+"Every edge in E2 has a weight that represents its temporal importance.
+",4.1 Current Utterance Graph and History Graph,[0],[0]
+The history graph is updated whenever keywords are extracted from a new utterance.,4.1 Current Utterance Graph and History Graph,[0],[0]
+This is because the current utterance becomes a part of the history graph for the next utterance.,4.1 Current Utterance Graph and History Graph,[0],[0]
+"As a history, old utterances are less important than recent ones.",4.1 Current Utterance Graph and History Graph,[0],[0]
+"Thus, the temporal importance should decrease gradually according to the passage of time.",4.1 Current Utterance Graph and History Graph,[0],[0]
+"In addition, the keywords which occur frequently at a meeting are more important than those mentioned just once or twice.",4.1 Current Utterance Graph and History Graph,[0],[0]
+"Since the frequently-mentioned keywords are normally major topics of the meeting, their influence should last for a long time.
+",4.1 Current Utterance Graph and History Graph,[0],[0]
+"To model these characteristics, the forgetting curve (Wozniak, 1999) is adopted in updating the history graph.",4.1 Current Utterance Graph and History Graph,[0],[0]
+It models the decline of memory retention in time.,4.1 Current Utterance Graph and History Graph,[0],[0]
+Figure 2 shows a typical representation of the forgetting curve.,4.1 Current Utterance Graph and History Graph,[0],[0]
+The X-axis of this figure is time and the Y-axis is memory retention.,4.1 Current Utterance Graph and History Graph,[0],[0]
+"As shown in this figure, memory retention of new
+information decreases gradually by the exponential nature of forgetting.",4.1 Current Utterance Graph and History Graph,[0],[0]
+"However, whenever the information is repeated, it is recalled longer.",4.1 Current Utterance Graph and History Graph,[0],[0]
+"This is formulated as
+R = e− t S ,
+where R is memory retention, t is time, and S is the relative strength of memory.
+",4.1 Current Utterance Graph and History Graph,[0],[0]
+"Based on the forgetting curve, the weight of each edge e2ij ∈ E2 between keywords v2i and v2j is set as
+w2ij = exp − t f(vi,vj) , (2)
+where t is the elapse of utterance time and f(vi, vj) is the frequency that vi and vj co-occur from the beginning of the meeting to now.",4.1 Current Utterance Graph and History Graph,[0],[0]
+"According to this equation, the temporal importance between keywords decreases gradually as time passes by, but the keyword relations repeated during the meeting are remembered for a long time in the history graph.",4.1 Current Utterance Graph and History Graph,[0],[0]
+All words within the history graph are not equally important in extracting keywords from the current utterance.,4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"In general, many participants discuss a wide range of topics in a meeting.",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"Therefore, some preceding utterances that shares topics with the current utterance are more significant.",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+We assume that the preceding utterances that contain the nouns in the current utterance share topics with the current utterance.,4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"Thus, only a subgraph of G2 that contain words in G1 is relevant for keyword extraction from G1.
+",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"Given the current utterance graph G1 = (V1, E1) and the history graph G2 = (V2, E2), the relevant graph G3 = (V3, E3) is a subgraph of G2.",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"Here, V3 = (V1∩V2)∪adjacency(V1) and adjacency(V1) is a set of vertices from G2 which are directly connected to the words in V1.",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"That is, V3 contains the words of G1 and their direct neighbor words in G2.",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+E3 is a subset of E2.,4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+Only the edges that appear in E2 are included in E3.,4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+The weight w3ij of each e3ij ∈ E3 is also borrowed from G2.,4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"That is, w3ij = w 2 ij .",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"Therefore, G3 is a 1-walk subgraph
+1 of G2 in which words in G1 and their neighbor words appear.
+",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+The keywords of the current utterance should reflect the relevant history as well as the current utterance itself.,4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"For this purpose, G1 is expanded with respect to G3.",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"The expanded graph G4 = (V4, E4) of G1 is defined as
+V4 = V1 ∪ V3, E4 = E1 ∪ E3.
+",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"For each edge e4ij ∈ E4, its weightw4ij is determined to be the larger value between w1ij and w 3 ij if it appears in both G1 and G3.",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"When it appears in only one of the graphs, w4ij is set to be the weight of its corresponding graph.",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"That is,
+w4ij =  max(w1ij , w 3 ij)",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"if e 4 ij ∈ E1 and e4ij ∈ E3, w1ij if e 4 ij ∈ E1 and e4ij /∈",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"E3,
+w3ij otherwise.
+",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"From this expanded graph G4, the keywords are extracted by TextRank (Mihalcea and Tarau, 2004).",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+TextRank is an unsupervised graph-based method for keyword extraction.,4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+It singles out the key vertices of a graph by providing a ranking mechanism.,4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"In order to rank the vertices, it computes the score of each vertex v4i ∈ V4 by S(v4i ) =",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+(1− d) +,4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"d · ∑
+v4 j ∈adj(v4 i )
+",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"w4ji∑ v4
+k ∈adj(v4 j )",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"w 4 jk
+S(v4j ),
+(3) 1If a m-walk subgraph (m > 1) is used, more affluent history is used.",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"However, this graph contains some words irrelevant to the current utterance.",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"According to our experiments, 1-walk subgraph outperforms other m-walk subgraphs where m > 1.",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"In addition, extracting G3 becomes expensive for large m.
+where 0 ≤",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+d ≤ 1 is a damping factor and adj(vi) denotes vi’s neighbors.,4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"Finally, the words whose score is larger than a specific threshold θ are chosen as keywords.",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"Especially when the current utterance is the first utterance of a meeting, the history graph does not exist.",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"In this case, the current utterance graph becomes the expanded graph (G4 = G1), and keywords are extracted from the current utterance graph.
+",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+The proposed method extracts keywords whenever an utterance is spoken.,4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"Thus, it tries to extract keywords even if the current utterance is not related to the topics of a meeting or is too short.",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"However, if the current utterance is irrelevant to the meeting, it has just a few connections with other previous utterances, and thus the potential keywords in this utterance are apt to have a low score.",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"The proposed method, however, does not select the words whose score is smaller than the threshold θ as keywords.",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"As a result, it extracts only the relevant keywords during the meeting.
+",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"Since the keywords for the current utterance should be the history for the next utterance, they have to be reflected into the history graph.",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"Therefore, a keyword graph G5 = (V5, E5) is constructed from the keywords.",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"Here, V5 is a set of keywords extracted from G4, and E5 is a subset of E4 that corresponds to V5.",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+The weights of edges in E5 are same with those in E4.,4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"That is, w5ij = w 4 ij .",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+The keyword graph G5 is then merged into the history graph G2 in the same way that G1 and G3 are merged.,4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"As stated above, the weights of the edges in the history graph G2 are updated by Equation (2).",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+"Therefore, before merging G5 and G2, all weights of G2 are updated by increasing t as t + 1 to reflect temporal importance of preceding utterances.",4.2 Keyword Extraction by Merging Current Utterance and History Graphs,[0],[0]
+The proposed method is evaluated with two kinds of data sets: the National Assembly transcripts in Korean and the ICSI meeting corpus in English.,5 Experiments,[0],[0]
+Both data sets are the records of meetings that are manually dictated by human transcribers.,5 Experiments,[0],[0]
+The first corpus used to evaluate our method is the National Assembly transcripts2.,5.1 National Assembly Transcripts in Korean,[0],[0]
+This corpus is obtained from the Knowledge Management System of the National Assembly of KoreaIt is transcribed from the 305th assembly record of the Knowledge Economy Committee in 2012.,5.1 National Assembly Transcripts in Korean,[0],[0]
+Table 1 summarizes simple statistics of the National Assembly transcripts.,5.1 National Assembly Transcripts in Korean,[0],[0]
+The 305th assembly record actually consists of two meetings.,5.1 National Assembly Transcripts in Korean,[0],[0]
+"The first meeting contains 1,280 utterances and the second has 573 utterances.",5.1 National Assembly Transcripts in Korean,[0],[0]
+The average number of words per utterance in the first meeting is 7.22 while the second meeting contains 10.17 words per utterance on average.,5.1 National Assembly Transcripts in Korean,[0],[0]
+"The second meeting transcript is used as a development data set to determine window size W of Equation (1), the damping factor d of Equation (3), and the threshold θ.",5.1 National Assembly Transcripts in Korean,[0],[0]
+"For all experiments below, d is set 0.85, W is 10, and θ is 0.28.",5.1 National Assembly Transcripts in Korean,[0],[0]
+The remaining first meeting transcript is used as a data set to extract keywords since this transcript contains more utterances.,5.1 National Assembly Transcripts in Korean,[0],[0]
+Only nouns are considered as potential keywords.,5.1 National Assembly Transcripts in Korean,[0],[0]
+"That is, only the words whose POS tag is NNG (common noun) or NNP (proper noun) can be a keyword.
+",5.1 National Assembly Transcripts in Korean,[0],[0]
+"Three annotators are engaged to extract keywords manually for each utterance in the first meeting transcript, since the Knowledge Management System does not provide the keywords3.",5.1 National Assembly Transcripts in Korean,[0],[0]
+The average number of keywords per utterance is 2.58.,5.1 National Assembly Transcripts in Korean,[0],[0]
+"To see the inter-judge agreement among the annotators, the Kappa coefficient (Carletta, 1996) was investigated.",5.1 National Assembly Transcripts in Korean,[0],[0]
+The kappa agreement of the National Assembly transcript is 0.31 that falls under the category of ‘Fair’.,5.1 National Assembly Transcripts in Korean,[0],[0]
+"Even though all congressmen in the transcript belong to the same committee, they discussed various topics at the meeting.",5.1 National Assembly Transcripts in Korean,[0],[0]
+"As a result, the keywords are difficult to be agreed unanimously by all three
+2The data set is available: http://ml.knu.ac.kr/ dataset/keywordextraction.html
+3A guideline was given to the annotators that keywords must be a single word and the maximum number of keywords per utterance is five.
+annotators.",5.1 National Assembly Transcripts in Korean,[0],[0]
+"Therefore, in this paper the words that are recommended by more than two annotators are chosen as keywords.
+",5.1 National Assembly Transcripts in Korean,[0],[0]
+The evaluation is done with two metics: Fmeasure and the weighted relative score (WRS).,5.1 National Assembly Transcripts in Korean,[0],[0]
+"Since the previous work by Liu et al. (2009) reported only F-measure and WRS, F-measure instead of precision/recall are used for the comparison with their method.",5.1 National Assembly Transcripts in Korean,[0],[0]
+"The weighted relative score is derived from Pyramid metric (Nenkova and Passonneau, 2004).",5.1 National Assembly Transcripts in Korean,[0],[0]
+"When a keyword extraction system generates keywords which many annotators agree, a higher score is given to it.",5.1 National Assembly Transcripts in Korean,[0],[0]
+"On the other hand, a lower score is given if fewer annotators agree.
+",5.1 National Assembly Transcripts in Korean,[0],[0]
+The proposed method is compared with two baseline models to see its relative performance.,5.1 National Assembly Transcripts in Korean,[0],[0]
+"One is the frequency-based keyword extraction with TFIDF weighting (Frank et al., 1999) and the other is TextRank in which the weight of edges is mutual information between vertices (Wan et al., 2007).",5.1 National Assembly Transcripts in Korean,[0],[0]
+"In TFIDF, each utterance is considered as a document, and thus all utterances including the current one are regarded as whole documents.",5.1 National Assembly Transcripts in Korean,[0],[0]
+The frequencybased TFIDF chooses top-K words according to their TFIDF value from the set of words appearing in the meeting transcript.,5.1 National Assembly Transcripts in Korean,[0],[0]
+"Since the human annotators are restricted to extract up to five keywords, the keyword extraction systems including our method are also requested to select top-5 keywords when more than five keywords are produced.
+",5.1 National Assembly Transcripts in Korean,[0],[0]
+"In order to see the effect of preceding utterances in baseline models, the performances are measured according to the number of preceding utterances used.",5.1 National Assembly Transcripts in Korean,[0],[0]
+Figure 3 shows the results.,5.1 National Assembly Transcripts in Korean,[0],[0]
+The X-axis of this figure is the number of preceding utterances and the Yaxis represents F-measures.,5.1 National Assembly Transcripts in Korean,[0],[0]
+"As shown in this figure, the performance of the baseline models improves monotonically at first as the number of preceding utterances increases.",5.1 National Assembly Transcripts in Korean,[0],[0]
+"However, the performance improvement stops when many preceding utterances are involved, and the performance begins to drop
+when too many utterances are considered.",5.1 National Assembly Transcripts in Korean,[0],[0]
+"The performance of TextRank model drops from 20 preceding utterances, while that of TFIDF model begins to drops at 50 utterances.",5.1 National Assembly Transcripts in Korean,[0],[0]
+"When too many preceding utterances are taken into account, it is highly possible that some of their topics are irrelevant to the current utterance, which leads to performance drop.
+",5.1 National Assembly Transcripts in Korean,[0],[0]
+Table 2 compares our method with the baseline models on the National Assembly transcripts.,5.1 National Assembly Transcripts in Korean,[0],[0]
+The performances of baseline models are obtained when they show the best performance for various number of preceding utterances.,5.1 National Assembly Transcripts in Korean,[0],[0]
+"TextRank model achieves F-measure of 0.478 and weighted relative score of 0.387, while TFIDF reports its best F-measure of 0.481 and weighted relative score of 0.394.",5.1 National Assembly Transcripts in Korean,[0],[0]
+"Thus, the difference between TFIDF and TextRank is not significant.",5.1 National Assembly Transcripts in Korean,[0],[0]
+"However, F-measure and weighted relative score of the proposed method are 0.533 and 0.421 respectively, and they are much higher than those of baseline models.",5.1 National Assembly Transcripts in Korean,[0],[0]
+"In addition, our method achieves precision of 0.543 and recall of 0.523 and
+this is much higher performance than TextRank whose precision is just 0.510.",5.1 National Assembly Transcripts in Korean,[0],[0]
+"Since the proposed method uses, as history, the preceding utterances relevant to the current utterance, its performance is kept high even if whole utterances are used.",5.1 National Assembly Transcripts in Korean,[0],[0]
+"Therefore, it could be inferred that it is important to adopt only the relevant history in keyword extraction from meeting transcripts.
+",5.1 National Assembly Transcripts in Korean,[0],[0]
+One of the key factors of our method is the temporal history.,5.1 National Assembly Transcripts in Korean,[0],[0]
+Its importance is given in Table 3.,5.1 National Assembly Transcripts in Korean,[0],[0]
+"As explained above, the temporal history is achieved by Equation (2).",5.1 National Assembly Transcripts in Korean,[0],[0]
+"Thus, the proposed model does not reflect the temporal importance of preceding utterances if w2ij = 1 always.",5.1 National Assembly Transcripts in Korean,[0],[0]
+"That is, under w 2 ij = 1, old utterances are regarded as important as recent utterances.",5.1 National Assembly Transcripts in Korean,[0],[0]
+"Without temporal history, F-measure and weighted relative score are just 0.518 and 0.413 respectively.",5.1 National Assembly Transcripts in Korean,[0],[0]
+These poor performances prove the importance of the temporal history in keyword extraction from meeting transcripts.,5.1 National Assembly Transcripts in Korean,[0],[0]
+"The proposed method is also evaluated on the ICSI meeting corpus (Janin et al., 2003) which consists of naturally occurring meetings recordings.",5.2 ICSI Meeting Corpus in English,[0],[0]
+This corpus is widely used for summarizing and extracting keywords of meetings.,5.2 ICSI Meeting Corpus in English,[0],[0]
+We followed all the experimental settings proposed by Liu et al. (2009) for this corpus.,5.2 ICSI Meeting Corpus in English,[0],[0]
+"Among 26 meeting transcripts chosen by Liu et al. from 161 transcripts of the ICSI meeting corpus, 6 transcripts are used as development data and the remaining transcripts are used as data to extract keywords.",5.2 ICSI Meeting Corpus in English,[0],[0]
+"The parameters for the ICSI meeting corpus are set to be d = 0.85,W = 10, and θ = 0.20.",5.2 ICSI Meeting Corpus in English,[0],[0]
+"Each meeting of the corpus consists of several topic segments, and every topic segment contains three sets of keywords that are annotated by three annotators.",5.2 ICSI Meeting Corpus in English,[0],[0]
+"Up to five keywords are annotated for a topic segment.
+",5.2 ICSI Meeting Corpus in English,[0],[0]
+Table 4 shows simple statistics of the ICSI meeting data.,5.2 ICSI Meeting Corpus in English,[0],[0]
+"Total number of topic segments in the 26 meetings is originally 201, but some of them do not
+have keywords.",5.2 ICSI Meeting Corpus in English,[0],[0]
+"Such segments are discarded, and the remaining 140 topic segments are actually used.",5.2 ICSI Meeting Corpus in English,[0],[0]
+"The average number of utterances in a topic segment is 260 and the average number of words per utterance is 7.22.
+",5.2 ICSI Meeting Corpus in English,[0],[0]
+"Unlike the National Assembly transcripts, the keywords of the ICSI meeting corpus are annotated at the topic segment level, not the utterance level.",5.2 ICSI Meeting Corpus in English,[0],[0]
+"Therefore, the proposed method which extracts keywords at the utterance level can not be applied directly to this corpus.",5.2 ICSI Meeting Corpus in English,[0],[0]
+"In order to obtain keywords for a topic segment with the proposed method, the keywords are first extracted from each utterance in the segment by the proposed method and then they are all accumulated.",5.2 ICSI Meeting Corpus in English,[0],[0]
+The proposed method extracts keywords for a topic segment from these accumulated utterance-level keywords as follows.,5.2 ICSI Meeting Corpus in English,[0],[0]
+Assume that a topic segment consists of l utterances.,5.2 ICSI Meeting Corpus in English,[0],[0]
+"Since our method can extract up to 5 keywords for each utterance, the number of keywords for the segment can reach to 5 · l. From these keywords, we select top-5 keywords ranked by Equation (3).
+",5.2 ICSI Meeting Corpus in English,[0],[0]
+The proposed method is compared with three previous studies.,5.2 ICSI Meeting Corpus in English,[0],[0]
+The first two are the methods proposed by Liu et al. (2009),5.2 ICSI Meeting Corpus in English,[0],[0]
+"One is the frequencybased method of TFIDF weighting with the features such as POS filtering, word clustering, and sentence salience score, and the other is the graph-based method with POS filtering.",5.2 ICSI Meeting Corpus in English,[0],[0]
+"The last method is a maximum entropy model applied to this task (Liu et al., 2008).",5.2 ICSI Meeting Corpus in English,[0],[0]
+"Note that the maximum entropy is a supervised learning model.
+",5.2 ICSI Meeting Corpus in English,[0],[0]
+Table 5 summarizes the comparison results.,5.2 ICSI Meeting Corpus in English,[0],[0]
+"As shown in this table, the proposed method outperforms all previous methods.",5.2 ICSI Meeting Corpus in English,[0],[0]
+"Our method achieves precision of 0.311 and recall of 0.361, and thus the F-score is 0.334.",5.2 ICSI Meeting Corpus in English,[0],[0]
+The weight relative score of the proposed method is 0.533.,5.2 ICSI Meeting Corpus in English,[0],[0]
+This is the improvement of up to 0.044 in F-measure and 0.129 in weighted relative score over other unsupervised methods (TFIDF-Liu and TextRank-Liu).,5.2 ICSI Meeting Corpus in English,[0],[0]
+It should be also noted that the proposed method outperforms even the supervised method (ME model).,5.2 ICSI Meeting Corpus in English,[0],[0]
+"The difference between our method and the maximum entropy model in weighted relative score is 0.132.
+",5.2 ICSI Meeting Corpus in English,[0],[0]
+One possible variant of the proposed method for the ICSI corpus is to simply merge the current utterance graph (G1) with the history graph (G2) rather than to extract keywords from each utterance.,5.2 ICSI Meeting Corpus in English,[0],[0]
+"After the current utterance graph of the last utterance in a topic segment is merged into the history graph, the keywords for the segment are extracted from the history graph.",5.2 ICSI Meeting Corpus in English,[0],[0]
+"This variant and the proposed method both rely on the temporal history, but the difference is that the history graph of the variant accumulates all information within the topic segment.",5.2 ICSI Meeting Corpus in English,[0],[0]
+"Thus, the keywords extracted from the history graph by this variant are those without consideration of topic relevance.
+",5.2 ICSI Meeting Corpus in English,[0],[0]
+Table 6 compares the proposed method with the variant.,5.2 ICSI Meeting Corpus in English,[0],[0]
+The performance of the variant is higher than those of TFIDF-Liu and TextRank-Liu.,5.2 ICSI Meeting Corpus in English,[0],[0]
+This proves the importance of the temporal history in keyword extraction from meeting transcripts.,5.2 ICSI Meeting Corpus in English,[0],[0]
+"However, the proposed method still outperforms the variant, and it demonstrates the importance of topic relevance.",5.2 ICSI Meeting Corpus in English,[0],[0]
+"Therefore, it can be concluded that the consideration of temporal history and topic relevance is critical in keyword extraction from meeting transcripts.",5.2 ICSI Meeting Corpus in English,[0],[0]
+"In this paper, we have proposed a just-in-time keyword extraction from meeting transcripts.",6 Conclusion,[0],[0]
+"Whenever an utterance is spoken, the proposed method extracts keywords from the utterance that best describe the utterance.",6 Conclusion,[0],[0]
+"Based on the graph representation of all components in a meeting, the proposed method extracts keywords by TextRank with some graph operations.
+",6 Conclusion,[0],[0]
+Temporal history and topic of the current utterance are two major factors especially in keyword extraction from meeting transcripts.,6 Conclusion,[0],[0]
+This is because recent utterances are more important than old ones and only the preceding utterances of which topic is relevant to the current utterance are important.,6 Conclusion,[0],[0]
+"To model the temporal importance of the preceding utterances, the concept of forgetting curve is used in updating the history graph of preceding utterances.",6 Conclusion,[0],[0]
+"In addition, the subgraph of the history graph that shares words appearing in the current utterance graph is used to extract keywords rather than whole history graph.",6 Conclusion,[0],[0]
+The proposed method was evaluated with the National Assembly transcripts and the ICSI meeting corpus.,6 Conclusion,[0],[0]
+"According to our experimental results on these data sets, the performance of keyword extraction is improved when we consider temporal history and topic relevance.",6 Conclusion,[0],[0]
+"This research was supported by the Converging Research Center Program funded by the Ministry of Education, Science and Technology (2012K001342)",Acknowledgments,[0],[0]
+"In a meeting, it is often desirable to extract keywords from each utterance as soon as it is spoken.",abstractText,[0],[0]
+"Thus, this paper proposes a just-intime keyword extraction from meeting transcripts.",abstractText,[0],[0]
+The proposed method considers two major factors that make it different from keyword extraction from normal texts.,abstractText,[0],[0]
+"The first factor is the temporal history of preceding utterances that grants higher importance to recent utterances than old ones, and the second is topic relevance that forces only the preceding utterances relevant to the current utterance to be considered in keyword extraction.",abstractText,[0],[0]
+Our experiments on two data sets in English and Korean show that the consideration of the factors results in performance improvement in keyword extraction from meeting transcripts.,abstractText,[0],[0]
+A Just-In-Time Keyword Extraction from Meeting Transcripts,title,[0],[0]
+"Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics (Long Papers), pages 12–22 Melbourne, Australia, July 15 - 20, 2018. c©2018 Association for Computational Linguistics
+12",text,[0],[0]
+"Distributional word embeddings, which represent the “meaning” of a word via a low-dimensional vector, have been widely applied by many natural language processing (NLP) pipelines and algorithms (Goldberg, 2016).",1 Introduction,[0],[0]
+"Following the success of recent neural (Mikolov et al., 2013) and matrixfactorization (Pennington et al., 2014) methods, researchers have sought to extend the approach to other text features, from subword elements to
+n-grams to sentences (Bojanowski et al., 2016; Poliak et al., 2017; Kiros et al., 2015).",1 Introduction,[0],[0]
+"However, the performance of both word embeddings and their extensions is known to degrade in small corpus settings (Adams et al., 2017) or when embedding sparse, low-frequency features (Lazaridou et al., 2017).",1 Introduction,[0],[0]
+"Attempts to address these issues often involve task-specific approaches (Rothe and Schütze, 2015; Iacobacci et al., 2015; Pagliardini et al., 2018) or extensively tuning existing architectures such as skip-gram (Poliak et al., 2017; Herbelot and Baroni, 2017).
+",1 Introduction,[0],[0]
+"For computational efficiency it is desirable that methods be able to induce embeddings for only those features (e.g. bigrams or synsets) needed by the downstream task, rather than having to pay a computational prix fixe to learn embeddings for all features occurring frequently-enough in a corpus.",1 Introduction,[0],[0]
+"We propose an alternative, novel solution via à la carte embedding, a method which bootstraps existing high-quality word vectors to learn a feature representation in the same semantic space via a linear transformation of the average word embeddings in the feature’s available contexts.",1 Introduction,[1.0],"['We propose an alternative, novel solution via à la carte embedding, a method which bootstraps existing high-quality word vectors to learn a feature representation in the same semantic space via a linear transformation of the average word embeddings in the feature’s available contexts.']"
+"This can be seen as a shallow extension of the distributional hypothesis (Harris, 1954), “a feature is characterized by the words in its context,” rather than the computationally more-expensive “a feature is characterized by the features in its context” that has been used implicitly by past work (Rothe and Schütze, 2015; Logeswaran and Lee, 2018).
+",1 Introduction,[1.0000000813907224],"['This can be seen as a shallow extension of the distributional hypothesis (Harris, 1954), “a feature is characterized by the words in its context,” rather than the computationally more-expensive “a feature is characterized by the features in its context” that has been used implicitly by past work (Rothe and Schütze, 2015; Logeswaran and Lee, 2018).']"
+"Despite its elementary formulation, we demonstrate that the à la carte method can learn faithful word embeddings from single examples and feature vectors improving performance on important downstream tasks.",1 Introduction,[0],[0]
+"Furthermore, the approach is resource-efficient, needing only pretrained embed-
+dings of common words and the text corpus used to train them, and easy to implement and compute via vector addition and linear regression.",1 Introduction,[0],[0]
+"After motivating and specifying the method, we illustrate these benefits through several applications:
+• Embeddings of rare words: we introduce a dataset1 for few-shot learning of word vectors and achieve state-of-the-art results on the task of representing unseen words using only the definition (Herbelot and Baroni, 2017).
+",1 Introduction,[0],[0]
+"• Synset embeddings: we show how the method can be applied to learn more finegrained lexico-semantic representations and give evidence of its usefulness for standard word-sense disambiguation tasks (Navigli et al., 2013; Moro and Navigli, 2015).
+",1 Introduction,[0],[0]
+"• n-gram embeddings: we build seven million n-gram embeddings from large text corpora and use them to construct document embeddings that are competitive with unsupervised deep learning approaches when evaluated on linear text classification.
+",1 Introduction,[0],[0]
+Our experimental results2 clearly demonstrate the advantages of à la carte embedding.,1 Introduction,[0],[0]
+"For word embeddings, the approach is an easy way to get a good vector for a new word from its definition or a few examples in context.",1 Introduction,[1.0],"['For word embeddings, the approach is an easy way to get a good vector for a new word from its definition or a few examples in context.']"
+"For feature embeddings, the method can embed anything that does not need labeling (such as a bigram) or occurs in an annotated corpus (such as a word-sense).",1 Introduction,[1.0],"['For feature embeddings, the method can embed anything that does not need labeling (such as a bigram) or occurs in an annotated corpus (such as a word-sense).']"
+"Our document embeddings, constructed directly using à la carte n-gram vectors, compete well with recent deep neural representations; this provides further evidence that simple methods can outperform modern deep learning on many NLP benchmarks (Arora et al., 2017; Mu and Viswanath, 2018; Arora et al., 2018a,b; Pagliardini et al., 2018).",1 Introduction,[1.0],"['Our document embeddings, constructed directly using à la carte n-gram vectors, compete well with recent deep neural representations; this provides further evidence that simple methods can outperform modern deep learning on many NLP benchmarks (Arora et al., 2017; Mu and Viswanath, 2018; Arora et al., 2018a,b; Pagliardini et al., 2018).']"
+"Many methods have been proposed for extending word embeddings to semantic feature vectors, with the aim of using them as interpretable and structure-aware building blocks of NLP pipelines (Kiros et al., 2015; Yamada et al., 2016).",2 Related Work,[0],[0]
+"Many exploit the structure and resources available for specific feature types, such as methods for sense, synsets, and lexemes (Rothe and Schütze, 2015; 1Dataset: nlp.cs.princeton.edu/CRW 2Code: www.github.com/NLPrinceton/ALaCarte
+Iacobacci et al., 2015) that make heavy use of the graph structure of the Princeton WordNet (PWN) and similar resources (Fellbaum, 1998).",2 Related Work,[0],[0]
+"By contrast, our work is more general, with incorporation of structure left as an open problem.",2 Related Work,[0],[0]
+Embeddings of n-grams are of special interest because they do not need annotation or expert knowledge and can often be effective on downstream tasks.,2 Related Work,[0],[0]
+"Their computation has been studied both explicitly (Yin and Schutze, 2014; Poliak et al., 2017) and as an implicit part of models for document embeddings (Hill et al., 2016; Pagliardini et al., 2018), which we use for comparison.",2 Related Work,[0],[0]
+"Supervised and multitask learning of text embeddings has also been attempted (Wang et al., 2017; Wu et al., 2017).
+",2 Related Work,[0],[0]
+"A main motivation of our work is to learn good embeddings, of both words and features, from only one or a few examples.",2 Related Work,[0],[0]
+"Efforts in this area can in many cases be split into contextual approaches (Lazaridou et al., 2017; Herbelot and Baroni, 2017) and morphological methods (Luong et al., 2013; Bojanowski et al., 2016; Pado et al., 2016).",2 Related Work,[0],[0]
+"The current paper provides a more effective formulation for context-based embeddings, which are often simpler to implement, can improve with more context information, and do not require morphological annotation.",2 Related Work,[0],[0]
+"Subword approaches, on the other hand, are often more compositional and flexible, and we leave the extension of our method to handle subword information to future work.",2 Related Work,[0],[0]
+"Our work is also related to some methods in domain adaptation and multi-lingual correlation, such as that of Bollegala et al. (2014).
+",2 Related Work,[0],[0]
+"Mathematically, this work builds upon the linear algebraic understanding of modern word embeddings developed by Arora et al. (2018b) via an extension to the latent-variable embedding model of Arora et al. (2016).",2 Related Work,[0],[0]
+"Although there have been several other applications of this model for natural language representation (Arora et al., 2017; Mu and Viswanath, 2018), ours is the first to provide a general approach for learning semantic features using corpus context.",2 Related Work,[0],[0]
+"We begin by assuming a large text corpus CV consisting of contexts c of words w in a vocabulary V , with the contexts themselves being sequences of words in V (e.g. a fixed-size window around the word or feature).",3 Method Specification,[1.0],"['We begin by assuming a large text corpus CV consisting of contexts c of words w in a vocabulary V , with the contexts themselves being sequences of words in V (e.g. a fixed-size window around the word or feature).']"
+"We further assume that we have trained word embeddings vw ∈ Rd on this collo-
+cation information using a standard algorithm (e.g. word2vec / GloVe).",3 Method Specification,[0],[0]
+Our goal is to construct a good embedding vf ∈ Rd of a text feature f given a set Cf of contexts it occurs in.,3 Method Specification,[1.0],['Our goal is to construct a good embedding vf ∈ Rd of a text feature f given a set Cf of contexts it occurs in.']
+Both f and its contexts are assumed to arise via the same process that generates the large corpus CV .,3 Method Specification,[0],[0]
+"In many settings below, the number |Cf | of contexts available for a feature f of interest is much smaller than the number |Cw| of contexts that the typical word w ∈ V occurs in.",3 Method Specification,[0],[0]
+"This could be because the feature is rare (e.g. unseen words, n-grams) or due to limited human annotation (e.g. word senses, named entities).",3 Method Specification,[0],[0]
+"A naive first approach to construct feature embeddings using context is additive, i.e. taking the average over all contexts of a feature f of the average word vector in each context:
+vadditivef",3.1 A Linear Approach,[0],[0]
+"= 1 |Cf | ∑ c∈Cf 1 |c| ∑ w∈c vw (1)
+",3.1 A Linear Approach,[0],[0]
+"This formulation reflects the training of commonly used embeddings, which employs additive composition to represent the context (Mikolov et al., 2013; Pennington et al., 2014).",3.1 A Linear Approach,[0],[0]
+"It has proved successful in the bag-of-embeddings approach to sentence representation (Wieting et al., 2016; Arora et al., 2017), which can compete with LSTM representations, and has also been given theoretical justification as the maximum a posteriori (MAP) context vector under a generative model related to popular embedding objectives (Arora et al., 2016).",3.1 A Linear Approach,[1.0],"['It has proved successful in the bag-of-embeddings approach to sentence representation (Wieting et al., 2016; Arora et al., 2017), which can compete with LSTM representations, and has also been given theoretical justification as the maximum a posteriori (MAP) context vector under a generative model related to popular embedding objectives (Arora et al., 2016).']"
+"Lazaridou et al. (2017) use this approach to learn embeddings of unknown word amalgamations, or chimeras, given a few context examples.
+",3.1 A Linear Approach,[0],[0]
+The additive approach has some limitations because the set of all word vectors is seen to share a few common directions.,3.1 A Linear Approach,[1.0],['The additive approach has some limitations because the set of all word vectors is seen to share a few common directions.']
+"Simple addition amplifies the component in these directions, at the expense of less common directions that presumably carry more “signal.”",3.1 A Linear Approach,[0],[0]
+"Stop-word removal can help to ameliorate this (Lazaridou et al., 2017; Herbelot and Baroni, 2017), but does not deal with the fact that content-words also have significant components in the same direction as these deleted words.",3.1 A Linear Approach,[0],[0]
+"Another mathematical framework to address this lacuna is to remove the top one or top few principal components, either from the word embeddings themselves (Mu and Viswanath, 2018) or from their summations (Arora et al., 2017).",3.1 A Linear Approach,[0],[0]
+"However, this approach is liable to either not remove
+enough noise or cause too much information loss without careful tuning (c.f. Figure 1).
+",3.1 A Linear Approach,[0],[0]
+We now note that removing the component along the top few principal directions is tantamount to multiplying the additive composition by a fixed (but data-dependent) matrix.,3.1 A Linear Approach,[1.0],['We now note that removing the component along the top few principal directions is tantamount to multiplying the additive composition by a fixed (but data-dependent) matrix.']
+"Thus a natural extension is to use an arbitrary linear transformation which will be learned from the data, and hence guaranteed to do at least as well as any of the above ideas.",3.1 A Linear Approach,[0],[0]
+"Specifically, we find the transform that can best recover existing word vectors vw —which are presumed to be of high quality— from their additive context embeddings vadditivew .",3.1 A Linear Approach,[0],[0]
+"This can be posed as the following linear regression problem
+vw ≈ Avadditivew = A
+( 1
+|Cw| ∑ c∈Cw ∑ w′∈c vw′
+) (2)
+where A ∈ Rd×d is learned and we assume for simplicity that 1|c| is constant (e.g. if c has a fixed window size) and is thus subsumed by the transform.",3.1 A Linear Approach,[0],[0]
+"After learning the matrix, we can embed any text feature in the same semantic space as the word embeddings via the following expression:
+vf = Av additive f = A  1 |Cf | ∑ c∈Cf ∑ w∈c vw  (3) Note that A is fixed for a given corpus and set of pretrained word embeddings and so does not need to be re-computed to embed different features or feature types.
+",3.1 A Linear Approach,[0.9999999477112833],"['After learning the matrix, we can embed any text feature in the same semantic space as the word embeddings via the following expression: vf = Av additive f = A  1 |Cf | ∑ c∈Cf ∑ w∈c vw  (3) Note that A is fixed for a given corpus and set of pretrained word embeddings and so does not need to be re-computed to embed different features or feature types.']"
+Algorithm 1: The basic à la carte feature embedding induction method.,3.1 A Linear Approach,[1.0],['Algorithm 1: The basic à la carte feature embedding induction method.']
+All contexts c consist of sequences of words drawn from the vocabulary V .,3.1 A Linear Approach,[0],[0]
+"Data: vocabulary V , corpus CV , vectors vw ∈",3.1 A Linear Approach,[0],[0]
+"Rd ∀ w ∈ V , feature f , corpus Cf of contexts of f Result:",3.1 A Linear Approach,[0],[0]
+"feature embedding vf ∈ Rd
+1 for w ∈ V do 2 let Cw ⊂ CV be the subcorpus of contexts of w 3 uw",3.1 A Linear Approach,[0],[0]
+"← 1|Cw| ∑ c∈Cw ∑ w′∈c vw′ // compute each word’s context embedding uw 4 A← argmin A∈Rd×d ∑ w∈V ‖vw −Auw‖22 // compute context-to-feature transform A
+5 uf ← 1|Cf | ∑ c∈Cf ∑ w∈c vw // compute feature’s context embedding uf 6 vf ← Auf // transform feature’s context embedding
+Theoretical Justification: As shown by Arora et al. (2018b, Theorem 1), the approximation (2) holds exactly in expectation for some matrix A when contexts c ∈ C are generated by sampling a context vector vc ∈ Rd from a zero-mean Gaussian with fixed covariance and drawing |c| words using P(w|vc) ∝ exp〈vc,vw〉.",3.1 A Linear Approach,[0],[0]
+The correctness (again in expectation) of (3) under this model is a direct extension.,3.1 A Linear Approach,[0],[0]
+"Arora et al. (2018b) use large text corpora to verify their model assumptions, providing theoretical justification for our approach.",3.1 A Linear Approach,[0],[0]
+"We observe that the best linear transform A can recover vectors with mean cosine similarity as high as 0.9 or more with the embeddings used to learn it, thus also justifying the method empirically.",3.1 A Linear Approach,[1.0],"['We observe that the best linear transform A can recover vectors with mean cosine similarity as high as 0.9 or more with the embeddings used to learn it, thus also justifying the method empirically.']"
+"The basic à la carte method, as motivated in Section 3.1 and specified in Algorithm 1, is straightforward and parameter-free (the dimension d is assumed to have been chosen beforehand, along with the other parameters of the original word embeddings).",3.2 Practical Details,[0],[0]
+In practice we may wish to modify the regression step in an attempt to learn a better transformation matrix A.,3.2 Practical Details,[1.0],['In practice we may wish to modify the regression step in an attempt to learn a better transformation matrix A.']
+"However, the standard first approach of using `2-regularized (Ridge) regression instead of simple linear regression gives little benefit, even when we have more parameters than word embeddings (i.e. when d2 > |V|).
+",3.2 Practical Details,[0],[0]
+"A more useful modification is to weight each point by some non-decreasing function α of each word’s corpus count cw, i.e. to solve
+A = argmin A∈Rd×d ∑ w∈V α(cw)‖vw −Auw‖22 (4)
+where uw is the additive context embedding.",3.2 Practical Details,[1.0000000012754848],"['A more useful modification is to weight each point by some non-decreasing function α of each word’s corpus count cw, i.e. to solve A = argmin A∈Rd×d ∑ w∈V α(cw)‖vw −Auw‖22 (4) where uw is the additive context embedding.']"
+"This reflects the fact that more frequent words likely
+have better pretrained embeddings.",3.2 Practical Details,[0],[0]
+In settings where |V| is large we find that a hard threshold (α(c) = 1c≥τ for some τ ≥ 1) is often useful.,3.2 Practical Details,[0],[0]
+"When we do not have many embeddings we can still give more importance to words with better embeddings via a function such as α(c) = log c, which we use in Section 5.1.",3.2 Practical Details,[0],[0]
+"While we can use our method to embed any type of text feature, its simplicity and effectiveness is rooted in word-level semantics: the approach assumes pre-existing high quality word embeddings and only considers collocations of features with words rather than with other features.",4 One-Shot and Few-Shot Learning of Word Embeddings,[0],[0]
+"Thus to verify that our approach is reasonable we first check how it performs on word representation tasks, specifically those where word embeddings need to be learned from very few examples.",4 One-Shot and Few-Shot Learning of Word Embeddings,[0],[0]
+"In this section we first investigate how representation quality varies with number of occurrences, as measured by performance on a similarity task that we introduce.",4 One-Shot and Few-Shot Learning of Word Embeddings,[0],[0]
+"We then apply the à la carte method to two tasks measuring the ability to learn new or synthetic words from context, achieving strong results on the nonce task of Herbelot and Baroni (2017).",4 One-Shot and Few-Shot Learning of Word Embeddings,[0],[0]
+"Performance on pairwise word similarity tasks is a standard way to evaluate word embeddings, with success measured via the Spearman correlation between a human score and the cosine similarity between word vectors.",4.1 Similarity Correlation vs. Sample Size,[0],[0]
+An overview of widely used datasets is given by Faruqui and Dyer (2014).,4.1 Similarity Correlation vs. Sample Size,[0],[0]
+"However, none of these datasets can be used directly to measure the effect of word frequency on
+embedding quality, which would help us understand the data requirements of our approach.",4.1 Similarity Correlation vs. Sample Size,[0.999999966146097],"['However, none of these datasets can be used directly to measure the effect of word frequency on embedding quality, which would help us understand the data requirements of our approach.']"
+"We address this issue by introducing the Contextual Rare Words (CRW) dataset, a subset of 562 pairs from the Rare Word (RW) dataset (Luong et al., 2013) supplemented by 255 sentences (contexts) for each rare word sampled from the Westbury Wikipedia Corpus (WWC) (Shaoul and Westbury, 2010).",4.1 Similarity Correlation vs. Sample Size,[0],[0]
+In addition we provide a subset of the WWC from which all sentences containing these rare words have been removed.,4.1 Similarity Correlation vs. Sample Size,[0],[0]
+"The task is to use embeddings trained on this subcorpus to induce rare word embeddings from the sampled contexts.
+",4.1 Similarity Correlation vs. Sample Size,[0],[0]
+"More specifically, the CRW dataset is constructed using all pairs from the RW dataset where the rarer word occurs between 512 and 10000 times in WWC; this yields a set of 455 distinct rare words.",4.1 Similarity Correlation vs. Sample Size,[0],[0]
+"The lower bound ensures that we have a sufficient number of rare word contexts, while the upper bound ensures that a significant fraction of the sentences from the original WWC remain in the subcorpus we provide.",4.1 Similarity Correlation vs. Sample Size,[0],[0]
+"In CRW, the first word in every pair is the more frequent word and occurs in the subcorpus, while the second word occurs in the 255 sampled contexts but not in the subcorpus.",4.1 Similarity Correlation vs. Sample Size,[1.0],"['In CRW, the first word in every pair is the more frequent word and occurs in the subcorpus, while the second word occurs in the 255 sampled contexts but not in the subcorpus.']"
+"We provide word2vec embeddings trained on all words occurring at least 100 times in the WWC subcorpus; these vectors include those assigned to the first (non-rare) words in the evaluation pairs.
+",4.1 Similarity Correlation vs. Sample Size,[0],[0]
+"Evaluation: For every rare word the method under consideration is given eight disjoint subsets containing 1, 2, 4, . . .",4.1 Similarity Correlation vs. Sample Size,[0],[0]
+", 128 example contexts.",4.1 Similarity Correlation vs. Sample Size,[0],[0]
+"The method induces an embedding of the rare word for each subset, letting us track how the quality of rare word vectors changes with more examples.",4.1 Similarity Correlation vs. Sample Size,[0],[0]
+"We report the Spearman ρ (as described above) at each sample size, averaged over 100 trials obtained by shuffling each rare word’s 255 contexts.
+",4.1 Similarity Correlation vs. Sample Size,[0.9999999279279295],"['We report the Spearman ρ (as described above) at each sample size, averaged over 100 trials obtained by shuffling each rare word’s 255 contexts.']"
+"The results in Figure 2 show that our à la carte method significantly outperforms the additive baseline (1) and its variants, including stopword removal, SIF-weighting (Arora et al., 2017), and top principal component removal (Mu and Viswanath, 2018).",4.1 Similarity Correlation vs. Sample Size,[0],[0]
+"We find that combining SIFweighting and top component removal also beats these baselines, but still does worse than our method.",4.1 Similarity Correlation vs. Sample Size,[0],[0]
+These experiments consolidate our intuitions from Section 3 that removing common components and frequent words is important and that learning a data-dependent transformation is an effective way to do this.,4.1 Similarity Correlation vs. Sample Size,[0],[0]
+"However, if we train
+word2vec embeddings from scratch on the subcorpus together with the sampled contexts we achieve a Spearman correlation of 0.45; this gap between word2vec and our method shows that there remains room for even better approaches for fewshot learning of word embeddings.",4.1 Similarity Correlation vs. Sample Size,[1.000000023798921],"['However, if we train word2vec embeddings from scratch on the subcorpus together with the sampled contexts we achieve a Spearman correlation of 0.45; this gap between word2vec and our method shows that there remains room for even better approaches for fewshot learning of word embeddings.']"
+"We now evaluate our work directly on the tasks posed by Herbelot and Baroni (2017), who developed simple datasets and methods to “simulate the process by which a competent speaker encounters a new word in known contexts.”",4.2 Learning Embeddings of New Concepts: Nonces and Chimeras,[0],[0]
+"The general goal will be to construct embeddings of new concepts in the same semantic space as a known embedding vocabulary using contextual information consisting of definitions or example sentences.
+",4.2 Learning Embeddings of New Concepts: Nonces and Chimeras,[0],[0]
+"Nonces: We first discuss the definitional nonce dataset made by the authors themselves, which has a test-set consisting of 300 single-word concepts and their definitions.",4.2 Learning Embeddings of New Concepts: Nonces and Chimeras,[0],[0]
+The task of learning each concept’s embedding is simulated by removing or randomly re-initializing its vector and requiring the system to use the remaining embeddings and the definition to make a new vector that is close to the original.,4.2 Learning Embeddings of New Concepts: Nonces and Chimeras,[0],[0]
+"Because the embeddings were constructed using data that includes these concepts, an implicit assumption is made that including or excluding one word does not greatly affect the se-
+mantic space; this assumption is necessary in order to have a good target vector for the system to be evaluated against.
+Using 259,376 word2vec embeddings trained on Wikipedia as the base vectors, Herbelot and Baroni (2017) heavily modify the skip-gram algorithm to successfully learn on one definition, creating the nonce2vec system.",4.2 Learning Embeddings of New Concepts: Nonces and Chimeras,[0],[0]
+"The original skipgram algorithm and vadditivew are used as baselines, with performance measured as the mean reciprocal rank and median rank of the concept’s original vector among the nearest neighbors of the output.
+",4.2 Learning Embeddings of New Concepts: Nonces and Chimeras,[0],[0]
+"To compare directly to their approach, we use their word2vec embeddings along with contexts from the Wikipedia corpus to construct context vectors uw for all words w apart from the 300 nonces.",4.2 Learning Embeddings of New Concepts: Nonces and Chimeras,[0],[0]
+"We then learn the à la carte transform A, weighting the data points in the regression (4) using a hard threshold of at least 1000 occurrences in Wikipedia.",4.2 Learning Embeddings of New Concepts: Nonces and Chimeras,[0],[0]
+An embedding for each nonce can then be constructed by multiplying A by the sum over all word embeddings in the nonce’s definition.,4.2 Learning Embeddings of New Concepts: Nonces and Chimeras,[0],[0]
+"As can be seen in Table 1, this approach significantly improves over both baselines and nonce2vec; the median rank of 165.5 of the original embedding among the nearest neighbors of the nonce vector is very low considering the vocabulary size is more than 250,000, and is also significantly lower than that of all previous methods.
+",4.2 Learning Embeddings of New Concepts: Nonces and Chimeras,[0],[0]
+"Chimeras: The second dataset Herbelot and Baroni (2017) consider is that of Lazaridou et al. (2017), who construct unseen concepts by combining two related words into a fake nonce word (the “chimera”) and provide two, four, or six example sentences for this nonce drawn from sentences containing one of the two component words.",4.2 Learning Embeddings of New Concepts: Nonces and Chimeras,[0],[0]
+"The desired nonce embeddings is then evaluated via the correlation of its cosine similar-
+ity with the embeddings of several other words, with ratings provided by human judges.
+",4.2 Learning Embeddings of New Concepts: Nonces and Chimeras,[1.0000000353531169],"['The desired nonce embeddings is then evaluated via the correlation of its cosine similar- ity with the embeddings of several other words, with ratings provided by human judges.']"
+"We use the same approach as in the nonce task, except that the chimera embedding is the result of summing over multiple sentences.",4.2 Learning Embeddings of New Concepts: Nonces and Chimeras,[0],[0]
+"From Table 1 we see that, while our method is consistently better than both the additive baseline and nonce2vec, removing stop-words from the additive baseline leads to stronger performance for more sentences.",4.2 Learning Embeddings of New Concepts: Nonces and Chimeras,[0],[0]
+"Since the à la carte algorithm explicitly trains the transform to match the true word embedding rather than human similarity measures, it is perhaps not surprising that our approach is much more dominant on the definitional nonce task.",4.2 Learning Embeddings of New Concepts: Nonces and Chimeras,[0],[0]
+"Having witnessed its success at representing unseen words, we now apply the à la carte method to two types of feature embeddings: synset embeddings and n-gram embeddings.",5 Building Feature Embeddings using Large Corpora,[0],[0]
+"Using these two examples we demonstrate the flexibility and adaptability of our approach when handling different corpora, base word embeddings, and downstream applications.",5 Building Feature Embeddings using Large Corpora,[0],[0]
+"Embeddings of synsets, or sets of cognitive synonyms, and related entities such as senses and lexemes have been widely studied, often due to the desire to account for polysemy (Rothe and Schütze, 2015; Iacobacci et al., 2015).",5.1 Supervised Synset Embeddings for Word-Sense Disambiguation,[0],[0]
+"Such representations can be evaluated in several ways, including via their use for word-sense disambiguation (WSD), the task of determining a word’s sense from context.",5.1 Supervised Synset Embeddings for Word-Sense Disambiguation,[0],[0]
+"While current state-of-theart methods often use powerful recurrent models (Raganato et al., 2017), we will instead use a sim-
+ple similarity-based approach that heavily depends on the synset embedding itself and thus serves as a more useful indicator of representation quality.",5.1 Supervised Synset Embeddings for Word-Sense Disambiguation,[0],[0]
+"A major target for our simple systems is to beat the most-frequent sense (MFS) method, which returns for each word the sense that occurs most frequently in a corpus such as SemCor.",5.1 Supervised Synset Embeddings for Word-Sense Disambiguation,[0],[0]
+"This baseline is “notoriously hard-to-beat,” routinely besting many systems in SemEval WSD competitions (Navigli et al., 2013).
+",5.1 Supervised Synset Embeddings for Word-Sense Disambiguation,[0],[0]
+"Synset Embeddings: We use SemCor (Langone et al., 2004), a subset of the Brown Corpus (BC) (Francis and Kucera, 1979) annotated using PWN synsets.",5.1 Supervised Synset Embeddings for Word-Sense Disambiguation,[1.0],"['Synset Embeddings: We use SemCor (Langone et al., 2004), a subset of the Brown Corpus (BC) (Francis and Kucera, 1979) annotated using PWN synsets.']"
+"However, because the corpus is quite small we use GloVe trained on Wikipedia instead of on BC itself.",5.1 Supervised Synset Embeddings for Word-Sense Disambiguation,[1.0],"['However, because the corpus is quite small we use GloVe trained on Wikipedia instead of on BC itself.']"
+The transform A is learned using context embeddings uw computed with windows of size ten around occurrences of w in BC and weighting each word by the log of its count during the regression stage (4).,5.1 Supervised Synset Embeddings for Word-Sense Disambiguation,[0],[0]
+"Then we set the context embedding us of each synset s to be the average sum of word embeddings representation over all sentences in SemCor containing s. Finally, we apply the à la carte transform to get the synset embedding vs = Aus.
+",5.1 Supervised Synset Embeddings for Word-Sense Disambiguation,[1.0000000499465123],"['Then we set the context embedding us of each synset s to be the average sum of word embeddings representation over all sentences in SemCor containing s. Finally, we apply the à la carte transform to get the synset embedding vs = Aus.']"
+"Sense Disambiguation: To determine the sense of a word w given its context c, we convert c into a vector using the à la carte transform A on the sum of its word embeddings and return the synset s of w whose embedding vs is most similar to this vector.",5.1 Supervised Synset Embeddings for Word-Sense Disambiguation,[1.0],"['Sense Disambiguation: To determine the sense of a word w given its context c, we convert c into a vector using the à la carte transform A on the sum of its word embeddings and return the synset s of w whose embedding vs is most similar to this vector.']"
+"We try two different synset embeddings: those induced from SemCor as above and those obtained by embedding a synset using its gloss, or PWN-provided definition, in the same way as a nonce in Section 4.2.",5.1 Supervised Synset Embeddings for Word-Sense Disambiguation,[1.0],"['We try two different synset embeddings: those induced from SemCor as above and those obtained by embedding a synset using its gloss, or PWN-provided definition, in the same way as a nonce in Section 4.2.']"
+"We also consider a combined approach in which we fall back on the gloss vector if the synset does not appear in SemCor and thus has no induced embedding.
+",5.1 Supervised Synset Embeddings for Word-Sense Disambiguation,[0],[0]
+"As shown in Table 2, synset embeddings induced from SemCor alone beat MFS overall, largely due to good noun results.",5.1 Supervised Synset Embeddings for Word-Sense Disambiguation,[1.0],"['As shown in Table 2, synset embeddings induced from SemCor alone beat MFS overall, largely due to good noun results.']"
+The method improves further when combined with the gloss approach.,5.1 Supervised Synset Embeddings for Word-Sense Disambiguation,[0],[0]
+"While we do not match the state-of-theart, our success in besting a difficult baseline using very little fine-tuning and exploiting none of the underlying graph structure suggests that the à la carte method can learn useful synset embeddings, even from relatively small data.",5.1 Supervised Synset Embeddings for Word-Sense Disambiguation,[0],[0]
+"As some of the simplest and most useful linguistic features, n-grams have long been a focus of embedding studies.",5.2 N-Gram Embeddings for Classification,[0],[0]
+"Compositional approaches, such as sums and products of unigram vectors, are often used and work well on some evaluations, but are often order-insensitive or very high-dimensional (Mitchell and Lapata, 2010).",5.2 N-Gram Embeddings for Classification,[0],[0]
+"Recent work by Poliak et al. (2017) works around this while staying compositional; however, as we will see their approach does not seem to capture a bigram’s meaning much better than the sum of its word vectors.",5.2 N-Gram Embeddings for Classification,[0],[0]
+"n-grams embeddings have also gained interest for low-dimensional document representation schemes (Hill et al., 2016; Pagliardini et al., 2018; Arora et al., 2018a), largely due to the success of their sparse high-dimensional Bag-of-nGrams (BonG) counterparts (Wang and Manning, 2012).",5.2 N-Gram Embeddings for Classification,[0],[0]
+"This setting of document embeddings derived from n-gram features will be used for quantitative evaluation in this section.
+",5.2 N-Gram Embeddings for Classification,[0],[0]
+"We build n-gram embeddings using two corpora: 300-dimensional Wikipedia embeddings, which we evaluate qualitatively, and 1600- dimensional embeddings on the Amazon Product Corpus (McAuley et al., 2015), which we use for document classification.",5.2 N-Gram Embeddings for Classification,[0],[0]
+"For both we use as source embeddings GloVe vectors trained on the respec-
+tive corpora over words occurring at least a hundred times.",5.2 N-Gram Embeddings for Classification,[0],[0]
+Context embeddings are constructed using a window of size ten and a hard threshold at 1000 occurrences is used as the word-weighting function in the regression (4).,5.2 N-Gram Embeddings for Classification,[0],[0]
+"Unlike Poliak et al. (2017), who can construct arbitrary embeddings but need to train at least two sets of vectors of dimension at least 2d to do so, and Yin and Schutze (2014), who determine which n-grams to represent via corpus counts, our à la carte approach allows us to train exactly those embeddings that we need for downstream tasks.",5.2 N-Gram Embeddings for Classification,[0],[0]
+"This, combined with our method’s efficiency, allows us to construct more than two million bigram embeddings and more than five million trigram embeddings, constrained only by their presence in the large source corpus.
+",5.2 N-Gram Embeddings for Classification,[0],[0]
+Qualitative Evaluation: We first compare bigram embedding methods by picking some idiomatic and entity-related bigrams and examining the closest word vectors to their representations.,5.2 N-Gram Embeddings for Classification,[0],[0]
+"These word-pairs are picked because we expect sophisticated feature embedding methods to encode a better vector than the sum of the two embeddings, which we use as a baseline.",5.2 N-Gram Embeddings for Classification,[0],[0]
+From Table 3 we see that embeddings based on corpora rather than composition are better able to embed these bigrams to be close to concepts that are semantically similar.,5.2 N-Gram Embeddings for Classification,[0],[0]
+"On the other hand, as discussed in Section 3 and evident from these results, the additive context approach is liable to emphasize stop-word directions due to their high frequency.
+",5.2 N-Gram Embeddings for Classification,[0],[0]
+Document Embedding: Our main application and quantitative evaluation of n-gram vectors is to use them to construct document embeddings.,5.2 N-Gram Embeddings for Classification,[0],[0]
+"Given a length L document D = {w1, . . .",5.2 N-Gram Embeddings for Classification,[0],[0]
+", wL}, we define its embedding vD as a weighted con-
+catenation over sums of our induced n-gram embeddings, i.e.
+vTD = ( L∑ t=1 vTwt · · · 1 n L−n+1∑ t=1 vT(wt,...,wt+n−1) )",5.2 N-Gram Embeddings for Classification,[0],[0]
+"where v(wt,...,wt+n−1) is the embedding of the ngram (wt, . . .",5.2 N-Gram Embeddings for Classification,[0],[0]
+", wt+n−1).",5.2 N-Gram Embeddings for Classification,[0],[0]
+"Following Arora et al. (2018a), we weight each n-gram component by 1n to reflect the fact that higher-order n-grams have lower quality embeddings because they occur less often in the source corpus.",5.2 N-Gram Embeddings for Classification,[0],[0]
+"While we concatenate across unigram, bigram, and trigram embeddings to construct our text representations, separate experiments show that simply adding up the vectors of all features also yields a smaller but still substantial improvement over the unigram performance.",5.2 N-Gram Embeddings for Classification,[0],[0]
+"The higher embedding dimension due to concatenation is in line with previous methods and can also be theoretically supported as yielding a less lossy compression of the n-gram information (Arora et al., 2018a).
+",5.2 N-Gram Embeddings for Classification,[0],[0]
+"In Table 4 we display the result of running cross-validated, `2-regularized logistic regression on documents from MR movie reviews (Pang and Lee, 2005), CR customer reviews (Hu and Liu, 2004), SUBJ subjectivity dataset (Pang and Lee, 2004), MPQA opinion polarity subtask (Wiebe et al., 2005), TREC question classification (Li and Roth, 2002), SST sentiment classification (binary and fine-grained) (Socher et al., 2013), and IMDB movie reviews (Maas et al., 2011).",5.2 N-Gram Embeddings for Classification,[0],[0]
+"The first four are evaluated using tenfold cross-validation, while the others have train-test splits.
+",5.2 N-Gram Embeddings for Classification,[0],[0]
+"Despite the simplicity of our embeddings (a concatenation over sums of à la carte n-gram vectors), we find that our results are very competitive with many recent unsupervised methods, achieving the best word-level results on two of the tested
+datasets.",5.2 N-Gram Embeddings for Classification,[0],[0]
+"The fact that we do especially well on the sentiment tasks indicates strong exploitation of the Amazon review corpus, which was also used by DisC, CNN-LSTM, and byte mLSTM.",5.2 N-Gram Embeddings for Classification,[0],[0]
+"At the same time, the fact that our results are comparable to neural approaches indicates that local wordorder may contain much of the information needed to do well on these tasks.",5.2 N-Gram Embeddings for Classification,[0],[0]
+"On the other hand, separate experiments do not show a substantial improvement from our approach over unigram methods such as SIF (Arora et al., 2017) on sentence similarity tasks such as STS (Cer et al., 2017).",5.2 N-Gram Embeddings for Classification,[0],[0]
+This could reflect either noise in the n-gram embeddings themselves or the comparative lower importance of local word-order for textual similarity compared to classification.,5.2 N-Gram Embeddings for Classification,[0],[0]
+"We have introduced à la carte embedding, a simple method for representing semantic features using unsupervised context information.",6 Conclusion,[0],[0]
+"A natural and principled integration of recent ideas for composing word vectors, the approach achieves strong performance on several tasks and promises to be useful in many linguistic settings and to yield many further research directions.",6 Conclusion,[0],[0]
+"Of particular interest is the replacement of simple window contexts by other structures, such as dependency parses, that could yield results in domains such as question answering or semantic role labeling.",6 Conclusion,[0],[0]
+"Ex-
+",6 Conclusion,[0],[0]
+"tensions of the mathematical formulation, such as the use of word weighting when building context vectors as in Arora et al. (2018b) or of spectral information along the lines of Mu and Viswanath (2018), are also worthy of further study.
+",6 Conclusion,[0],[0]
+"More practically, the Contextual Rare Words (CRW) dataset we provide will support research on few-shot learning of word embeddings.",6 Conclusion,[0],[0]
+"Both in this area and for n-grams there is great scope for combining our approach with compositional approaches (Bojanowski et al., 2016; Poliak et al., 2017) that can handle settings such as zero-shot learning.",6 Conclusion,[0],[0]
+"More work is needed to understand the usefulness of our method for representing (potentially cross-lingual) entities such as synsets, whose embeddings have found use in enhancing WordNet and related knowledge bases (CamachoCollados et al., 2016; Khodak et al., 2017).",6 Conclusion,[0],[0]
+"Finally, there remain many language features, such as named entities and morphological forms, whose representation by our method remains unexplored.",6 Conclusion,[0],[0]
+We thank Karthik Narasimhan and our three anonymous reviewers for helpful suggestions.,Acknowledgments,[0],[0]
+"The work in this paper was in part supported by SRC JUMP, Mozilla Research, NSF grants CCF1302518 and CCF-1527371, Simons Investigator Award, Simons Collaboration Grant, and ONRN00014-16-1-2329.",Acknowledgments,[0],[0]
+"Motivations like domain adaptation, transfer learning, and feature learning have fueled interest in inducing embeddings for rare or unseen words, n-grams, synsets, and other textual features.",abstractText,[0],[0]
+"This paper introduces à la carte embedding, a simple and general alternative to the usual word2vec-based approaches for building such representations that is based upon recent theoretical results for GloVe-like embeddings.",abstractText,[0],[0]
+Our method relies mainly on a linear transformation that is efficiently learnable using pretrained word vectors and linear regression.,abstractText,[0],[0]
+"This transform is applicable “on the fly” in the future when a new text feature or rare word is encountered, even if only a single usage example is available.",abstractText,[0],[0]
+We introduce a new dataset showing how the à la carte method requires fewer examples of words in context to learn high-quality embeddings and we obtain state-of-the-art results on a nonce task and some unsupervised document classification tasks.,abstractText,[0],[0]
+A La Carte Embedding: Cheap but Effective Induction of Semantic Feature Vectors,title,[0],[0]

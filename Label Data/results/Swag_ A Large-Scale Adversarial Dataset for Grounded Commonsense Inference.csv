@@ -1,0 +1,1020 @@
+0,1,label2,summary_sentences
+"Proceedings of the 2017 Conference on Empirical Methods in Natural Language Processing, pages 670–680 Copenhagen, Denmark, September 7–11, 2017. c©2017 Association for Computational Linguistics
+Many modern NLP systems rely on word embeddings, previously trained in an unsupervised manner on large corpora, as base features. Efforts to obtain embeddings for larger chunks of text, such as sentences, have however not been so successful. Several attempts at learning unsupervised representations of sentences have not reached satisfactory enough performance to be widely adopted. In this paper, we show how universal sentence representations trained using the supervised data of the Stanford Natural Language Inference datasets can consistently outperform unsupervised methods like SkipThought vectors (Kiros et al., 2015) on a wide range of transfer tasks. Much like how computer vision uses ImageNet to obtain features, which can then be transferred to other tasks, our work tends to indicate the suitability of natural language inference for transfer learning to other NLP tasks. Our encoder is publicly available1.",text,[0.9518765558361003],"['As models are developed for commonsense inference, and more broadly as the field of NLP advances, we note that AF can be used again to create a more adversarial version of Swag using better language models and AF models.']"
+"Distributed representations of words (or word embeddings) (Bengio et al., 2003; Collobert et al., 2011; Mikolov et al., 2013; Pennington et al., 2014) have shown to provide useful features for various tasks in natural language processing and computer vision.",1 Introduction,[0.958543223756355],"['We consider three different types of word representations: 300d GloVe vectors from Common Crawl (Pennington et al., 2014), 300d Numberbatch vectors retrofitted using ConceptNet relations (Speer et al., 2017), and 1024d ELMo contextual representations that show improvement on a variety of NLP tasks, including standard NLI (Peters et al., 2018).']"
+"While there seems to be a consensus concerning the usefulness of word embeddings and how to learn them, this is not yet clear with regard to representations that carry the meaning of a full sentence.",1 Introduction,[0],[0]
+"That is, how to capture the
+1https://www.github.com/ facebookresearch/InferSent
+relationships among multiple words and phrases in a single vector remains an question to be solved.
+",1 Introduction,[0],[0]
+"In this paper, we study the task of learning universal representations of sentences, i.e., a sentence encoder model that is trained on a large corpus and subsequently transferred to other tasks.",1 Introduction,[0],[0]
+"Two questions need to be solved in order to build such an encoder, namely: what is the preferable neural network architecture; and how and on what task should such a network be trained.",1 Introduction,[0],[0]
+"Following existing work on learning word embeddings, most current approaches consider learning sentence encoders in an unsupervised manner like SkipThought (Kiros et al., 2015) or FastSent (Hill et al., 2016).",1 Introduction,[0],[0]
+"Here, we investigate whether supervised learning can be leveraged instead, taking inspiration from previous results in computer vision, where many models are pretrained on the ImageNet (Deng et al., 2009) before being transferred.",1 Introduction,[0],[0]
+"We compare sentence embeddings trained on various supervised tasks, and show that sentence embeddings generated from models trained on a natural language inference (NLI) task reach the best results in terms of transfer accuracy.",1 Introduction,[0],[0]
+"We hypothesize that the suitability of NLI as a training task is caused by the fact that it is a high-level understanding task that involves reasoning about the semantic relationships within sentences.
+",1 Introduction,[0],[0]
+"Unlike in computer vision, where convolutional neural networks are predominant, there are multiple ways to encode a sentence using neural networks.",1 Introduction,[0],[0]
+"Hence, we investigate the impact of the sentence encoding architecture on representational transferability, and compare convolutional, recurrent and even simpler word composition schemes.",1 Introduction,[0],[0]
+"Our experiments show that an encoder based on a bi-directional LSTM architecture with max pooling, trained on the Stanford Natural Language Inference (SNLI) dataset (Bowman et al., 2015), yields state-of-the-art sentence embeddings com-
+670
+pared to all existing alternative unsupervised approaches like SkipThought or FastSent, while being much faster to train.",1 Introduction,[0],[0]
+We establish this finding on a broad and diverse set of transfer tasks that measures the ability of sentence representations to capture general and useful information.,1 Introduction,[0],[0]
+"Transfer learning using supervised features has been successful in several computer vision applications (Razavian et al., 2014).",2 Related work,[0],[0]
+"Striking examples include face recognition (Taigman et al., 2014) and visual question answering (Antol et al., 2015), where image features trained on ImageNet (Deng et al., 2009) and word embeddings trained on large unsupervised corpora are combined.
+",2 Related work,[0],[0]
+"In contrast, most approaches for sentence representation learning are unsupervised, arguably because the NLP community has not yet found the best supervised task for embedding the semantics of a whole sentence.",2 Related work,[0],[0]
+"Another reason is that neural networks are very good at capturing the biases of the task on which they are trained, but can easily forget the overall information or semantics of the input data by specializing too much on these biases.",2 Related work,[0],[0]
+Learning models on large unsupervised task makes it harder for the model to specialize.,2 Related work,[0],[0]
+"Littwin and Wolf (2016) showed that co-adaptation of encoders and classifiers, when trained end-to-end, can negatively impact the generalization power of image features generated by an encoder.",2 Related work,[0],[0]
+"They propose a loss that incorporates multiple orthogonal classifiers to counteract this effect.
+",2 Related work,[0],[0]
+"Recent work on generating sentence embeddings range from models that compose word embeddings (Le and Mikolov, 2014; Arora et al., 2017; Wieting et al., 2016b) to more complex neural network architectures.",2 Related work,[0],[0]
+"SkipThought vectors (Kiros et al., 2015) propose an objective function that adapts the skip-gram model for words (Mikolov et al., 2013) to the sentence level.",2 Related work,[0],[0]
+"By encoding a sentence to predict the sentences around it, and using the features in a linear model, they were able to demonstrate good performance on 8 transfer tasks.",2 Related work,[0],[0]
+"They further obtained better results using layer-norm regularization of their model in (Ba et al., 2016).",2 Related work,[0],[0]
+Hill et al. (2016) showed that the task on which sentence embeddings are trained significantly impacts their quality.,2 Related work,[0],[0]
+"In addition to unsupervised methods, they included supervised training in their comparison—namely, on
+machine translation data (using the WMT’14 English/French and English/German pairs), dictionary definitions and image captioning data from the COCO dataset (Lin et al., 2014).",2 Related work,[0],[0]
+"These models obtained significantly lower results compared to the unsupervised Skip-Thought approach.
+",2 Related work,[0],[0]
+"Recent work has explored training sentence encoders on the SNLI corpus and applying them on the SICK corpus (Marelli et al., 2014), either using multi-task learning or pretraining (Mou et al., 2016; Bowman et al., 2015).",2 Related work,[0],[0]
+"The results were inconclusive and did not reach the same level as simpler approaches that directly learn a classifier on top of unsupervised sentence embeddings instead (Arora et al., 2017).",2 Related work,[0],[0]
+"To our knowledge, this work is the first attempt to fully exploit the SNLI corpus for building generic sentence encoders.",2 Related work,[0],[0]
+"As we show in our experiments, we are able to consistently outperform unsupervised approaches, even if our models are trained on much less (but humanannotated) data.",2 Related work,[0],[0]
+"This work combines two research directions, which we describe in what follows.",3 Approach,[0],[0]
+"First, we explain how the NLI task can be used to train universal sentence encoding models using the SNLI task.",3 Approach,[0],[0]
+"We subsequently describe the architectures that we investigated for the sentence encoder, which, in our opinion, covers a suitable range of sentence encoders currently in use.",3 Approach,[0],[0]
+"Specifically, we examine standard recurrent models such as LSTMs and GRUs, for which we investigate mean and maxpooling over the hidden representations; a selfattentive network that incorporates different views of the sentence; and a hierarchical convolutional network that can be seen as a tree-based method that blends different levels of abstraction.",3 Approach,[0],[0]
+"The SNLI dataset consists of 570k humangenerated English sentence pairs, manually labeled with one of three categories: entailment, contradiction and neutral.",3.1 The Natural Language Inference task,[0],[0]
+"It captures natural language inference, also known in previous incarnations as Recognizing Textual Entailment (RTE), and constitutes one of the largest high-quality labeled resources explicitly constructed in order to require understanding sentence semantics.",3.1 The Natural Language Inference task,[0],[0]
+"We hypothesize that the semantic nature of NLI makes it a good candidate for learning universal sentence
+embeddings in a supervised way.",3.1 The Natural Language Inference task,[0],[0]
+"That is, we aim to demonstrate that sentence encoders trained on natural language inference are able to learn sentence representations that capture universally useful features.
+",3.1 The Natural Language Inference task,[0],[0]
+"Models can be trained on SNLI in two different ways: (i) sentence encoding-based models that explicitly separate the encoding of the individual sentences and (ii) joint methods that allow to use encoding of both sentences (to use cross-features or attention from one sentence to the other).
+",3.1 The Natural Language Inference task,[0],[0]
+"Since our goal is to train a generic sentence encoder, we adopt the first setting.",3.1 The Natural Language Inference task,[0],[0]
+"As illustrated in Figure 1, a typical architecture of this kind uses a shared sentence encoder that outputs a representation for the premise u and the hypothesis v.",3.1 The Natural Language Inference task,[0],[0]
+"Once the sentence vectors are generated, 3 matching methods are applied to extract relations between u and v : (i) concatenation of the two representations (u, v); (ii) element-wise product u ∗ v; and (iii) absolute element-wise difference |u− v|.",3.1 The Natural Language Inference task,[0],[0]
+"The resulting vector, which captures information from both the premise and the hypothesis, is fed into a 3-class classifier consisting of multiple fullyconnected layers culminating in a softmax layer.",3.1 The Natural Language Inference task,[0],[0]
+"A wide variety of neural networks for encoding sentences into fixed-size representations exists, and it is not yet clear which one best captures generically useful information.",3.2 Sentence encoder architectures,[0],[0]
+"We compare 7 different architectures: standard recurrent encoders with either Long Short-Term Memory (LSTM) or Gated Recurrent Units (GRU), concatenation of last hidden states of forward and backward GRU, Bi-directional LSTMs (BiLSTM)
+with either mean or max pooling, self-attentive network and hierarchical convolutional networks.",3.2 Sentence encoder architectures,[0],[0]
+"Our first, and simplest, encoders apply recurrent neural networks using either LSTM (Hochreiter and Schmidhuber, 1997) or GRU (Cho et al., 2014) modules, as in sequence to sequence encoders (Sutskever et al., 2014).",3.2.1 LSTM and GRU,[0.9508650551778295],"['Making such inference necessitates a rich understanding about everyday physical situations, including object affordances (Gibson, 1979) and frame semantics (Baker et al., 1998).']"
+"For a sequence of T words (w1, . . .",3.2.1 LSTM and GRU,[0],[0]
+", wT ), the network computes a set of T hidden representations h1, . . .",3.2.1 LSTM and GRU,[0],[0]
+", hT , with ht = −−−−→ LSTM(w1, . . .",3.2.1 LSTM and GRU,[0],[0]
+", wT ) (or using GRU units instead).",3.2.1 LSTM and GRU,[0],[0]
+"A sentence is represented by the last hidden vector, hT .
+",3.2.1 LSTM and GRU,[0],[0]
+"We also consider a model BiGRU-last that concatenates the last hidden state of a forward GRU, and the last hidden state of a backward GRU to have the same architecture as for SkipThought vectors.",3.2.1 LSTM and GRU,[0],[0]
+"For a sequence of T words {wt}t=1,...,T , a bidirectional LSTM computes a set of T vectors {ht}t.",3.2.2 BiLSTM with mean/max pooling,[0],[0]
+For t ∈,3.2.2 BiLSTM with mean/max pooling,[0],[0]
+"[1, . . .",3.2.2 BiLSTM with mean/max pooling,[0],[0]
+", T ], ht, is the concatenation of a forward LSTM and a backward LSTM that read the sentences in two opposite directions:
+−→ ht = −−−−→ LSTMt(w1, . . .",3.2.2 BiLSTM with mean/max pooling,[0],[0]
+", wT )←−
+",3.2.2 BiLSTM with mean/max pooling,[0],[0]
+"ht = ←−−−− LSTMt(w1, . . .",3.2.2 BiLSTM with mean/max pooling,[0],[0]
+", wT )",3.2.2 BiLSTM with mean/max pooling,[0],[0]
+ht =,3.2.2 BiLSTM with mean/max pooling,[0],[0]
+"[ −→ ht , ←− ht ]
+We experiment with two ways of combining the varying number of {ht}t to form a fixed-size vector, either by selecting the maximum value over each dimension of the hidden units (max pooling) (Collobert and Weston, 2008) or by considering the average of the representations (mean pooling).",3.2.2 BiLSTM with mean/max pooling,[0],[0]
+"The self-attentive sentence encoder (Liu et al., 2016; Lin et al., 2017) uses an attention mechanism over the hidden states of a BiLSTM to generate a representation u of an input sentence.",3.2.3 Self-attentive network,[0],[0]
+"The attention mechanism is defined as :
+h̄i = tanh(Whi + bw)
+αi = eh̄",3.2.3 Self-attentive network,[0],[0]
+T,3.2.3 Self-attentive network,[0],[0]
+"i uw∑
+",3.2.3 Self-attentive network,[0],[0]
+"i e h̄Ti uw u = ∑
+t
+αihi
+where {h1, . . .",3.2.3 Self-attentive network,[0],[0]
+", hT } are the output hidden vectors of a BiLSTM.",3.2.3 Self-attentive network,[0],[0]
+"These are fed to an affine transformation (W , bw) which outputs a set of keys (h̄1, . . .",3.2.3 Self-attentive network,[0],[0]
+", h̄T ).",3.2.3 Self-attentive network,[0],[0]
+The {αi} represent the score of similarity between the keys and a learned context query vector uw.,3.2.3 Self-attentive network,[0],[0]
+"These weights are used to produce the final representation u, which is a weighted linear combination of the hidden vectors.
+",3.2.3 Self-attentive network,[0],[0]
+"Following Lin et al. (2017) we use a selfattentive network with multiple views of the input sentence, so that the model can learn which part of the sentence is important for the given task.",3.2.3 Self-attentive network,[0],[0]
+"Concretely, we have 4 context vectors u1w, u 2 w, u 3 w, u 4 w which generate 4 representations that are then concatenated to obtain the sentence representation u. Figure 3 illustrates this architecture.",3.2.3 Self-attentive network,[0],[0]
+"One of the currently best performing models on classification tasks is a convolutional architecture termed AdaSent (Zhao et al., 2015), which concatenates different representations of the sentences
+at different level of abstractions.",3.2.4 Hierarchical ConvNet,[0],[0]
+"Inspired by this architecture, we introduce a faster version consisting of 4 convolutional layers.",3.2.4 Hierarchical ConvNet,[0],[0]
+"At every layer, a representation ui is computed by a max-pooling operation over the feature maps (see Figure 4).
+",3.2.4 Hierarchical ConvNet,[0],[0]
+The final representation u =,3.2.4 Hierarchical ConvNet,[0],[0]
+"[u1, u2, u3, u4] concatenates representations at different levels of the input sentence.",3.2.4 Hierarchical ConvNet,[0],[0]
+The model thus captures hierarchical abstractions of an input sentence in a fixed-size representation.,3.2.4 Hierarchical ConvNet,[0],[0]
+"For all our models trained on SNLI, we use SGD with a learning rate of 0.1 and a weight decay of 0.99.",3.3 Training details,[0],[0]
+"At each epoch, we divide the learning rate by 5 if the dev accuracy decreases.",3.3 Training details,[0],[0]
+We use minibatches of size 64 and training is stopped when the learning rate goes under the threshold of 10−5.,3.3 Training details,[0],[0]
+"For the classifier, we use a multi-layer perceptron with 1 hidden-layer of 512 hidden units.",3.3 Training details,[0],[0]
+We use opensource GloVe vectors trained on Common Crawl 840B2 with 300 dimensions as fixed word embeddings.,3.3 Training details,[0],[0]
+"Our aim is to obtain general-purpose sentence embeddings that capture generic information that is
+2https://nlp.stanford.edu/projects/ glove/
+useful for a broad set of tasks.",4 Evaluation of sentence representations,[0],[0]
+"To evaluate the quality of these representations, we use them as features in 12 transfer tasks.",4 Evaluation of sentence representations,[0],[0]
+We present our sentence-embedding evaluation procedure in this section.,4 Evaluation of sentence representations,[0],[0]
+We constructed a sentence evaluation tool3 to automate evaluation on all the tasks mentioned in this paper.,4 Evaluation of sentence representations,[0],[0]
+"The tool uses Adam (Kingma and Ba, 2014) to fit a logistic regression classifier, with batch size 64.
+",4 Evaluation of sentence representations,[0],[0]
+"Binary and multi-class classification We use a set of binary classification tasks (see Table 1) that covers various types of sentence classification, including sentiment analysis (MR, SST), question-type (TREC), product reviews (CR), subjectivity/objectivity (SUBJ) and opinion polarity (MPQA).",4 Evaluation of sentence representations,[0],[0]
+We generate sentence vectors and train a logistic regression on top.,4 Evaluation of sentence representations,[0],[0]
+"A linear classifier requires fewer parameters than an MLP and is thus suitable for small datasets, where transfer learning is especially well-suited.",4 Evaluation of sentence representations,[0],[0]
+"We tune the L2 penalty of the logistic regression with grid-search on the validation set.
+",4 Evaluation of sentence representations,[0],[0]
+Entailment and semantic relatedness We also evaluate on the SICK dataset for both entailment (SICK-E) and semantic relatedness (SICK-R).,4 Evaluation of sentence representations,[0],[0]
+We use the same matching methods as in SNLI and learn a Logistic Regression on top of the joint representation.,4 Evaluation of sentence representations,[0],[0]
+"For semantic relatedness evaluation, we follow the approach of (Tai et al., 2015) and learn to predict the probability distribution of relatedness scores.",4 Evaluation of sentence representations,[0],[0]
+"We report Pearson correlation.
+",4 Evaluation of sentence representations,[0],[0]
+"STS14 - Semantic Textual Similarity While semantic relatedness is supervised in the case of SICK-R, we also evaluate our embeddings on the 6 unsupervised SemEval tasks of STS14 (Agirre et al., 2014).",4 Evaluation of sentence representations,[0],[0]
+"This dataset includes subsets of news articles, forum discussions, image descriptions and headlines from news articles containing pairs of sentences (lower-cased), labeled with
+3https://www.github.com/ facebookresearch/SentEval
+a similarity score between 0 and 5.",4 Evaluation of sentence representations,[0],[0]
+"These tasks evaluate how the cosine distance between two sentences correlate with a human-labeled similarity score through Pearson and Spearman correlations.
+",4 Evaluation of sentence representations,[0],[0]
+Paraphrase detection The Microsoft Research Paraphrase Corpus is composed of pairs of sentences which have been extracted from news sources on the Web.,4 Evaluation of sentence representations,[0],[0]
+Sentence pairs have been human-annotated according to whether they capture a paraphrase/semantic equivalence relationship.,4 Evaluation of sentence representations,[0],[0]
+"We use the same approach as with SICK-E, except that our classifier has only 2 classes.
+",4 Evaluation of sentence representations,[0],[0]
+"Caption-Image retrieval The caption-image retrieval task evaluates joint image and language feature models (Hodosh et al., 2013; Lin et al., 2014).",4 Evaluation of sentence representations,[0],[0]
+"The goal is either to rank a large collection of images by their relevance with respect to a given query caption (Image Retrieval), or ranking captions by their relevance for a given query image (Caption Retrieval).",4 Evaluation of sentence representations,[0],[0]
+"We use a pairwise rankingloss Lcir(x, y): ∑ y ∑ k
+max(0, α− s(V y, Ux) + s(V y, Uxk))",4 Evaluation of sentence representations,[0],[0]
+"+∑ x ∑ k′ max(0, α− s(Ux, V y) + s(Ux, V yk′))
+",4 Evaluation of sentence representations,[0],[0]
+"where (x, y) consists of an image y with one of its associated captions x, (yk)k and (yk′)k′ are negative examples of the ranking loss, α is the margin and s corresponds to the cosine similarity.",4 Evaluation of sentence representations,[0],[0]
+U and V are learned linear transformations that project the caption x and the image y to the same embedding space.,4 Evaluation of sentence representations,[0],[0]
+We use a margin α = 0.2 and 30 contrastive terms.,4 Evaluation of sentence representations,[0],[0]
+"We use the same splits as in (Karpathy and Fei-Fei, 2015), i.e., we use 113k images from the COCO dataset (each containing 5 captions) for training, 5k images for validation and 5k images for test.",4 Evaluation of sentence representations,[0],[0]
+"For evaluation, we split the 5k images in 5 random sets of 1k images on which we compute Recall@K, with K ∈ {1, 5, 10} and
+median (Med r) over the 5 splits.",4 Evaluation of sentence representations,[0],[0]
+"For fair comparison, we also report SkipThought results in our setting, using 2048-dimensional pretrained ResNet101 (He et al., 2016) with 113k training images.",4 Evaluation of sentence representations,[0],[0]
+"In this section, we refer to ”micro” and ”macro” averages of development set (dev) results on transfer tasks whose metrics is accuracy: we compute a ”macro” aggregated score that corresponds to the classical average of dev accuracies, and the ”micro” score that is a sum of the dev accuracies, weighted by the number of dev samples.",5 Empirical results,[0],[0]
+Model We observe in Table 3 that different models trained on the same NLI corpus lead to different transfer tasks results.,5.1 Architecture impact,[0],[0]
+The BiLSTM-4096 with the max-pooling operation performs best on both SNLI and transfer tasks.,5.1 Architecture impact,[0],[0]
+"Looking at the micro and macro averages, we see that it performs significantly better than the other models LSTM, GRU, BiGRU-last, BiLSTM-Mean, inner-attention and the hierarchical-ConvNet.
+",5.1 Architecture impact,[0],[0]
+"Table 3 also shows that better performance on the training task does not necessarily translate in better results on the transfer tasks like when comparing inner-attention and BiLSTM-Mean for instance.
+",5.1 Architecture impact,[0],[0]
+We hypothesize that some models are likely to over-specialize and adapt too well to the biases of a dataset without capturing general-purpose information of the input sentence.,5.1 Architecture impact,[0],[0]
+"For example, the inner-attention model has the ability to focus only on certain parts of a sentence that are useful for the SNLI task, but not necessarily for the transfer tasks.",5.1 Architecture impact,[0],[0]
+"On the other hand, BiLSTM-Mean does not make sharp choices on which part of the sentence is more important than others.",5.1 Architecture impact,[0],[0]
+"The difference between the results seems to come from the different abilities of the models to incorporate general information while not focusing too much on specific features useful for the task at hand.
+",5.1 Architecture impact,[0],[0]
+"For a given model, the transfer quality is also sensitive to the optimization algorithm: when training with Adam instead of SGD, we observed that the BiLSTM-max converged faster on SNLI (5 epochs instead of 10), but obtained worse results on the transfer tasks, most likely because of the model and classifier’s increased capability to over-specialize on the training task.
+",5.1 Architecture impact,[0],[0]
+"Embedding size Figure 5 compares the overall performance of different architectures, showing the evolution of micro averaged performance with
+Model MR CR SUBJ MPQA SST TREC MRPC SICK-R SICK-E STS14 Unsupervised representation training (unordered sentences) Unigram-TFIDF 73.7 79.2 90.3 82.4 - 85.0 73.6/81.7 - - .58/.57",5.1 Architecture impact,[0],[0]
+ParagraphVec (DBOW) 60.2 66.9 76.3 70.7 - 59.4 72.9/81.1 - - .42/.43 SDAE 74.6 78.0,5.1 Architecture impact,[0],[0]
+90.8 86.9 - 78.4 73.7/80.7 - - .37/.38 SIF (GloVe + WR) - - - - 82.2 - - - 84.6 .69/ - word2vec BOW† 77.7 79.8 90.9 88.3 79.7 83.6 72.5/81.4 0.803 78.7,5.1 Architecture impact,[0],[0]
+.65/.64 fastText BOW†,5.1 Architecture impact,[0],[0]
+76.5 78.9 91.6 87.4 78.8 81.8 72.4/81.2 0.800 77.9 .63/.62,5.1 Architecture impact,[0],[0]
+GloVe BOW†,5.1 Architecture impact,[0],[0]
+78.7 78.5 91.6 87.6 79.8 83.6 72.1/80.9 0.800 78.6 .54/.56 GloVe Positional Encoding† 78.3 77.4 91.1 87.1 80.6 83.3 72.5/81.2 0.799 77.9,5.1 Architecture impact,[0],[0]
+.51/.54,5.1 Architecture impact,[0],[0]
+"BiLSTM-Max (untrained)† 77.5 81.3 89.6 88.7 80.7 85.8 73.2/81.6 0.860 83.4 .39/.48
+Unsupervised representation training (ordered sentences) FastSent 70.8 78.4 88.7 80.6 - 76.8 72.2/80.3 - - .63/.64 FastSent+AE 71.8 76.7 88.8 81.5 - 80.4 71.2/79.1 - - .62/.62 SkipThought 76.5 80.1 93.6 87.1 82.0 92.2 73.0/82.0 0.858 82.3 .29/.35",5.1 Architecture impact,[0],[0]
+"SkipThought-LN 79.4 83.1 93.7 89.3 82.9 88.4 - 0.858 79.5 .44/.45
+Supervised representation training CaptionRep (bow) 61.9 69.3 77.4 70.8 - 72.2 - - - .46/.42 DictRep (bow) 76.7 78.7 90.7 87.2 - 81.0 68.4/76.8 - - .67/.70",5.1 Architecture impact,[0],[0]
+NMT En-to-Fr 64.7 70.1 84.9 81.5 - 82.8 - - .43/.42 Paragram-phrase - - - - 79.7 - - 0.849 83.1 .71/ - BiLSTM-Max (on SST)† (*) 83.7 90.2 89.5 (*) 86.0 72.7/80.9 0.863 83.1 .55/.54 BiLSTM-Max (on SNLI)† 79.9 84.6 92.1 89.8 83.3 88.7 75.1/82.3 0.885 86.3 .68/.65,5.1 Architecture impact,[0],[0]
+"BiLSTM-Max (on AllNLI)† 81.1 86.3 92.4 90.2 84.6 88.2 76.2/83.1 0.884 86.3 .70/.67
+Supervised methods (directly trained for each task – no transfer) Naive Bayes - SVM 79.4 81.8 93.2 86.3 83.1 - - - - - AdaSent 83.1 86.3 95.5 93.3 - 92.4 - - - - TF-KLD - - - - - - 80.4/85.9 - - - Illinois-LH - - - - - - - - 84.5 - Dependency Tree-LSTM - - - - - - - 0.868 - -
+Table 4: Transfer test results for various architectures trained in different ways.",5.1 Architecture impact,[0],[0]
+"Underlined are best results for transfer learning approaches, in bold are best results among the models trained in the same way.",5.1 Architecture impact,[0],[0]
+"† indicates methods that we trained, other transfer models have been extracted from (Hill et al., 2016).",5.1 Architecture impact,[0],[0]
+"For best published supervised methods (no transfer), we consider AdaSent (Zhao et al., 2015), TF-KLD (Ji and Eisenstein, 2013), Tree-LSTM (Tai et al., 2015) and Illinois-LH system (Lai and Hockenmaier, 2014).",5.1 Architecture impact,[0],[0]
+(*),5.1 Architecture impact,[0],[0]
+"Our model trained on SST obtained 83.4 for MR and 86.0 for SST (MR and SST come from the same source), which we do not put in the tables for fair comparison with transfer methods.
+regard to the embedding size.
+",5.1 Architecture impact,[0],[0]
+"Since it is easier to linearly separate in high dimension, especially with logistic regression, it is not surprising that increased embedding sizes lead to increased performance for almost all models.",5.1 Architecture impact,[0],[0]
+"However, this is particularly true for some models (BiLSTM-Max, HConvNet, inner-att), which demonstrate unequal abilities to incorporate more information as the size grows.",5.1 Architecture impact,[0],[0]
+We hypothesize that such networks are able to incorporate information that is not directly relevant to the objective task (results on SNLI are relatively stable with regard to embedding size) but that can nevertheless be useful as features for transfer tasks.,5.1 Architecture impact,[0],[0]
+We report in Table 4 transfer tasks results for different architectures trained in different ways.,5.2 Task transfer,[0],[0]
+We group models by the nature of the data on which they were trained.,5.2 Task transfer,[0],[0]
+The first group corresponds to models trained with unsupervised unordered sentences.,5.2 Task transfer,[0],[0]
+"This includes bag-of-words models such as word2vec-SkipGram, the UnigramTFIDF model, the Paragraph Vector model (Le and Mikolov, 2014), the Sequential Denoising Auto-Encoder (SDAE) (Hill et al., 2016) and the SIF model (Arora et al., 2017), all trained on the Toronto book corpus (Zhu et al., 2015).",5.2 Task transfer,[0],[0]
+"The second group consists of models trained with unsu-
+pervised ordered sentences such as FastSent and SkipThought (also trained on the Toronto book corpus).",5.2 Task transfer,[0],[0]
+We also include the FastSent variant “FastSent+AE” and the SkipThought-LN version that uses layer normalization.,5.2 Task transfer,[0],[0]
+"We report results from models trained on supervised data in the third group, and also report some results of supervised methods trained directly on each task for comparison with transfer learning approaches.
+",5.2 Task transfer,[0],[0]
+"Comparison with SkipThought The best performing sentence encoder to date is the SkipThought-LN model, which was trained on a very large corpora of ordered sentences.",5.2 Task transfer,[0],[0]
+"With much less data (570k compared to 64M sentences) but with high-quality supervision from the SNLI dataset, we are able to consistently outperform the results obtained by SkipThought vectors.",5.2 Task transfer,[0],[0]
+We train our model in less than a day on a single GPU compared to the best SkipThought-LN network trained for a month.,5.2 Task transfer,[0],[0]
+"Our BiLSTM-max trained on SNLI performs much better than released SkipThought vectors on MR, CR, MPQA, SST, MRPC-accuracy, SICK-R, SICK-E and STS14 (see Table 4).",5.2 Task transfer,[0],[0]
+"Except for the SUBJ dataset, it also performs better than SkipThought-LN on MR, CR and MPQA.",5.2 Task transfer,[0],[0]
+We also observe by looking at the STS14 results that the cosine metrics in our embedding space is much more semantically informative than in SkipThought embedding space (pearson score of 0.68 compared to 0.29 and 0.44 for ST and ST-LN).,5.2 Task transfer,[0],[0]
+"We hypothesize that this is namely linked to the matching method of SNLI models which incorporates a notion of distance (element-wise product and absolute difference) during training.
+",5.2 Task transfer,[0.9610819061319406],['We propose a new challenge of physically situated commonsense inference that broadens the scope of natural language inference (NLI) with commonsense reasoning.']
+"NLI as a supervised training set Our findings indicate that our model trained on SNLI obtains much better overall results than models trained on other supervised tasks such as COCO, dictionary definitions, NMT, PPDB (Ganitkevitch et al., 2013) and SST.",5.2 Task transfer,[0],[0]
+"For SST, we tried exactly the same models as for SNLI; it is worth noting that SST is smaller than NLI.",5.2 Task transfer,[0],[0]
+Our representations constitute higher-quality features for both classification and similarity tasks.,5.2 Task transfer,[0],[0]
+"One explanation is that the natural language inference task constrains the model to encode the semantic information of the input sentence, and that the information required to perform NLI is generally discriminative and informative.
+",5.2 Task transfer,[0.9576301444546735],"['Our adversarial filtering paradigm is general, allowing potential applications to other datasets that require human composition of question answer pairs.']"
+Domain adaptation on SICK tasks Our transfer learning approach obtains better results than previous state-of-the-art on the SICK task - can be seen as an out-domain version of SNLI - for both entailment and relatedness.,5.2 Task transfer,[0],[0]
+"We obtain a pearson score of 0.885 on SICK-R while (Tai et al., 2015) obtained 0.868, and we obtain 86.3% test accuracy on SICK-E while previous best handengineered models (Lai and Hockenmaier, 2014) obtained 84.5%.",5.2 Task transfer,[0],[0]
+"We also significantly outperformed previous transfer learning approaches on SICK-E (Bowman et al., 2015) that used the parameters of an LSTM model trained on SNLI to fine-tune on SICK (80.8% accuracy).",5.2 Task transfer,[0],[0]
+"We hypothesize that our embeddings already contain the information learned from the in-domain task, and that learning only the classifier limits the number of parameters learned on the small out-domain task.
+",5.2 Task transfer,[0],[0]
+"Image-caption retrieval results In Table 5, we report results for the COCO image-caption retrieval task.",5.2 Task transfer,[0],[0]
+We report the mean recalls of 5 random splits of 1K test images.,5.2 Task transfer,[0],[0]
+"When trained with
+ResNet features and 30k more training data, the SkipThought vectors perform significantly better than the original setting, going from 33.8 to 37.9 for caption retrieval R@1, and from 25.9 to 30.6 on image retrieval R@1.",5.2 Task transfer,[0],[0]
+"Our approach pushes the results even further, from 37.9 to 42.4 on caption retrieval, and 30.6 to 33.2 on image retrieval.",5.2 Task transfer,[0],[0]
+"These results are comparable to previous approach of (Ma et al., 2015) that did not do transfer but directly learned the sentence encoding on the imagecaption retrieval task.",5.2 Task transfer,[0],[0]
+"This supports the claim that pre-trained representations such as ResNet image features and our sentence embeddings can achieve competitive results compared to features learned directly on the objective task.
+",5.2 Task transfer,[0],[0]
+MultiGenre NLI,5.2 Task transfer,[0],[0]
+"The MultiNLI corpus (Williams et al., 2017) was recently released as a multi-genre version of SNLI.",5.2 Task transfer,[0],[0]
+"With 433K sentence pairs, MultiNLI improves upon SNLI in its coverage: it contains ten distinct genres of written and spoken English, covering most of the complexity of the language.",5.2 Task transfer,[0],[0]
+We augment Table 4 with our model trained on both SNLI and MultiNLI (AllNLI).,5.2 Task transfer,[0],[0]
+We observe a significant boost in performance overall compared to the model trained only on SLNI.,5.2 Task transfer,[0],[0]
+"Our model even reaches AdaSent performance on CR, suggesting that having a larger coverage for the training task helps learn even better general representations.",5.2 Task transfer,[0],[0]
+"On semantic textual similarity STS14, we are also competitive with PPDB based paragramphrase embeddings with a pearson score of 0.70.",5.2 Task transfer,[0],[0]
+"Interestingly, on caption-related transfer tasks such as the COCO image caption retrieval task, training our sentence encoder on other genres from MultiNLI does not degrade the performance compared to the model trained only SNLI (which contains mostly captions), which confirms the generalization power of our embeddings.",5.2 Task transfer,[0],[0]
+This paper studies the effects of training sentence embeddings with supervised data by testing on 12 different transfer tasks.,6 Conclusion,[0],[0]
+We showed that models learned on NLI can perform better than models trained in unsupervised conditions or on other supervised tasks.,6 Conclusion,[0],[0]
+"By exploring various architectures, we showed that a BiLSTM network with max pooling makes the best current universal sentence encoding methods, outperforming existing approaches like SkipThought vectors.
+",6 Conclusion,[0],[0]
+We believe that this work only scratches the surface of possible combinations of models and tasks for learning generic sentence embeddings.,6 Conclusion,[0],[0]
+Larger datasets that rely on natural language understanding for sentences could bring sentence embedding quality to the next level.,6 Conclusion,[0],[0]
+"Many modern NLP systems rely on word embeddings, previously trained in an unsupervised manner on large corpora, as base features.",abstractText,[0],[0]
+"Efforts to obtain embeddings for larger chunks of text, such as sentences, have however not been so successful.",abstractText,[0],[0]
+Several attempts at learning unsupervised representations of sentences have not reached satisfactory enough performance to be widely adopted.,abstractText,[0],[0]
+"In this paper, we show how universal sentence representations trained using the supervised data of the Stanford Natural Language Inference datasets can consistently outperform unsupervised methods like SkipThought vectors (Kiros et al., 2015) on a wide range of transfer tasks.",abstractText,[0],[0]
+"Much like how computer vision uses ImageNet to obtain features, which can then be transferred to other tasks, our work tends to indicate the suitability of natural language inference for transfer learning to other NLP tasks.",abstractText,[0],[0]
+Our encoder is publicly available1.,abstractText,[0],[0]
+Supervised Learning of Universal Sentence Representations from Natural Language Inference Data,title,[0],[0]
+"Proceedings of the SIGDIAL 2016 Conference, pages 242–251, Los Angeles, USA, 13-15 September 2016. c©2016 Association for Computational Linguistics",text,[0],[0]
+"Current virtual personal assistants (PAs) require users to either formulate complex intents in one utterance (e.g., “call Peter Miller on his mobile phone”) or go through tedious sub-dialogues (e.g., “phone call” – who would you like to call? – “Peter Miller” – I have a mobile number and a work number.",1 Introduction,[0],[0]
+Which one do you want?).,1 Introduction,[0],[0]
+"This is not how one would interact with a human assistant, where the request would be naturally structured into smaller chunks that individually get acknowledged (e.g., “Can you make a connection for me?” – sure – “with Peter Miller” - uh huh",1 Introduction,[0],[0]
+- “on his mobile” - dialling now).,1 Introduction,[0],[0]
+"Current PAs signal ongoing understanding by displaying the state of
+the recognised speech (ASR) to the user, but not their semantic interpretation of it.",1 Introduction,[0],[0]
+Another type of assistant system forgoes enquiring user intent altogether and infers likely intents from context.,1 Introduction,[0],[0]
+"GoogleNow, for example, might present traffic information to a user picking up their mobile phone at their typical commute time.",1 Introduction,[0],[0]
+"These systems display their “understanding” state, but do not allow any type of interaction with it apart from dismissing the provided information.
+",1 Introduction,[0],[0]
+"In this work, we explore adding a graphical user interface (GUI) modality that makes it possible to see these interaction styles as extremes on a continuum, and to realise positions between these extremes and present a mixed graphical/voice enabled PA that can provide feedback of understanding to the user incrementally as the user’s utterance unfolds–allowing users to make requests in instalments instead of fully thought-out requests.",1 Introduction,[0],[0]
+It does this by signalling ongoing understanding in an intuitive tree-like GUI that can be displayed on a mobile device.,1 Introduction,[0],[0]
+"We evaluate our system by directing users to perform tasks using it under nonincremental (i.e., ASR endpointing) and incremental conditions and then compare the two conditions.",1 Introduction,[0],[0]
+"We further compare a non-adaptive with an adaptive (i.e., infers likely events) version of our system.",1 Introduction,[0],[0]
+"We report that the users found the interface intuitive and easy to use, and that users were able to perform tasks more efficiently with incremental as well as adaptive variants of the system.",1 Introduction,[0],[0]
+This work builds upon several threads of previous research: Chai et al. (2014),2 Related Work,[0],[0]
+"addressed misalignments in understanding (i.e., common ground (Clark and Schaefer, 1989)) between robots and humans by informing the human of the internal system state via speech.",2 Related Work,[0],[0]
+"We take this idea and ap-
+242
+ply it to a PA by displaying the internal state of the system to the user via a GUI (explained in Section 3.5), allowing the user to determine if system understanding has taken place–a way of providing feedback and backchannels to the user.",2 Related Work,[0],[0]
+"Dethlefs et al. (2016) provide a good review of work that show how backchannels facilitate grounding, feedback, and clarifications in human spoken dialogue, and apply an information density approach to determine when to backchannel using speech.",2 Related Work,[0],[0]
+"Because we don’t backchannel using speech here, there is no potential overlap between the user and the system; rather, our system can display backchannels and ask clarifications without frustrating the user through inadvertent overlaps.
+",2 Related Work,[0],[0]
+"Though different in many ways, our work is similar in some regards to Larsson et al. (2011), which displays information to the user and allows the user to navigate the display itself (e.g., by saying up or down in a menu list)–functionality that we intend to apply to our GUI in future work.",2 Related Work,[0],[0]
+"Our work is also comparable to SDS toolkits such as IrisTK (Skantze and Moubayed, 2012) and OpenDial (Lison, 2015) which enable SDS designers to visualise the internal state of their systems, though not for end user interpretability.
+",2 Related Work,[0],[0]
+"Some of the work here is inspired by the Microsoft Language Understanding Intelligent Service (LUIS) project (Williams et al., 2015).",2 Related Work,[0],[0]
+"While our system by no means achieves the scale that LUIS does, we offer here an additional contribution of an open source LUIS-like system (with the important addition of the graphical interface) that is authorable (using JSON files; we leave authoring using a web interface like that of LUIS to future work), extensible (affordances can be easily added), incremental (in that respect going beyond LUIS), trainable (i.e., can learn from examples, but can still function well without examples), and can learn through interacting (here we apply a user model that learns during interaction).",2 Related Work,[0],[0]
+"This section introduces and describes our SDS, which is modularised into four main components: ASR, natural language understanding (NLU), dialogue management (DM), and the graphical user interface (GUI) which, as explained below, is visualised as a right-branching tree.",3 System Description,[0],[0]
+The overall system is represented in Figure 1.,3 System Description,[0],[0]
+"For the remainder of this section, each module is explained in
+turn.",3 System Description,[0],[0]
+"As each module processes input incrementally (i.e., word for word), we first explain our framework for incremental processing.",3 System Description,[0],[0]
+An aspect of our SDS that sets it apart from others is the requirement that it process incrementally.,3.1 Incremental Dialogue,[0],[0]
+"One potential concern with incremental processing is regarding informativeness: why act early when waiting might provide additional information, resulting in better-informed decisions?",3.1 Incremental Dialogue,[0],[0]
+The trade off is naturalness as perceived by the user who is interacting with the SDS.,3.1 Incremental Dialogue,[0],[0]
+"Indeed, it has been shown that human users perceive incremental systems as being more natural than traditional, turn-based systems (Aist et al., 2006; Skantze and Schlangen, 2009; Skantze and Hjalmarsson, 1991; Asri et al., 2014), offer a more human-like experience (Edlund et al., 2008) and are more satisfying to interact with than non-incremental systems (Aist et al., 2007).",3.1 Incremental Dialogue,[0],[0]
+"Psycholinguistic research has also shown that humans comprehend utterances as they unfold and do not wait until the end of an utterance to begin the comprehension process (Tanenhaus et al., 1995; Spivey et al., 2002).
+",3.1 Incremental Dialogue,[0],[0]
+The trade-off between informativeness and naturalness can be reconciled when mechanisms are in place that allow earlier decisions to be repaired.,3.1 Incremental Dialogue,[0],[0]
+"Such mechanisms are offered by the incremental unit (IU) framework for SDS (Schlangen and Skantze, 2011), which we apply here.",3.1 Incremental Dialogue,[0],[0]
+"Following Kennington et al. (2014), the IU framework consists of a network of processing modules.",3.1 Incremental Dialogue,[0],[0]
+"A typical module takes input, performs some kind of processing on that data, and produces output.
+",3.1 Incremental Dialogue,[0],[0]
+The data are packaged as the payload of incremental units (IUs) which are passed between modules.,3.1 Incremental Dialogue,[0],[0]
+"The IUs themselves are interconnected via so-called same level links (SLL) and groundedin links (GRIN), the former allowing the linking of IUs as a growing sequence, the latter allowing that sequence to convey what IUs directly affect it (see Figure 2 for an example of incremental ASR).",3.1 Incremental Dialogue,[0],[0]
+"Thus IUs can be added, but can be later revoked and replaced in light of new information.",3.1 Incremental Dialogue,[0],[0]
+"The IU framework can take advantage of up-to-date information, but have the potential to function in such a way that users perceive as more natural.
+",3.1 Incremental Dialogue,[0],[0]
+The modules explained in the remainder of this section are implemented as IU-modules and process incrementally.,3.1 Incremental Dialogue,[0],[0]
+Each will now be explained.,3.1 Incremental Dialogue,[0],[0]
+The module that takes speech input from the user in our SDS is the ASR component.,3.2 Speech Recognition,[0],[0]
+"Incremental ASR must transcribe uttered speech into words which must be forthcoming from the ASR as early as possible (i.e., the ASR must not wait for endpointing to produce output).",3.2 Speech Recognition,[0],[0]
+"Each module that follows must also process incrementally, acting in lock-step upon input as it is received.",3.2 Speech Recognition,[0],[0]
+"Incremental ASR is not new (Baumann et al., 2009) and many of the current freely-accessible ASR systems can produce output (semi-) incrementally.",3.2 Speech Recognition,[0],[0]
+We opt for Google ASR for its vocabulary coverage of our evaluation language (German).,3.2 Speech Recognition,[0],[0]
+"Following, Baumann et al. (2016), we package output from the Google service into IUs which are passed to the NLU module, which we now explain.",3.2 Speech Recognition,[0],[0]
+We approach the task of NLU as a slot-filling task (a very common approach; see Tur et al. (2012)) where an intent is complete when all slots of a frame are filled.,3.3 Language Understanding,[0],[0]
+"The main driver of the NLU in
+our SDS is the SIUM model of NLU introduced in Kennington et al. (2013).",3.3 Language Understanding,[0],[0]
+"SIUM has been used in several systems which have reported substantial results in various domains, languages, and tasks (Han et al., 2015; Kennington et al., 2015; Kennington and Schlangen, 2017)",3.3 Language Understanding,[0],[0]
+"Though originally a model of reference resolution, it was always intended to be used for general NLU, which we do here.",3.3 Language Understanding,[0],[0]
+"The model is formalised as follows:
+",3.3 Language Understanding,[0],[0]
+P (I|U) = 1 P (U) P (I) ∑ r∈R P (U |R = r)P,3.3 Language Understanding,[0],[0]
+"(R = r|I) (1)
+That is, P (I|U) is the probability of the intent",3.3 Language Understanding,[0],[0]
+"I (i.e., a frame slot) behind the speaker’s (ongoing) utterance U .",3.3 Language Understanding,[0],[0]
+"This is recovered using the mediating variable R, a set of properties which map between aspects of U and aspects of I .",3.3 Language Understanding,[0],[0]
+"We opt for abstract properties here (e.g., the frame for restaurant might be filled by a certain type of cuisine intent such as italian which has properties like pasta, mediterranean, vegetarian, etc.).",3.3 Language Understanding,[0],[0]
+Properties are pre-defined by a system designer and can match words that might be uttered to describe the intent in question.,3.3 Language Understanding,[0],[0]
+"For P (R|I), probability is distributed uniformly over all properties that a given intent is specified to have.",3.3 Language Understanding,[0],[0]
+"(If other information is available, more informative priors could be used as well.)",3.3 Language Understanding,[0],[0]
+The mapping between properties and aspects of U can be learned from data.,3.3 Language Understanding,[0],[0]
+"During application, R is marginalised over, resulting in a distribution over possible intents.1",3.3 Language Understanding,[0],[0]
+"This occurs at each word increment, where the distribution from the previous increment is combined via P (I), keeping track of the distribution over time.
+",3.3 Language Understanding,[0],[0]
+We further apply a simple rule to add in apriori knowledge: if some r ∈ R and w ∈ U are such that r,3.3 Language Understanding,[0],[0]
+".= w (where .= is string equality; e.g., an intent has the property of pasta and the word pasta is uttered), then we set C(U=w|R=r)=1.",3.3 Language Understanding,[0],[0]
+"To allow for possible ASR confusions, we also apply C(U=w|R=r)= 1",3.3 Language Understanding,[0],[0]
+"− ld(w, r)/max(len(w), len(r)), where ld is the Levenshtein distance (but we only apply this if the calculated value is above a threshold of 0.6; i.e., the two strings are mostly similar).",3.3 Language Understanding,[0],[0]
+"For all otherw, C(w|r)=0.",3.3 Language Understanding,[0],[0]
+"This results in a distribution C, which we renormalise and blend with learned distribution to yield P (U |R).
+",3.3 Language Understanding,[0],[0]
+"1In Kennington et al. (2013) the authors apply Bayes’ Rule to allow P (U |R) to produce a distribution over properties, which we adopt here.
+",3.3 Language Understanding,[0],[0]
+We apply an instantiation of SIUM for each slot.,3.3 Language Understanding,[0],[0]
+"The candidate slots which are processed depends on the state of the dialogue; only slots represented by visible nodes are considered, thereby reducing the possible frames that could be predicted.",3.3 Language Understanding,[0],[0]
+"At each word increment, the updated slots (and their corresponding) distributions are given to the DM, which will now be explained.",3.3 Language Understanding,[0],[0]
+"The DM plays a crucial role in our SDS: as well as determining how to act, the DM is called upon to decide when to act, effectively giving the DM the control over timing of actions rather than relying on ASR endpointing–further separating our SDS from other systems.",3.4 Dialogue Manager,[0],[0]
+"The DM policy is based on a confidence score derived from the NLU (in this case, we used the distribution’s argmax value) using thresholds for the actions (see below), set by hand (i.e., trial and error).",3.4 Dialogue Manager,[0],[0]
+"At each word and resulting distribution from NLU, the DM needs to choose one of the following:
+• wait – wait for more information (i.e., for the next word)
+• select – as the NLU is confident enough, fill the slot can with the argmax from NLU
+• request – signal a (yes/no) clarification request on the current slot and the proposed filler
+• confirm – act on the confirmation of the user; in effect, select the proposed slot value
+Though the thresholds are statically set, we applied OpenDial (Lison, 2015) as an IU-module to perform the task of the DM with the future goal that these values could be adjusted through reinforcement learning (which OpenDial could provide).",3.4 Dialogue Manager,[0],[0]
+"The DM processes and makes a decision for each slot, with the assumption that only one slot out of all that are processed will result in an non-wait action (though this is not enforced).",3.4 Dialogue Manager,[0],[0]
+The goal of the GUI is to intuitively inform the user about the internal state of the ongoing understanding.,3.5 Graphical User Interface,[0],[0]
+"One motivation for this is that the user can determine if the system understood the user’s intent before providing the user with a response
+(e.g., a list of restaurants of a certain type); i.e., if any misunderstanding takes place, it happens before the system commits to an action and is potentially more easily repaired.
+",3.5 Graphical User Interface,[0],[0]
+"The display is a rightbranching tree, where the branches directly off the root node display the affordances of the system (i.e., what domains of things it can understand and do something about).",3.5 Graphical User Interface,[0],[0]
+"When the first tree is displayed, it represents a state of the NLU where none of the slots are filled, as in Figure 3.
+",3.5 Graphical User Interface,[0],[0]
+"When a user verbally selects a domain to ask about, the tree is adjusted to make that domain the only one displayed and
+the slots that are required for that domain are shown as branches.",3.5 Graphical User Interface,[0],[0]
+"The user can then fill those slots (i.e., branches) by uttering the displayed name, or, alternatively, by uttering the item to fill the slot directly.",3.5 Graphical User Interface,[0],[0]
+"For example, at a minimum, the user could utter the name of the domain then an item for each slot (e.g., food Thai downtown) or the speech could be more natural (e.g., I’m quite hungry, I am looking for some Thai food maybe in the downtown area).",3.5 Graphical User Interface,[0],[0]
+"Crucially, the user can also hesitate within and between chunks, as advancement is not triggered by silence thresholding, but rather semantically.",3.5 Graphical User Interface,[0],[0]
+"When something is uttered that falls into the request state of the DM as explained above, the display expands the subtree under question and marks the item with a question mark (see Figure 4).",3.5 Graphical User Interface,[0],[0]
+"At this point, the user can utter any kind of confirmation.",3.5 Graphical User Interface,[0],[0]
+A positive confirmation fills the slot with the item in question.,3.5 Graphical User Interface,[0],[0]
+"A negative confirmation retracts the question, but leaves the branch expanded.",3.5 Graphical User Interface,[0],[0]
+The expanded branches are displayed according to their rank as given by the NLU’s probability distribution.,3.5 Graphical User Interface,[0],[0]
+"Though a branch in the display can theoretically display an unlimited number of children, we opted to only show 7 children; if a branch had more, the final child displayed as an ellipsis.
+",3.5 Graphical User Interface,[0],[0]
+"A completed branch is collapsed, visually marking its corresponding slot as filled.",3.5 Graphical User Interface,[0],[0]
+"At any
+time, a user can backtrack by saying no (or equivalent) or start the entire interaction over from the beginning with a keyword, e.g., restart.",3.5 Graphical User Interface,[0],[0]
+"To aid the user’s attention, the node under question is marked in red, where completed slots are represented by outlined nodes, and filled nodes represent candidates for the current slot in question (see examples of all three in Figure 4).",3.5 Graphical User Interface,[0],[0]
+"For cases where the system is in the wait state for several words (during which there is no change in the tree), the system signals activity at each word by causing the red node in question to temporarily change to white, then back to red (i.e., appearing as a blinking node to the user).",3.5 Graphical User Interface,[0],[0]
+"Figure 5 shows a filled frame, represented as tree with one branch for each filled slot.
+",3.5 Graphical User Interface,[0],[0]
+Figure 5: Example tree where all of the slots are filled.,3.5 Graphical User Interface,[0],[0]
+"(i.e., domain:food, location:university, type:thai)
+",3.5 Graphical User Interface,[0],[0]
+Such an interface clearly shows the internal state of the SDS and whether or not it has understood the request so far.,3.5 Graphical User Interface,[0],[0]
+"It is designed to aid the user’s attention to the slot in question, and clearly indicates the affordances that the system has.",3.5 Graphical User Interface,[0],[0]
+"The interface is currently a read-only display that is purely speech-driven, but it could be augmented with additional functionalities, such as tapping a node for expansion or typing input that the system might not yet display.",3.5 Graphical User Interface,[0],[0]
+"It is currently implemented as a web-based interface (using the JavaScript D3 library), allowing it to be usable as a web application on any machine or mobile device.
+",3.5 Graphical User Interface,[0],[0]
+"Adaptive Branching The GUI as explained affords an additional straight-forward extension: in order to move our system towards adaptivity on the above-mentioned continuum, the GUI can be used to signal what the system thinks the user might say next.",3.5 Graphical User Interface,[0],[0]
+"This is done by expanding a branch and displaying a confirmation on that branch, signalling that the system predicts that the user will choose that particular branch.",3.5 Graphical User Interface,[0],[0]
+"Alternatively, if the system is confident that a user will fill a slot with a particular value, that particular slot can be filled without confirmation.",3.5 Graphical User Interface,[0],[0]
+This is displayed as a collapsed tree branch.,3.5 Graphical User Interface,[0],[0]
+"A system that perfectly predicts a user’s intent would fill an entire tree (i.e., all slots) only requiring the user to confirm once.",3.5 Graphical User Interface,[0],[0]
+A more careful system would confirm at each step (such an interaction would only require the user to utter confirmations and nothing else).,3.5 Graphical User Interface,[0],[0]
+We applied this adaptive variant of the tree in one of our experiments explained below.,3.5 Graphical User Interface,[0],[0]
+"In this section, we describe two experiments where we evaluated our system.",4 Experiments,[0],[0]
+It is our primary goal to show that our GUI is useful and signals understanding to the user.,4 Experiments,[0],[0]
+We also wish to show that incremental presentation of such a GUI is more effective than an endpointed system.,4 Experiments,[0],[0]
+We further want to show that an adaptive system is more effective than a non-adaptive system (though both would process incrementally).,4 Experiments,[0],[0]
+"In order to best evaluate our system, we recruited participants to interact with our system in varied settings to compare endpointed (i.e., non-incremental) and nonadaptive as well as adaptive versions.",4 Experiments,[0],[0]
+"We describe how the data were collected from the participants, then explain each experiment and give results.",4 Experiments,[0],[0]
+The participants were seated at a desk and given written instructions indicating that they were to use the system to perform as many tasks as possible in the allotted time.,4.1 Task & Procedure,[0],[0]
+Figure 6 shows some example tasks as they would be displayed (one at a time) to the user.,4.1 Task & Procedure,[0],[0]
+"A screen, tablet, and keyboard were on the desk in front of the user (see Figure",4.1 Task & Procedure,[0],[0]
+7).2,4.1 Task & Procedure,[0],[0]
+"The user was instructed to convey the task presented on the screen to the system such
+2We used a Samsung 8.4 Pro tablet turned to its side to show a larger width for the tree to grow to the right.",4.1 Task & Procedure,[0],[0]
+"The tablet only showed the GUI; the SDS ran on a separate computer.
+that the GUI on the tablet would have a completed tree (e.g., as in Figure 5).",4.1 Task & Procedure,[0],[0]
+"When the participant was satisfied that the system understood her intent, she was to press space bar on the keyboard which triggered a new task to be displayed on the screen and reset the tree to its start state on the tablet (as in Figure 3).
+",4.1 Task & Procedure,[0],[0]
+"The possible task domains were call, which had a single slot for name to be filled (i.e., one out of the 22 most common German given names); message which had a slot for name and a slot for the message (which, when invoked, would simply fill in directly from the
+ASR until 1 second of silence was detected); eat which had slots for type (in this case, 6 possible types) and location (in this case, 6 locations based around the city of Bielefeld); route which had slots for source city and the destination city (which shared the same list of the top 100 most populous German cities); and reminder which had a slot for message.
+",4.1 Task & Procedure,[0],[0]
+"For each task, the domain was first randomly chosen from the 5 possible domains, and then each slot value to be filled was randomly chosen (the message slot for the name and message domains was randomly selected from a list of 6 possible “messages”, each with 2-3 words; e.g., feed the cat, visit grandma, etc.).",4.1 Task & Procedure,[0],[0]
+The system kept track of which tasks were already presented to the participant.,4.1 Task & Procedure,[0],[0]
+"At any time after the first task, the system could choose a task that was previously presented and present it again to the participant (with a 50% chance) so the user would often see tasks that she had seen before (with the assumption that humans who use PAs often do perform similar, if not the same, tasks more than once).
+",4.1 Task & Procedure,[0],[0]
+"The participant was told that she would interact with the system in three different phases, each for 4 minutes, and to accomplish as many tasks as possible in that time allotment.",4.1 Task & Procedure,[0],[0]
+The participant was not told what the different phases were.,4.1 Task & Procedure,[0],[0]
+"The experiments described in Sections 4.2 and
+4.3 respectively describe and report a comparison first between the Phase 1 and 2 (denoted as the endpointed and incremental variants of the system) in order to establish whether or not the incremental variant produced better results than the endpointed variant.",4.1 Task & Procedure,[0],[0]
+We also report a comparison between Phase 2 and 3 (incremental and incremental-adaptive phases).,4.1 Task & Procedure,[0],[0]
+Phase 1 and Phase 3 are not directly comparable to each other as Phase 3 is really a variant of Phase 2.,4.1 Task & Procedure,[0],[0]
+"Because of this, we fixed the order of the phase presentation for all participants.",4.1 Task & Procedure,[0],[0]
+Each of these phases are described below.,4.1 Task & Procedure,[0],[0]
+"Before the participant began Phase 1, they were able to try it out for up to 4 minutes (in Phase 1 settings) and ask for help from the experimenter, allowing them to get used to the Phase 1 interface before the actual experiment began.",4.1 Task & Procedure,[0],[0]
+"After this trial phase, the experiment began with Phase 1.
+",4.1 Task & Procedure,[0],[0]
+"Phase 1: Non-incremental In this phase, the system did not appear to work incrementally; i.e., the system displayed tree updates after ASR endpointing (of 1.2 seconds–a reasonable amount of time to expect a response from a commercial spoken PA).",4.1 Task & Procedure,[0],[0]
+The system displayed the ongoing ASR on the tablet as it was recognised (as is often done in commercial PAs).,4.1 Task & Procedure,[0],[0]
+"At the end of Phase 1, a pop up window notified the user that the phase was complete.",4.1 Task & Procedure,[0],[0]
+"They then moved onto Phase 2.
+",4.1 Task & Procedure,[0],[0]
+"Phase 2: Incremental In this phase, the system displayed the tree information incrementally without endpointing.",4.1 Task & Procedure,[0],[0]
+"The ASR was no longer displayed; only the tree provided feedback in understanding, as explained in Section 3.5.
+",4.1 Task & Procedure,[0],[0]
+"After Phase 2, a 10-question questionnaire was displayed on the screen for the participant to fill out comparing Phase 1 and Phase 2.",4.1 Task & Procedure,[0],[0]
+"For each question, they had the choice of Phase 1, Phase
+2, Both, and Neither.",4.1 Task & Procedure,[0],[0]
+(See Appendix for full list of questions.),4.1 Task & Procedure,[0],[0]
+"After completing the questionnaire, they moved onto Phase 3.
+",4.1 Task & Procedure,[0],[0]
+"Phase 3: Incremental-adaptive In this phase, the incremental system was again presented to the participant with an added user model that “learned” about the user.",4.1 Task & Procedure,[0],[0]
+"If the user saw a task more than once, the user model would predict that, if the user chose that task domain again (e.g., route) then the system would automatically ask a clarification using the previously filled values (except for the message slot, which the user always had to fill).",4.1 Task & Procedure,[0],[0]
+"If the user saw a task more than 3 times, the system skipped asking for clarifications and filled in the domain slots completely, requiring the user only to press the space bar to confirm it was the correct one (i.e., to complete the task).",4.1 Task & Procedure,[0],[0]
+"An example progression might be as follows: a participant is presented with the task route from Bielefeld to Berlin, then the user would attempt to get the system to fill in the tree (i.e., slots) with those values.",4.1 Task & Procedure,[0],[0]
+"After some interaction in other domains, the user sees the same task again, and now after indicating the intent type route, the user must only say “yes” for each slot to confirm the system’s prediction.",4.1 Task & Procedure,[0],[0]
+"Later, if the task is presented a third time, when entering that domain (i.e, route), the two slots would already be filled.",4.1 Task & Procedure,[0],[0]
+"If later a different route task was presented, e.g., route from Bielefeld to Hamburg, the system would already have the two slots filled, but the user could backtrack by saying “no, to Hamburg” which would trigger the system to fill the appropriate slot with the corrected value.",4.1 Task & Procedure,[0],[0]
+"Later interactions within the route domain would ask for a clarification on the destination slot since it has had several possible values given by the participant, but continue to fill the from slot with Bielefeld.
+",4.1 Task & Procedure,[0],[0]
+"After Phase 3, the participants were presented with another questionnaire on the screen to fill out with the same questions (plus two additional questions), this time comparing Phase 2 and Phase 3.",4.1 Task & Procedure,[0],[0]
+"For each item, they had the choice of Phase 2, Phase 3, Both, and Neither.",4.1 Task & Procedure,[0],[0]
+"At the end of the three phases and questionnaires, the participants were given a final questionnaire to fill out by hand on their general impressions of the systems.
+",4.1 Task & Procedure,[0],[0]
+We recruited 14 participants for the evaluation.,4.1 Task & Procedure,[0],[0]
+"We used the Mint tools data collection framework (Kousidis et al., 2012) to log the interactions.",4.1 Task & Procedure,[0],[0]
+"Due to some technical issues, one of the participants
+did not log interactions.",4.1 Task & Procedure,[0],[0]
+"We collected data from 13 participants, post-Phase 2 questionnaires from 12 participants, post-Phase 3 questionnaires from all 14 participants, and general questionnaires from all 14 participants.",4.1 Task & Procedure,[0],[0]
+"In the experiments that follow, we report objective and subjective measures to determine the settings that produced superior results.
+",4.1 Task & Procedure,[0],[0]
+Metrics We report the subjective results of the participant questionnaires.,4.1 Task & Procedure,[0],[0]
+We only report those items that were statistically significant (see Appendix for a full list of the questions).,4.1 Task & Procedure,[0],[0]
+"We further report objective measures for each system variant: total number of completed tasks, fully correct frames, average frame f-score, and average time elapsed (averages are taken over all participants for each variant; we only used the 10 participants who fully interacted with all three phases).",4.1 Task & Procedure,[0],[0]
+Discussion is left to the end of this section.,4.1 Task & Procedure,[0],[0]
+"In this section we report the results of the evaluation between the endpointed (i.e., nonincremental; Phase 1) variant vs the incremental (Phase 2) variant of our system.
+",4.2 Experiment 1: Endpointed vs. Incremental,[0],[0]
+"Subjective Results We applied a multinomial test of significance to the results, treating all four possible answers as equally likely (with Bonferroni correction of 10).",4.2 Experiment 1: Endpointed vs. Incremental,[0],[0]
+"The item The interface was useful and easy to understand with the answer of Both was significant (χ2 (4, N = 12)",4.2 Experiment 1: Endpointed vs. Incremental,[0],[0]
+"= 9.0, p < .005), as was The assistant was easy and intuitive to use also with the answer Both (χ2 (4, N = 12) = 9.0, p < .005).",4.2 Experiment 1: Endpointed vs. Incremental,[0],[0]
+"The item I always understood what the system wanted from me was also answered Both significantly more times than other answers (χ2 (4, N = 14) = 9.0, p< .005), similarly for It was sometimes unclear to me if the assistant understood me with the answer of Both (χ2 (4, N = 12) = 10.0, p < .005).",4.2 Experiment 1: Endpointed vs. Incremental,[0],[0]
+"These responses tell us that though the participants did not report preference for either system variant, they reported a general positive impression of the GUI (in both variants).",4.2 Experiment 1: Endpointed vs. Incremental,[0],[0]
+"This is a nice result; the GUI could be used in either system with benefit to the users.
+",4.2 Experiment 1: Endpointed vs. Incremental,[0],[0]
+Objective Results The endpointed (Phase 1) and incremental (Phase 2) columns in Table 1 show the results of the objective evaluation.,4.2 Experiment 1: Endpointed vs. Incremental,[0],[0]
+"Though the average time per task and fscore for the endpointed variant are better than those of the
+incremental variant, the total number of tasks for the incremental variant was higher.
+",4.2 Experiment 1: Endpointed vs. Incremental,[0],[0]
+"Manual inspection of logs indicate that participants took advantage of the system’s flexibility of understanding instalments (i.e., filling frames incrementally).",4.2 Experiment 1: Endpointed vs. Incremental,[0],[0]
+"This is evidenced in that participants often uttered words understood by the system as being negative (e.g., nein/no), either as a result of an explicit confirmation request by the system (e.g., Thai?) or after a slot was incorrectly filled (something very easily determined through the GUI).",4.2 Experiment 1: Endpointed vs. Incremental,[0],[0]
+"This is a desired outcome of using our system; participants were able to repair local areas of misunderstanding as they took place instead of needing to correct an entire intent (i.e., frame).",4.2 Experiment 1: Endpointed vs. Incremental,[0],[0]
+"However, we cannot fully empirically measure these tendencies given our data.",4.2 Experiment 1: Endpointed vs. Incremental,[0],[0]
+"In this section we report results for the evaluation between the incremental (Phase 2) and incremental-adaptive (henceforth just adaptive; Phase 3) systems.
+",4.3 Experiment 2: Incremental vs. Incremental-Adaptive,[0],[0]
+Subjective Results We applied the same significance test as Experiment 1 (with Bonferroni correction of 12).,4.3 Experiment 2: Incremental vs. Incremental-Adaptive,[0],[0]
+"The item The interface was useful and easy to understand was answered with Both significantly (χ2 (4, N = 14)",4.3 Experiment 2: Incremental vs. Incremental-Adaptive,[0],[0]
+"= 10.0, p < .0042), The item I had the feeling that the assistant attempted to learn about me was answered with Neither (χ2 (4, N = 14) = 8.0, p < .0042), though Phase 3 was also marked (6 times).",4.3 Experiment 2: Incremental vs. Incremental-Adaptive,[0],[0]
+All other items were not significant.,4.3 Experiment 2: Incremental vs. Incremental-Adaptive,[0],[0]
+Here again we see that there is a general positive impression of the GUI under all conditions.,4.3 Experiment 2: Incremental vs. Incremental-Adaptive,[0],[0]
+"If anyone noticed that a system variant was attempting to learn a user model at all, they noticed that it was in Phase 3, as expected.
+",4.3 Experiment 2: Incremental vs. Incremental-Adaptive,[0],[0]
+"Objective Results The incremental (Phase 2) and adaptive (Phase 3) columns in Table 1 show
+the results for the objective evaluation for this experiment.",4.3 Experiment 2: Incremental vs. Incremental-Adaptive,[0],[0]
+"There is a clear difference between the two variants, with the adaptive showing more completed tasks, more fully correct frames, and a higher average fscore (all three likely due to the fact that frames were potentially pre-filled).",4.3 Experiment 2: Incremental vs. Incremental-Adaptive,[0],[0]
+"While the responses don’t express any preference for a particular system variant, the overall impression of the GUI was positive.",4.4 Discussion,[0],[0]
+"The objective measures show that there are gains to be made when the system signals understanding at a more finegrained interval than at the utterance level, due to the higher number of completed tasks and locallymade repairs.",4.4 Discussion,[0],[0]
+"There are further gains to be made when the system applies simple user modelling (i.e., adaptivity) by attempting to predict what the user might want to do in a chosen domain, decreasing the possibility of user error and allowing the system to accurately and quickly complete more tasks.",4.4 Discussion,[0],[0]
+"Participants also didn’t just get used to the system over time, as the average time per episode was fairly similar in all three phases.
+",4.4 Discussion,[0],[0]
+The open-ended questionnaire sheds additional light.,4.4 Discussion,[0],[0]
+"Most of the suggestions for improvement related to ASR misrecognition and speed (i.e., not about the system itself).",4.4 Discussion,[0],[0]
+Two participants suggested an ability to add “free input” or select alternatives from the tree.,4.4 Discussion,[0],[0]
+"Two participants suggested that the system be more responsive (i.e., in wait states), and give more feedback (i.e., backchannels) more often.",4.4 Discussion,[0],[0]
+"For those participants that expressed preference to the non-incremental system (Phase 1), none of them had used a speech-based PA before, whereas those that expressed preference to the incremental versions (Phases 2 and 3) use them regularly.",4.4 Discussion,[0],[0]
+"We conjecture that people without SDS experience equate understanding with ASR, whereas those that are more familiar with PAs know that perfect ASR doesn’t translate to perfect understanding–hence the need for a GUI.",4.4 Discussion,[0],[0]
+"A potential remedy would be to display ASR with the tree, signalling understanding despite ASR errors.",4.4 Discussion,[0],[0]
+"Given the results and analysis, we conclude that an intuitive presentation that signals a system’s ongoing understanding benefits end users who perform simple tasks which might be performed by a PA.",5 Conclusion & Future Work,[0],[0]
+"The GUI that we provided, using a right-branching
+tree, worked well; indeed, the participants who used it found it intuitive and easy to understand.",5 Conclusion & Future Work,[0],[0]
+There are gains to be made when the system signals understanding at finer-grained levels than just at the end of a pre-formulated utterance.,5 Conclusion & Future Work,[0],[0]
+There are further gains to be made when a PA attempts to learn (even a rudimentary) user model to predict what the user might want to do next.,5 Conclusion & Future Work,[0],[0]
+"The adaptivity moves our system from one extreme of the continuum–simple slot filling–closer towards the extreme that is fully predictive, with the additional benefit of being able to easily correct mistakes in the predictions.
+",5 Conclusion & Future Work,[0],[0]
+"For future work, we intend to provide simple authoring tools for the system to make building simple PAs using our GUI easy.",5 Conclusion & Future Work,[0],[0]
+We want to improve the NLU and scale to larger domains.3,5 Conclusion & Future Work,[0],[0]
+"We also plan on implementing this as a standalone application that could be run on a mobile device, which could actually perform the tasks.",5 Conclusion & Future Work,[0],[0]
+"It would further be beneficial to compare the GUI with a system that responds with speech (i.e., without a GUI).",5 Conclusion & Future Work,[0],[0]
+"Lastly, we will investigate using touch as an additional input modality to select between possible alternatives that are offered by the system.
+",5 Conclusion & Future Work,[0],[0]
+Acknowledgements Thanks to the anonymous reviewers who provided useful comments and suggestions.,5 Conclusion & Future Work,[0],[0]
+Thanks also to Julian Hough for helping with experiments.,5 Conclusion & Future Work,[0],[0]
+"We acknowledge support by the Cluster of Excellence “Cognitive Interaction Technology” (CITEC; EXC 277) at Bielefeld University, which is funded by the German Research Foundation (DFG), and the BMBF KogniHome project.
+",5 Conclusion & Future Work,[0],[0]
+"Appendix The following questions were asked on both questionnaires following Phase 2 and Phase 3 (comparing the two most latest used system versions; as translated into English):
+•",5 Conclusion & Future Work,[0],[0]
+The interface was useful and easy to understand.,5 Conclusion & Future Work,[0],[0]
+• The assistant was easy and intuitive to use.,5 Conclusion & Future Work,[0],[0]
+• The assistant understood what I wanted to say.,5 Conclusion & Future Work,[0],[0]
+• I always understood what the system wanted from me.,5 Conclusion & Future Work,[0],[0]
+•,5 Conclusion & Future Work,[0],[0]
+The assistant made many mistakes.,5 Conclusion & Future Work,[0],[0]
+• The assistant did not respond while I spoke.,5 Conclusion & Future Work,[0],[0]
+"3Kennington and Schlangen (2017) showed that our chosen NLU approach can scale fairly well, but the GUI has some limits when applied to larger domains with thousands of items.",5 Conclusion & Future Work,[0],[0]
+"We leave improved scaling to future work.
+",5 Conclusion & Future Work,[0],[0]
+"• It was sometimes unclear to me if the assistant understood me.
+",5 Conclusion & Future Work,[0],[0]
+• The assistant responded while I spoke.,5 Conclusion & Future Work,[0],[0]
+• The assistant sometimes did things that I did not expect.,5 Conclusion & Future Work,[0],[0]
+"• When the assistant made mistakes, it was easy for me
+to correct them.
+",5 Conclusion & Future Work,[0],[0]
+"In addition to the above 10 questions, the following were also asked on the questionnaire following Phase 3: • I had the feeling that the assistant attempted to learn
+about me.
+",5 Conclusion & Future Work,[0],[0]
+"• I had the feeling that the assistant made incorrect guesses.
+",5 Conclusion & Future Work,[0],[0]
+The following questions were used on the general questionnaire:,5 Conclusion & Future Work,[0],[0]
+"• I regularly use personal assistants such as Siri, Cortana,
+Google now or Amazon Echo:",5 Conclusion & Future Work,[0],[0]
+"Yes/No
+• I have never used a speech-based personal assistant: Yes/No
+• What was your general impression of our personal assistants?
+",5 Conclusion & Future Work,[0],[0]
+• Would you use one of these assistants on a smart phone or tablet if it were available?,5 Conclusion & Future Work,[0],[0]
+"If yes, which one?
+• Do you have suggestions that you think would help us improve our assistants?
+",5 Conclusion & Future Work,[0],[0]
+"• If you have used other speech-based interfaces before, do you prefer this interface?",5 Conclusion & Future Work,[0],[0]
+"Arguably, spoken dialogue systems are most often used not in hands/eyes-busy situations, but rather in settings where a graphical display is also available, such as a mobile phone.",abstractText,[0],[0]
+We explore the use of a graphical output modality for signalling incremental understanding and prediction state of the dialogue system.,abstractText,[0],[0]
+"By visualising the current dialogue state and possible continuations of it as a simple tree, and allowing interaction with that visualisation (e.g., for confirmations or corrections), the system provides both feedback on past user actions and guidance on possible future ones, and it can span the continuum from slot filling to full prediction of user intent (such as GoogleNow).",abstractText,[0],[0]
+"We evaluate our system with real users and report that they found the system intuitive and easy to use, and that incremental and adaptive settings enable users to accomplish more tasks.",abstractText,[0],[0]
+Supporting Spoken Assistant Systems with a Graphical User Interface that Signals Incremental Understanding and Prediction State,title,[0],[0]
+"Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing, pages 640–645 Brussels, Belgium, October 31 - November 4, 2018. c©2018 Association for Computational Linguistics
+640",text,[0],[0]
+"In structured input-output models as used in tasks like translation and image captioning, the attention variable decides which part of the input aligns to the current output.",1 Introduction,[0],[0]
+"Many attention mechanisms have been proposed (Xu et al., 2015; Bahdanau et al., 2014; Luong et al., 2015; Martins and Astudillo, 2016) but the de facto standard is a soft attention mechanism that first assigns attention weights to input encoder states, then computes an attention weighted ’soft’ aligned input state, which finally derives the output distribution.",1 Introduction,[0],[0]
+"This method is end to end differentiable and easy to implement.
+",1 Introduction,[0],[0]
+Another less popular variant is hard attention that aligns each output to exactly one input state but requires intricate training to teach the network to choose that state.,1 Introduction,[0],[0]
+"When successfully trained, hard attention is often found to be more accurate (Xu et al., 2015; Zaremba and Sutskever, 2015).",1 Introduction,[0],[0]
+"In NLP, a recent success has been in a monotonic hard attention setting in morphological inflection tasks (Yu et al., 2016; Aharoni and Goldberg, 2017).",1 Introduction,[0],[0]
+"For general seq2seq learning, methods like SparseMax (Martins and Astudillo, 2016) and local attention (Luong et al., 2015) were proposed to bridge the gap between soft and hard attention.
+",1 Introduction,[0],[0]
+"∗Both authors contributed equally to this work
+In this paper we propose a surprisingly simpler alternative based on the original joint distribution between output and attention, of which existing soft and hard attention mechanisms are approximations.",1 Introduction,[0],[0]
+"The joint model couples input states individually to the output like in hard attention, but it combines the advantage of end-to-end trainability of soft attention.",1 Introduction,[0],[0]
+"When the number of input states is large, we propose to use a simple approximation of the full joint distribution called Beam-joint.",1 Introduction,[0],[0]
+"This approximation is also easily trainable and does not suffer from the high variance of Monte-Carlo sampling gradients of hard attention.
+",1 Introduction,[0],[0]
+"We evaluated our model on five translation tasks and increased BLEU by 0.8 to 1.7 over soft attention, which in turn was better than hard and the recent Sparsemax (Martins and Astudillo, 2016) attention.",1 Introduction,[0],[0]
+"More importantly, the training process was as easy as soft attention.",1 Introduction,[0],[0]
+"For further support, we also evaluate on two morphological inflection tasks and got gains over soft and hard attention.",1 Introduction,[0],[0]
+For sequence to sequence (seq2seq) learning the encoder-decoder model is the standard and we review it here.,2 Background and Related Work,[0],[0]
+We then review related work on attention mechanisms on these models.,2 Background and Related Work,[0],[0]
+"Let x1, . . .",2.1 Attention-based Encoder Decoder Model,[0],[0]
+", xm denote the tokens in the input sequence that have been transformed by an encoder network to state vectors x1, . . .",2.1 Attention-based Encoder Decoder Model,[0],[0]
+", xm, which we jointly denote as x1...m. Let y1, . . .",2.1 Attention-based Encoder Decoder Model,[0],[0]
+", yn denote the output tokens in the target sequence.",2.1 Attention-based Encoder Decoder Model,[0],[0]
+"The Encoder-Decoder (ED) network factorizes Pr(y1, . . .",2.1 Attention-based Encoder Decoder Model,[0],[0]
+", yn|x1...m) as ∏n t=1 Pr(yt|x1...m, st) where st is a decoder state summarizing y1, . . .",2.1 Attention-based Encoder Decoder Model,[0],[0]
+yt−1.,2.1 Attention-based Encoder Decoder Model,[0],[0]
+"For each t, a hidden attention variable at is used to denote which part of x1...m aligns with yt.",2.1 Attention-based Encoder Decoder Model,[0],[0]
+"Let P (at = j|x1...m, st) denote the
+probability that encoder state xj is relevant for output yt.",2.1 Attention-based Encoder Decoder Model,[0],[0]
+"Typically this is estimated using a softmax function over attention scores computed from xj and decoder state st as follows.
+",2.1 Attention-based Encoder Decoder Model,[0],[0]
+"P (at = j|x1...m, st) =",2.1 Attention-based Encoder Decoder Model,[0],[0]
+"eAθ(xj ,st)∑m r=1",2.1 Attention-based Encoder Decoder Model,[0],[0]
+"e Aθ(xr,st) (1)
+where Aθ(., .) is the attention unit that scores each input state xj as per the decoder state st.",2.1 Attention-based Encoder Decoder Model,[0],[0]
+"Thereafter, in the popular soft-attention mechanism, the attention weighted sum of the input states is used to model log likelihood for each yt as
+log Pr(yt|x1...m) = log Pr(yt| ∑ a Pt(a)xa) (2)
+where Pt(at = j) is the short form for P (at = j|x1...m, st).",2.1 Attention-based Encoder Decoder Model,[0],[0]
+"Also, here and in the rest of the paper we drop st from P (yt) and Pt(a) for ease of notation.",2.1 Attention-based Encoder Decoder Model,[0],[0]
+The weighted sum ∑ a Pt(a)xa is called an input context ct which is fed to the decoder RNN along with yt for computing the next state st+1.,2.1 Attention-based Encoder Decoder Model,[0],[0]
+"We next review existing attention types.
+",2.2 Related Work,[0],[0]
+"Soft Attention is the attention method described in the previous section and is the current standard for seq2seq learning (Xu Chen, 2018; Koehn, 2017).",2.2 Related Work,[0],[0]
+"It was proposed for translation in (Bahdanau et al., 2014) and refined further in (Luong et al., 2015).",2.2 Related Work,[0],[0]
+"As shown in Eq 2, here each output is derived from an attention averaged input.",2.2 Related Work,[0],[0]
+This diffuses the coupling between the input and output.,2.2 Related Work,[0],[0]
+"The advantage of soft attention is end to end differentiability, and fast training and inference.
+",2.2 Related Work,[0],[0]
+"Hard Attention was proposed in its current form in (Xu et al., 2015) and attends to exactly one input state for an output1.",2.2 Related Work,[0],[0]
+"During training, log-likelihood is an expectation over sampled attentions:
+logPt(yt|x1...m) = M∑ l=1 logPt(yt|xãl) (3)
+where ã1, . . .",2.2 Related Work,[0],[0]
+", ãM are sampled from the multinomial Pt(a).",2.2 Related Work,[0],[0]
+"Because of the sampling, the gradient has to be computed by Monte Carlo gradient/REINFORCE (Williams, 1992) and is subject to high variance.",2.2 Related Work,[0],[0]
+"Many tricks are required to train
+1Note, attention on a single input encoder state does not imply attention on a single input token because RNNs or selfattention capture the context around the token.
+hard attention and there is little standardization across implementations.",2.2 Related Work,[0],[0]
+Xu et al (2015) use a combination of REINFORCE and soft attention.,2.2 Related Work,[0],[0]
+Zaremba et al(2015) uses curriculum learning that starts as soft-attention and gradually becomes discrete.,2.2 Related Work,[0],[0]
+"Ling& Rush (2017) aggregates multiple samples during training, and a single sampled attention while testing.",2.2 Related Work,[0],[0]
+"However, once trained well the sharp focus on memory provided by hard-attention has been found to yield superior performance (Xu et al., 2015; Shankar and Sarawagi, 2018).
+",2.2 Related Work,[0],[0]
+Sparse/Local Attention Many attempts have been made to bridge the gap between soft and hard attention.,2.2 Related Work,[0],[0]
+Luong et al (2015) proposes local attention that averages a window of input.,2.2 Related Work,[0],[0]
+"This has been refined later to include syntax (Chen et al., 2017; Sennrich and Haddow, 2016; Chen et al., 2018).",2.2 Related Work,[0],[0]
+"Another idea is to replace the softmax in soft attention with sparsity inducing operators (Martins and Astudillo, 2016; Niculae and Blondel, 2017).",2.2 Related Work,[0],[0]
+"However, all sparse/local attention methods continue to compute P (y) from an attention weighted sum of inputs (Eq: 2) unlike hard attention.",2.2 Related Work,[0],[0]
+"We start from an explicit joint representation of the uncertainty of the attention and output variables.
+",3 Joint Attention-Output Models,[0],[0]
+logPt(yt|x1...m) = log ∑ a Pt(a)Pt(yt|xa),3 Joint Attention-Output Models,[0],[0]
+"(4)
+The joint model directly couples individual input states to the output, and thus is a type of hard attention.",3 Joint Attention-Output Models,[0],[0]
+"Also, by taking an expectation, instead of a single hard attention, it enjoys differentiability as in soft-attention.",3 Joint Attention-Output Models,[0],[0]
+"We call this the full-joint method.
+",3 Joint Attention-Output Models,[0],[0]
+"Unfortunately, either when the vocabulary or the number of encoder states (m) is large, full-joint is not practical.",3 Joint Attention-Output Models,[0],[0]
+Existing hard and soft attentions can be viewed as its approximations that either marginalize early or hard select attention.,3 Joint Attention-Output Models,[0],[0]
+We show a surprisingly simple alternative approximation that provides hard attention without its training complexity.,3 Joint Attention-Output Models,[0],[0]
+"Our method called Beam-joint deterministically selects the top-k highest attention values and approximates the full joint log probability as
+logPt(yt|x1...m)",3 Joint Attention-Output Models,[0],[0]
+"≈ log ∑
+a∈TopK(Pt(a))
+Pt(a)Pt(yt|xa)",3 Joint Attention-Output Models,[0],[0]
+"(5)
+Thus, in beam-joint, we first compute the multinomial attention distribution in O(m) time using
+Eq 1, select the Top-K input positions from the multinomial, next with hard attention on each position compute K output softmax, and finally compute the attention weighted output mixture distribution.",3 Joint Attention-Output Models,[0],[0]
+The number of output softmax is K times in normal soft-attention but the actual running time overhead is only 20–30% for translation tasks.,3 Joint Attention-Output Models,[0],[0]
+We used the default pass-through TopK operator (which is not differentiable) and optimize the beamapproximation directly.,3 Joint Attention-Output Models,[0],[0]
+"We also experimented with a version which smoothly shifts from soft-attention to beam-attention, but found that training the beamapproximation directly leads to best results.
+",3 Joint Attention-Output Models,[0],[0]
+We show empirically that this very simple scheme is surprisingly effective compared to existing hard and soft attention over several translation tasks.,3 Joint Attention-Output Models,[0],[0]
+"Unlike sampling and variational methods that require careful tuning and exotic tricks during training, this simple scheme trains as easily as softattention, without significant increase in training time because even K = 6 works well enough.
+",3 Joint Attention-Output Models,[0],[0]
+"Another reason why our ’sum of probabilities’ form performs better could be the softmax barrier effect highlighted in (Yang et al., 2018).",3 Joint Attention-Output Models,[0],[0]
+The authors argue that the richness of natural language cannot be captured in normal softmax due to the low rank constraint it imposes on input-to-output matrix.,3 Joint Attention-Output Models,[0],[0]
+They improve performance using a Mixture of Softmax model.,3 Joint Attention-Output Models,[0],[0]
+Our beam-joint also is a mixture of softmax and possibly achieves higher rank than a single softmax.,3 Joint Attention-Output Models,[0],[0]
+"However their mixture requires learning multiple softmax matrices, whereas ours are due to varying attention and we do not learn any extra parameters than soft attention.",3 Joint Attention-Output Models,[0],[0]
+We compare attention models on two NLP tasks: machine translation and morphological inflection.,4 Experiments,[0],[0]
+We experiment on five language pairs from three datasets:,4.1 Machine translation,[0],[0]
+"IWSLT15 English↔Vietnamese (Cettolo et al., 2015) which contains 133k train, 1.5k validation(tst2012) and 1.2k test(tst2013) sentence pairs respectively; IWSLT14 German↔English (Cettolo et al., 2014) which contains 160k train, 7.2k validation and 6.7k test sentence pairs respectively ; Workshop on Asian Translation 2017 Japanese→English",4.1 Machine translation,[0],[0]
+"(Nakazawa et al., 2016) which contains 2M train, 1.8k validation and 1.8k test sentence pairs respectively.",4.1 Machine translation,[0],[0]
+"We use a 2 layer bi-
+directional encoder and a 2 layer unidirectional decoder with 512 hidden LSTM units and 0.2 dropout rate with vanilla SGD optimizer.",4.1 Machine translation,[0],[0]
+We base our implementation2 on the NMT code3 in Tensorflow.,4.1 Machine translation,[0],[0]
+"We did no special hyper-parameter tuning and used standard-softmax tuned parameters on a batch size of 64.
+",4.1 Machine translation,[0],[0]
+Comparing attention models We compare beam-joint (default K = 6) with standard soft and hard attention.,4.1 Machine translation,[0],[0]
+"To further dissect the reasons behind beam-joint’s gains, we compare beam-joint with a sampling based approximation of full-joint called Sample-Joint that replaces the TopK in Eq 5 with K attention weighted samples.",4.1 Machine translation,[0],[0]
+We train samplejoint as well as hard-attention with REINFORCE with 6-samples.,4.1 Machine translation,[0],[0]
+"Also to ascertain that our gains are not explained by sparsity alone, we compare with Sparsemax (Martins and Astudillo, 2016).
+",4.1 Machine translation,[0],[0]
+In Table 1 we show perplexity and BLEU with three beam sizes (B).,4.1 Machine translation,[0],[0]
+"Beam-joint significantly outperforms all other variants, including the standard soft attention by 0.8 to 1.7 BLEU points.",4.1 Machine translation,[0],[0]
+The perplexity shows even a more impressive drop in all five datasets.,4.1 Machine translation,[0],[0]
+"Also we observe training times for beam-joint to be only 20–30% higher than softattention, establishing that beam-joint is both practical and more accurate.
+",4.1 Machine translation,[0],[0]
+Sample-joint is much worse than beam-joint.,4.1 Machine translation,[0],[0]
+"Apart from the problem of high variance of gradients in the reinforce step, another problem is that sampling repeats states whereas TopK in beamjoint gets distinct states.",4.1 Machine translation,[0],[0]
+"Hard attention too faces training issues and performs worse than soft attention, explaining why it is not commonly used in NMT.",4.1 Machine translation,[0],[0]
+"Sample-joint is better than Hard attention, further highlighting the merits of the joint distribution.",4.1 Machine translation,[0],[0]
+Sparsemax is competitive but marginally worse than soft attention.,4.1 Machine translation,[0],[0]
+"This is concordant with the recent experiments of (Niculae and Blondel, 2017).
+",4.1 Machine translation,[0],[0]
+Comparison with Full Joint Next we evaluate the impact of our beam-joint approximation against full-joint and soft attention.,4.1 Machine translation,[0],[0]
+"Full-joint cannot scale to large vocabularies, therefore we only compare on En-Vi with a batch size of 32.",4.1 Machine translation,[0],[0]
+Figure 1a shows final BLEU of these methods as well as BLEU against increasing training steps.,4.1 Machine translation,[0],[0]
+"Beam-joint both converges faster and to a higher score than soft-
+2https://github.com/sid7954/beam-joint-attention 3https://github.com/tensorflow/nmt
+attention.",4.1 Machine translation,[0],[0]
+"For example by 10000 steps ( 5 epochs), beam-joint has surpassed soft-attention by almost 2 BLEU points (20 vs 22).",4.1 Machine translation,[0],[0]
+"Moreover beam-joint tracks full-joint well, and both converge finally to similar BLEUs near 27 against 26 for soft attention.",4.1 Machine translation,[0],[0]
+"This shows that an attention-beam of size 6 suffices to approximate full joint almost perfectly.
+",4.1 Machine translation,[0],[0]
+"Next, in Figure 1b, we compare beam-joint (solid lines) and soft attention (dotted lines) for convergence rates on three other datasets.",4.1 Machine translation,[0],[0]
+"For each dataset beam-joint trains faster with a consistent improvement of more than 1 BLEU.
+",4.1 Machine translation,[0],[0]
+Effect of K in Beam-joint We show the effect of K used in TopK of beam-joint in Figure 2 on the En-Vi and De-En tasks.,4.1 Machine translation,[0],[0]
+On En-Vi BLEU increases from 16.0 to 25.7 to 26.5 as K increases from 1 to 2 to 3; and then saturates quickly.,4.1 Machine translation,[0],[0]
+Similar behavior is observed in the other dataset.,4.1 Machine translation,[0],[0]
+"This shows that small K values like 6 suffice for translation.
+",4.1 Machine translation,[0],[0]
+We further evaluate whether the performance gain of beam-joint is due to the softmax barrier alone in Table 2.,4.1 Machine translation,[0],[0]
+"We used our models trained with K=6, and deployed them for test-time greedy decoding with K set to 1.",4.1 Machine translation,[0],[0]
+"Since the output now has only a single softmax component, this model faces the same bottleneck as soft-attention.",4.1 Machine translation,[0],[0]
+"One can observe that as expected these results are worse than beam-joint with K=6, however they still exceed soft-attention by a significant margin, demonstrating that the performance gain is not solely due to the effect of ensembling or softmax-barrier.",4.1 Machine translation,[0],[0]
+"To demonstrate the use of this approach beyond translation, we next consider two morphological
+inflection tasks.",4.2 Morphological Inflection,[0],[0]
+"We use (Durrett and DeNero, 2013)’s dataset containing 8 inflection forms for German Nouns (de-N) and 27 forms for German Verbs (de-V).",4.2 Morphological Inflection,[0],[0]
+The number of training words is 2364 and 1627 respectively while the validation and test words are 200 each.,4.2 Morphological Inflection,[0],[0]
+"We train a one layer encoder and decoder with 128 hidden LSTM units each with a dropout rate of 0.2 using Adam(Kingma and Ba, 2014) and measure 0/1 accuracy for soft, hard and full-joint attention models.",4.2 Morphological Inflection,[0],[0]
+"Due to limited input length and vocabulary, we were able to run directly the full-joint model.",4.2 Morphological Inflection,[0],[0]
+"We also ran the 100 units wide two layer LSTM with hard-monotonic attention provided by (Aharoni and Goldberg, 2017) labeled Hard-Mono4.",4.2 Morphological Inflection,[0],[0]
+The table below shows that even for this task full-joint scores over existing attention models5.,4.2 Morphological Inflection,[0],[0]
+"The generic full-joint attention provides slight gains even over the task specific hard-monotonic attention.
+",4.2 Morphological Inflection,[0],[0]
+"Dataset Soft Hard HardMono
+FullJoint
+de-N 85.50 85.13 85.65 85.81 de-V 94.91 95.04 95.31 95.52
+Conclusion
+",4.2 Morphological Inflection,[0],[0]
+In this paper we showed a simple yet effective approximation of the joint attention-output distribution in sequence to sequence learning.,4.2 Morphological Inflection,[0],[0]
+Our joint model consistently provides higher accuracy without significant running time overheads in five translation and two morphological inflection tasks.,4.2 Morphological Inflection,[0],[0]
+"An interesting direction for future work is to extend beam-joint to multi-head attention architectures as in (Vaswani et al., 2017; Xu Chen, 2018).
+",4.2 Morphological Inflection,[0],[0]
+"Acknowledgements We thank NVIDIA Corporation for supporting this research by the donation of Titan X GPU.
+4https://github.com/roeeaharoni/morphologicalreinflection
+5Our numbers are lower than earlier reported because ours use a single model whereas (Aharoni and Goldberg, 2017) and others report from an ensemble of five models.",4.2 Morphological Inflection,[0],[0]
+"In this paper we show that a simple beam approximation of the joint distribution between attention and output is an easy, accurate, and efficient attention mechanism for sequence to sequence learning.",abstractText,[0],[0]
+The method combines the advantage of sharp focus in hard attention and the implementation ease of soft attention.,abstractText,[0],[0]
+On five translation and two morphological inflection tasks we show effortless and consistent gains in BLEU compared to existing attention mechanisms.,abstractText,[0],[0]
+Surprisingly Easy Hard-Attention for Sequence to Sequence Learning,title,[0],[0]
+"Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing, pages 93–104 Brussels, Belgium, October 31 - November 4, 2018. c©2018 Association for Computational Linguistics
+93
+We present Swag, a new dataset with 113k multiple choice questions about a rich spectrum of grounded situations. To address the recurring challenges of the annotation artifacts and human biases found in many existing datasets, we propose Adversarial Filtering (AF), a novel procedure that constructs a de-biased dataset by iteratively training an ensemble of stylistic classifiers, and using them to filter the data. To account for the aggressive adversarial filtering, we use state-of-theart language models to massively oversample a diverse set of potential counterfactuals. Empirical results demonstrate that while humans can solve the resulting inference problems with high accuracy (88%), various competitive models struggle on our task. We provide comprehensive analysis that indicates significant opportunities for future research.",text,[0],[0]
+"When we read a story, we bring to it a large body of implicit knowledge about the physical world.",1 Introduction,[0],[0]
+"For instance, given the context “on stage, a woman takes a seat at the piano,” shown in Table 1, we can easily infer what the situation might look like: a woman is giving a piano performance, with a crowd watching her.",1 Introduction,[0],[0]
+"We can furthermore infer her likely next action: she will most likely set her fingers on the piano keys and start playing.
+",1 Introduction,[1.0000000873876458],['We can furthermore infer her likely next action: she will most likely set her fingers on the piano keys and start playing.']
+"This type of natural language inference requires commonsense reasoning, substantially broadening the scope of prior work that focused primarily on
+linguistic entailment (Chierchia and McConnellGinet, 2000).",1 Introduction,[1.0000000152561872],"['This type of natural language inference requires commonsense reasoning, substantially broadening the scope of prior work that focused primarily on linguistic entailment (Chierchia and McConnellGinet, 2000).']"
+"Whereas the dominant entailment paradigm asks if two natural language sentences (the ‘premise’ and the ‘hypothesis’) describe the same set of possible worlds (Dagan et al., 2006; Bowman et al., 2015), here we focus on whether a (multiple-choice) ending describes a possible (future) world that can be anticipated from the situation described in the premise, even when it is not strictly entailed.",1 Introduction,[1.0],"['Whereas the dominant entailment paradigm asks if two natural language sentences (the ‘premise’ and the ‘hypothesis’) describe the same set of possible worlds (Dagan et al., 2006; Bowman et al., 2015), here we focus on whether a (multiple-choice) ending describes a possible (future) world that can be anticipated from the situation described in the premise, even when it is not strictly entailed.']"
+"Making such inference necessitates a rich understanding about everyday physical situations, including object affordances (Gibson, 1979) and frame semantics (Baker et al., 1998).
+",1 Introduction,[0],[0]
+A first step toward grounded commonsense inference with today’s deep learning machinery is to create a large-scale dataset.,1 Introduction,[0],[0]
+"However, recent work has shown that human-written datasets are susceptible to annotation artifacts: unintended stylistic patterns that give out clues for the gold labels (Gururangan et al., 2018; Poliak et al., 2018).",1 Introduction,[1.0],"['However, recent work has shown that human-written datasets are susceptible to annotation artifacts: unintended stylistic patterns that give out clues for the gold labels (Gururangan et al., 2018; Poliak et al., 2018).']"
+"As a result, models trained on such datasets with hu-
+man biases run the risk of over-estimating the actual performance on the underlying task, and are vulnerable to adversarial or out-of-domain examples (Wang et al., 2018; Glockner et al., 2018).
+",1 Introduction,[0],[0]
+"In this paper, we introduce Adversarial Filtering (AF), a new method to automatically detect and reduce stylistic artifacts.",1 Introduction,[1.0],"['In this paper, we introduce Adversarial Filtering (AF), a new method to automatically detect and reduce stylistic artifacts.']"
+We use this method to construct Swag: an adversarial dataset with 113k multiple-choice questions.,1 Introduction,[1.0],['We use this method to construct Swag: an adversarial dataset with 113k multiple-choice questions.']
+"We start with pairs of temporally adjacent video captions, each with a context and a follow-up event that we know is physically possible.",1 Introduction,[1.0],"['We start with pairs of temporally adjacent video captions, each with a context and a follow-up event that we know is physically possible.']"
+We then use a state-of-theart language model fine-tuned on this data to massively oversample a diverse set of possible negative sentence endings (or counterfactuals).,1 Introduction,[1.0],['We then use a state-of-theart language model fine-tuned on this data to massively oversample a diverse set of possible negative sentence endings (or counterfactuals).']
+"Next, we filter these candidate endings aggressively and adversarially using a committee of trained models to obtain a population of de-biased endings with similar stylistic features to the real ones.",1 Introduction,[0],[0]
+"Finally, these filtered counterfactuals are validated by crowd workers to further ensure data quality.
+",1 Introduction,[0],[0]
+"Extensive empirical results demonstrate unique contributions of our dataset, complementing existing datasets for natural langauge inference (NLI) (Bowman et al., 2015; Williams et al., 2018) and commonsense reasoning (Roemmele et al., 2011; Mostafazadeh et al., 2016; Zhang et al., 2017).",1 Introduction,[0],[0]
+"First, our dataset poses a new challenge of grounded commonsense inference that is easy for humans (88%) while hard for current state-ofthe-art NLI models (<60%).",1 Introduction,[0],[0]
+"Second, our proposed adversarial filtering methodology allows for cost-effective construction of a large-scale dataset while substantially reducing known annotation artifacts.",1 Introduction,[0],[0]
+"The generality of adversarial filtering allows it to be applied to build future datasets, ensuring that they serve as reliable benchmarks.
+",1 Introduction,[0],[0]
+"2 Swag: Our new dataset
+We introduce a new dataset for studying physically grounded commonsense inference, called Swag.1",1 Introduction,[0],[0]
+Our task is to predict which event is most likely to occur next in a video.,1 Introduction,[0],[0]
+"More formally, a model is given a context c = (s,n): a complete sentence s and a noun phrase n that begins a second sentence, as well as a list of possible verb phrase sentence endings V = {v1, . . .",1 Introduction,[0.9978459614859622],"['More formally, a model is given a context c = (s,n): a complete sentence s and a noun phrase n that begins a second sentence, as well as a list of possible verb phrase sentence endings V = {v1, .']"
+",v4}.",1 Introduction,[0],[0]
+"See Figure 1 for an example triple (s,n,vi).",1 Introduction,[0],[0]
+"The model must then select the most appropriate verb phrase vî ∈ V .
+1Short for Situations With Adversarial Generations.
+",1 Introduction,[0],[0]
+"Overview Our corpus consists of 113k multiple choice questions (73k training, 20k validation, 20k test) and is derived from pairs of consecutive video captions from ActivityNet Captions (Krishna et al., 2017; Heilbron et al., 2015) and the Large Scale Movie Description Challenge (LSMDC; Rohrbach et al., 2017).",1 Introduction,[0],[0]
+The two datasets are slightly different in nature and allow us to achieve broader coverage: ActivityNet contains 20k YouTube clips containing one of 203 activity types (such as doing gymnastics or playing guitar); LSMDC consists of 128k movie captions (audio descriptions and scripts).,1 Introduction,[0],[0]
+"For each pair of captions, we use a constituency parser (Stern et al., 2017) to split the second sentence into noun and verb phrases (Figure 1).2 Each question has a human-verified gold ending and 3 distractors.",1 Introduction,[0],[0]
+"In this section, we outline the construction of Swag.",3 A solution to annotation artifacts,[0.9558395696219287],"['In this section, we evaluate the performance of various NLI models on Swag.']"
+"We seek dataset diversity while minimizing annotation artifacts, conditional stylistic patterns such as length and word-preference biases.",3 A solution to annotation artifacts,[0],[0]
+"For many NLI datasets, these biases have been shown to allow shallow models (e.g. bag-of-words) obtain artificially high performance.
+",3 A solution to annotation artifacts,[0],[0]
+"To avoid introducing easily “gamed” patterns, we present Adversarial Filtering (AF), a generallyapplicable treatment involving the iterative refinement of a set of assignments to increase the entropy under a chosen model family.",3 A solution to annotation artifacts,[0],[0]
+"We then discuss how we generate counterfactual endings, and
+2We filter out sentences with rare tokens (≤3 occurrences), that are short (l ≤ 5), or that lack a verb phrase.
+",3 A solution to annotation artifacts,[0],[0]
+Algorithm 1 Adversarial filtering (AF) of negative samples.,3 A solution to annotation artifacts,[0],[0]
+"During our experiments, we set Neasy = 2 for refining a population ofN− = 1023 negative examples to k = 9, and used a 80%/20% train/test split.
+while convergence not reached do • Split the dataset D randomly up into training and testing portions Dtr and Dte. •",3 A solution to annotation artifacts,[0],[0]
+Optimize a model fθ on Dtr. for index i in Dte do •,3 A solution to annotation artifacts,[0],[0]
+Identify easy indices:,3 A solution to annotation artifacts,[0],[0]
+Aeasyi = {j ∈ Ai : fθ(x,3 A solution to annotation artifacts,[0],[0]
++ i ) > fθ(x,3 A solution to annotation artifacts,[0],[0]
+"− i,j)}
+• Replace N easy easy indices j ∈ Aeasyi with adversarial indices k 6∈",3 A solution to annotation artifacts,[0],[0]
+Ai satisfying fθ(x,3 A solution to annotation artifacts,[0],[0]
+"− i,k) > fθ(x",3 A solution to annotation artifacts,[0],[0]
+"− i,j).
+end for end while
+finally, the models used for filtering.",3 A solution to annotation artifacts,[0],[0]
+"In this section, we formalize what it means for a dataset to be adversarial.",3.1 Formal definition,[0],[0]
+"Intuitively, we say that an adversarial dataset for a model f is one on which f will not generalize, even if evaluated on test data from the same distribution.",3.1 Formal definition,[0],[0]
+"More formally, let our input space be X and the label space be Y .",3.1 Formal definition,[0],[0]
+"Our trainable classifier f , taking parameters θ is defined as fθ : X → R|Y|.",3.1 Formal definition,[0],[0]
+"Let our dataset of size N be defined as D = {(xi, yi)}1≤i≤N , and let the loss function over the dataset be L(fθ,D).",3.1 Formal definition,[0],[0]
+"We say that a dataset is adversarial with respect to f if we expect high empirical error I over all leave-one-out train/test splits (Vapnik, 2000):
+I(D, f)",3.1 Formal definition,[0],[0]
+"= 1 N N∑ i=1 L(fθ?i , {(xi, yi)}), (1)
+where θ?i = argmin θ L(fθ,D \ {(xi, yi)}), (2)
+",3.1 Formal definition,[0],[0]
+with regularization terms omitted for simplicity.,3.1 Formal definition,[0],[0]
+"In this section, we outline an approach for generating an adversarial dataset D, effectively maximizing empirical error I with respect to a family of trainable classifiers f .",3.2 Adversarial filtering (AF) algorithm,[0],[0]
+"Without loss of generality, we consider the situation where we have N contexts, each associated with a single positive example (x+i , 1)∈X ×Y , and a large population of context-specific negative examples (x−i,j , 0)∈X ×Y , where 1≤j≤N− for each i. For instance, the negative examples could be incorrect relations in knowledge-base completion (Socher et al., 2013), or all words in a dictionary for a
+single-word cloze task (Zweig and Burges, 2011).",3.2 Adversarial filtering (AF) algorithm,[0],[0]
+Our goal will be to filter the population of negative examples for each instance i to a size of k N−.,3.2 Adversarial filtering (AF) algorithm,[0],[0]
+"This will be captured by returning a set of assignments A, where for each instance the assignment will be a k-subset Ai = [1 . . .",3.2 Adversarial filtering (AF) algorithm,[0],[0]
+N−]k.,3.2 Adversarial filtering (AF) algorithm,[0],[0]
+"The filtered dataset will then be:
+DAF = {(xi, 1), {(x−i,j , 0)}j∈Ai}1≤i≤N (3)
+Unfortunately, optimizing I(DAF , f) is difficult as A is global and non-differentiable.",3.2 Adversarial filtering (AF) algorithm,[0],[0]
+"To address this, we present Algorithm 1.",3.2 Adversarial filtering (AF) algorithm,[0],[0]
+"On each iteration, we split the data into dummy ‘train’ and ‘test’ splits.",3.2 Adversarial filtering (AF) algorithm,[1.0],"['On each iteration, we split the data into dummy ‘train’ and ‘test’ splits.']"
+"We train a model f on the training portion and obtain parameters θ, then use the remaining test portion to reassign the indices of A.",3.2 Adversarial filtering (AF) algorithm,[1.0],"['We train a model f on the training portion and obtain parameters θ, then use the remaining test portion to reassign the indices of A.']"
+"For each context, we replace some number of ‘easy’ negatives in A that fθ classifies correctly with ‘adversarial’ negatives outside ofA that fθ misclassifies.
+",3.2 Adversarial filtering (AF) algorithm,[0],[0]
+"This process can be thought of as increasing the overall entropy of the dataset: given a strong model fθ that is compatible with a random subset of the data, we aim to ensure it cannot generalize to the held-out set.",3.2 Adversarial filtering (AF) algorithm,[0],[0]
+We repeat this for several iterations to reduce the generalization ability of the model family f over arbitrary train/test splits.,3.2 Adversarial filtering (AF) algorithm,[0],[0]
+"To generate counterfactuals for Swag, we use an LSTM (Hochreiter and Schmidhuber, 1997) language model (LM), conditioned on contexts from video captions.",3.3 Generating candidate endings,[0],[0]
+"We first pretrain on BookCorpus (Zhu et al., 2015), then finetune on the video caption datasets.",3.3 Generating candidate endings,[0],[0]
+The architecture uses standard best practices and was validated on held-out perplexity of the video caption datasets; details are in the appendix.,3.3 Generating candidate endings,[0],[0]
+"We use the LM to sample N−=1023 unique endings for a partial caption.3
+Importantly, we greedily sample the endings, since beam search decoding biases the generated endings to be of lower perplexity (and thus easily distinguishable from found endings).",3.3 Generating candidate endings,[0],[0]
+"We find this process gives good counterfactuals: the generated endings tend to use topical words, but often make little sense physically, making them perfect for our task.",3.3 Generating candidate endings,[0],[0]
+"Further, the generated endings are marked as “gibberish” by humans only 9.1% of the time (Sec 3.5); in that case the ending is filtered out.
+",3.3 Generating candidate endings,[0],[0]
+"3To ensure that the LM generates unique endings, we split the data into five validation folds and train five separate LMs, one for each set of training folds.",3.3 Generating candidate endings,[0],[0]
+This means that each LM never sees the found endings during training.,3.3 Generating candidate endings,[0],[0]
+"In creating Swag, we designed the model family f to pick up on low-level stylistic features that we posit should not be predictive of whether an event happens next in a video.",3.4 Stylistic models for adversarial filtering,[0],[0]
+"These stylistic features are an obvious case of annotation artifacts (Cai et al., 2017; Schwartz et al.,",3.4 Stylistic models for adversarial filtering,[0],[0]
+2017).4 Our final classifier is an ensemble of four stylistic models:,3.4 Stylistic models for adversarial filtering,[0],[0]
+1.,3.4 Stylistic models for adversarial filtering,[0],[0]
+A multilayer perceptron (MLP) given LM perplexity features and context/ending lengths.,3.4 Stylistic models for adversarial filtering,[0],[0]
+2.,3.4 Stylistic models for adversarial filtering,[0],[0]
+A bag-of-words model that averages the word embeddings of the second sentence as features.,3.4 Stylistic models for adversarial filtering,[0],[0]
+3.,3.4 Stylistic models for adversarial filtering,[0],[0]
+"A one-layer CNN, with filter sizes ranging from 2-5, over the second sentence.",3.4 Stylistic models for adversarial filtering,[0],[0]
+4.,3.4 Stylistic models for adversarial filtering,[0],[0]
+A bidirectional LSTM over the 100 most common words in the second sentence; uncommon words are replaced by their POS tags.,3.4 Stylistic models for adversarial filtering,[0],[0]
+We ensemble the models by concatenating their final representations and passing it through an MLP.,3.4 Stylistic models for adversarial filtering,[0],[0]
+"On every adversarial iteration, the ensemble is trained jointly to minimize cross-entropy.
+",3.4 Stylistic models for adversarial filtering,[0],[0]
+"The accuracies of these models (at each iteration, evaluated on a 20% split of the test dataset before indices of A get remapped) are shown in Figure 2.",3.4 Stylistic models for adversarial filtering,[0],[0]
+"Performance decreases from 60% to close to random chance; moreover, confusing the perplexity-based MLP is not sufficient to lower performance of the ensemble.",3.4 Stylistic models for adversarial filtering,[0],[0]
+"Only once the other stylistic models are added does the ensemble accuracy drop substantially, suggesting that our approach is effective at reducing stylistic artifacts.
+",3.4 Stylistic models for adversarial filtering,[0],[0]
+"4A broad definition of annotation artifacts might include aspects besides lexical/stylistic features: for instance, certain events are less likely semantically regardless of the context (e.g. riding a horse using a hose).",3.4 Stylistic models for adversarial filtering,[0],[0]
+"For this work, we erred more conservatively and only filtered based on style.",3.4 Stylistic models for adversarial filtering,[0],[0]
+The final data-collection step is to have humans verify the data.,3.5 Human verification,[0],[0]
+"Workers on Amazon Mechanical Turk were given the caption context, as well as six candidate endings: one found ending and five adversarially-sampled endings.",3.5 Human verification,[0],[0]
+The task was twofold:,3.5 Human verification,[0],[0]
+"Turkers ranked the endings independently as likely, unlikely, or gibberish, and selected the best and second best endings (Fig 3).
+",3.5 Human verification,[0],[0]
+We obtained the correct answers to each context in two ways.,3.5 Human verification,[0],[0]
+"If a Turker ranks the found ending as either best or second best (73.7% of the time), we add the found ending as a gold example, with negatives from the generations not labelled best or gibberish.",3.5 Human verification,[0],[0]
+"Further, if a Turker ranks a generated ending as best, and the found ending as second best, then we have reason to believe that the generation is good.",3.5 Human verification,[0],[0]
+"This lets us add an additional training example, consisting of the generated best ending as the gold, and remaining generations as negatives.5 Examples with ≤3 nongibberish endings were filtered out.6
+We found after 1000 examples that the annotators tended to have high agreement, also generally choosing found endings over generations (see Table 2).",3.5 Human verification,[0],[0]
+"Thus, we collected the remaining 112k examples with one annotator each, periodically verifying that annotators preferred the found endings.",3.5 Human verification,[0],[0]
+"In this section, we evaluate the performance of various NLI models on Swag.",4 Experiments,[0],[0]
+"Recall that models
+5These two examples share contexts.",4 Experiments,[0],[0]
+"To prevent biasing the test and validation sets, we didn’t perform this procedure on answers from the evaluation sets’ context.
+",4 Experiments,[0],[0]
+"6To be data-efficient, we reannotated filtered-out examples by replacing gibberish endings, as well as generations that outranked the found ending, with candidates from A.
+for our dataset take the following form: given a sentence and a noun phrase as context c = (s,n), as well as a list of possible verb phrase endings V = {v1, . . .",4 Experiments,[0],[0]
+",v4}, a model fθ must select a verb î that hopefully matches igold:
+î =",4 Experiments,[0],[0]
+"argmax i fθ(s,n,vi) (4)
+To study the amount of bias in our dataset, we also consider models that take as input just the ending verb phrase vi, or the entire second sentence (n,vi).",4 Experiments,[0],[0]
+"For our learned models, we train f by minimizing multi-class cross-entropy.",4 Experiments,[0],[0]
+"We consider three different types of word representations: 300d GloVe vectors from Common Crawl (Pennington et al., 2014), 300d Numberbatch vectors retrofitted using ConceptNet relations (Speer et al., 2017), and 1024d ELMo contextual representations that show improvement on a variety of NLP tasks, including standard NLI (Peters et al., 2018).",4 Experiments,[0],[0]
+"We follow the final dataset split (see Section 2) using two training approaches: training on the found data, and the found and highly-ranked generated data.",4 Experiments,[0],[0]
+See the appendix for more details.,4 Experiments,[1.0],['See the appendix for more details.']
+"The following models predict labels from a single span of text as input; this could be the ending only, the second sentence only, or the full passage.",4.1 Unary models,[0],[0]
+a.,4.1 Unary models,[0],[0]
+"fastText (Joulin et al., 2017):",4.1 Unary models,[0],[0]
+"This library models a single span of text as a bag of n-grams, and tries to predict the probability of an ending being correct or incorrect independently.7",4.1 Unary models,[0],[0]
+"b. Pretrained sentence encoders We consider two types of pretrained RNN sentence encoders, SkipThoughts (Kiros et al., 2015) and InferSent
+7The fastText model is trained using binary cross-entropy; at test time we extract the prediction by selecting the ending with the highest positive likelihood under the model.
+",4.1 Unary models,[0],[0]
+"(Conneau et al., 2017).",4.1 Unary models,[0],[0]
+"SkipThoughts was trained by predicting adjacent sentences in book data, whereas InferSent was trained on supervised NLI data.",4.1 Unary models,[1.0],"['SkipThoughts was trained by predicting adjacent sentences in book data, whereas InferSent was trained on supervised NLI data.']"
+"For each second sentence (or just the ending), we feed the encoding into an MLP.",4.1 Unary models,[0],[0]
+c. LSTM sentence encoder,4.1 Unary models,[0],[0]
+"Given an arbitrary span of text, we run a two-layer BiLSTM over it.",4.1 Unary models,[0],[0]
+"The final hidden states are then max-pooled to obtain a fixed-size representation, which is then used to predict the potential for that ending.",4.1 Unary models,[0],[0]
+The following models predict labels from two spans of text.,4.2 Binary models,[0],[0]
+"We consider two possibilties for these models: using just the second sentence, where the two text spans are n,vi, or using the context and the second sentence, in which case the spans are s, (n,vi).",4.2 Binary models,[0],[0]
+The latter case includes many models developed for the NLI task.,4.2 Binary models,[0],[0]
+"d. Dual Bag-of-Words For this baseline, we treat each sentence as a bag-of-embeddings (c,vi).",4.2 Binary models,[0],[0]
+We model the probability of picking an ending i using a bilinear model: softmaxi(cWvTi ).,4.2 Binary models,[0],[0]
+"8 e. Dual pretrained sentence encoders Here, we obtain representations from SkipThoughts or InferSent for each span, and compute their pairwise compatibility using either 1) a bilinear model or 2) an MLP from their concatenated representations.",4.2 Binary models,[0],[0]
+"f. SNLI inference Here, we consider two models that do well on SNLI (Bowman et al., 2015): Decomposable Attention (Parikh et al., 2016) and ESIM (Chen et al., 2017).",4.2 Binary models,[0],[0]
+"We use pretrained versions of these models (with ELMo embeddings) on SNLI to obtain 3-way entailment, neutral, and contradiction probabilities for each example.",4.2 Binary models,[0],[0]
+We then train a log-linear model using these 3-way probabilities as features.,4.2 Binary models,[0],[0]
+g. SNLI models (retrained),4.2 Binary models,[0],[0]
+"Here, we train ESIM and Decomposable Attention on our dataset: we simply change the output layer size to 1 (the potential of an ending vi) with a softmax over i.",4.2 Binary models,[0],[0]
+We also considered the following models:,4.3 Other models,[0],[0]
+h. Length:,4.3 Other models,[0],[0]
+"Although length was used by the adversarial classifier, we want to verify that human validation didn’t reintroduce a length bias.",4.3 Other models,[0.9636963218518071],"['We also considered the following models: h. Length: Although length was used by the adversarial classifier, we want to verify that human validation didn’t reintroduce a length bias.']"
+"For this baseline, we always choose the shortest ending.",4.3 Other models,[0],[0]
+i. ConceptNet,4.3 Other models,[0],[0]
+"As our task requires world knowledge, we tried a rule-based system on top of the
+8We also tried using an MLP, but got worse results.
+",4.3 Other models,[0],[0]
+"ConceptNet knowledge base (Speer et al., 2017).",4.3 Other models,[0],[0]
+"For an ending sentence, we use the spaCy dependency parser to extract the head verb and its dependent object.",4.3 Other models,[0],[0]
+The ending score is given by the number of ConceptNet causal relations9 between synonyms of the verb and synonyms of the object.,4.3 Other models,[0],[0]
+"j. Human performance To benchmark human performance, five Mechanical Turk workers were asked to answer 100 dataset questions, as did an ‘expert’ annotator (the first author of this paper).",4.3 Other models,[0.9991386115163637],"['Human performance To benchmark human performance, five Mechanical Turk workers were asked to answer 100 dataset questions, as did an ‘expert’ annotator (the first author of this paper).']"
+Predictions were combined using a majority vote.,4.3 Other models,[0],[0]
+We present our results in Table 3.,4.4 Results,[0],[0]
+"The best model that only uses the ending is the LSTM sequence model with ELMo embeddings, which obtains 43.6%.",4.4 Results,[0],[0]
+"This model, as with most models studied, greatly improves with more context: by 3.1% when given the initial noun phrase, and by an ad-
+9We used the relations ‘Causes’, ‘CapableOf’, ‘ReceivesAction’, ‘UsedFor’, and ‘HasSubevent’.",4.4 Results,[0],[0]
+"Though their coverage is low (30.4% of questions have an answer with≥1 causal relation), the more frequent relations in ConceptNet, such as ‘IsA’, at best only indirectly relate to our task.
+",4.4 Results,[0],[0]
+ditional 4% when also given the first sentence.,4.4 Results,[0],[0]
+Further improvement is gained from models that compute pairwise representations of the inputs.,4.4 Results,[1.0],['Further improvement is gained from models that compute pairwise representations of the inputs.']
+"While the simplest such model, DualBoW, obtains only 35.1% accuracy, combining InferSent sentence representations gives 40.5% accuracy (InferSent-Bilinear).",4.4 Results,[0],[0]
+"The best results come from pairwise NLI models: when fully trained on Swag, ESIM+ELMo obtains 59.2% accuracy.
+",4.4 Results,[0.9999999779760236],"['The best results come from pairwise NLI models: when fully trained on Swag, ESIM+ELMo obtains 59.2% accuracy.']"
+"When comparing machine results to human results, we see there exists a lot of headroom.",4.4 Results,[0],[0]
+"Though there likely is some noise in the task, our results suggest that humans (even untrained) converge to a consensus.",4.4 Results,[0],[0]
+"Our in-house “expert” annotator is outperformed by an ensemble of 5 Turk workers (with 88% accuracy); thus, the effective upper bound on our dataset is likely even higher.",4.4 Results,[0],[0]
+"5.1 Swag versus existing NLI datasets The past few years have yielded great advances in NLI and representation learning, due to the availability of large datasets like SNLI and MultiNLI
+(Bowman et al., 2015; Williams et al., 2018).",5 Analysis,[0],[0]
+"With the release of Swag, we hope to continue this trend, particularly as our dataset largely has the same input/output format as other NLI datasets.",5 Analysis,[0],[0]
+"We observe three key differences between our dataset and others in this space:
+First, as noted in Section 1, Swag requires a unique type of temporal reasoning.",5 Analysis,[0],[0]
+"A state-of-theart NLI model such as ESIM, when bottlenecked through the SNLI notion of entailment (SNLIESIM), only obtains 36.1% accuracy.10 This implies that these datasets necessitate different (and complementary) forms of reasoning.
+",5 Analysis,[0],[0]
+"Second, our use of videos results in wide coverage of dynamic and temporal situations Compared with SNLI, with contexts from Flickr30K (Plummer et al., 2017) image captions, Swag has more active verbs like ‘pull’ and ‘hit,’ and fewer static verbs like ‘sit’ and ‘wear’ (Figure 4).11
+Third, our dataset suffers from few lexical biases.",5 Analysis,[0.9999999468117741],"['Second, our use of videos results in wide coverage of dynamic and temporal situations Compared with SNLI, with contexts from Flickr30K (Plummer et al., 2017) image captions, Swag has more active verbs like ‘pull’ and ‘hit,’ and fewer static verbs like ‘sit’ and ‘wear’ (Figure 4).11 Third, our dataset suffers from few lexical biases.']"
+"Whereas fastText, a bag of n-gram model, obtains 67.0% accuracy on SNLI versus a 34.3% baseline (Gururangan et al., 2018), fastText obtains only 29.0% accuracy on Swag.12",5 Analysis,[1.0],"['Whereas fastText, a bag of n-gram model, obtains 67.0% accuracy on SNLI versus a 34.3% baseline (Gururangan et al., 2018), fastText obtains only 29.0% accuracy on Swag.12']"
+"We sought to quantify how human judgments differ from the best studied model, ESIM+ELMo.",5.2 Error analysis,[0],[0]
+"We randomly sampled 100 validation questions
+10The weights of SNLI-ESIM pick up primarily on entailment probability (0.59), as with neutral (0.46), while contradiction is negatively correlated (-.42).
+",5.2 Error analysis,[0],[0]
+"11Video data has other language differences; notably, character names in LSMDC were replaced by ‘someone’
+12The most predictive individual words on SWAG are infrequent in number: ‘dotted‘ with P(+|dotted) = 77% with 10.3 counts, and P(−|similar)",5.2 Error analysis,[0],[0]
+= 81% with 16.3 counts.,5.2 Error analysis,[0],[0]
+"(Counts from negative endings were discounted 3x, as there are 3 times as many negative endings as positive endings).
+",5.2 Error analysis,[0],[0]
+"that ESIM+ELMo answered incorrectly, for each extracting both the gold ending and the model’s preferred ending.",5.2 Error analysis,[0],[0]
+"We asked 5 Amazon Mechanical Turk workers to pick the better ending (of which they preferred the gold endings 94% of the time) and to select one (or more) multiple choice reasons explaining why the chosen answer was better.
+",5.2 Error analysis,[0.9999999765143541],['We asked 5 Amazon Mechanical Turk workers to pick the better ending (of which they preferred the gold endings 94% of the time) and to select one (or more) multiple choice reasons explaining why the chosen answer was better.']
+"The options, and the frequencies, are outlined in Table 4.",5.2 Error analysis,[1.0],"['The options, and the frequencies, are outlined in Table 4.']"
+"The most common reason for the turkers preferring the correct answer is situational (52.3% of the time), followed by weirdness (17.5%) and plausibility (14.4%).",5.2 Error analysis,[0],[0]
+"This suggests that ESIM+ELMo already does a good job at filtering out weird and implausible answers, with the main bottleneck being grounded physical understanding.",5.2 Error analysis,[0],[0]
+"The ambiguous percentage is also relatively low (12.0%), implying significant headroom.",5.2 Error analysis,[0],[0]
+"Last, we show several qualitative examples in Table 5.",5.3 Qualitative examples,[0],[0]
+"Though models can do decently well by identifying complex alignment patterns between the two sentences (e.g. being “up a tree” implies that “tree” is the end phrase), the incorrect model predictions suggest this strategy is insuffi-
+cient.",5.3 Qualitative examples,[0.9999999996906405],"['Though models can do decently well by identifying complex alignment patterns between the two sentences (e.g. being “up a tree” implies that “tree” is the end phrase), the incorrect model predictions suggest this strategy is insuffi- cient.']"
+"For instance, answering “An old man rides a small bumper car” requires knowledge about bumper cars and how they differ from regular cars: bumper cars are tiny, don’t drive on roads, and don’t work in parking lots, eliminating the alternatives.",5.3 Qualitative examples,[0],[0]
+"However, this knowledge is difficult to extract from existing corpora: for instance, the ConceptNet entry for Bumper Car has only a single relation: bumper cars are a type of vehicle.",5.3 Qualitative examples,[0],[0]
+"Other questions require intuitive physical reasoning: e.g, for “he pours the raw egg batter into the pan,” about what happens next in making an omelet.",5.3 Qualitative examples,[0],[0]
+Our results suggest that Swag is a challenging testbed for NLI models.,5.4 Where to go next?,[0],[0]
+"However, the adversarial models used to filter the dataset are purely stylistic and focus on the second sentence; thus, subtle artifacts still likely remain in our dataset.",5.4 Where to go next?,[0],[0]
+"These patterns are ostensibly picked up by the NLI models (particularly when using ELMo features), but the large gap between machine and human performance suggests that more is required to solve the dataset.",5.4 Where to go next?,[0],[0]
+"As models are developed for commonsense inference, and more broadly as the field of NLP advances, we note that AF can be used again to create a more adversarial version of Swag using better language models and AF models.",5.4 Where to go next?,[0],[0]
+"Entailment NLI There has been a long history of NLI benchmarks focusing on linguistic entailment (Cooper et al., 1996; Dagan et al., 2006; Marelli et al., 2014; Bowman et al., 2015; Lai et al., 2017; Williams et al., 2018).",6 Related Work,[0],[0]
+"Recent NLI datasets in particular have supported learning broadly-applicable sentence representations (Conneau et al., 2017); moreover, models trained on these datasets were used as components
+for performing better video captioning (Pasunuru and Bansal, 2017), summarization (Pasunuru and Bansal, 2018), and generation (Holtzman et al., 2018), confirming the importance of NLI research.",6 Related Work,[0],[0]
+"The NLI task requires a variety of commonsense knowledge (LoBue and Yates, 2011), which our work complements.",6 Related Work,[0],[0]
+"However, previous datasets for NLI have been challenged by unwanted annotation artifacts, (Gururangan et al., 2018; Poliak et al., 2018) or scale issues.",6 Related Work,[0],[0]
+"Our work addresses these challenges by constructing a new NLI benchmark focused on grounded commonsense reasoning, and by introducing an adversarial filtering mechanism that substantially reduces known and easily detectable annotation artifacts.
+",6 Related Work,[0],[0]
+"Commonsense NLI Several datasets have been introduced to study NLI beyond linguistic entailment: for inferring likely causes and endings given a sentence (COPA; Roemmele et al., 2011), for choosing the most sensible ending to a short story (RocStories; Mostafazadeh et al., 2016; Sharma et al., 2018), and for predicting likelihood of a hypothesis by regressing to an ordinal label (JOCI; (Zhang et al., 2017)).",6 Related Work,[0],[0]
+These datasets are relatively small: 1k examples for COPA and 10k cloze examples for RocStories.13 JOCI increases the scale by generating the hypotheses using a knowledge graph or a neural model.,6 Related Work,[0],[0]
+"In contrast to JOCI where the task was formulated as a regression task on the degree of plausibility of the hypothesis, we frame commonsense inference as a multiple choice question to reduce the potential ambiguity in the labels and to allow for direct comparison between machines and humans.",6 Related Work,[0],[0]
+"In addition, Swag’s use of adversarial filtering increases diversity of situations and counterfactual generation quality.
+",6 Related Work,[0],[0]
+"13For RocStories, this was by design to encourage learning from the larger corpus of 98k sensible stories.
+",6 Related Work,[0],[0]
+"Last, another related task formulation is sentence completion or cloze, where the task is to predict a single word that is removed from a given context (Zweig and Burges, 2011; Paperno et al., 2016).14 Our work in contrast requires longer textual descriptions to reason about.
+",6 Related Work,[0],[0]
+Vision datasets Several resources have been introduced to study temporal inference in vision.,6 Related Work,[0],[0]
+"The Visual Madlibs dataset has 20k image captions about hypothetical next/previous events (Yu et al., 2015); similar to our work, the test portion is multiple-choice, with counterfactual answers retrieved from similar images and verified by humans.",6 Related Work,[0],[0]
+"The question of ‘what will happen next?’ has also been studied in photo albums (Huang et al., 2016), videos of team sports, (Felsen et al., 2017) and egocentric dog videos (Ehsani et al., 2018).",6 Related Work,[0],[0]
+"Last, annotation artifacts are also a recurring problem for vision datasets such as Visual Genome (Zellers et al., 2018) and Visual QA (Jabri et al., 2016); recent work was done to create a more challenging VQA dataset by annotating complementary image pairs (Goyal et al., 2016).
+",6 Related Work,[0],[0]
+"Reducing gender/racial bias Prior work has sought to reduce demographic biases in word embeddings (Zhang et al., 2018) as well as in image recognition models (Zhao et al., 2017).",6 Related Work,[0],[0]
+"Our work has focused on producing a dataset with minimal annotation artifacts, which in turn helps to avoid some gender and racial biases that stem from elicitation (Rudinger et al., 2017).",6 Related Work,[0],[0]
+"However, it is not perfect in this regard, particularly due to biases in movies (Schofield and Mehr, 2016; Sap et al., 2017).",6 Related Work,[0],[0]
+"Our methodology could potentially be extended to construct datasets free of (possibly intersectional) gender or racial bias.
+",6 Related Work,[0],[0]
+"Physical knowledge Prior work has studied learning grounded knowledge about objects and verbs: from knowledge bases (Li et al., 2016), syntax parses (Forbes and Choi, 2017), word embeddings (Lucy and Gauthier, 2017), and images and dictionary definitions (Zellers and Choi, 2017).",6 Related Work,[0],[0]
+"An alternate thread of work has been to learn scripts: high-level representations of event chains (Schank and Abelson, 1975; Chambers and Jurafsky, 2009).",6 Related Work,[0],[0]
+"Swag evaluates both of these strands.
+",6 Related Work,[0],[0]
+14Prior work on sentence completion filtered negatives with heuristics based on LM perplexities.,6 Related Work,[0],[0]
+"We initially tried something similar, but found the result to still be gameable.",6 Related Work,[0],[0]
+We propose a new challenge of physically situated commonsense inference that broadens the scope of natural language inference (NLI) with commonsense reasoning.,7 Conclusion,[0],[0]
+"To support research toward commonsense NLI, we create a large-scale dataset Swag with 113k multiple-choice questions.",7 Conclusion,[0],[0]
+"Our dataset is constructed using Adversarial Filtering (AF), a new paradigm for robust and cost-effective dataset construction that allows datasets to be constructed at scale while automatically reducing annotation artifacts that can be easily detected by a committee of strong baseline models.",7 Conclusion,[0],[0]
+"Our adversarial filtering paradigm is general, allowing potential applications to other datasets that require human composition of question answer pairs.",7 Conclusion,[0],[0]
+"We thank the anonymous reviewers, members of the ARK and xlab at the University of Washington, researchers at the Allen Institute for AI, and Luke Zettlemoyer for their helpful feedback.",Acknowledgements,[0],[0]
+We also thank the Mechanical Turk workers for doing a fantastic job with the human validation.,Acknowledgements,[0],[0]
+"This work was supported by the National Science Foundation Graduate Research Fellowship (DGE-1256082), the NSF grant (IIS1524371, 1703166), the DARPA CwC program through ARO (W911NF-15-1-0543), the IARPA DIVA program through D17PC00343, and gifts by Google and Facebook.",Acknowledgements,[0],[0]
+"The views and conclusions contained herein are those of the authors and should not be interpreted as representing endorsements of IARPA, DOI/IBC, or the U.S. Government.",Acknowledgements,[0],[0]
+"Given a partial description like “she opened the hood of the car,” humans can reason about the situation and anticipate what might come next (“then, she examined the engine”).",abstractText,[0],[0]
+"In this paper, we introduce the task of grounded commonsense inference, unifying natural language inference and commonsense reasoning.",abstractText,[0],[0]
+"We present Swag, a new dataset with 113k multiple choice questions about a rich spectrum of grounded situations.",abstractText,[0],[0]
+"To address the recurring challenges of the annotation artifacts and human biases found in many existing datasets, we propose Adversarial Filtering (AF), a novel procedure that constructs a de-biased dataset by iteratively training an ensemble of stylistic classifiers, and using them to filter the data.",abstractText,[0],[0]
+"To account for the aggressive adversarial filtering, we use state-of-theart language models to massively oversample a diverse set of potential counterfactuals.",abstractText,[0],[0]
+"Empirical results demonstrate that while humans can solve the resulting inference problems with high accuracy (88%), various competitive models struggle on our task.",abstractText,[0],[0]
+We provide comprehensive analysis that indicates significant opportunities for future research.,abstractText,[0],[0]
+Swag: A Large-Scale Adversarial Dataset for Grounded Commonsense Inference,title,[0],[0]

@@ -73,7 +73,7 @@ for subdir, dirs, files in os.walk(cdir1):
             for a, b in df2.iterrows():
                 doc2 = nlp(b[2])
                 similarity = doc1.similarity(doc2)
-                if similarity > 0.95:
+                if similarity > 0.80:
                     label21.append(similarity)
                     sentence.append(doc2.text)
                     #print("similarity = " + str("%.2f" % (float(doc1.similarity(doc2)) * 100)) + "%\n")

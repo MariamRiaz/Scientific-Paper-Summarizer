@@ -1,0 +1,1513 @@
+0,1,label2,summary_sentences
+Distributed machine learning is crucial for many settings where the data is possessed by multiple parties or when the quantity of data prohibits processing at a central location.,1. Introduction,[0],[0]
+"It helps to reduce the computational complexity, improve both the robustness and the scalability of data processing.",1. Introduction,[0],[0]
+"In a distributed setting, multiple entities/nodes collaboratively work toward a common optimization objective through an
+1Department of Electrical Engineering and Computer Science, University of Michigan, Ann Arbor, Michigan, USA.",1. Introduction,[0],[0]
+Correspondence to:,1. Introduction,[0],[0]
+"Xueru Zhang <xueru@umich.edu>, Mohammad Mahdi Khalili <khalili@umich.edu>, Mingyan Liu <mingyan@umich.edu>.
+",1. Introduction,[0],[0]
+"Proceedings of the 35 th International Conference on Machine Learning, Stockholm, Sweden, PMLR 80, 2018.",1. Introduction,[0],[0]
+"Copyright 2018 by the author(s).
+interactive process of local computation and message passing, which ideally should result in all nodes converging to a global optimum.",1. Introduction,[0],[0]
+"Existing approaches to decentralizing an optimization problem primarily consist of subgradientbased algorithms (Nedic et al., 2008; Nedic & Ozdaglar, 2009; Lobel & Ozdaglar, 2011), ADMM-based algorithms (Wei & Ozdaglar, 2012; Ling & Ribeiro, 2014; Shi et al., 2014; Zhang & Kwok, 2014; Ling et al., 2016), and composite of subgradient and ADMM (Bianchi et al., 2014).",1. Introduction,[0],[0]
+"It has been shown that ADMM-based algorithms can converge at the rate of O( 1k ) while subgradient-based algorithms typically converge at the rate of O( 1√
+k ), where k is the number
+of iterations (Wei & Ozdaglar, 2012).",1. Introduction,[0],[0]
+"In this study, we will solely focus on ADMM-based algorithms.
+",1. Introduction,[0],[0]
+"The information exchanged over the iterative process gives rise to privacy concerns if the local training data is proprietary to each node, especially when it contains sensitive information such as medical or financial records, web search history, and so on.",1. Introduction,[0],[0]
+"It is therefore highly desirable to ensure such iterative processes are privacy-preserving.
+",1. Introduction,[0],[0]
+"A widely used notion of privacy is the ε-differential privacy; it is generally achieved by perturbing the algorithm such that the probability distribution of its output is relatively insensitive to any change to a single record in the input (Dwork, 2006).",1. Introduction,[0],[0]
+"Several differentially private distributed algorithms have been proposed, including (Hale & Egerstedty, 2015; Huang et al., 2015; Han et al., 2017; Zhang & Zhu, 2017; Bellet et al., 2017).",1. Introduction,[0],[0]
+"While a number of such studies have been done for (sub)gradient-based algorithms, the same is much harder for ADMM-based algorithms due to its computational complexity stemming from the fact that each node is required to solve an optimization problem in each iteration.",1. Introduction,[0],[0]
+"To the best of our knowledge, only (Zhang & Zhu, 2017) applies differential privacy to ADMM, where the noise is either added to the dual variable (dual variable perturbation) or the primal variable (primal variable perturbation) in ADMM updates.",1. Introduction,[0],[0]
+"However, (Zhang & Zhu, 2017) could only bound the privacy loss of a single iteration.",1. Introduction,[0],[0]
+"Since an attacker can potentially use all intermediate results to perform inference, the privacy loss accumulates over time through the iterative process.",1. Introduction,[0],[0]
+It turns out that the tradeoff between the utility of the algorithm and its privacy preservation over the entire computational process becomes hard using the existing method.,1. Introduction,[0],[0]
+"ar X iv :1 80 6.
+",1. Introduction,[0],[0]
+"02 24
+6v 1
+[ cs
+.L",1. Introduction,[0],[0]
+"G
+] 6
+J un
+2 01
+8
+In this study we propose a perturbation method that could simultaneously improve the accuracy and privacy for ADMM.",1. Introduction,[0],[0]
+We start with a modified version of ADMM whereby each node independently decides its own penalty parameter in each iteration; it may also differ from the dual updating step size.,1. Introduction,[0],[0]
+For this modified ADMM we establish conditions for convergence and quantify the lower bound of the convergence rate.,1. Introduction,[0],[0]
+We then present a penalty perturbation method to provide differential privacy.,1. Introduction,[0],[0]
+"Our numerical results show that under this method, by increasing the penalty parameter over iterations, we can achieve stronger privacy guarantee as well as better algorithmic performance, i.e., more stable convergence and higher accuracy.
+",1. Introduction,[0],[0]
+The remainder of the paper is organized as follows.,1. Introduction,[0],[0]
+We present problem formulation and definition of differential privacy and ADMM in Section 2 and a modified ADMM algorithm along with its convergence analysis in Section 3.,1. Introduction,[0],[0]
+A private version of this ADMM algorithm is then introduced in Section 4 and numerical results in Section 5.,1. Introduction,[0],[0]
+Discussions are given in Section 6 and Section 7 concludes the paper.,1. Introduction,[0],[0]
+"Consider a connected network1 given by an undirected graph G(N ,E ), which consists of a set of nodes N = {1, 2, · · · , N} and a set of edges E = {1, 2, · · · , E}.",2.1. Problem Formulation,[0],[0]
+Two nodes can exchange information if and only if they are connected by an edge.,2.1. Problem Formulation,[0],[0]
+"Let Vi denote node i’s set of neighbors, excluding itself.",2.1. Problem Formulation,[0],[0]
+"A node i contains a dataset Di = {(xni , yni )",2.1. Problem Formulation,[0],[0]
+"|n = 1, 2, · · · , Bi}, where xni ∈ Rd is the feature vector representing the n-th sample belonging to i, yni ∈ {−1, 1} the corresponding label, and Bi the size of Di.
+Consider the regularized empirical risk minimization (ERM) problems for binary classification defined as follows:
+",2.1. Problem Formulation,[0],[0]
+"min fc OERM (fc, Dall) =",2.1. Problem Formulation,[0],[0]
+N∑ i=1,2.1. Problem Formulation,[0],[0]
+C Bi Bi∑ n=1 L (yni,2.1. Problem Formulation,[0],[0]
+f T c,2.1. Problem Formulation,[0],[0]
+x n,2.1. Problem Formulation,[0],[0]
+"i )+ρR(fc) (1) where C ≤ Bi and ρ > 0 are constant parameters of the algorithm, the loss function L (·) measures the accuracy of classifier, and the regularizer R(·) helps to prevent overfitting.",2.1. Problem Formulation,[0],[0]
+The goal is to train a (centralized) classifier fc ∈ Rd over the union of all local datasets Dall = ∪i∈N,2.1. Problem Formulation,[0],[0]
+"Di in a distributed manner using ADMM, while providing privacy guarantee for each data sample 2.
+",2.1. Problem Formulation,[0],[0]
+"1A connected network is one in which every node is reachable (via a path) from every other node.
+2The proposed penalty perturbation method is not limited to classification problems.",2.1. Problem Formulation,[0],[0]
+It can be applied to general ADMM-based distributed algorithms since the convergence and privacy analysis,2.1. Problem Formulation,[0],[0]
+"To decentralize (1), let fi be the local classifier of each node i. To achieve consensus, i.e., f1 = f2 = · · · = fN , a set of auxiliary variables {wij |i ∈ N , j ∈ Vi} are introduced for every pair of connected nodes.",2.2. Conventional ADMM,[0],[0]
+"As a result, (1) is reformulated equivalently as:
+min {fi},{wij} ÕERM ({fi}Ni=1, Dall) =",2.2. Conventional ADMM,[0],[0]
+N∑ i=1,2.2. Conventional ADMM,[0],[0]
+"O(fi, Di)
+",2.2. Conventional ADMM,[0],[0]
+"s.t. fi = wij , wij = fj , i ∈ N ,",2.2. Conventional ADMM,[0],[0]
+"j ∈ Vi
+(2)
+where O(fi, Di) = C
+Bi
+∑Bi n=1 L (y n",2.2. Conventional ADMM,[0],[0]
+i f T,2.2. Conventional ADMM,[0],[0]
+"i x n i ) + ρ
+N R(fi).
+",2.2. Conventional ADMM,[0],[0]
+The objective in (2) can be solved using ADMM.,2.2. Conventional ADMM,[0],[0]
+"Let {fi} be the shorthand for {fi}i∈N ; let {wij , λkij} be the shorthand for {wij , λkij}i∈N ,j∈Vi,k∈{a,b}, where λaij , λbij are dual variables corresponding to equality constraints fi = wij and wij = fj respectively.",2.2. Conventional ADMM,[0],[0]
+"Then the augmented Lagrangian is as follows:
+Lη({fi}, {wij , λkij}) =",2.2. Conventional ADMM,[0],[0]
+N∑ i=1,2.2. Conventional ADMM,[0],[0]
+"O(fi, Di)
++ N∑ i=1",2.2. Conventional ADMM,[0],[0]
+∑ j∈Vi (λaij) T (fi − wij) +,2.2. Conventional ADMM,[0],[0]
+N∑ i=1,2.2. Conventional ADMM,[0],[0]
+"∑ j∈Vi (λbij) T (wij − fj) (3)
++ N∑ i=1 ∑",2.2. Conventional ADMM,[0],[0]
+j∈Vi η 2 (||fi − wij ||22 + ||wij,2.2. Conventional ADMM,[0],[0]
+"− fj ||22) .
+",2.2. Conventional ADMM,[0],[0]
+"In the (t + 1)-th iteration, the ADMM updates consist of the following:
+fi(t+ 1) = argmin fi Lη({fi}, {wij(t), λkij(t)}) ; (4)
+wij(t+ 1) = argmin wij Lη({fi(t+ 1)}, {wij , λkij(t)}) ; (5)
+λaij(t+ 1) = λ a ij(t) + η(fi(t+",2.2. Conventional ADMM,[0],[0]
+1)− wij(t+ 1)),2.2. Conventional ADMM,[0],[0]
+"; (6)
+λbij(t+ 1) = λ b ij(t) +",2.2. Conventional ADMM,[0],[0]
+η(wij(t+ 1)− fj(t+ 1)) .,2.2. Conventional ADMM,[0],[0]
+"(7)
+Using Lemma 3 in (Forero et al., 2010), if dual variables λaij(t) and λ b ij(t) are initialized to zero for all node pairs (i, j), then λaij(t) = λ b ij(t) and λ k ij(t) = −λkji(t) will hold for all iterations with k ∈ {a, b}, i ∈ N , j ∈ Vi.
+",2.2. Conventional ADMM,[0],[0]
+Let λi(t) = ∑,2.2. Conventional ADMM,[0],[0]
+"j∈Vi λ a ij(t) = ∑ j∈Vi λ b ij(t), then the ADMM iterations (4)-(7) can be simplified as:
+fi(t+ 1) = argmin fi {O(fi, Di) + 2λi(t)T fi
++η ∑ j∈Vi ||1 2 (fi(t) + fj(t))− fi||22 } ; (8)
+λi(t+ 1) = λi(t) + η
+2 ∑ j∈Vi (fi(t+ 1)− fj(t+ 1)) .",2.2. Conventional ADMM,[0],[0]
+"(9)
+in Section 3 & 4 remain valid.",2.2. Conventional ADMM,[0],[0]
+"Differential privacy (Dwork, 2006) can be used to measure the privacy risk of each individual sample in the dataset quantitatively.",2.3. Differential Privacy,[0],[0]
+"Mathematically, a randomized algorithm A (·) taking a dataset as input satisfies ε-differential privacy if for any two datasets D, D̂ differing in at most one data point, and for any set of possible outputs S ⊆ range(A ), Pr(A (D) ∈ S) ≤",2.3. Differential Privacy,[0],[0]
+exp(ε)Pr(A (D̂) ∈ S) holds.,2.3. Differential Privacy,[0],[0]
+We call two datasets differing in at most one data point as neighboring datasets.,2.3. Differential Privacy,[0],[0]
+"The above definition suggests that for a sufficiently small ε, an adversary will observe almost the same output regardless of the presence (or value change) of any one individual in the dataset; this is what provides privacy protection for that individual.",2.3. Differential Privacy,[0],[0]
+"Two randomizations were proposed in (Zhang & Zhu, 2017): (i) dual variable perturbation, where each node i adds a random noise to its dual variable λi(t) before updating its primal variable fi(t) using (8) in each iteration; and (ii) primal variable perturbation, where after updating primal variable fi(t), each node adds a random noise to it before broadcasting to its neighbors.","2.4. Private ADMM proposed in (Zhang & Zhu, 2017)",[0],[0]
+Both were evaluated for a single iteration for a fixed privacy constraint.,"2.4. Private ADMM proposed in (Zhang & Zhu, 2017)",[0],[0]
+"As we will see later in numerical experiments, the privacy loss accumulates significantly when inspected over multiple iterations.
+","2.4. Private ADMM proposed in (Zhang & Zhu, 2017)",[0],[0]
+"In contrast, in this study we will explore the use of the penalty parameter η to provide privacy.","2.4. Private ADMM proposed in (Zhang & Zhu, 2017)",[0],[0]
+"In particular, we will allow this to be private information to every node, i.e., each decides its own η in every iteration and it is not exchanged among the nodes.","2.4. Private ADMM proposed in (Zhang & Zhu, 2017)",[0],[0]
+Below we will begin by modifying the ADMM to accommodate private penalty terms.,"2.4. Private ADMM proposed in (Zhang & Zhu, 2017)",[0],[0]
+"Conventional ADMM (Boyd et al., 2011) requires that the penalty parameter η be fixed and equal to the dual updating step size for all nodes in all iterations.",3.1. Making η a node’s private information,[0],[0]
+Varying the penalty parameter to accelerate convergence in ADMM has been proposed in the literature.,3.1. Making η a node’s private information,[0],[0]
+"For instance, (He et al., 2002; Magnússon et al., 2014; Aybat & Iyengar, 2015; Xu et al., 2016) vary this penalty parameter in every iteration but keep it the same for different equality constraints in (2).",3.1. Making η a node’s private information,[0],[0]
+"In (Song et al., 2016; Zhang & Wang, 2017) this parameter varies in each iteration and is allowed to differ for different equality constraints.",3.1. Making η a node’s private information,[0],[0]
+"However, all of these modifications are based on the original ADMM (Eqn. (4)-(7)) and not on the simplified version (Eqn. (8)-(9)); the significance of this difference is discussed below in the context of privacy requirement.",3.1. Making η a node’s private information,[0],[0]
+"Moreover, we will decouple ηi(t+1) from the dual updating step size, denoted as θ below.",3.1. Making η a node’s private information,[0],[0]
+"For simplicity, θ is fixed for
+all nodes in our analysis, but can also be private information as we show in numerical experiments.
+",3.1. Making η a node’s private information,[0],[0]
+First consider replacing η with ηij(t+ 1) in Eqn.,3.1. Making η a node’s private information,[0],[0]
+"(4)-(5) of the original ADMM (as is done in (Song et al., 2016; Zhang & Wang, 2017))",3.1. Making η a node’s private information,[0],[0]
+"and replacing η with θ in Eqn. (6)-(7); we obtain the following:
+fi(t+ 1) = argmin fi {O(fi, Di) + 2λi(t)T fi
++ ∑ j∈Vi ηij(t+ 1) + ηji(t+ 1) 2 ||1 2 (fi(t) + fj(t))− fi||22} ;
+λi(t+ 1) = λi(t) +",3.1. Making η a node’s private information,[0],[0]
+"θ
+2 ∑ j∈Vi (fi(t+ 1)− fj(t+ 1)) .
+",3.1. Making η a node’s private information,[0],[0]
+This however violates our requirement that ηji(t) be node j’s private information since this is needed by node i to perform the above computation.,3.1. Making η a node’s private information,[0],[0]
+"To resolve this, we instead start from the simplified ADMM, modifying Eqn. (8)-(9):
+fi(t+ 1) = argmin fi {O(fi, Di) + 2λi(t)T fi
++ηi(t+ 1) ∑ j∈Vi ||fi − 1 2 (fi(t) + fj(t))||22 } ; (10)
+λi(t+ 1) = λi(t) +",3.1. Making η a node’s private information,[0],[0]
+"θ
+2 ∑ j∈Vi (fi(t+ 1)− fj(t+ 1)) , (11)
+where ηi(t+ 1) is now node i’s private information.",3.1. Making η a node’s private information,[0],[0]
+Indeed ηi(t+ 1) is no longer purely a penalty parameter related to any equality constraint in the original sense.,3.1. Making η a node’s private information,[0],[0]
+We will however refer to it as the private penalty parameter for simplicity.,3.1. Making η a node’s private information,[0],[0]
+The above constitutes the M-ADMM algorithm.,3.1. Making η a node’s private information,[0],[0]
+We next show that the M-ADMM (Eqn. (10)-(11)) converges to the optimal solution under a set of common technical assumptions.,3.2. Convergence Analysis,[0],[0]
+"Our proof is based on the method given in (Ling et al., 2016).
+",3.2. Convergence Analysis,[0],[0]
+"Assumption 1: Function O(fi, Di) is convex and continuously differentiable in fi, ∀i.
+",3.2. Convergence Analysis,[0],[0]
+Assumption 2:,3.2. Convergence Analysis,[0],[0]
+"The solution set to the original ERM problem (1) is nonempty and there exists at least one bounded element.
+",3.2. Convergence Analysis,[0],[0]
+"The KKT optimality condition of the primal update (10) is:
+0 = ∇O(fi(t+ 1), Di) + 2λi(t)",3.2. Convergence Analysis,[0],[0]
++ηi(t+ 1) ∑ j∈Vi (2fi(t+ 1)− (fi(t) + fj(t))) .,3.2. Convergence Analysis,[0],[0]
+"(12)
+We next rewrite (11)-(12) in matrix form.",3.2. Convergence Analysis,[0],[0]
+"Define the adjacency matrix of the network A ∈ RN×N as
+aij = { 1, if node i and node j are connected 0, otherwise .
+",3.2. Convergence Analysis,[0],[0]
+"Stack the variables fi(t), λi(t) and ∇O(fi(t), Di) for i ∈ N into matrices, i.e.,
+f̂(t) =  f1(t) T f2(t) T
+...",3.2. Convergence Analysis,[0],[0]
+"fN (t) T
+ ∈ RN×d , Λ(t) =  λ1(t) T λ2(t) T
+... λN",3.2. Convergence Analysis,[0],[0]
+"(t) T
+ ∈ RN×d
+∇Ô(f̂(t), Dall) =  ∇O(f1(t), D1)T ∇O(f2(t), D2)T
+...",3.2. Convergence Analysis,[0],[0]
+"∇O(fN (t), DN )T  ∈ RN×d",3.2. Convergence Analysis,[0],[0]
+"Let Vi = |Vi| be the number of neighbors of node i, and define the degree matrix D = diag([V1;V2; · · · ;VN ]) ∈ RN×N .",3.2. Convergence Analysis,[0],[0]
+Define for the t-th iteration a penalty-weighted matrix W (t) = diag([η1(t); η2(t); · · · ; ηN (t)]) ∈ RN×N .,3.2. Convergence Analysis,[0],[0]
+"Then the matrix form of (11)-(12) are:
+∇Ô(f̂(t+ 1), Dall) + 2Λ(t) + 2W (t+ 1)Df̂(t+ 1) −W (t+ 1)(D +A)f̂(t) = 0N×d ; (13)
+2Λ(t+ 1) = 2Λ(t) + θ(D −A)f̂(t+ 1) .",3.2. Convergence Analysis,[0],[0]
+"(14)
+Note that D −A is the Laplacian matrix and D +A is the signless Laplacian matrix of the network, with the following properties if the network is connected: (i) D ±",3.2. Convergence Analysis,[0],[0]
+A 0 is positive semi-definite; (ii),3.2. Convergence Analysis,[0],[0]
+Null(D,3.2. Convergence Analysis,[0],[0]
+"− A) = c1, i.e., every member in the null space of D −A is a scalar multiple of 1 with 1 being the vector of all 1’s (Kelner, 2007).",3.2. Convergence Analysis,[0],[0]
+"Let √ X denote the square root of a symmetric positive semi-definite (PSD) matrix X that is also symmetric PSD, i.e., √ X √ X = X .",3.2. Convergence Analysis,[0],[0]
+"Define matrix Y (t) such that 2Λ(t) =√
+D −AY (t).",3.2. Convergence Analysis,[0],[0]
+"Since Λ(0) = zeros(N, d), which is in the column space of D −A, this together with (14) imply that Λ(t) is in the column space of D − A and √ D −A.",3.2. Convergence Analysis,[0],[0]
+This guarantees the existence of Y (t).,3.2. Convergence Analysis,[0],[0]
+"This allows us to rewrite (13)-(14) as:
+∇Ô(f̂(t+ 1), Dall) + √ D −AY (t+ 1)
++(W (t+ 1)− θI)(D −A)f̂(t+ 1) +W (t+ 1)(D +A)(f̂(t+ 1)− f̂(t))",3.2. Convergence Analysis,[0],[0]
+"= 0N×d ; (15)
+Y (t+ 1) = Y (t) + θ",3.2. Convergence Analysis,[0],[0]
+√ D −Af̂(t+ 1) .,3.2. Convergence Analysis,[0],[0]
+"(16)
+Lemma 3.1 [First-order Optimality Condition (Ling et al., 2016)]",3.2. Convergence Analysis,[0],[0]
+"Under Assumptions 1 and 2, the following two statements are equivalent:
+• f̂∗ =",3.2. Convergence Analysis,[0],[0]
+"[(f∗1 )T ; (f∗2 )T ; · · · ; (f∗N )T ] ∈ RN×d is consensual, i.e., f∗1 = f ∗ 2 = · · · = f∗N = f∗c where f∗c is the
+optimal solution to (1).
+",3.2. Convergence Analysis,[0],[0]
+"• There exists a pair (f̂∗, Y ∗) with Y ∗ = √ D −AX
+for some X ∈ RN×d such that
+∇Ô(f̂∗, Dall) + √ D −AY ∗ = 0N×d ; (17)√ D −Af̂∗ = 0N×d .",3.2. Convergence Analysis,[0],[0]
+"(18)
+Lemma 3.1 shows that a pair (Y ∗, f̂∗) satisfying (17)(18) is equivalent to the optimal solution of our problem, hence the convergence of M-ADMM is proved by showing that (Y (t), f̂(t)) converges to a pair (Y ∗, f̂∗) satisfying (17)(18).
+",3.2. Convergence Analysis,[0],[0]
+Theorem 3.1 Consider the modified ADMM defined by (10)-(11).,3.2. Convergence Analysis,[0],[0]
+"Let {Y (t), f̂(t)} be outputs in each iteration and (Y ∗, f̂∗) a pair satisfying (17)-(18).",3.2. Convergence Analysis,[0],[0]
+"Denote
+Z(t) =
+[ Y (t)
+f̂(t)
+] ∈ R2N×d, Z∗ =",3.2. Convergence Analysis,[0],[0]
+"[ Y ∗
+f̂∗
+] ∈ R2N×d
+J(t)",3.2. Convergence Analysis,[0],[0]
+=,3.2. Convergence Analysis,[0],[0]
+"[ IN×N θ 0 0 W (t)(D +A) ] ∈ R2N×2N
+Let 〈·, ·〉F be the Frobenius inner product of two matrices.",3.2. Convergence Analysis,[0],[0]
+"We have
+〈Z(t+ 1)−Z∗, J(t+ 1)(Z(t+ 1)−Z(t))〉F ≤ 0 .",3.2. Convergence Analysis,[0],[0]
+(19),3.2. Convergence Analysis,[0],[0]
+"(Y (t), f̂(t)) converges to (Y ∗, f̂∗).","If ηi(t + 1) ≥ ηi(t) ≥ θ > 0 and ηi(t) < +∞, ∀t, i, then",[0],[0]
+"To further establish the convergence rate of modified ADMM, an additional assumption is used:
+Assumption 3:",3.3. Convergence Rate Analysis,[0],[0]
+"For all i ∈ N , O(fi, Di) is strongly convex in fi and has Lipschitz continues gradients, i.e., for any f1i and f 2",3.3. Convergence Rate Analysis,[0],[0]
+"i , we have:
+(f1i −f2i )T (∇O(f1i , Di)−∇O(f2i , Di))",3.3. Convergence Rate Analysis,[0],[0]
+"≥ mi||f1i −f2i ||22
+||∇O(f1i , Di)−∇O(f2i , Di)||2 ≤Mi||f1i",3.3. Convergence Rate Analysis,[0],[0]
+"− f2i ||2 (20)
+where mi > 0 is the strong convexity constant and 0",3.3. Convergence Rate Analysis,[0],[0]
+<,3.3. Convergence Rate Analysis,[0],[0]
+Mi,3.3. Convergence Rate Analysis,[0],[0]
+"< +∞ is the Lipschitz constant.
+",3.3. Convergence Rate Analysis,[0],[0]
+Theorem 3.2 Define Dm = diag([m1;m2; · · · ;mN ]) ∈,3.3. Convergence Rate Analysis,[0],[0]
+RN×N and DM = diag([M21 ;M22 ; · · · ;M2N ]) ∈ RN×N with mi > 0,3.3. Convergence Rate Analysis,[0],[0]
+and 0 <,3.3. Convergence Rate Analysis,[0],[0]
+Mi < +∞ as given in Assumption 3.,3.3. Convergence Rate Analysis,[0],[0]
+"Denote by ||X||2J = 〈X, JX〉F the Frobenius inner product of any matrix X and JX; denote by σmin(·) and σmax(·) the smallest nonzero, and the largest, singular values of a matrix, respectively.
+",3.3. Convergence Rate Analysis,[0],[0]
+Let σ̃max(t) =,3.3. Convergence Rate Analysis,[0],[0]
+"σmax(W (t)(D +A)), σ̄max/min(t) = σmax/min((W",3.3. Convergence Rate Analysis,[0],[0]
+(t)− θI)(D −A)) and µ > 1 be an arbitrary constant.,3.3. Convergence Rate Analysis,[0],[0]
+"Consider any δ(t) that satisfies (21)(22):
+δ(t)µ2σ̃max(t) θσmin(D −A) ≤ 1 (21)
+and
+δ(t)( µσ̄max(t) 2IN + µ2DM θσmin(D",3.3. Convergence Rate Analysis,[0],[0]
+−A)(µ− 1),3.3. Convergence Rate Analysis,[0],[0]
+"+W (t)(D +A))
+",3.3. Convergence Rate Analysis,[0],[0]
+2(W (t)− θI)(D −A) + 2Dm .,3.3. Convergence Rate Analysis,[0],[0]
+(22),3.3. Convergence Rate Analysis,[0],[0]
+"(Y (t), f̂(t)) converges to (Y ∗, f̂∗) in the following sense:
+(1 + δ(t))||Z(t)− Z∗||2J(t) ≤","If ηi(t + 1) ≥ ηi(t) ≥ θ > 0 and ηi(t) < +∞, ∀t, i, then",[0],[0]
+||Z(t−,"If ηi(t + 1) ≥ ηi(t) ≥ θ > 0 and ηi(t) < +∞, ∀t, i, then",[0],[0]
+"1)− Z ∗||2J(t) .
+","If ηi(t + 1) ≥ ηi(t) ≥ θ > 0 and ηi(t) < +∞, ∀t, i, then",[0],[0]
+"Furthermore, a lower bound on δ(t) is:
+min{θσmin(D −A) µ2σ̃max(t) , 2mo + 2σ̄min(t) µ2M2O+µσ̄max(t) 2
+θσmin(D−A)(µ−1) + σ̃max(t) } (23)
+where mo = mini∈N {mi} and MO = maxi∈N {Mi}.
+","If ηi(t + 1) ≥ ηi(t) ≥ θ > 0 and ηi(t) < +∞, ∀t, i, then",[0],[0]
+"Although Theorem 3.2 only gives a lower bound on the convergence rate (1 + δ(t)) of the M-ADMM, it reflects the impact of penalty {ηi(t)}Ni=1 on the convergence.","If ηi(t + 1) ≥ ηi(t) ≥ θ > 0 and ηi(t) < +∞, ∀t, i, then",[0],[0]
+"Since σ̄max(t) = σmax((W (t)− θI)(D −A)) and σ̃max(t) = σmax(W (t)(D +A)), larger penalty results in larger σ̄max(t) and σ̃max(t).","If ηi(t + 1) ≥ ηi(t) ≥ θ > 0 and ηi(t) < +∞, ∀t, i, then",[0],[0]
+"By (23), the first term,
+θσmin(D−A) µ2σ̃max(t)
+is smaller when σ̃max(t) is larger.","If ηi(t + 1) ≥ ηi(t) ≥ θ > 0 and ηi(t) < +∞, ∀t, i, then",[0],[0]
+"The second term is bounded by θσmin(D−A)(µ−1)(2mo+2σ̄min(t))µσ̄max(t)2 , which is smaller when σ̄max(t) is larger.","If ηi(t + 1) ≥ ηi(t) ≥ θ > 0 and ηi(t) < +∞, ∀t, i, then",[0],[0]
+"Therefore, the convergence rate 1 + δ(t) decreases as {ηi(t)}Ni=1 increase.","If ηi(t + 1) ≥ ηi(t) ≥ θ > 0 and ηi(t) < +∞, ∀t, i, then",[0],[0]
+In this section we present a privacy preserving version of MADMM.,4. Private M-ADMM,[0],[0]
+"To begin, a random noise i(t+1) with probability density proportional to exp{−αi(t + 1)|| i(t + 1)||2} is added to penalty term in the objective function of (10):
+Lprivi (t+ 1) =",4. Private M-ADMM,[0],[0]
+"O(fi, Di) + 2λi(t)",4. Private M-ADMM,[0],[0]
+T fi +ηi(t+ 1) ∑ j∈Vi ||fi + i(t+,4. Private M-ADMM,[0],[0]
+"1)− 1 2 (fi(t) + fj(t))||22
+(24)
+",4. Private M-ADMM,[0],[0]
+"To generate this noisy vector, choose the norm from the gamma distribution with shape d and scale 1αi(t+1) and the direction uniformly, where d is the dimension of the feature space.",4. Private M-ADMM,[0],[0]
+"Then node i’s local result is obtained by finding the optimal solution to the private objective function:
+fi(t+ 1) = argmin fi
+Lprivi (t+ 1), i ∈ N .",4. Private M-ADMM,[0],[0]
+"(25)
+It is equivalent to (26) below when noise ηi(t+1)Vi i(t+1)
+",4. Private M-ADMM,[0],[0]
+Algorithm 1 Penalty perturbation (PP) method,4. Private M-ADMM,[0],[0]
+Parameter:,4. Private M-ADMM,[0],[0]
+"Determine θ such that 2c1 < BiC ( ρ N + 2θVi)
+holds for all i. Initialize: Generate fi(0) randomly and λi(0) = 0d×1 for every node i ∈ N , t = 0",4. Private M-ADMM,[0],[0]
+"Input: {Di}Ni=1, {αi(1), · · · , αi(T )}Ni=1 for t = 0 to T − 1 do
+for i = 1 to N do Generate noise i(t+ 1) ∼ exp(−αi(t+ 1)|| ||2)",4. Private M-ADMM,[0],[0]
+"Perturb the penalty term according to (24) Update primal variable via (25) end for for i = 1 to N do
+Broadcast fi(t+ 1) to all neighbors",4. Private M-ADMM,[0],[0]
+"j ∈ Vi end for for i = 1 to N do
+Update dual variable according to (11) end for
+end for Output: upper bound of the total privacy loss β
+is added to the dual variable λi(t):
+argmin fi
+L̃privi (",4. Private M-ADMM,[0],[0]
+"t+ 1) = C
+Bi Bi∑ n=1 L",4. Private M-ADMM,[0],[0]
+(,4. Private M-ADMM,[0],[0]
+yni f T i x n,4. Private M-ADMM,[0],[0]
+i ),4. Private M-ADMM,[0],[0]
+"+ ρ N R(fi)
+",4. Private M-ADMM,[0],[0]
++2(λi(t) +,4. Private M-ADMM,[0],[0]
+ηi(t+,4. Private M-ADMM,[0],[0]
+1)Vi i(t+ 1)),4. Private M-ADMM,[0],[0]
+"T fi +ηi(t+ 1) ∑ j∈Vi ||fi − 1 2 (fi(t) + fj(t))||22 .
+",4. Private M-ADMM,[0],[0]
+"Further, if ηi(t+1) = η = θ,∀i, t, then the above is reduced to the dual variable perturbation in (Zhang & Zhu, 2017)3.
+",4. Private M-ADMM,[0],[0]
+"The complete procedure is shown in Algorithm 1, where the condition used to generate θ helps bound the worst-case privacy loss but is not necessary in guaranteeing convergence.
+",4. Private M-ADMM,[0],[0]
+"In a distributed and iterative setting, the “output” of the algorithm is not merely the end result, but includes all intermediate results generated and exchanged during the iterative process.",4. Private M-ADMM,[0],[0]
+"For this reason, we formally state the differential privacy definition in this setting below.
+",4. Private M-ADMM,[0],[0]
+"Definition 4.1 Consider a connected network G(N ,E ) with a set of nodes N = {1, 2, · · · , N}.",4. Private M-ADMM,[0],[0]
+Let f(t) =,4. Private M-ADMM,[0],[0]
+{fi(t)}Ni=1 denote the information exchange of all nodes in the t-th iteration.,4. Private M-ADMM,[0],[0]
+"A distributed algorithm is said to satisfy β-differential privacy during T iterations if for any two datasets Dall = ∪iDi and D̂all = ∪iD̂i, differing in at
+3Only a single iteration is considered in (Zhang & Zhu, 2017) while imposing a privacy constraint.",4. Private M-ADMM,[0],[0]
+"Since we consider the entire iterative process, we don’t impose per-iteration privacy constraint but calculate the total privacy loss.
+",4. Private M-ADMM,[0],[0]
+"most one data point, and for any set of possible outputs S during T iterations, the following holds:
+Pr({f(t)}Tt=0 ∈ S|Dall)",4. Private M-ADMM,[0],[0]
+Pr({f(t)}Tt=0 ∈ S|D̂all) ≤,4. Private M-ADMM,[0],[0]
+"exp(β)
+We now state our main result on the privacy property of the penalty perturbation algorithm using the above definition.",4. Private M-ADMM,[0],[0]
+"Additional assumptions on L (·) and R(·) are used.
+",4. Private M-ADMM,[0],[0]
+Assumption 4: The loss function L is strictly convex and twice differentiable.,4. Private M-ADMM,[0],[0]
+|L,4. Private M-ADMM,[0],[0]
+"′| ≤ 1 and 0 < L ′′ ≤ c1 with c1 being a constant.
+",4. Private M-ADMM,[0],[0]
+"Assumption 5: The regularizer R is 1-strongly convex and twice continuously differentiable.
+",4. Private M-ADMM,[0],[0]
+Theorem 4.1 Normalize feature vectors in the training set such that ||xni ||2 ≤ 1 for all i ∈ N and,4. Private M-ADMM,[0],[0]
+"n. Then the private M-ADMM algorithm (PP) satisfies the β-differential privacy with
+β ≥ max i∈N { T∑ t=1 C(1.4c1 + αi(t)) ηi(t)ViBi } .",4. Private M-ADMM,[0],[0]
+(26),4. Private M-ADMM,[0],[0]
+"We use the same dataset as (Zhang & Zhu, 2017), i.e., the Adult dataset from the UCI Machine Learning Repository (Lichman, 2013).",5. Numerical Experiments,[0],[0]
+"It consists of personal information of around 48,842 individuals, including age, sex, race, education, occupation, income, etc.",5. Numerical Experiments,[0],[0]
+"The goal is to predict whether the annual income of an individual is above $50,000.
+",5. Numerical Experiments,[0],[0]
+"To preprocess the data, we (1) remove all individuals with missing values; (2) convert each categorical attribute (with m categories) to a binary vector of length m; (3) normalize columns (features) such that the maximum value of each column is 1; (4) normalize rows (individuals) such that its l2 norm is at most 1; and (5) convert labels {≥ 50k,≤ 50k} to {+1,−1}.",5. Numerical Experiments,[0],[0]
+"After this preprocessing, the final data includes 45,223 individuals, each represented as a 105-dimensional vector of norm at most 1.
+",5. Numerical Experiments,[0],[0]
+"We will use as loss function the logistic loss L (z) = log(1 + exp(−z)), with |L ′| ≤ 1 and L ′′ ≤ c1 = 14 .",5. Numerical Experiments,[0],[0]
+The regularizer is R(fi),5. Numerical Experiments,[0],[0]
+= 12 ||fi|| 2 2.,5. Numerical Experiments,[0],[0]
+We will measure the accuracy of the algorithm by the average loss L(t) := 1 N ∑N i=1 1,5. Numerical Experiments,[0],[0]
+"Bi ∑Bi n=1 L (y n i fi(t)
+",5. Numerical Experiments,[0],[0]
+Txni ) over the training set.,5. Numerical Experiments,[0],[0]
+"We will measure the privacy of the algorithm by the upper bound P (t) := max i∈N { ∑t r=1 C(1.4c1+αi(r)) ηi(r)ViBi
+}.",5. Numerical Experiments,[0],[0]
+"The smaller L(t) and P (t), the higher accuracy and stronger privacy guarantee.",5. Numerical Experiments,[0],[0]
+"We consider a five-node network and assign each node the following private penalty parameters: ηi(t) = ηi(1)q t−1 i for node i, where [η1(1), · · · , η5(1)] =",5.1. Convergence of M-ADMM,[0],[0]
+"[0.55, 0.65, 0.6, 0.55, 0.6] and [q1, · · · , q5] =",5.1. Convergence of M-ADMM,[0],[0]
+"[1.01, 1.03, 1.1, 1.2, 1.02].
+Figure 1(a) shows the convergence of M-ADMM under these parameters while using a fixed dual updating step size θ = 0.5 across all nodes (blue curve).",5.1. Convergence of M-ADMM,[0],[0]
+This is consistent with Theorem 3.1.,5.1. Convergence of M-ADMM,[0],[0]
+"As mentioned earlier, this step size can also be non-fixed (black) and different (red) for different nodes.",5.1. Convergence of M-ADMM,[0],[0]
+"In
+Figure 1(b) we let each node use the same penalty ηi(t) = η(t) = 0.5qt−11 and compare the results by increasing q1, q1 ≥ 1.",5.1. Convergence of M-ADMM,[0],[0]
+"We see that increasing penalty slows down the convergence, and larger increase in q1 slows it down even more, which is consistent with Theorem 3.2.",5.1. Convergence of M-ADMM,[0],[0]
+"We next inspect the accuracy and privacy of the penalty perturbation (PP) based private M-ADMM (Algorithm 1) and compare it with the dual variable perturbation (DVP) method proposed in (Zhang & Zhu, 2017).",5.2. Private M-ADMM,[0],[0]
+"In this set of experiments, for simplicity of presentation we shall fix θ = 0.5, let ηi(t) = η(t) = θqt−11 , and noise αi(t) = α(t) = α(1)qt−12 for all nodes.",5.2. Private M-ADMM,[0],[0]
+"We observe similar results when ηi(t) and αi(t) vary from node to node.
+",5.2. Private M-ADMM,[0],[0]
+"For each parameter setting, we perform 10 independent runs of the algorithm, and record both the mean and the range of their accuracy.",5.2. Private M-ADMM,[0],[0]
+"Specifically, Ll(t) denotes the average loss over the training dataset in the t-th iteration of the l-th experiment (1 ≤ l ≤ 10).",5.2. Private M-ADMM,[0],[0]
+The mean of average loss is then given by Lmean(t) = 110 ∑10 l=1,5.2. Private M-ADMM,[0],[0]
+"L
+l(t), and the range Lrange(t)",5.2. Private M-ADMM,[0],[0]
+"= max
+1≤l≤10 Ll(t)",5.2. Private M-ADMM,[0],[0]
+− min 1≤l≤10 Ll(t).,5.2. Private M-ADMM,[0],[0]
+"The larger the
+range Lrange(t)",5.2. Private M-ADMM,[0],[0]
+"the less stable the algorithm, i.e., under the same parameter setting, the difference in performances (convergence curves) of every two experiments is larger.",5.2. Private M-ADMM,[0],[0]
+Each parameter setting also has a corresponding upper bound on the privacy loss denoted by P (t).,5.2. Private M-ADMM,[0],[0]
+Figures 2(a)2(b) show both Lmean(t) and Lrange(t),5.2. Private M-ADMM,[0],[0]
+as vertical bars centered at Lmean(t),5.2. Private M-ADMM,[0],[0]
+.,5.2. Private M-ADMM,[0],[0]
+Their corresponding privacy upper bound is given in Figures 2(c)2(d).,5.2. Private M-ADMM,[0],[0]
+"The pair 2(a)-2(c) (resp. 2(b)2(d)) is for the same parameter setting.
+",5.2. Private M-ADMM,[0],[0]
+"Figure 2 compares PP (blue & red, with ηi(t) increasing geometrically) with DVP (black & magenta, with ηi(t) = θ, ∀i, t).",5.2. Private M-ADMM,[0],[0]
+"We see that in both cases improved accuracy comes at the expense of higher privacy loss (from magenta to black under DVP, from red to blue under PP).",5.2. Private M-ADMM,[0],[0]
+"However, we also see that with suitable choices of q1, q2, PP can outperform DVP significantly both in accuracy and in privacy (e.g., red outperforms magenta in both accuracy and privacy, and blue outperforms black in both accuracy and privacy).
+",5.2. Private M-ADMM,[0],[0]
+We also performed experiments with the same dataset on larger networks with tens and hundreds of nodes and with samples evenly and unevenly spread across nodes.,5.2. Private M-ADMM,[0],[0]
+"In both cases, convergence is attained and our algorithm continues to outperform (Zhang & Zhu, 2017) in a large network (see Figures 3 & 4).",5.2. Private M-ADMM,[0],[0]
+"Since the privacy loss of the network is dominated by the node with the largest privacy loss and it increases as the number of samples in a node decreases (Theorem 4.1), the loss of privacy in a network with uneven sample size distributions is higher; note that this is a common issue with this type of analysis.",5.2. Private M-ADMM,[0],[0]
+Our numerical results show that increasing the penalty {ηi(t)}Ni=1 over iterations can improve the algorithm’s accuracy and privacy simultaneously.,6. Discussion,[0],[0]
+Below we provide some insight on why this is the case and discuss possible generalizations of our method.,6. Discussion,[0],[0]
+"When the algorithm is perturbed by random noise, which is necessary to achieve privacy, increasing the penalty parameters over iterations makes the algorithm more noise resistant.",6.1. Higher accuracy,[0],[0]
+"In particular, for the minimization in (25), larger ηi(t+ 1) results in smaller updates of variables, i.e., smaller distance between fi(t + 1) and fi(t).",6.1. Higher accuracy,[0],[0]
+"In the non-private case, since fi(t) always moves toward the optimum, smaller update slows down the process.",6.1. Higher accuracy,[0],[0]
+"In the private case, on the other hand, since a random noise is added to each update, fi(t) does not always move toward the optimum in each step.",6.1. Higher accuracy,[0],[0]
+"When the overall perturbation has a larger variance, it is more likely that fi(t) could move further away from the optimum in some iterations.",6.1. Higher accuracy,[0],[0]
+"Because larger ηi(t) leads to smaller update, it helps prevent fi(t) from moving too far away from the optimum, thus stabilizing the algorithm (smaller Lrange(t)).",6.1. Higher accuracy,[0],[0]
+"First of all, more added noise means stronger privacy guarantee.",6.2. Stronger privacy,[0],[0]
+"Increasing ηi(t) and αi(t) in such a way that the overall perturbation 2ηi(t)Vi i(t)T fi(t) in (26) is increasing leads to less privacy loss, as shown in Figure 2.",6.2. Stronger privacy,[0],[0]
+"The noise resistance provided by an increasing ηi(t) indeed allows larger noises to be added under PP without jeopardizing convergence as observed in Section 6.1.
+More interestingly, keeping ηi(t) private further strengthens privacy protection.",6.2. Stronger privacy,[0],[0]
+"Consider the following threat model: An attacker knows {(xni , yni )}",6.2. Stronger privacy,[0],[0]
+"Bi n=2 and {fj(t)}j∈Vi∪i for all t, i.e., all data points except for the first data point of node i, as well as all intermediate results of node i and its neighbors.",6.2. Stronger privacy,[0],[0]
+"If the attacker also knows the dual updating step size θ and penalty parameter {ηi(t)}Tt=1 of node i, it can then infer the unknown data point (x1i , y 1 i ) with high confidence by combining the KKT optimality conditions from all iterations (see supplementary material for details).",6.2. Stronger privacy,[0],[0]
+"However, if the penalty parameters {ηi(t)}Tt=1 are private to each node, then it is impossible for the attacker to infer the unknown data.",6.2. Stronger privacy,[0],[0]
+"Even if the attacker knows the participation of an individual, it remains hard to infer its features.",6.2. Stronger privacy,[0],[0]
+"The main contribution of this paper is the finding that increasing {ηi}Ni=1 improves the algorithm’s ability to resist
+noise: even though we increase noise in each iteration to improve privacy, the accuracy does not degrade significantly due to this increasing robustness, which improves the privacy-utility tradeoff.",6.3. Generalization & comparison,[0],[0]
+This property holds regardless of the noise distribution.,6.3. Generalization & comparison,[0],[0]
+"While the present privacy analysis uses a similar framework as in (Chaudhuri et al., 2011; Zhang & Zhu, 2017) (objective perturbation with added Gamma noise), we can also use methods from other existing (centralized) ERM differentially private algorithms to every iteration in ADMM.",6.3. Generalization & comparison,[0],[0]
+"For example, if we allow some probability (δ > 0) of violating -differential privacy and adopt a weaker variant ( , δ)-differential privacy, we can adopt methods from works such as (Kifer et al., 2012; Jain & Thakurta, 2014; Bassily et al., 2014), by adding Gaussian noise to achieve tighter bounds on privacy loss.",6.3. Generalization & comparison,[0],[0]
+"However, as noted above, the robustness is improved as {ηi}Ni=1 increases; thus the same conclusion can be reached that both privacy and accuracy can be improved.
+",6.3. Generalization & comparison,[0],[0]
+This idea can also be generalized to other differentially private iterative algorithms.,6.3. Generalization & comparison,[0],[0]
+A key observation of our algorithm is that the overall perturbation (2ηi(t)Vi i(t)T fi(t)) is related to the parameter that controls the updating step size (ηi(t)).,6.3. Generalization & comparison,[0],[0]
+"In general, if the algorithm is perturbed in each iteration with a quantity φ( , ξ), which is a function of added noise and some parameter ξ that controls the step size, such that the resulting step size and φ( , ξ) move in opposite directions (i.e., decreasing step size increases the φ( , ξ)), then it is possible to simultaneously improve both accuracy and privacy by varying ξ to decrease the step size over time.
+",6.3. Generalization & comparison,[0],[0]
+"Interestingly, in a differentially private (sub)gradient-based distributed algorithm (Huang et al., 2015), the step size
+and the overall perturbation move in the same direction (i.e., decreasing step size decreases perturbation).",6.3. Generalization & comparison,[0],[0]
+"The reason for this difference is that under this subgradient-based algorithm, the sensitivity of the algorithm decreases with decreasing step size, which in turn leads to privacy constraint being satisfied with smaller perturbation.",6.3. Generalization & comparison,[0],[0]
+"In contrast, for ADMM the sensitivity of the algorithm is independent of the step size, and the perturbation actually needs to increase to improve privacy guarantee; the decreasing step size acts to compensate for this increase in noise to maintain accuracy, as discussed in Section 6.1.
+",6.3. Generalization & comparison,[0],[0]
+"This issue of step size never arises in the study of (Zhang & Zhu, 2017) because the analysis is only for a single iteration; however, as we have seen doing so leads to significant total privacy loss over many iterations.",6.3. Generalization & comparison,[0],[0]
+This paper presents a penalty-perturbation idea to introduce privacy preservation in iterative algorithms.,7. Conclusions,[0],[0]
+We showed how to modify an ADMM-based distributed algorithm to improve privacy without compromising accuracy.,7. Conclusions,[0],[0]
+The key idea is to add a perturbation correlated to the step size so that they change in opposite directions.,7. Conclusions,[0],[0]
+Applying this idea to other iterative algorithms can be part of the future work.,7. Conclusions,[0],[0]
+"This work is supported by the NSF under grants CNS1422211, CNS-1646019, CNS-1739517.",Acknowledgements,[0],[0]
+"By KKT condition of (5), there is:
+0 =","A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+λbij(t)− λaij(t) +,"A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+"η(2wij(t+ 1)− fi(t+ 1)− fj(t+ 1))
+","A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+"Implies:
+wij(t+ 1) = 1
+2η (λaij(t)− λbij(t))","A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+"+
+1 2 (fi(t+ 1) + fj(t+ 1)) (27)
+","A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+"Plug (27) into (6)(7):
+λaij(t+ 1) = 1
+2 (λaij(t) + λ b ij(t))","A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+"+
+η 2 (fi(t+ 1)− fj(t+ 1)) (28)
+λbij(t+ 1) = 1
+2 (λbij(t) + λ a ij(t))","A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+"+
+η 2 (fi(t+ 1)− fj(t+ 1)) (29)
+","A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+"If initialize λaij(0) = λ b ij(0) to be zero vectors for all node pairs (i, j), (28)(29) imply that λ a ij(t) = λ b ij(t) and λ k ji(t) = −λkij(t), k ∈ {a, b} will hold for all t. (27) becomes:
+wij(t+ 1)","A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+"= 1
+2 (fi(t+ 1) + fj(t+ 1)) (30)
+Let λij(t) =","A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+λaij(t),"A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+= λ,"A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+"b ij(t), (6)(7) can be simplified as:
+λij(t+ 1) = λij(t) +","A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+"η
+2 (fi(t+ 1)− fj(t+ 1))","A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+"(31)
+Plug (30) into the augmented Lagrangian (3) to simplify it:
+Lη({fi}, {wij , λkij}) =","A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+N∑ i=1,"A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+"O(fi, Di) +","A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+N∑ i=1,"A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+∑ j∈Vi (λij(t)),"A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+"T (fi − fj)
++ N∑ i=1","A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+∑,"A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+j∈Vi η 2 (||fi − 1 2 (fi(t) + fj(t))||22) +,"A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+N∑ i=1,"A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+∑,"A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+"j∈Vi η 2 (||1 2 (fi(t) + fj(t))− fj ||22)
+(32)
+","A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+Since ∑N i=1 ∑,"A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+j∈Vi λij(t)fj = ∑N i=1 ∑,"A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+"j∈Vi λji(t)fi and λij(t) = −λji(t), the second term in (32) can be simplified:
+N∑ i=1","A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+∑ j∈Vi (λij(t)),"A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+T (fi − fj) = 2,"A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+N∑ i=1,"A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+∑ j∈Vi (λij(t)),"A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+"T fi
+The last term can be expressed as:
+N∑ i=1","A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+∑,"A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+j∈Vi η 2 (||1 2 (fi(t) + fj(t))− fj ||22) =,"A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+N∑ i=1,"A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+∑,"A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+"j∈Vi η 2 (||1 2 (fi(t) + fj(t))− fi||22)
+Therefore, (32) is simplified as:
+Lη({fi}, {wij , λkij}) =","A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+N∑ i=1,"A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+"O(fi, Di) +","A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+2 N∑ i=1,"A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+∑ j∈Vi λij(t) T fi + N∑ i=1,"A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+"∑ j∈Vi η(||fi − 1 2 (fi(t) + fj(t))||22) (33)
+","A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+Define λi(t) = ∑ j∈Vi λij(t).,"A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+"Based on (31)(33), the original ADMM updates (4)-(7) are simplified as:
+fi(t+ 1) = argmin fi O(fi, Di) + 2λi(t)","A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+"T fi + η ∑ j∈Vi ||fi − 1 2 (fi(t) + fj(t))||22
+λi(t+ 1) = λi(t) + η
+2","A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+∑ j∈Vi (fi(t+ 1)− fj(t+ 1)),"A. Proof of Simplifying ADMM (Forero et al., 2010)",[0],[0]
+"Subtract (17) from (15) and (18) from (16):
+∇Ô(f̂(t+ 1), Dall)−∇Ô(f̂∗, Dall) + √ D −A(Y (t+ 1)− Y ∗)",B. Proof of Theorem 3.1,[0],[0]
+"+ (W (t+ 1)− θI)(D −A)f̂(t+ 1)
++W (t+ 1)(D +",B. Proof of Theorem 3.1,[0],[0]
+A)(f̂(t+ 1)− f̂(t)),B. Proof of Theorem 3.1,[0],[0]
+"= 0N×d (34)
+Y (t+ 1) = Y (t) + θ √ D −A(f̂(t+",B. Proof of Theorem 3.1,[0],[0]
+"1)− f̂∗) (35)
+",B. Proof of Theorem 3.1,[0],[0]
+"By convexity of O(fi, Di), for any f1i and f 2 i , there is:
+(f1i − f2i )T (∇O(f1i , Di)−∇O(f2i , Di))",B. Proof of Theorem 3.1,[0],[0]
+"≥ 0
+Let 〈·, ·〉F be frobenius inner product of two matrices, there is:
+〈f̂(t+ 1)− f̂∗,∇Ô(f̂(t+ 1), Dall)−∇Ô(f̂∗, Dall)〉F",B. Proof of Theorem 3.1,[0],[0]
+"≥ 0
+Substitute ∇Ô(f̂(t+ 1), Dall)−∇Ô(f̂∗, Dall) from (34):
+0 ≤ 〈f̂(t+ 1)− f̂∗,−",B. Proof of Theorem 3.1,[0],[0]
+"√ D −A(Y (t+ 1)− Y ∗)〉F + 〈f̂(t+ 1)− f̂∗,−(W (t+ 1)− θI)(D −A)f̂(t+ 1)〉F +〈f̂(t+ 1)− f̂∗,−W (t+ 1)(D +A)(f̂(t+ 1)− f̂(t))〉F",B. Proof of Theorem 3.1,[0],[0]
+"(36)
+Consider the right hand side of (36).",B. Proof of Theorem 3.1,[0],[0]
+"Since D−A is symmetric and PSD, √ D −A is also a symmetric matrix and by (35),
+〈f̂(t+ 1)− f̂∗,− √ D −A(Y (t+ 1)− Y ∗)〉F",B. Proof of Theorem 3.1,[0],[0]
+= 〈− √ D −A(f̂(t+,B. Proof of Theorem 3.1,[0],[0]
+"1)− f̂∗), (Y (t+ 1)− Y ∗)〉F
+= −〈1 θ
+(Y (t+ 1)− Y (t)), Y (t+ 1)− Y ∗〉F",B. Proof of Theorem 3.1,[0],[0]
+"(37)
+Rearrange (36) and use (D −A)f̂∗ = 0N×d
+0",B. Proof of Theorem 3.1,[0],[0]
+"≥ 〈Z(t+ 1)− Z∗, J(t+ 1)(Z(t+ 1)− Z(t))〉F +",B. Proof of Theorem 3.1,[0],[0]
+"〈f̂(t+ 1)− f̂∗, (W (t+ 1)− θI)(D −A)(f̂(t+ 1)− f̂∗)〉F",B. Proof of Theorem 3.1,[0],[0]
+"(38)
+Suppose ηi(t) ≥ θ for all t, i, i.e., the diagonal matrix W (t)− θI 0 for all t. Since D−A 0, whose eigenvalues are all non-negative, the eigenvalues of (W (t+ 1)− θI)(D −A) are thus also non-negative, i.e., (W (t+ 1)− θI)(D −A) 0.",B. Proof of Theorem 3.1,[0],[0]
+"Then for the second term of the RHS of (38), there is:
+〈f̂(t+ 1)− f̂∗, (W (t+ 1)− θI)(D −A)(f̂(t+ 1)− f̂∗)〉F",B. Proof of Theorem 3.1,[0],[0]
+"≥ 0
+Therefore, 〈Z(t+ 1)− Z∗, J(t+ 1)(Z(t+ 1)− Z(t))〉F",B. Proof of Theorem 3.1,[0],[0]
+≤ 0,B. Proof of Theorem 3.1,[0],[0]
+"(39)
+To simplify the notation, for a matrix X , let ||X||2J = 〈X, JX〉F , then (39) can be represented as:
+1 2 ||Z(t+ 1)− Z∗||2J(t+1)",B. Proof of Theorem 3.1,[0],[0]
++ 1 2 ||Z(t+ 1)− Z(t)||2J(t+1),B. Proof of Theorem 3.1,[0],[0]
+"− 1 2 ||Z(t)− Z∗||2J(t+1) ≤ 0
+implies
+||Z(t+ 1)− Z(t)||2J(t+1) ≤ −||Z(t+",B. Proof of Theorem 3.1,[0],[0]
+1)− Z ∗||2J(t+1) + ||Z(t)− Z ∗||2J(t) + ||Z(t)− Z ∗||2J(t+1),B. Proof of Theorem 3.1,[0],[0]
+"− ||Z(t)− Z ∗||2J(t) (40)
+",B. Proof of Theorem 3.1,[0],[0]
+"Suppose ηi(t+ 1) ≥ ηi(t) for all t and i, i.e., the diagonal matrix W (t+ 1)−W (t) 0 for all t. Since D+A 0, implies (W (t+ 1)−W (t))(D +A) 0.",B. Proof of Theorem 3.1,[0],[0]
+"Let U = sup
+i,t,k |(fi(t)− f∗c )k| ∈ R be the finite upper bound of all nodes i, all iterations t
+and all components k, then
+||Z(t)− Z∗||2J(t+1)",B. Proof of Theorem 3.1,[0],[0]
+− ||Z(t)− Z ∗||2J(t) = Tr((Z(t)− Z ∗)T,B. Proof of Theorem 3.1,[0],[0]
+"(J(t+ 1)− J(t))(Z(t)− Z∗))
+= Tr((f̂(t)− f̂∗)T (W (t+ 1)−W (t))(D +A)(f̂(t)− f̂∗))",B. Proof of Theorem 3.1,[0],[0]
+"≤ U2(||ones(N, d)||2W (t+1)(D+A)",B. Proof of Theorem 3.1,[0],[0]
+"− ones(N, d)|| 2 W (t)(D+A))
+(41)
+where ones(N, d) is all one’s matrix of size N × d.",B. Proof of Theorem 3.1,[0],[0]
+"By (40)(41):
+||Z(t+ 1)− Z(t)||2J(t+1) ≤ ||Z(t)− Z ∗||2J(t)",B. Proof of Theorem 3.1,[0],[0]
+"− ||Z(t+ 1)− Z ∗||2J(t+1) +U2(||ones(N, d)||2W",B. Proof of Theorem 3.1,[0],[0]
+"(t+1)(D+A) − ||ones(N, d)|| 2 W (t)(D+A))
+",B. Proof of Theorem 3.1,[0],[0]
+"(42)
+Sum up (42) over t from 0 to +∞ leads to:
++∞∑ t=0 ||Z(t+ 1)− Z(t)||2J(t+1) ≤ ||Z(0)− Z ∗||2J(0)",B. Proof of Theorem 3.1,[0],[0]
+"− ||Z(+∞)− Z ∗||2J(+∞)
++U2(||ones(N, d)||2W (+∞)(D+A) − ||ones(N, d)|| 2 W (0)(D+A))
+(43)
+Since ηi(t) <",B. Proof of Theorem 3.1,[0],[0]
+"+∞, the RHS of (43) is finite, implies that limt→+∞ ||Z(t+ 1)− Z(t)||2J(t+1) = 0 must hold.
+",B. Proof of Theorem 3.1,[0],[0]
+"By the definition of Z(t), J(t) and ||X||2J = 〈X, JX〉F , the following must hold
+lim t→+∞
+||f̂(t+ 1)− f̂(t)||2W (t+1)(D+A) = 0",B. Proof of Theorem 3.1,[0],[0]
+"(44)
+lim t→+∞
+||Y (t+ 1)− Y (t)||2F = 0 (45)
+(45) shows that Y (t) converges to a stationary point Y s, along with (16) imply limt→+∞ √ D −Af̂(t + 1) = 0.",B. Proof of Theorem 3.1,[0],[0]
+"Since Null( √ D −A) = c1, f̂(t+ 1) must lie in the subspace spanned by 1 as t→∞. To satisfy (44), either of the following two statements must hold:
+",B. Proof of Theorem 3.1,[0],[0]
+• limt→+∞(f̂(t+,B. Proof of Theorem 3.1,[0],[0]
+1)− f̂(t)),B. Proof of Theorem 3.1,[0],[0]
+"= 0N×d
+• limt→+∞W (t+ 1)(D +A)1 = limt→+∞W (t+ 1)A1 + limt→+∞ ∑N i=1",B. Proof of Theorem 3.1,[0],[0]
+ηi(t+,B. Proof of Theorem 3.1,[0],[0]
+"1)Vi = 0N×1
+",B. Proof of Theorem 3.1,[0],[0]
+Since ηi(t) ≥,B. Proof of Theorem 3.1,[0],[0]
+θ > 0,B. Proof of Theorem 3.1,[0],[0]
+"for all t, implies limt→+∞ ∑N i=1",B. Proof of Theorem 3.1,[0],[0]
+ηi(t+,B. Proof of Theorem 3.1,[0],[0]
+1)Vi > 0.,B. Proof of Theorem 3.1,[0],[0]
+The second statement can never be true because all elements of A and W (t+ 1) are non-negative.,B. Proof of Theorem 3.1,[0],[0]
+"Hence, f̂(t) should also converge to a stationary point f̂s.
+",B. Proof of Theorem 3.1,[0],[0]
+"Now show that the stationary point (Y s, f̂s) is (Y ∗, f̂∗).
+",B. Proof of Theorem 3.1,[0],[0]
+"Take limit of both sides of (15) (16), substitute f̂s, Y s yields
+∇Ô(f̂s, Dall) + √ D −AY s",B. Proof of Theorem 3.1,[0],[0]
+"+ (W (t+ 1)− θI)(D −A)f̂s = 0N×d (46)
+",B. Proof of Theorem 3.1,[0],[0]
+"√ D −Af̂s = 0N×d (47)
+",B. Proof of Theorem 3.1,[0],[0]
+"By (47), (46) turns into: ∇Ô(f̂s, Dall) + √ D −AY s = 0N×d",B. Proof of Theorem 3.1,[0],[0]
+"(48)
+Compare (47)(48) with (17)(18) in Lemma 3.1 and observe that (Y s, f̂s) satisfies the optimality condition (17)(18) and is thus the optimal point.",B. Proof of Theorem 3.1,[0],[0]
+"Therefore, f(t) converges to f̂∗ and Y (t) converges to Y ∗.",B. Proof of Theorem 3.1,[0],[0]
+"According to the Assumption 3 that O(fi, Di) is strongly convex and has Lipschitz continues gradients for all i ∈ N , define diagonal matrices Dm = diag([m1;m2; · · · ;mN ]) ∈",C. Proof of Theorem 3.2,[0],[0]
+RN×N and DM = diag([M21 ;M22 ; · · · ;M2N ]) ∈,C. Proof of Theorem 3.2,[0],[0]
+"RN×N , (20) yield:
+〈f̂1 − f̂2,∇Ô(f̂1, Dall)−∇Ô(f̂2, Dall)〉F",C. Proof of Theorem 3.2,[0],[0]
+"≥ 〈f̂1 − f̂2, Dm(f̂1",C. Proof of Theorem 3.2,[0],[0]
+"− f̂2)〉F (49)
+||∇Ô(f̂1, Dall)−∇Ô(f̂2, Dall)||2F ≤ 〈f̂1 − f̂2, DM (f̂1 − f̂2)〉F (50)
+",C. Proof of Theorem 3.2,[0],[0]
+"Since for any µ > 1 and any matrices C1, C2 with the same dimensions, there is:
+||C1 +",C. Proof of Theorem 3.2,[0],[0]
+"C2||2F ≤ µ||C1||2F + µ
+µ− 1 ||C2||2F
+From (34), there is:
+||",C. Proof of Theorem 3.2,[0],[0]
+"√ D −A(Y (t+ 1)− Y ∗)||2F ≤ µ||∇Ô(f̂(t+ 1), Dall)−∇Ô(f̂∗, Dall) +W (t+ 1)(D +A)(f̂(t+ 1)− f̂(t))||2F
++ µ
+µ− 1 ||(W (t+ 1)− θI)(D −A)f̂(t+ 1)||2F ≤
+µ2
+µ− 1 ||∇Ô(f̂(t+ 1), Dall)−∇Ô(f̂∗, Dall)||2F
++µ2||W (t+ 1)(D +A)(f̂(t+ 1)− f̂(t))||2F + µ
+µ− 1 ||(W (t+ 1)− θI)(D −A)f̂(t+ 1)||2F
+(51)
+Let σmin(·), σmax(·) denote the smallest nonzero singular value and the largest singular value of a matrix respectively.
+",C. Proof of Theorem 3.2,[0],[0]
+"For any matrices C1, C2, let C1 = UΣV T be SVD of C1, there is:
+||C1C2||2F ≤ σmax(C1)||C2||2CT1
+σmin(C1)",C. Proof of Theorem 3.2,[0],[0]
+2||C2||2F ≤,C. Proof of Theorem 3.2,[0],[0]
+||C1C2||2F ≤,C. Proof of Theorem 3.2,[0],[0]
+"σmax(C1)2||C2||2F
+Denote σ̄max(t+ 1) = σmax((W (t+ 1)− θI)(D −A))",C. Proof of Theorem 3.2,[0],[0]
+"σ̄min(t+ 1) = σmin((W (t+ 1)− θI)(D −A))
+",C. Proof of Theorem 3.2,[0],[0]
+"σ̃max(t+ 1) = σmax(W (t+ 1)(D +A))
+",C. Proof of Theorem 3.2,[0],[0]
+"Using (50) and (D −A)f̂∗ = 0, (51) is turned into:
+1 θ ||Y (t+ 1)− Y ∗||2F ≤
+µ2
+θσmin(D −A)(µ− 1) ||f̂(t+ 1)− f̂∗||2DM
++ µ2σ̃max(t+ 1)
+θσmin(D −A) ||f̂(t+ 1)− f̂(t)||2W (t+1)(D+A) +
+µσ̄max(t+ 1) 2
+θσmin(D",C. Proof of Theorem 3.2,[0],[0]
+−A)(µ− 1),C. Proof of Theorem 3.2,[0],[0]
+"||(f̂(t+ 1)− f̂∗)||2F
+Adding ||f̂(t+ 1)− f̂∗||2W (t+1)(D+A) at both sides leads to:
+||Z(t+ 1)− Z∗||2J(t+1) ≤ µ2σ̃max(t+ 1)
+θσmin(D −A) ||f̂(t+ 1)− f̂(t)||2W (t+1)(D+A)
++||f̂(t+ 1)− f̂∗||2µ2DM+µσ̄max(t+1)2IN θσmin(D−A)(µ−1)",C. Proof of Theorem 3.2,[0],[0]
+"+W (t+1)(D+A)
+(52)
+",C. Proof of Theorem 3.2,[0],[0]
+"Since δ(t+ 1)µ2σ̃max(t+ 1)
+θσmin(D −A) ≤ 1 (53)
+and
+δ(t+ 1)( µσ̄max(t+ 1) 2IN + µ2DM θσmin(D −A)(µ− 1)",C. Proof of Theorem 3.2,[0],[0]
++W (t+ 1)(D +A)),C. Proof of Theorem 3.2,[0],[0]
+"2(W (t+ 1)− θI)(D −A) + 2Dm (54)
+",C. Proof of Theorem 3.2,[0],[0]
+"It implies from (52) that:
+δ(t+ 1)||Z(t+ 1)− Z∗||2J(t+1) ≤ ||f̂(t+ 1)− f̂(t)||",C. Proof of Theorem 3.2,[0],[0]
+"2 W (t+1)(D+A) + ||f̂(t+ 1)− f̂ ∗||22(W (t+1)−θI)(D−A)+2Dm ≤ ||Z(t+ 1)− Z(t)||2J(t+1) + ||f̂(t+ 1)− f̂ ∗||22(W (t+1)−θI)(D−A)+2Dm (55)
+",C. Proof of Theorem 3.2,[0],[0]
+"Substituting f̂1 with f̂(t+ 1) and f̂2 with f̂∗ and the gradient difference from (34) in (49) leads to:
+〈f̂(t+ 1)− f̂∗, √ D −A(Y (t+ 1)− Y ∗)〉F",C. Proof of Theorem 3.2,[0],[0]
+"+ 〈f̂(t+ 1)− f̂∗,W (t+ 1)(D +",C. Proof of Theorem 3.2,[0],[0]
+"A)(f̂(t+ 1)− f̂(t))〉F
++〈f̂(t+ 1)− f̂∗, (W (t+ 1)− θI)(D −A)f̂(t+ 1)〉F ≤",C. Proof of Theorem 3.2,[0],[0]
+"−〈f̂(t+ 1)− f̂∗, Dm(f̂(t+ 1)− f̂∗)〉F
+Similar to the proof of Theorem 3.1, using the definition of Z(t+ 1), Z∗, J(t+ 1) and (D −A)f̂∗ = 0, there is:
+||Z(t+ 1)− Z∗||2J(t+1) ≤ −||Z(t+",C. Proof of Theorem 3.2,[0],[0]
+1)− Z(t)|| 2 J(t+1) + ||Z(t)− Z ∗||2J(t+1),C. Proof of Theorem 3.2,[0],[0]
+"− ||f̂(t+ 1)− f̂ ∗||22Dm+2(W (t+1)−θI)(D−A)
+(56)
+",C. Proof of Theorem 3.2,[0],[0]
+"Sum up (55) and (56) gives:
+(1 + δ(t+ 1))||Z(t+ 1)− Z∗||2J(t+1) ≤ ||Z(t)−",C. Proof of Theorem 3.2,[0],[0]
+"Z ∗||2J(t+1)
+",C. Proof of Theorem 3.2,[0],[0]
+"Let mo = mini∈N {mi}, MO = maxi∈N {Mi}.",C. Proof of Theorem 3.2,[0],[0]
+"One δ(t+ 1) that satisfies (53) and (54) could be:
+min{θσmin(D −A) µ2σ̃max(t+",C. Proof of Theorem 3.2,[0],[0]
+"1) , 2mo + 2σ̄min(t+ 1) µ2M2O+µσ̄max(t+1) 2
+θσmin(D−A)(µ−1) + σ̃max(t+ 1) }",C. Proof of Theorem 3.2,[0],[0]
+"In the following proof, use the uppercase letters and lowercase letters to denote random variables and the corresponding realizations.
+",D. Proof of Theorem 4.1,[0],[0]
+"Since the modified ADMM is randomized, denote Fi(t) as the random variable of the result that node i broadcasts in t-th iteration, of which the realization is fi(t).",D. Proof of Theorem 4.1,[0],[0]
+"Define F (t) = {Fi(t)}Ni=1 whose realization is {fi(t)}Ni=1.
+",D. Proof of Theorem 4.1,[0],[0]
+"Let FF (0:t)(·) be the joint probability distribution of F (0 : t) = {F (r)}tr=0, and FF (t)(·) be the distribution of F (t), by chain rule:
+FF (0:T )({f(r)}Tr=0) =",D. Proof of Theorem 4.1,[0],[0]
+"FF (0:T−1)({f(r)}T−1r=0 ) ·FF (T )(f(T )|{f(r)} T−1 r=0 ) = · · ·
+= FF (0)(f(0)) · T∏ t=1",D. Proof of Theorem 4.1,[0],[0]
+"FF (t)(f(t)|{f(r)}t−1r=0)
+For two neighboring datasets Dall and D̂all of the network, the ratio of joint probabilities is given by:
+FF (0:T )({f(r)}Tr=0|Dall) FF (0:T )({f(r)}Tr=0|D̂all) =",D. Proof of Theorem 4.1,[0],[0]
+FF (0)(f(0)|Dall) FF (0)(f(0)|D̂all) · T∏ t=1,D. Proof of Theorem 4.1,[0],[0]
+"FF (t)(f(t)|{f(r)}t−1r=0, Dall) FF (t)(f(t)|{f(r)}t−1r=0, D̂all)
+(57)
+Since fi(0) is randomly selected for all i, which is independent of dataset, there is FF (0)(f(0)|Dall) =",D. Proof of Theorem 4.1,[0],[0]
+"FF (0)(f(0)|D̂all).
+",D. Proof of Theorem 4.1,[0],[0]
+"First only consider t-th iteration, since the primal variable is updated according to (25), by KKT optimality condition, ∇fiL priv i (t)|fi=fi(t) = 0, implies:
+i(t) =",D. Proof of Theorem 4.1,[0],[0]
+"− 1
+2ηi(t)Vi
+C
+Bi Bi∑ n=1 yni L ′(yni fi(t)",D. Proof of Theorem 4.1,[0],[0]
+Txni )x n,D. Proof of Theorem 4.1,[0],[0]
+"i −
+1 2ηi(t)Vi ( ρ N ∇R(fi(t))",D. Proof of Theorem 4.1,[0],[0]
+"+ 2λi(t− 1))
+",D. Proof of Theorem 4.1,[0],[0]
+− 1 2Vi ∑ j∈Vi (2fi(t)− fi(t− 1)− fj(t− 1)),D. Proof of Theorem 4.1,[0],[0]
+"(58)
+",D. Proof of Theorem 4.1,[0],[0]
+"Given {fi(r)}t−1r=0, Fi(t) and Ei(t) will be bijective:
+• For any Fi(t) with the realization fi(t), ∃ an unique Ei(t) = i(t) having the form of (58) such that the KKT condition holds.
+",D. Proof of Theorem 4.1,[0],[0]
+"• Since the Lagrangian Lprivi (t) is strictly convex (by Assumption 4,5), its minimizer is unique, implies that for any Ei(t) with the realization i(t), ∃ an unique Fi(t) = fi(t) such that the KKT condition holds.
+",D. Proof of Theorem 4.1,[0],[0]
+"Since each node i generates i(t) independently, fi(t) is also independent from each other.",D. Proof of Theorem 4.1,[0],[0]
+"Let FFi(t)(·) be the distribution of Fi(t), there is:
+FF (t)(f(t)|{f(r)}t−1r=0, Dall) FF (t)(f(t)|{f(r)}t−1r=0, D̂all) = N∏ v=1 FFv(t)(fv(t)|{fv(r)} t−1 r=0, Dv) FFv(t)(fv(t)|{fv(r)} t−1 r=0, D̂v) = FFi(t)(fi(t)|{fi(r)}",D. Proof of Theorem 4.1,[0],[0]
+"t−1 r=0, Di) FFi(t)(fi(t)|{fi(r)} t−1 r=0, D̂i)
+(59)
+",D. Proof of Theorem 4.1,[0],[0]
+"Since two neighboring datasets Dall and D̂all only have at most one data point that is different, the second equality holds is because of the fact that this different data point could only be possessed by one node, say node i.",D. Proof of Theorem 4.1,[0],[0]
+"Then there is Dj = D̂j for j 6= i.
+",D. Proof of Theorem 4.1,[0],[0]
+"Given {fi(r)}t−1r=0, let gt(·, Di) :",D. Proof of Theorem 4.1,[0],[0]
+Rd → Rd denote the one-to-one mapping from Ei(t) to Fi(t) using dataset Di.,D. Proof of Theorem 4.1,[0],[0]
+"Let FEi(t)(·) be the probability density of Ei(t), by Jacobian transformation, there is4:
+FFi(t)(fi(t)|Di)",D. Proof of Theorem 4.1,[0],[0]
+"= FEi(t)(g −1 t (fi(t), Di)) ·",D. Proof of Theorem 4.1,[0],[0]
+"| det(J(g−1t (fi(t), Di)))| (60)
+where g−1t (fi(t), Di) is the mapping from Fi(t) to Ei(t) using data Di as shown in (58) and J(g −1 t (fi(t), Di)) is the Jacobian matrix of it.
+",D. Proof of Theorem 4.1,[0],[0]
+"Without loss of generality, let Di and D̂i be only different in the first data point, say (x1i , y 1 i ) and (x̂ 1",D. Proof of Theorem 4.1,[0],[0]
+"i , ŷ 1 i ) respectively.",D. Proof of Theorem 4.1,[0],[0]
+"Then by (59)(60), (57) yields:
+FF (0:T )({f(r)}Tr=0|Dall) FF (0:T )({f(r)}Tr=0|D̂all) = T∏ t=1 FEi(t)(g −1 t (fi(t), Di))",D. Proof of Theorem 4.1,[0],[0]
+"FEi(t)(g −1 t (fi(t), D̂i)) ·",D. Proof of Theorem 4.1,[0],[0]
+"T∏ t=1 |det(J(g−1t (fi(t), Di)))| |det(J(g−1t (fi(t), D̂i)))|
+(61)
+4We believe that there is a critical mistake in (Zhang & Zhu, 2017) and the original paper (Chaudhuri et al., 2011) where the objective perturbation method was proposed.",D. Proof of Theorem 4.1,[0],[0]
+"A wrong mapping is used in both work:
+FFi(t)(fi(t)|Di) = FEi(t)(g −1 t (fi(t), Di)) ·",D. Proof of Theorem 4.1,[0],[0]
+"| det(J(g−1t (fi(t), Di)))|−1
+Consider the first part, Ei(t) ∼ exp{−αi(t)|| ||}, let ̂i(t) = g−1t (fi(t), D̂i) and i(t) =",D. Proof of Theorem 4.1,[0],[0]
+"g−1t (fi(t), Di)
+T∏ t=1",D. Proof of Theorem 4.1,[0],[0]
+"FEi(t)(g −1 t (fi(t), Di))",D. Proof of Theorem 4.1,[0],[0]
+"FEi(t)(g −1 t (fi(t), D̂i))",D. Proof of Theorem 4.1,[0],[0]
+= T∏ t=1,D. Proof of Theorem 4.1,[0],[0]
+exp(αi(t)(||̂i(t)||,D. Proof of Theorem 4.1,[0],[0]
+− || i(t)||)),D. Proof of Theorem 4.1,[0],[0]
+"≤ exp( T∑ t=1 αi(t)||̂i(t)− i(t)||) (62)
+",D. Proof of Theorem 4.1,[0],[0]
+"By (58), Assumptions 4 and the facts that ||xni ||2 ≤ 1 (pre-normalization), yni ∈ {+1,−1}.
+",D. Proof of Theorem 4.1,[0],[0]
+"||̂i(t)− i(t)|| = 1
+2ηi(t)Vi
+C Bi · ||y1iL ′(y1i fi(t)Tx1i )",D. Proof of Theorem 4.1,[0],[0]
+x1i,D. Proof of Theorem 4.1,[0],[0]
+− ŷ1iL ′(ŷ1i fi(t)T x̂1i ),D. Proof of Theorem 4.1,[0],[0]
+"x̂1i || ≤
+C
+ηi(t)ViBi
+(62) can be bounded: T∏ t=1 FEi(t)(g −1 t (fi(t), Di))",D. Proof of Theorem 4.1,[0],[0]
+"FEi(t)(g −1 t (fi(t), D̂i))",D. Proof of Theorem 4.1,[0],[0]
+"≤ exp( T∑ t=1 Cαi(t) ηi(t)ViBi ) (63)
+Consider the second part, the Jacobian matrix J(g−1t (fi(t), Di)) is:
+J(g−1t (fi(t), Di))",D. Proof of Theorem 4.1,[0],[0]
+=,D. Proof of Theorem 4.1,[0],[0]
+"− 1
+2ηi(t)Vi
+C
+Bi Bi∑ n=1 L ′′(yni fi(t)",D. Proof of Theorem 4.1,[0],[0]
+Txni )x n,D. Proof of Theorem 4.1,[0],[0]
+i (x n i ) T,D. Proof of Theorem 4.1,[0],[0]
+− 1 2ηi(t)Vi ρ N ∇2R(fi(t))−,D. Proof of Theorem 4.1,[0],[0]
+"Id
+Let G(t) =",D. Proof of Theorem 4.1,[0],[0]
+C2ηi(t)ViBi (L ′′(ŷ1i fi(t) T x̂1i )x̂ 1,D. Proof of Theorem 4.1,[0],[0]
+i (x̂ 1 i ) T −L ′′(y1i fi(t)Tx1i ),D. Proof of Theorem 4.1,[0],[0]
+x1i (x1i )T ) and H(t) =,D. Proof of Theorem 4.1,[0],[0]
+"−J(g −1 t (fi(t), Di)), there is:
+|det(J(g−1t (fi(t), Di)))| |det(J(g−1t (fi(t), D̂i)))| = |det(H(t))| |det(H(t) +G(t))| =
+1
+|det(I +H(t)−1G(t))| =
+1 | ∏r j=1(1 + λj(H(t) −1G(t)))|
+where λj(H(t)−1G(t)) denotes the j-th largest eigenvalue of H(t)−1G(t).",D. Proof of Theorem 4.1,[0],[0]
+"Since G(t) has rank at most 2, implies H(t)−1G(t) also has rank at most 2.
+",D. Proof of Theorem 4.1,[0],[0]
+"Because θ is determined such that 2c1 < BiC ( ρ N + 2θVi), and θ ≤ ηi(t) holds for all node i and iteration t, which implies:
+c1 Bi C ( ρ N + 2ηi(t)Vi)",D. Proof of Theorem 4.1,[0],[0]
+"< 1 2 (64)
+",D. Proof of Theorem 4.1,[0],[0]
+"By Assumptions 4 and 5, the eigenvalue of H(t) and G(t) satisfy:
+λj(H(t))",D. Proof of Theorem 4.1,[0],[0]
+"≥ ρ
+2ηi(t)ViN + 1 > 0
+",D. Proof of Theorem 4.1,[0],[0]
+− Cc1 2ηi(t)ViBi ≤,D. Proof of Theorem 4.1,[0],[0]
+λj(G(t)),D. Proof of Theorem 4.1,[0],[0]
+"≤ Cc1 2ηi(t)ViBi
+",D. Proof of Theorem 4.1,[0],[0]
+"Implies:
+− c1 Bi C ( ρ N + 2ηi(t)Vi)",D. Proof of Theorem 4.1,[0],[0]
+≤ λj(H(t)−1G(t)),D. Proof of Theorem 4.1,[0],[0]
+"≤ c1 Bi C ( ρ N + 2ηi(t)Vi)
+",D. Proof of Theorem 4.1,[0],[0]
+"By (64):
+−1 2 ≤ λj(H(t)−1G(t))",D. Proof of Theorem 4.1,[0],[0]
+"≤ 1 2
+Since λmin(H(t)−1G(t))",D. Proof of Theorem 4.1,[0],[0]
+"> −1, there is:
+1 |1 + λmax(H(t)−1G(t))|2",D. Proof of Theorem 4.1,[0],[0]
+"≤ 1 |det(I +H(t)−1G(t))| ≤ 1 |1 + λmin(H(t)−1G(t))|2
+Therefore,
+T∏ t=1 |det(J(g−1t (fi(t), Di)))| |det(J(g−1t (fi(t), D̂i)))| ≤",D. Proof of Theorem 4.1,[0],[0]
+"T∏ t=1
+1
+|1− c1Bi",D. Proof of Theorem 4.1,[0],[0]
+"C ( ρ N +2ηi(t)Vi)
+|2 = exp(− T∑ t=1 2 ln(1− c1 Bi C",D. Proof of Theorem 4.1,[0],[0]
+( ρ N + 2ηi(t)Vi) )),D. Proof of Theorem 4.1,[0],[0]
+"(65)
+Since for any real number x ∈",D. Proof of Theorem 4.1,[0],[0]
+"[0, 0.5], − ln(1 − x) < 1.4x.",D. Proof of Theorem 4.1,[0],[0]
+"By condition (64), (65) can be bounded with a simper expression:
+T∏ t=1 |det(J(g−1t (fi(t), Di)))| |det(J(g−1t (fi(t), D̂i)))| ≤ exp",D. Proof of Theorem 4.1,[0],[0]
+( T∑ t=1 2.8c1 Bi C ( ρ N + 2ηi(t)Vi) ),D. Proof of Theorem 4.1,[0],[0]
+≤ exp( T∑ t=1 1.4Cc1 ηi(t)ViBi ),D. Proof of Theorem 4.1,[0],[0]
+"(66)
+Combine (63)(66), (61) can be bounded:
+FF (0:T )({f(r)}Tr=0|Dall) FF (0:T )({f(r)}Tr=0|D̂all) ≤ exp( T∑ t=1 ( 1.4Cc1 ηi(t)ViBi + Cαi(t) ηi(t)ViBi ))",D. Proof of Theorem 4.1,[0],[0]
+"= exp( T∑ t=1
+C
+ηi(t)ViBi (1.4c1 + αi(t)))
+",D. Proof of Theorem 4.1,[0],[0]
+"Therefore, the total privacy loss during T iterations can be bounded by any β:
+β ≥ max i∈N { T∑ t=1
+C
+ηi(t)ViBi (1.4c1 + αi(t))}
+E. Inference of Attackers when ηi(t) is Non-private By KKT optimality condition in each iteration, we have:
+i(t) +",D. Proof of Theorem 4.1,[0],[0]
+"1
+2ηi(t)Vi
+C Bi y1iL ′(y1i fi(t) Tx1i )",D. Proof of Theorem 4.1,[0],[0]
+x 1,D. Proof of Theorem 4.1,[0],[0]
+"i = −
+1
+2ηi(t)Vi
+C
+Bi",D. Proof of Theorem 4.1,[0],[0]
+Bi∑ n=2 yni L ′(yni fi(t),D. Proof of Theorem 4.1,[0],[0]
+Txni )x n,D. Proof of Theorem 4.1,[0],[0]
+"i
+− 1 2ηi(t)Vi ( ρ N ∇R(fi(t))",D. Proof of Theorem 4.1,[0],[0]
++,D. Proof of Theorem 4.1,[0],[0]
+"2λi(t− 1))− 1 2Vi ∑ j∈Vi (2fi(t)− fi(t− 1)− fj(t− 1)) .
+",D. Proof of Theorem 4.1,[0],[0]
+In this case the attacker can compute the RHS of (67) completely.,D. Proof of Theorem 4.1,[0],[0]
+"Furthermore, since Ei(t) is zero-mean, over a large number of iterations we will have 1T ∑T t=1 i(t)",D. Proof of Theorem 4.1,[0],[0]
+"≈ 0 with high probability, which then allows the attacker to determine the features of the unknown individual up to a scaling factor, i.e., it can determine the second term on the LHS as a scalar multiplied with x1i .",D. Proof of Theorem 4.1,[0],[0]
+"Alternating direction method of multiplier (ADMM) is a popular method used to design distributed versions of a machine learning algorithm, whereby local computations are performed on local data with the output exchanged among neighbors in an iterative fashion.",abstractText,[0],[0]
+During this iterative process the leakage of data privacy arises.,abstractText,[0],[0]
+"A differentially private ADMM was proposed in prior work (Zhang & Zhu, 2017) where only the privacy loss of a single node during one iteration was bounded, a method that makes it difficult to balance the tradeoff between the utility attained through distributed computation and privacy guarantees when considering the total privacy loss of all nodes over the entire iterative process.",abstractText,[0],[0]
+We propose a perturbation method for ADMM where the perturbed term is correlated with the penalty parameters; this is shown to improve the utility and privacy simultaneously.,abstractText,[0],[0]
+The method is based on a modified ADMM where each node independently determines its own penalty parameter in every iteration and decouples it from the dual updating step size.,abstractText,[0],[0]
+The condition for convergence of the modified ADMM and the lower bound on the convergence rate are also derived.,abstractText,[0],[0]
+Improving the Privacy and Accuracy of ADMM-Based Distributed Algorithms ,title,[0],[0]
+"Topic modeling algorithms, such as Latent Dirichlet Allocation (Blei et al., 2003) and related methods (Blei, 2012), are often used to learn a set of latent topics for a corpus, and predict the probabilities of each word in each document belonging to each topic (Teh et al., 2006; Newman et al., 2006; Toutanova and Johnson, 2008; Porteous et al., 2008; Johnson, 2010; Xie and Xing, 2013; Hingmire et al., 2013).
+",1 Introduction,[0],[0]
+Conventional topic modeling algorithms such as these infer document-to-topic and topic-to-word distributions from the co-occurrence of words within documents.,1 Introduction,[0],[0]
+"But when the training corpus of documents is small or when the documents are short, the resulting distributions might be based on little evidence.",1 Introduction,[0],[0]
+"Sahami and Heilman (2006) and Phan et al.
+(2011) show that it helps to exploit external knowledge to improve the topic representations.",1 Introduction,[0],[0]
+Sahami and Heilman (2006) employed web search results to improve the information in short texts.,1 Introduction,[0],[0]
+"Phan et al. (2011) assumed that the small corpus is a sample of topics from a larger corpus like Wikipedia, and then use the topics discovered in the larger corpus to help shape the topic representations in the small corpus.",1 Introduction,[0],[0]
+"However, if the larger corpus has many irrelevant topics, this will “use up” the topic space of the model.",1 Introduction,[0],[0]
+"In addition, Petterson et al. (2010) proposed an extension of LDA that uses external information about word similarity, such as thesauri and dictionaries, to smooth the topic-to-word distribution.
+",1 Introduction,[0],[0]
+"Topic models have also been constructed using latent features (Salakhutdinov and Hinton, 2009; Srivastava et al., 2013; Cao et al., 2015).",1 Introduction,[0],[0]
+"Latent feature (LF) vectors have been used for a wide range of NLP tasks (Glorot et al., 2011; Socher et al., 2013; Pennington et al., 2014).",1 Introduction,[0],[0]
+"The combination of values permitted by latent features forms a high dimensional space which makes it is well suited to model topics of very large corpora.
+",1 Introduction,[0],[0]
+"Rather than relying solely on a multinomial or latent feature model, as in Salakhutdinov and Hinton (2009), Srivastava et al. (2013)",1 Introduction,[0],[0]
+"and Cao et al. (2015), we explore how to take advantage of both latent feature and multinomial models by using a latent feature representation trained on a large external corpus to supplement a multinomial topic model estimated from a smaller corpus.
+",1 Introduction,[0],[0]
+"Our main contribution is that we propose two new latent feature topic models which integrate latent feature word representations into two Dirichlet
+ar X
+iv :1
+81 0.
+06 30
+6v 1
+[ cs
+.C",1 Introduction,[0],[0]
+"L
+] 1
+5 O
+ct 2
+multinomial topic models: a Latent Dirichlet Allocation (LDA) model (Blei et al., 2003) and a onetopic-per-document Dirichlet Multinomial Mixture (DMM) model (Nigam et al., 2000).",1 Introduction,[0],[0]
+"Specifically, we replace the topic-to-word Dirichlet multinomial component which generates the words from topics in each Dirichlet multinomial topic model by a twocomponent mixture of a Dirichlet multinomial component and a latent feature component.
+",1 Introduction,[0],[0]
+"In addition to presenting a sampling procedure for the new models, we also compare using two different sets of pre-trained latent feature word vectors with our models.",1 Introduction,[0],[0]
+"We achieve significant improvements on topic coherence evaluation, document clustering and document classification tasks, especially on corpora of short documents and corpora with few documents.",1 Introduction,[0],[0]
+"The Latent Dirichlet Allocation (LDA) topic model (Blei et al., 2003) represents each document d as a probability distribution θd over topics, where each topic z is modeled by a probability distribution φz over words in a fixed vocabulary W .
+",2.1 LDA model,[0],[0]
+"As presented in Figure 1, where α and β are hyper-parameters and T is number of topics, the generative process for LDA is described as follows:
+θd ∼ Dir(α) zdi ∼ Cat(θd) φz ∼ Dir(β) wdi ∼ Cat(φzdi )
+where Dir and Cat stand for a Dirichlet distribution and a categorical distribution, and zdi is the topic indicator for the ith word wdi in document d. Here, the topic-to-word Dirichlet multinomial component generates the word wdi by drawing it from the categorical distribution Cat(φzdi ) for topic zdi .
+",2.1 LDA model,[0],[0]
+We follow the Gibbs sampling algorithm for estimating LDA topic models as described by Griffiths and Steyvers (2004).,2.1 LDA model,[0],[0]
+"By integrating out θ and φ, the algorithm samples the topic zdi for the current i th
+word wdi in document d using the conditional distribution P(zdi | Z¬di), where Z¬di denotes the topic assignments of all the other words in the document collection D, so:
+P(zdi = t | Z¬di) ∝",2.1 LDA model,[0],[0]
+"(N td¬i + α) N t,wdi ¬di +",2.1 LDA model,[0],[0]
+"β
+N t¬di + V β (",2.1 LDA model,[0],[0]
+"1)
+Notation: N t,wd is the rank-3 tensor that counts the number of times that word w is generated from topic t in document d by the Dirichlet multinomial component, which in section 2.1 belongs to the LDA model, while in section 2.2 belongs to the DMM model.",2.1 LDA model,[0],[0]
+"When an index is omitted, it indicates summation over that index (so Nd is the number of words in document d).
+",2.1 LDA model,[0],[0]
+"We write the subscript ¬d for the document collection D with document d removed, and the subscript ¬di for D with just the ith word in document d removed, while the subscript d¬i represents document d without its ith word.",2.1 LDA model,[0],[0]
+"For example, N t¬di is the number of words labelled a topic t, ignoring the ith word of document d. V is the size of the vocabulary, V = |W",2.1 LDA model,[0],[0]
+|.,2.1 LDA model,[0],[0]
+Applying topic models for short or few documents for text clustering is more challenging because of data sparsity and the limited contexts in such texts.,2.2 DMM model for short texts,[0],[0]
+"One approach is to combine short texts into long pseudo-documents before training LDA (Hong and Davison, 2010; Weng et al., 2010; Mehrotra et al., 2013).",2.2 DMM model for short texts,[0],[0]
+"Another approach is to assume that there is only one topic per document (Nigam et al., 2000; Zhao et al., 2011; Yin and Wang, 2014).
+",2.2 DMM model for short texts,[0],[0]
+"In the Dirichlet Multinomial Mixture (DMM) model (Nigam et al., 2000), each document is assumed to only have one topic.",2.2 DMM model for short texts,[0],[0]
+"The process of generating a document d in the collection D, as shown in Figure 1, is to first select a topic assignment for the document, and then the topic-to-word Dirichlet multinomial component generates all the words in the document from the same selected topic:
+θ ∼ Dir(α) zd ∼ Cat(θ) φz ∼ Dir(β) wdi ∼ Cat(φzd)
+Yin and Wang (2014) introduced a collapsed Gibbs sampling algorithm for the DMM model in
+which a topic zd is sampled for the document d using the conditional probability P(zd | Z¬d), where Z¬d denotes the topic assignments of all the other documents, so:
+",2.2 DMM model for short texts,[0],[0]
+P(zd = t | Z¬d) ∝,2.2 DMM model for short texts,[0],[0]
+(Mt¬d + α) Γ(Nt¬d,2.2 DMM model for short texts,[0],[0]
+"+ V β)
+Γ(Nt¬d",2.2 DMM model for short texts,[0],[0]
+"+Nd + V β) ∏ w∈W Γ(Nt,w¬d +N w d + β) Γ(Nt,w¬d + β) (2)
+Notation: M t¬d is the number of documents assigned to topic t excluding the current document d; Γ is the Gamma function.",2.2 DMM model for short texts,[0],[0]
+"Traditional count-based methods (Deerwester et al., 1990; Lund and Burgess, 1996; Bullinaria and Levy, 2007) for learning real-valued latent feature (LF) vectors rely on co-occurrence counts.",2.3 Latent feature vector models,[0],[0]
+"Recent approaches based on deep neural networks learn vectors by predicting words given their window-based context (Collobert and Weston, 2008; Mikolov et al., 2013; Pennington et al., 2014; Liu et al., 2015).
+",2.3 Latent feature vector models,[0],[0]
+Mikolov et al. (2013)’s method maximizes the log likelihood of each word given its context.,2.3 Latent feature vector models,[0],[0]
+Pennington et al. (2014) used back-propagation to minimize the squared error of a prediction of the logfrequency of context words within a fixed window of each word.,2.3 Latent feature vector models,[0],[0]
+Word vectors can be trained directly on a new corpus.,2.3 Latent feature vector models,[0],[0]
+"In our new models, however, in order to incorporate the rich information from very large datasets, we utilize pre-trained word vectors that were trained on external billion-word corpora.",2.3 Latent feature vector models,[0],[0]
+"In this section, we propose two novel probabilistic topic models, which we call the LF-LDA and the LFDMM, that combine a latent feature model with either an LDA or DMM model.",3 New latent feature topic models,[0],[0]
+"We also present Gibbs sampling procedures for our new models.
+",3 New latent feature topic models,[0],[0]
+"In general, LF-LDA and LF-DMM are formed by taking the original Dirichlet multinomial topic models LDA and DMM, and replacing their topic-to-
+word Dirichlet multinomial component that generates words from topics with a two-component mixture of a topic-to-word Dirichlet multinomial component and a latent feature component.
+",3 New latent feature topic models,[0],[0]
+"Informally, the new models have the structure of the original Dirichlet multinomial topic models, as shown in Figure 2, with the addition of two matrices τ and ω of latent feature weights, where τ t and ωw are the latent-feature vectors associated with topic t and word w respectively.
+",3 New latent feature topic models,[0],[0]
+"Our latent feature model defines the probability that it generates a word given the topic as the categorical distribution CatE with:
+CatE(w | τ tω>) = exp(τ t · ωw)∑
+w′∈W exp(τ t · ωw′) (3)
+CatE is a categorical distribution with log-space parameters, i.e. CatE(w | u) ∝ exp(uw).",3 New latent feature topic models,[0],[0]
+"As τ t and ωw are (row) vectors of latent feature weights, so τ tω> is a vector of “scores” indexed by words.",3 New latent feature topic models,[0],[0]
+"ω is fixed because we use pre-trained word vectors.
+",3 New latent feature topic models,[0],[0]
+"In the next two sections 3.1 and 3.2, we explain the generative processes of our new models LF-LDA and LF-DMM.",3 New latent feature topic models,[0],[0]
+"We then present our Gibbs sampling procedures for the models LF-LDA and LF-DMM in the sections 3.3 and 3.4, respectively, and explain how we estimate τ in section 3.5.",3 New latent feature topic models,[0],[0]
+"The LF-LDA model generates a document as follows: a distribution over topics θd is drawn for document d; then for each ith word wdi (in sequential order that words appear in the document), the model chooses a topic indicator zdi , a binary indicator variable sdi is sampled from a Bernoulli distribution to determine whether the word wdi is to be generated by the Dirichlet multinomial or latent feature component, and finally the word is generated from the chosen topic by the determined topic-toword model.",3.1 Generative process for the LF-LDA model,[0],[0]
+"The generative process is:
+θd ∼ Dir(α) zdi ∼ Cat(θd) φz ∼ Dir(β) sdi ∼ Ber(λ) wdi ∼ (1− sdi)Cat(φzdi ) + sdiCatE(τ zdi ω >)
+where the hyper-parameter λ is the probability of a word being generated by the latent feature topic-toword model and Ber(λ) is a Bernoulli distribution with success probability λ.",3.1 Generative process for the LF-LDA model,[0],[0]
+Our LF-DMM model uses the DMM model assumption that all the words in a document share the same topic.,3.2 Generative process for the LF-DMM model,[0],[0]
+"Thus, the process of generating a document in a document collection with our LF-DMM is as follows: a distribution over topics θ is drawn for the document collection; then the model draws a topic indicator zd for the entire document d; for every ith word wdi in the document d, a binary indicator variable sdi is sampled from a Bernoulli distribution to determine whether the Dirichlet multinomial or latent feature component will be used to generate the word wdi , and finally the word is generated from the same topic zd by the determined component.",3.2 Generative process for the LF-DMM model,[0],[0]
+"The generative process is summarized as:
+θ ∼ Dir(α) zd ∼ Cat(θ) φz ∼ Dir(β) sdi ∼ Ber(λ) wdi ∼ (1− sdi)Cat(φzd) + sdiCatE(τ",3.2 Generative process for the LF-DMM model,[0],[0]
+zd ω >),3.2 Generative process for the LF-DMM model,[0],[0]
+"From the generative model of LF-LDA in Figure 2, by integrating out θ and φ, we use the Gibbs sampling algorithm (Robert and Casella, 2004) to perform inference to calculate the conditional topic assignment probabilities for each word.",3.3 Inference in LF-LDA model,[0],[0]
+"The outline of the Gibbs sampling algorithm for the LF-LDA model is detailed in Algorithm 1.
+",3.3 Inference in LF-LDA model,[0],[0]
+"Algorithm 1: An approximate Gibbs sampling algorithm for the LF-LDA model
+Initialize the word-topic variables zdi using the LDA sampling algorithm for iteration iter = 1, 2, ... do for topic t = 1, 2, ..., T do
+τ",3.3 Inference in LF-LDA model,[0],[0]
+"t = arg maxτ t P(τ t | Z,S) for document d = 1, 2, ..., |D| do
+for word index i = 1, 2, ...,",3.3 Inference in LF-LDA model,[0],[0]
+"Nd do sample zdi and sdi from P(zdi = t, sdi | Z¬di ,S¬di , τ ,ω)
+Here, S denotes the distribution indicator variables for the whole document collection D. Instead of sampling τ",3.3 Inference in LF-LDA model,[0],[0]
+"t from the posterior, we perform MAP estimation as described in the section 3.5.
+",3.3 Inference in LF-LDA model,[0],[0]
+"For sampling the topic zdi and the binary indicator variable sdi of the i
+th word wdi in the document d, we integrate out sdi in order to sample zdi and then
+sample sdi given zdi .",3.3 Inference in LF-LDA model,[0],[0]
+"We sample the topic zdi using the conditional distribution as follows:
+P(zdi = t | Z¬di , τ ,ω) ∝",3.3 Inference in LF-LDA model,[0],[0]
+"(N td¬i +K
+t d¬i + α)(
+(1− λ) N t,wdi ¬di + β
+N t¬di + V β +",3.3 Inference in LF-LDA model,[0],[0]
+λCatE(wdi,3.3 Inference in LF-LDA model,[0],[0]
+| τ t ω>) ),3.3 Inference in LF-LDA model,[0],[0]
+"(4) Then we sample sdi conditional on zdi = t with:
+P(sdi=s | zdi=t) ∝  (1− λ)N t,wdi ¬di +β Nt¬di",3.3 Inference in LF-LDA model,[0],[0]
++V β for s,3.3 Inference in LF-LDA model,[0],[0]
+"= 0
+λ CatE(wdi |τ t ω>)",3.3 Inference in LF-LDA model,[0],[0]
+"for s = 1 (5)
+Notation: Due to the new models’ mixture architecture, we separate out the counts for each of the two components of each model.",3.3 Inference in LF-LDA model,[0],[0]
+"We define the rank3 tensor Kt,wd as the number of times a word w in document d is generated from topic t by the latent feature component of the generative LF-LDA or LFDMM model.
+",3.3 Inference in LF-LDA model,[0],[0]
+"We also extend the earlier definition of the tensor N t,wd as the number of times a word w in document d is generated from topic t by the Dirichlet multinomial component of our combined models, which in section 3.3 refers to the LF-LDA model, while in section 3.4 refers to the LF-DMM model.",3.3 Inference in LF-LDA model,[0],[0]
+"For both tensors K and N , omitting an index refers to summation over that index and negation ¬ indicates exclusion as before.",3.3 Inference in LF-LDA model,[0],[0]
+So Nwd +K w d is the total number of times the word type w appears in the document d.,3.3 Inference in LF-LDA model,[0],[0]
+"For the LF-DMM model, we integrate out θ and φ, and then sample the topic zd and the distribution selection variables sd for document d using Gibbs sampling as outlined in Algorithm 2.
+",3.4 Inference in LF-DMM model,[0],[0]
+"Algorithm 2: An approximate Gibbs sampling algorithm for the LF-DMM model
+Initialize the word-topic variables zdi using the DMM sampling algorithm for iteration iter = 1, 2, ... do for topic t = 1, 2, ..., T do
+τ",3.4 Inference in LF-DMM model,[0],[0]
+"t = arg maxτ t P(τ t | Z,S) for document d = 1, 2, ..., |D| do
+sample zd and sd from P(zd = t, sd | Z¬d,S¬d, τ ,ω)
+",3.4 Inference in LF-DMM model,[0],[0]
+"As before in Algorithm 1, we also use MAP estimation of τ as detailed in section 3.5 rather than
+sampling from the posterior.",3.4 Inference in LF-DMM model,[0],[0]
+"The conditional distribution of topic variable and selection variables for document d is:
+P(zd = t, sd | Z¬d,S¬d, τ ,ω)
+∝",3.4 Inference in LF-DMM model,[0],[0]
+"λKd (1− λ)Nd (M t¬d + α) Γ(N t¬d + V β)
+Γ(N t¬d",3.4 Inference in LF-DMM model,[0],[0]
++,3.4 Inference in LF-DMM model,[0],[0]
+"Nd + V β)∏ w∈W Γ(N t,w¬d +N w d + β) Γ(N t,w¬d + β) ∏ w∈W",3.4 Inference in LF-DMM model,[0],[0]
+CatE(w | τ t ω>)K,3.4 Inference in LF-DMM model,[0],[0]
+"w d (6)
+Unfortunately the ratios of Gamma functions makes it difficult to integrate out sd in this distribution P. As zd and sd are not independent, it is computationally expensive to directly sample from this distribution, as there are 2(N w d +K w d ) different values of sd.",3.4 Inference in LF-DMM model,[0],[0]
+"So we approximate P with a distribution Q that factorizes across words as follows:
+Q(zd = t, sd | Z¬d,S¬d, τ ,ω) ∝",3.4 Inference in LF-DMM model,[0],[0]
+"λKd (1− λ)Nd (M t¬d + α) (7)∏
+w∈W
+( N t,w¬d + β
+N t¬d + V β )",3.4 Inference in LF-DMM model,[0],[0]
+Nwd ∏,3.4 Inference in LF-DMM model,[0],[0]
+w∈W CatE(w | τ t ω>)K,3.4 Inference in LF-DMM model,[0],[0]
+"w d
+This simpler distribution Q can be viewed as an approximation to P in which the topic-word “counts” are “frozen” within a document.",3.4 Inference in LF-DMM model,[0],[0]
+This approximation is reasonably accurate for short documents.,3.4 Inference in LF-DMM model,[0],[0]
+This distribution Q simplifies the coupling between zd and sd.,3.4 Inference in LF-DMM model,[0],[0]
+This enables us to integrate out sd in Q.,3.4 Inference in LF-DMM model,[0],[0]
+"We first sample the document topic zd for document d using Q(zd), marginalizing over sd:
+Q(zd = t | Z¬d, τ ,ω)
+∝",3.4 Inference in LF-DMM model,[0],[0]
+(M t¬d + α),3.4 Inference in LF-DMM model,[0],[0]
+∏,3.4 Inference in LF-DMM model,[0],[0]
+"w∈W
+( (1− λ) N t,w ¬d +β
+Nt¬d+V β
++ λ",3.4 Inference in LF-DMM model,[0],[0]
+"CatE(w | τ t ω>)
+)(Nwd +Kwd ) (8)
+Then we sample the binary indicator variable sdi for each ith word wdi in document d conditional on zd = t from the following distribution:
+Q(sdi=s | zd = t) ∝
+{ (1− λ)N t,wdi ¬d +β
+Nt¬d+V β for s = 0
+λ CatE(wdi | τ t ω>) for s = 1 (9)",3.4 Inference in LF-DMM model,[0],[0]
+"To estimate the topic vectors after each Gibbs sampling iteration through the data, we apply regularized maximum likelihood estimation.",3.5 Learning latent feature vectors for topics,[0],[0]
+"Applying MAP estimation to learn log-linear models for topic models is also used in SAGE (Eisenstein et al., 2011) and SPRITE (Paul and Dredze, 2015).",3.5 Learning latent feature vectors for topics,[0],[0]
+"How-
+ever, unlike our models, those models do not use latent feature word vectors to characterize topic-word distributions.",3.5 Learning latent feature vectors for topics,[0],[0]
+The negative log likelihood of the corpus L under our model factorizes topic-wise into factors Lt for each topic.,3.5 Learning latent feature vectors for topics,[0],[0]
+"With L2 regularization1 for topic t, these are:
+Lt = − ∑ w∈W Kt,w ( τ t · ωw − log ( ∑ w′∈W exp(τ t · ωw′) ))
+",3.5 Learning latent feature vectors for topics,[0],[0]
+"+ µ ‖ τ t ‖22 (10)
+",3.5 Learning latent feature vectors for topics,[0],[0]
+The MAP estimate of topic vectors τ t is obtained by minimizing the regularized negative log likelihood.,3.5 Learning latent feature vectors for topics,[0],[0]
+"The derivative with respect to the jth element of the vector for topic t is: ∂Lt ∂τ t,j = − ∑ w∈W Kt,w ( ωw,j − ∑ w′∈W ωw′,jCatE(w ′",3.5 Learning latent feature vectors for topics,[0],[0]
+"| τ tω>)
+)",3.5 Learning latent feature vectors for topics,[0],[0]
+"+ 2µτ t,j (11)
+",3.5 Learning latent feature vectors for topics,[0],[0]
+"We used L-BFGS2(Liu and Nocedal, 1989) to find the topic vector τ t that minimizes Lt.",3.5 Learning latent feature vectors for topics,[0],[0]
+"To investigate the performance of our new LF-LDA and LF-DMM models, we compared their performance against baseline LDA and DMM models on topic coherence, document clustering and document classification evaluations.",4 Experiments,[0],[0]
+"The topic coherence evaluation measures the coherence of topic-word associations, i.e. it directly evaluates how coherent the assignment of words to topics is.",4 Experiments,[0],[0]
+"The document clustering and document classification tasks evaluate how useful the topics assigned to documents are in clustering and classification tasks.
+",4 Experiments,[0],[0]
+"Because we expect our new models to perform comparatively well in situations where there is little data about topic-to-word distributions, our experiments focus on corpora with few or short documents.",4 Experiments,[0],[0]
+"We also investigated which values of λ perform well, and compared the performance when using two different sets of pre-trained word vectors in these new models.",4 Experiments,[0],[0]
+"We experimented with two state-of-the-art sets of pre-trained word vectors here.
+",4.1.1 Distributed word representations,[0],[0]
+1The L2 regularizer constant was set to µ = 0.01.,4.1.1 Distributed word representations,[0],[0]
+"2We used the L-BFGS implementation from the Mallet
+toolkit (McCallum, 2002).
+",4.1.1 Distributed word representations,[0],[0]
+Google word vectors3 are pre-trained 300- dimensional vectors for 3 million words and phrases.,4.1.1 Distributed word representations,[0],[0]
+"These vectors were trained on a 100 billion word subset of the Google News corpus by using the Google Word2Vec toolkit (Mikolov et al., 2013).",4.1.1 Distributed word representations,[0],[0]
+Stanford vectors4 are pre-trained 300-dimensional vectors for 2 million words.,4.1.1 Distributed word representations,[0],[0]
+"These vectors were learned from 42-billion tokens of Common Crawl web data using the Stanford GloVe toolkit (Pennington et al., 2014).
+",4.1.1 Distributed word representations,[0],[0]
+"We refer to our LF-LDA and LF-DMM models using Google and Stanford word vectors as w2v-LDA, glove-LDA, w2v-DMM and glove-DMM.",4.1.1 Distributed word representations,[0],[0]
+"We conducted experiments on the 20-Newsgroups dataset, the TagMyNews news dataset and the Sanders Twitter corpus.
+",4.1.2 Experimental datasets,[0],[0]
+"The 20-Newsgroups dataset5 contains about 19,000 newsgroup documents evenly grouped into 20 different categories.",4.1.2 Experimental datasets,[0],[0]
+The TagMyNews news dataset6,4.1.2 Experimental datasets,[0],[0]
+"(Vitale et al., 2012) consists of about 32,600 English RSS news items grouped into 7 categories, where each news document has a news title and a short description.",4.1.2 Experimental datasets,[0],[0]
+"In our experiments, we also used a news title dataset which consists of just the news titles from the TagMyNews news dataset.
+",4.1.2 Experimental datasets,[0],[0]
+"Each dataset was down-cased, and we removed non-alphabetic characters and stop-words found in the stop-word list in the Mallet toolkit (McCallum, 2002).",4.1.2 Experimental datasets,[0],[0]
+"We also removed words shorter than 3 characters and words appearing less than 10 times in the 20-Newsgroups corpus, and under 5 times in the TagMyNews news and news titles datasets.",4.1.2 Experimental datasets,[0],[0]
+"In addition, words not found in both Google and Stanford vector representations were also removed.7 We refer to the cleaned 20-Newsgroups, TagMyNews news
+3 Download at: https://code.google.com/p/word2vec/ 4 Download at: http://www-nlp.stanford.edu/projects/glove/ 5We used the “all-terms” version of the 20-Newsgroups dataset available at http://web.ist.utl.pt/acardoso/datasets/ (Cardoso-Cachopo, 2007).
+",4.1.2 Experimental datasets,[0],[0]
+"6The TagMyNews news dataset is unbalanced, where the largest category contains 8,200 news items while the smallest category contains about 1,800 items.",4.1.2 Experimental datasets,[0],[0]
+"Download at: http: //acube.di.unipi.it/tmn-dataset/
+71366, 27 and 12 words were correspondingly removed out of the 20-Newsgroups, TagMyNews news and news title datasets.
+and news title datasets as N20, TMN and TMNtitle, respectively.
+",4.1.2 Experimental datasets,[0],[0]
+We also performed experiments on two subsets of the N20 dataset.,4.1.2 Experimental datasets,[0],[0]
+The N20short dataset consists of all documents from the N20 dataset with less than 21 words.,4.1.2 Experimental datasets,[0],[0]
+"The N20small dataset contains 400 documents consisting of 20 randomly selected documents from each group of the N20 dataset.
+",4.1.2 Experimental datasets,[0],[0]
+"Finally, we also experimented on the publicly available Sanders Twitter corpus.8",4.1.2 Experimental datasets,[0],[0]
+"This corpus consists of 5,512 Tweets grouped into four different topics (Apple, Google, Microsoft, and Twitter).",4.1.2 Experimental datasets,[0],[0]
+"Due to restrictions in Twitter’s Terms of Service, the actual Tweets need to be downloaded using 5,512 Tweet IDs.",4.1.2 Experimental datasets,[0],[0]
+There are 850 Tweets not available to download.,4.1.2 Experimental datasets,[0],[0]
+"After removing the non-English Tweets, 3,115 Tweets remain.",4.1.2 Experimental datasets,[0],[0]
+"In addition to converting into lowercase and removing non-alphabetic characters, words were normalized by using a lexical normalization dictionary for microblogs (Han et al., 2012).",4.1.2 Experimental datasets,[0],[0]
+"We then removed stop-words, words shorter than 3 characters or appearing less than 3 times in the corpus.",4.1.2 Experimental datasets,[0],[0]
+"The four words apple, google, microsoft and twitter were removed as these four words occur in every Tweet in the corresponding topic.",4.1.2 Experimental datasets,[0],[0]
+"Moreover, words not found in both Google and Stanford vector lists were also removed.9",4.1.2 Experimental datasets,[0],[0]
+"In all our experiments, after removing words from documents, any document with a zero word count was also removed from the corpus.",4.1.2 Experimental datasets,[0],[0]
+"For the Twitter corpus, this resulted in just 2,520 remaining Tweets.",4.1.2 Experimental datasets,[0],[0]
+"The hyper-parameter β used in baseline LDA and DMM models was set to 0.01, as this is a common setting in the literature (Griffiths and Steyvers,
+8Download at: http://www.sananalytics.com/lab/index.php 9There are 91 removed words.
+2004).",4.1.3 General settings,[0],[0]
+"We set the hyper-parameter α = 0.1, as this can improve performance relative to the standard setting α = 50T , as noted by Lu et al. (2011) and Yin and Wang (2014).
+",4.1.3 General settings,[0],[0]
+We ran each baseline model for 2000 iterations and evaluated the topics assigned to words in the last sample.,4.1.3 General settings,[0],[0]
+"For our models, we ran the baseline models for 1500 iterations, then used the outputs from the last sample to initialize our models, which we ran for 500 further iterations.
+",4.1.3 General settings,[0],[0]
+"We report the mean and standard deviation of the results of ten repetitions of each experiment (so the standard deviation is approximately 3 standard errors, or a 99% confidence interval).",4.1.3 General settings,[0],[0]
+This section examines the quality of the topic-word mappings induced by our models.,4.2 Topic coherence evaluation,[0],[0]
+"In our models, topics are distributions over words.",4.2 Topic coherence evaluation,[0],[0]
+"The topic coherence evaluation measures to what extent the highprobability words in each topic are semantically coherent (Chang et al., 2009; Stevens et al., 2012).",4.2 Topic coherence evaluation,[0],[0]
+"Newman et al. (2010), Mimno et al. (2011) and Lau et al. (2014) describe methods for automatically evaluating the semantic coherence of sets of words.",4.2.1 Quantitative analysis,[0],[0]
+The method presented in Lau et al. (2014) uses the normalized pointwise mutual information (NPMI) score and has a strong correlation with humanjudged coherence.,4.2.1 Quantitative analysis,[0],[0]
+A higher NPMI score indicates that the topic distributions are semantically more coherent.,4.2.1 Quantitative analysis,[0],[0]
+"Given a topic t represented by its top-N topic words w1, w2, ..., wN , the NPMI score for t is:
+NPMI-Score(t) = ∑
+16i<j6N
+log P(wi,wj)
+P(wi)P(wj)
+− log P(wi, wj) (12)
+where the probabilities in equation (12) are derived from a 10-word sliding window over an external corpus.
+",4.2.1 Quantitative analysis,[0],[0]
+The NPMI score for a topic model is the average score for all topics.,4.2.1 Quantitative analysis,[0],[0]
+"We compute the NPMI score based on top-15 most probable words of each topic and use the English Wikipedia10 of 4.6 million articles as our external corpus.
+Figures 3 and 4 show NPMI scores computed for the LDA, w2v-LDA and glove-LDA models on the
+10We used the Wikipedia-articles dump of July 8, 2014.
+N20short dataset for 20 and 40 topics.",4.2.1 Quantitative analysis,[0],[0]
+We see that λ = 1.0 gives the highest NPMI score.,4.2.1 Quantitative analysis,[0],[0]
+"In other words, using only the latent feature model produces the most coherent topic distributions.
+",4.2.1 Quantitative analysis,[0],[0]
+"Tables 2, 3 and 4 present the NPMI scores produced by the models on the other experimental datasets, where we vary11 the number of topics in steps from 4 to 80.",4.2.1 Quantitative analysis,[0],[0]
+"Tables 3 and 4 show that the DMM model performs better than the LDA model on
+11 We perform with T",4.2.1 Quantitative analysis,[0],[0]
+"= 6 on the N20 and N20small datasets as the 20-Newsgroups dataset could be also grouped into 6 larger topics instead of 20 fine-grained categories.
+",4.2.1 Quantitative analysis,[0],[0]
+"the TMN, TMNtitle and Twitter datasets.",4.2.1 Quantitative analysis,[0],[0]
+"These results show that our latent feature models produce significantly higher scores than the baseline models on all the experimental datasets.
+",4.2.1 Quantitative analysis,[0],[0]
+"Google word2vec vs. Stanford glove word vectors: In general, our latent feature models obtain competitive NPMI results in using pre-trained Google word2vec and Stanford glove word vectors for a large value of T , for example T = 80.",4.2.1 Quantitative analysis,[0],[0]
+"With small values of T , for example T ≤ 7 , using Google word vectors produces better scores than using Stanford word vectors on the small N20small dataset of normal texts and on the short text TMN and TMNtitle datasets.",4.2.1 Quantitative analysis,[0],[0]
+"However, the opposite pattern holds on the full N20 dataset.",4.2.1 Quantitative analysis,[0],[0]
+Both sets of the pre-trained word vectors produce similar scores on the small and short Twitter dataset.,4.2.1 Quantitative analysis,[0],[0]
+This section provides an example of how our models improve topic coherence.,4.2.2 Qualitative analysis,[0],[0]
+"Table 5 compares the top15 words12 produced by the baseline DMM model
+12In the baseline model, the top-15 topical words output from the 1500th sample are similar to top-15 words from the 2000th
+and our w2v-DMM model with λ = 1.0 on the TMNtitle dataset with T = 20 topics.
+",4.2.2 Qualitative analysis,[0],[0]
+"In table 5, topic 1 of the DMM model consists of words related to “nuclear crisis in Japan” together with other unrelated words.",4.2.2 Qualitative analysis,[0],[0]
+"The w2v-DMM model produced a purer topic 1 focused on “Japan earthquake and nuclear crisis,” presumably related to the “Fukushima Daiichi nuclear disaster.”",4.2.2 Qualitative analysis,[0],[0]
+Topic 3 is about “oil prices” in both models.,4.2.2 Qualitative analysis,[0],[0]
+"However, all top15 words are qualitatively more coherent in the w2vDMM model.",4.2.2 Qualitative analysis,[0],[0]
+"While topic 4 of the DMM model is difficult to manually label, topic 4 of the w2v-DMM model is about the “Arab Spring” event.
+",4.2.2 Qualitative analysis,[0],[0]
+"Topics 5, 19 and 14 of the DMM model are not easy to label.",4.2.2 Qualitative analysis,[0],[0]
+"Topic 5 relates to “entertainment”, topic 19 is generally a mixture of “entertainment” and “sport”, and topic 14 is about “sport” and “politics.”",4.2.2 Qualitative analysis,[0],[0]
+"However, the w2v-DMM model more clearly distinguishes these topics: topic 5 is about “entertainment”, topic 19 is only about “sport” and topic 14 is only about “politics.”",4.2.2 Qualitative analysis,[0],[0]
+We compared our models to the baseline models in a document clustering task.,4.3 Document clustering evaluation,[0],[0]
+"After using a topic model to calculate the topic probabilities of a document, we assign every document the topic with the highest probability given the document (Cai et al., 2008; Lu et al., 2011; Xie and Xing, 2013; Yan et al., 2013).",4.3 Document clustering evaluation,[0],[0]
+"We use two common metrics to evaluate clustering performance: Purity and normalized mutual information (NMI): see (Manning et al., 2008, Section 16.3) for details of these evaluations.",4.3 Document clustering evaluation,[0],[0]
+"Purity and NMI scores always range from 0.0 to 1.0, and higher scores reflect better clustering performance.
+",4.3 Document clustering evaluation,[0],[0]
+"Figures 5 and 6 present Purity and NMI results obtained by the LDA, w2v-LDA and glove-LDA models on the N20short dataset with the numbers of topics T set to either 20 or 40, and the value of the mixture weight λ varied from 0.0 to 1.0.
+",4.3 Document clustering evaluation,[0],[0]
+"We found that setting λ to 1.0 (i.e. using only the latent features to model words), the glove-LDA produced 1%+ higher scores on both Purity and NMI results than the w2v-LDA when using 20 topics.",4.3 Document clustering evaluation,[0],[0]
+"However, the two models glove-LDA and w2v-LDA returned equivalent results with 40 topics where they
+sample if we do not take the order of the most probable words into account.
+gain 2%+ absolute improvement13 on the two Purity and NMI against the baseline LDA model.
+",4.3 Document clustering evaluation,[0],[0]
+"By varying λ, as shown in Figures 5 and 6, the w2v-LDA and glove-LDA models obtain their best results at λ = 0.6 where the w2v-LDA model does slightly better than the glove-LDA.",4.3 Document clustering evaluation,[0],[0]
+"Both models sig-
+13Using the Student’s t-Test, the improvement is significant (p < 0.01).
+nificantly outperform their baseline LDA models; for example with 40 topics, the w2v-LDA model attains 4.4% and 4.3% over the LDA model on Purity and NMI metrics, respectively.
+",4.3 Document clustering evaluation,[0],[0]
+"We fix the mixture weight λ at 0.6, and report experimental results based on this value for the rest of this section.",4.3 Document clustering evaluation,[0],[0]
+"Tables 6, 7 and 8 show clustering results produced by our models and the baseline models on the remaining datasets with different numbers
+of topics.",4.3 Document clustering evaluation,[0],[0]
+"As expected, the DMM model is better than the LDA model on the short datasets of TMN, TMNtitle and Twitter.",4.3 Document clustering evaluation,[0],[0]
+"For example with 80 topics on the TMNtitle dataset, the DMM achieves about 7+% higher Purity and NMI scores than LDA.
+",4.3 Document clustering evaluation,[0],[0]
+"New models vs. baseline models: On most tests, our models score higher than the baseline models, particularly on the small N20small dataset where we get 6.0% improvement on NMI at T = 6, and on the short text TMN and TMNtitle datasets we obtain 6.1% and 2.5% higher Purity at T = 80.",4.3 Document clustering evaluation,[0],[0]
+"In addition, on the short and small Twitter dataset with T = 4, we achieve 3.9% and 5.3% improvements in Purity and NMI scores, respectively.",4.3 Document clustering evaluation,[0],[0]
+"Those results show that an improved model of topic-word mappings also
+improves the document-topic assignments.",4.3 Document clustering evaluation,[0],[0]
+"For the small value of T ≤ 7, on the large datasets of N20, TMN and TMNtitle, our models and baseline models obtain similar clustering results.",4.3 Document clustering evaluation,[0],[0]
+"However, with higher values of T , our models perform better than the baselines on the short TMN and TMNtitle datasets, while on the N20 dataset, the baseline LDA model attains a slightly higher clustering results than ours.",4.3 Document clustering evaluation,[0],[0]
+"In contrast, on the short and small Twitter dataset, our models obtain considerably better clustering results than the baseline models with a small value of T .
+",4.3 Document clustering evaluation,[0],[0]
+"Google word2vec vs. Stanford glove word vectors: On the small N20short and N20small datasets, using the Google pre-trained word vectors produces
+higher clustering scores than using Stanford pretrained word vectors.",4.3 Document clustering evaluation,[0],[0]
+"However, on the large datasets N20, TMN and TMNtitle, using Stanford word vectors produces higher scores than using Google word vectors when using a smaller number of topics, for example T ≤ 20.",4.3 Document clustering evaluation,[0],[0]
+"With more topics, for instance T = 80, the pre-trained Google and Stanford word vectors produce similar clustering results.",4.3 Document clustering evaluation,[0],[0]
+"In addition, on the Twitter dataset, both sets of pre-trained word vectors produce similar results.",4.3 Document clustering evaluation,[0],[0]
+"Unlike the document clustering task, the document classification task evaluates the distribution over topics for each document.",4.4 Document classification evaluation,[0],[0]
+"Following Lacoste-Julien et al. (2009), Lu et al. (2011), Huh and Fienberg (2012) and Zhai and Boyd-graber (2013), we used Support Vector Machines (SVM) to predict the ground truth labels from the topic-proportion vector of each document.",4.4 Document classification evaluation,[0],[0]
+"We used the WEKA’s implementation (Hall et al., 2009) of the fast Sequential Minimal Optimization algorithm (Platt, 1999) for learning a classifier with ten-fold cross-validation and WEKA’s default parameters.",4.4 Document classification evaluation,[0],[0]
+"We present the macroaveraged F1 score (Manning et al., 2008, Section 13.6) as the evaluation metric for this task.
+",4.4 Document classification evaluation,[0],[0]
+"Just as in the document clustering task, the mixture weight λ = 0.6 obtains the highest classification performances on the N20short dataset.",4.4 Document classification evaluation,[0],[0]
+"For example with T = 40, our w2v-LDA and gloveLDA obtain F1 scores at 40.0% and 38.9% which are 4.5% and 3.4% higher than F1 score at 35.5% obtained by the LDA model, respectively.
+",4.4 Document classification evaluation,[0],[0]
+"We report classification results on the remaining experimental datasets with mixture weight λ = 0.6 in tables 9, 10 and 11.",4.4 Document classification evaluation,[0],[0]
+"Unlike the clustering results, the LDA model does better than the DMM model for classification on the TMN dataset.
+",4.4 Document classification evaluation,[0],[0]
+"New models vs. baseline models: On most eval-
+uations, our models perform better than the baseline models.",4.4 Document classification evaluation,[0],[0]
+"In particular, on the small N20small and Twitter datasets, when the number of topics T is equal to number of ground truth labels (i.e. 20 and 4 correspondingly), our w2v-LDA obtains 5+% higher F1 score than the LDA model.",4.4 Document classification evaluation,[0],[0]
+"In addition, our w2v-DMM model achieves 5.4% and 2.9% higher F1 score than the DMM model on short TMN and TMNtitle datasets with T = 80, respectively.
+",4.4 Document classification evaluation,[0],[0]
+Google word2vec vs. Stanford glove word vectors: The comparison of the Google and Stanford pre-trained word vectors for classification is similar to the one for clustering.,4.4 Document classification evaluation,[0],[0]
+"We found that the topic coherence evaluation produced the best results with a mixture weight λ = 1, which corresponds to using topic-word distributions defined in terms of the latent-feature word vectors.",4.5 Discussion,[0],[0]
+"This is not surprising, since the topic coherence evaluation we used (Lau et al., 2014) is based on word co-occurrences in an external corpus (here, Wikipedia), and it is reasonable that the billion-word corpora used to train the latent feature word vectors are more useful for this task than the much smaller topic-modeling corpora, from which the topic-word multinomial distributions are trained.
+",4.5 Discussion,[0],[0]
+"On the other hand, the document clustering and document classification tasks depend more strongly on possibly idiosyncratic properties of the smaller topic-modeling corpora, since these evaluations reflect how well the document-topic assignments can group or distinguish documents within the topicmodeling corpus.",4.5 Discussion,[0],[0]
+"Smaller values of λ enable the models to learn topic-word distributions that include an arbitrary multinomial topic-word distribution, enabling the models to capture idiosyncratic properties of the topic-modeling corpus.",4.5 Discussion,[0],[0]
+"Even in these evaluations we found that an intermediate value of λ = 0.6 produced the best results, indicating that better word-topic distributions were produced when information from the large external corpus is combined with corpus-specific topic-word multinomials.",4.5 Discussion,[0],[0]
+"We found that using the latent feature word vectors produced significant performance improvements even when the domain of the topic-modeling corpus was quite different to that of the external corpus from which the word vectors were derived, as was the case in our experiments on Twitter data.
+",4.5 Discussion,[0],[0]
+We found that using either the Google or the Stanford latent feature word vectors produced very similar results.,4.5 Discussion,[0],[0]
+"As far as we could tell, there is no reason to prefer either one of these in our topic modeling applications.",4.5 Discussion,[0],[0]
+"In this paper, we have shown that latent feature representations can be used to improve topic models.",5 Conclusion and future work,[0],[0]
+"We proposed two novel latent feature topic models, namely LF-LDA and LF-DMM, that integrate a latent feature model within two topic models LDA and DMM.",5 Conclusion and future work,[0],[0]
+"We compared the performance of our models LF-LDA and LF-DMM to the baseline LDA and DMM models on topic coherence, document clustering and document classification evaluations.",5 Conclusion and future work,[0],[0]
+"In the topic coherence evaluation, our model outperformed the baseline models on all 6 experimental datasets, showing that our method for exploiting external information from very large corpora helps improve the topic-to-word mapping.",5 Conclusion and future work,[0],[0]
+"Meanwhile, document clustering and document classification results show that our models improve the document-topic assignments compared to the baseline models, especially on datasets with few or short documents.
+",5 Conclusion and future work,[0],[0]
+"As an anonymous reviewer suggested, it would be interesting to identify exactly how the latent feature word vectors improve topic modeling performance.",5 Conclusion and future work,[0],[0]
+"We believe that they provide useful information about word meaning extracted from the large corpora that they are trained on, but as the reviewer suggested, it is possible that the performance improvements arise because the word vectors are trained on context windows of size 5 or 10, while the LDA and DMM models view documents as bags of words, and effectively use a context window that encompasses the entire document.",5 Conclusion and future work,[0],[0]
+"In preliminary experiments where we train latent feature word vectors from the topic-modeling corpus alone using context windows of size 10 we found that performance was degraded relative to the results presented here, suggesting that the use of a context window alone is not responsible for the performance improvements we reported here.",5 Conclusion and future work,[0],[0]
+"Clearly it would be valuable to investigate this further.
+",5 Conclusion and future work,[0],[0]
+"In order to use a Gibbs sampler in section 3.4, the conditional distributions needed to be distributions we can sample from cheaply, which is not the case for the ratios of Gamma functions.",5 Conclusion and future work,[0],[0]
+"While we used a simple approximation, it is worth exploring other sampling techniques that can avoid approximations, such as Metropolis-Hastings sampling (Bishop, 2006, Section 11.2.2).
+",5 Conclusion and future work,[0],[0]
+"In order to compare the pre-trained Google and Stanford word vectors, we excluded words that did not appear in both sets of vectors.",5 Conclusion and future work,[0],[0]
+"As suggested by anonymous reviewers, it would be interesting to learn vectors for these unseen words.",5 Conclusion and future work,[0],[0]
+"In addition, it is worth fine-tuning the seen-word vectors on the dataset of interest.
+",5 Conclusion and future work,[0],[0]
+"Although we have not evaluated our approach on very large corpora, the corpora we have evaluated on do vary in size, and we showed that the gains from our approach are greatest when the corpora are small.",5 Conclusion and future work,[0],[0]
+A drawback of our approach is that it is slow on very large corpora.,5 Conclusion and future work,[0],[0]
+"Variational Bayesian inference may provide an efficient solution to this problem (Jordan et al., 1999; Blei et al., 2003).",5 Conclusion and future work,[0],[0]
+"This research was supported by a Google award through the Natural Language Understanding
+Focused Program, and under the Australian Research Council’s Discovery Projects funding scheme (project numbers DP110102506 and DP110102593).",Acknowledgments,[0],[0]
+"The authors would like to thank the three anonymous reviewers, the action editor and Dr. John Pate at the Macquarie University, Australia for helpful comments and suggestions.",Acknowledgments,[0],[0]
+"Probabilistic topic models are widely used to discover latent topics in document collections, while latent feature vector representations of words have been used to obtain high performance in many NLP tasks.",abstractText,[0],[0]
+"In this paper, we extend two different Dirichlet multinomial topic models by incorporating latent feature vector representations of words trained on very large corpora to improve the word-topic mapping learnt on a smaller corpus.",abstractText,[0],[0]
+"Experimental results show that by using information from the external corpora, our new models produce significant improvements on topic coherence, document clustering and document classification tasks, especially on datasets with few or short documents.",abstractText,[0],[0]
+Improving Topic Models with Latent Feature Word Representations,title,[0],[0]
+"Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing, pages 862–868 Brussels, Belgium, October 31 - November 4, 2018. c©2018 Association for Computational Linguistics
+862",text,[0],[0]
+Building a machine translation (MT) system requires lots of bilingual data.,1 Introduction,[1.0],['Building a machine translation (MT) system requires lots of bilingual data.']
+"Neural MT models (Bahdanau et al., 2015), which become the current standard, are even more difficult to train without huge bilingual supervision (Koehn and Knowles, 2017).",1 Introduction,[0],[0]
+"However, bilingual resources are still limited to some of the selected language pairs—mostly from or to English.
+",1 Introduction,[0],[0]
+A workaround for zero-resource language pairs is translating via an intermediate (pivot) language.,1 Introduction,[0],[0]
+"To do so, we need to collect parallel data and train MT models for source-to-pivot and pivot-to-target individually; it takes a double effort and the decoding is twice as slow.
+",1 Introduction,[0],[0]
+"Unsupervised learning is another alternative, where we can train an MT system with only monolingual corpora.",1 Introduction,[1.0],"['Unsupervised learning is another alternative, where we can train an MT system with only monolingual corpora.']"
+"Decipherment methods (Ravi and Knight, 2011; Nuhn et al., 2013) are the first work in this direction, but they often suffer from a huge latent hypothesis space (Kim et al., 2017).
+",1 Introduction,[0],[0]
+Recent work by Artetxe et al. (2018) and Lample et al. (2018) train sequence-to-sequence MT models of both translation directions together in an unsupervised way.,1 Introduction,[1.0],['Recent work by Artetxe et al. (2018) and Lample et al. (2018) train sequence-to-sequence MT models of both translation directions together in an unsupervised way.']
+"They do back-translation (Sennrich et al., 2016a) back and forth for every iteration or batch, which needs an immensely long time and careful tuning of hyperparameters for massive monolingual data.
+",1 Introduction,[1.00000001492422],"['They do back-translation (Sennrich et al., 2016a) back and forth for every iteration or batch, which needs an immensely long time and careful tuning of hyperparameters for massive monolingual data.']"
+"Here we suggest rather simple methods to build an unsupervised MT system quickly, based on word translation using cross-lingual word embeddings.",1 Introduction,[1.0],"['Here we suggest rather simple methods to build an unsupervised MT system quickly, based on word translation using cross-lingual word embeddings.']"
+"The contributions of this paper are:
+• We formulate a straightforward way to combine a language model with cross-lingual word similarities, effectively considering context in lexical choices.
+",1 Introduction,[1.000000017283436],"['The contributions of this paper are: • We formulate a straightforward way to combine a language model with cross-lingual word similarities, effectively considering context in lexical choices.']"
+"• We develop a postprocessing method for word-by-word translation outputs using a denoising autoencoder, handling local reordering and multi-aligned words.
+",1 Introduction,[0],[0]
+"• We analyze the effect of different artificial noises for the denoising model and propose a novel noise type.
+",1 Introduction,[1.0000000695138398],['• We analyze the effect of different artificial noises for the denoising model and propose a novel noise type.']
+"• We verify that cross-lingual embedding on subword units performs poorly in translation.
+",1 Introduction,[0],[0]
+"• We empirically show that cross-lingual mapping can be learned using a small vocabulary without losing the translation performance.
+",1 Introduction,[0],[0]
+"The proposed models can be efficiently trained with off-the-shelf softwares with little or no changes in the implementation, using only monolingual data.",1 Introduction,[0],[0]
+The provided analyses help for better learning of cross-lingual word embeddings for translation purpose.,1 Introduction,[0],[0]
+"Altogether, our unsupervised MT system outperforms the sequence-to-sequence neural models even without training signals from the opposite translation direction, i.e. via backtranslation.",1 Introduction,[1.0],"['Altogether, our unsupervised MT system outperforms the sequence-to-sequence neural models even without training signals from the opposite translation direction, i.e. via backtranslation.']"
+"As a basic step for unsupervised MT, we learn a word translation model from monolingual corpora of each language.",2 Cross-lingual Word Embedding,[0],[0]
+"In this work, we exploit crosslingual word embedding for word-by-word translation, which is state-of-the-art in terms of type translation quality (Artetxe et al., 2017; Conneau et al., 2018).
+",2 Cross-lingual Word Embedding,[0],[0]
+Cross-lingual word embedding is a continuous representation of words whose vector space is shared across multiple languages.,2 Cross-lingual Word Embedding,[1.0],['Cross-lingual word embedding is a continuous representation of words whose vector space is shared across multiple languages.']
+"This enables distance calculation between word embeddings across languages, which is actually finding translation candidates.
+",2 Cross-lingual Word Embedding,[0],[0]
+"We train cross-lingual word embedding in a fully unsupervised manner:
+1.",2 Cross-lingual Word Embedding,[0.9999999578168783],['We train cross-lingual word embedding in a fully unsupervised manner: 1.']
+Learn monolingual source and target embeddings independently.,2 Cross-lingual Word Embedding,[0],[0]
+"For this, we run skipgram algorithm augmented with character ngram (Bojanowski et al., 2017).
+2.",2 Cross-lingual Word Embedding,[0],[0]
+"Find a linear mapping from source embedding space to target embedding space by adversarial training (Conneau et al., 2018).",2 Cross-lingual Word Embedding,[1.0],"['Find a linear mapping from source embedding space to target embedding space by adversarial training (Conneau et al., 2018).']"
+"We do not pre-train the discriminator with a seed dictionary, and consider only the top Vcross-train words of each language as input to the discriminator.
+",2 Cross-lingual Word Embedding,[0],[0]
+"Once we have the cross-lingual mapping, we can transform the embedding of a given source word and find a target word with the closest embedding, i.e. nearest neighbor search.",2 Cross-lingual Word Embedding,[0],[0]
+"Here, we apply cross-domain similarity local scaling (Conneau et al., 2018) to penalize the word similarities in dense areas of the embedding distribution.
+",2 Cross-lingual Word Embedding,[0],[0]
+"We further refine the mapping obtained from Step 2 as follows (Artetxe et al., 2017):
+3.",2 Cross-lingual Word Embedding,[0],[0]
+"Build a synthetic dictionary by finding mutual nearest neighbors for both translation directions in vocabularies of Vcross-train words.
+4.",2 Cross-lingual Word Embedding,[0],[0]
+"Run a Procrustes problem solver with the dictionary from Step 3 to re-train the mapping (Smith et al., 2017).
+5.",2 Cross-lingual Word Embedding,[0],[0]
+Repeat Step 3 and 4 for a fixed number of iterations to update the mapping further.,2 Cross-lingual Word Embedding,[1.0],['Repeat Step 3 and 4 for a fixed number of iterations to update the mapping further.']
+"In translating sentences, cross-lingual word embedding has several drawbacks.",3 Sentence Translation,[0],[0]
+We describe each of them and our corresponding solutions.,3 Sentence Translation,[0],[0]
+The word translation using nearest neighbor search does not consider context around the current word.,3.1 Context-aware Beam Search,[1.0],['The word translation using nearest neighbor search does not consider context around the current word.']
+"In many cases, the correct translation is not the nearest target word but other close words with morphological variations or synonyms, depending on the context.
+",3.1 Context-aware Beam Search,[1.0000000802072062],"['In many cases, the correct translation is not the nearest target word but other close words with morphological variations or synonyms, depending on the context.']"
+"The reasons are in two-fold: 1) Word embedding is trained to place semantically related words nearby, even though they have opposite meanings.",3.1 Context-aware Beam Search,[0],[0]
+"2) A hubness problem of high-dimensional embedding space hinders a correct search, where lots of different words happen to be close to each other (Radovanović et al., 2010).
+",3.1 Context-aware Beam Search,[0],[0]
+"In this paper, we integrate context information into word-by-word translation by combining a language model (LM) with cross-lingual word embedding.",3.1 Context-aware Beam Search,[1.0],"['In this paper, we integrate context information into word-by-word translation by combining a language model (LM) with cross-lingual word embedding.']"
+Let f be a source word in the current position and e a possible target word.,3.1 Context-aware Beam Search,[1.0],['Let f be a source word in the current position and e a possible target word.']
+"Given a history h of target words before e, the score of e to be the translation of f would be:
+L(e; f, h) = λemb log q(f, e) + λLM log p(e|h)
+Here, q(f, e) is a lexical score defined as:
+q(f, e) = d(f, e) + 1
+2
+where d(f, e) ∈",3.1 Context-aware Beam Search,[0],[0]
+"[−1, 1] is a cosine similarity between f and e.",3.1 Context-aware Beam Search,[0],[0]
+"It is transformed to the range [0, 1] to make it similar in scale with the LM probability.",3.1 Context-aware Beam Search,[0],[0]
+"In our experiments, we found that this simple linear scaling is better than sigmoid or softmax functions in the final translation performance.
+",3.1 Context-aware Beam Search,[0],[0]
+"Accumulating the scores per position, we perform a beam search to allow only reasonable translation hypotheses.",3.1 Context-aware Beam Search,[1.0],"['Accumulating the scores per position, we perform a beam search to allow only reasonable translation hypotheses.']"
+"Even when we have correctly translated words for each position, the output is still far from an acceptable translation.",3.2 Denoising,[0],[0]
+"We adopt sequence denoising autoencoder (Hill et al., 2016) to improve the translation output of Section 3.1.",3.2 Denoising,[0],[0]
+"The main idea is to train a sequence-to-sequence neural network model that takes a noisy sentence as input and produces a (denoised) clean sentence as output, both of which are of the same (target) language.",3.2 Denoising,[0],[0]
+"The model was originally proposed to learn sentence embeddings, but here we use it directly to actually remove noise in a sentence.
+",3.2 Denoising,[0],[0]
+"Training label sequences for the denoising network would be target monolingual sentences, but
+we do not have their noisy versions at hand.",3.2 Denoising,[0.9999999777364961],"['Training label sequences for the denoising network would be target monolingual sentences, but we do not have their noisy versions at hand.']"
+"Given a clean target sentence, the noisy input should be ideally word-by-word translation of the corresponding source sentence.",3.2 Denoising,[0],[0]
+"However, such bilingual sentence alignment is not available in our unsupervised setup.
+",3.2 Denoising,[0],[0]
+"Instead, we inject artificial noise into a clean sentence to simulate the noise of word-by-word translation.",3.2 Denoising,[1.0],"['Instead, we inject artificial noise into a clean sentence to simulate the noise of word-by-word translation.']"
+We design different noise types after the following aspects of word-by-word translation.,3.2 Denoising,[0],[0]
+Word-by-word translation always outputs a target word for every position.,3.2.1 Insertion,[0],[0]
+"However, there are a plenty of cases that multiple source words should be translated to a single target word, or that some source words are rather not translated to any word to make a fluent output.",3.2.1 Insertion,[0],[0]
+"For example, a German sentence “Ich höre zu.” would be translated to “I’m listening to.”",3.2.1 Insertion,[0],[0]
+"by a word-by-word translator, but “I’m listening.” is more natural in English (Figure 1).
+",3.2.1 Insertion,[0],[0]
+"We pretend to have extra target words which might be translation of redundant source words, by inserting random target words to a clean sentence:
+1.",3.2.1 Insertion,[0],[0]
+"For each position i, sample a probability pi ∼ Uniform(0, 1).
+2.",3.2.1 Insertion,[0],[0]
+"If pi < pins, sample a word e from the most frequent Vins target words and insert it before position i.
+We limit the inserted words by Vins because target insertion occurs mostly with common words, e.g. prepositions or articles, as the example above.",3.2.1 Insertion,[0],[0]
+"We insert words only before—not after—a position, since an extra word after the ending word (usually a punctuation) is not probable.",3.2.1 Insertion,[0],[0]
+"Similarly, word-by-word translation cannot handle the contrary case: when a source word should be translated into more than one target words, or a
+target word should be generated from no source words for fluency.",3.2.2 Deletion,[0],[0]
+"For example, a German word “im” must be “in the” in English, but word translation generates only one of the two English words.",3.2.2 Deletion,[1.0],"['For example, a German word “im” must be “in the” in English, but word translation generates only one of the two English words.']"
+"Another example is shown in Figure 2.
+",3.2.2 Deletion,[0],[0]
+"To simulate such situations, we drop some words randomly from a clean target sentence (Hill et al., 2016):
+1.",3.2.2 Deletion,[0],[0]
+"For each position i, sample a probability pi ∼ Uniform(0, 1).
+2.",3.2.2 Deletion,[0],[0]
+"If pi < pdel, drop the word in the position i.",3.2.2 Deletion,[0],[0]
+"Also, translations generated word-by-word are not in an order of the target language.",3.2.3 Reordering,[0],[0]
+"In our beam search, LM only assists in choosing the right word in context but does not modify the word order.",3.2.3 Reordering,[0],[0]
+"A common reordering problem of German→English is illustrated in Figure 3.
+",3.2.3 Reordering,[0],[0]
+"From a clean target sentence, we corrupt its word order by random permutations.",3.2.3 Reordering,[1.0],"['From a clean target sentence, we corrupt its word order by random permutations.']"
+"We limit the maximum distance between an original position and its new position like Lample et al. (2018):
+1.",3.2.3 Reordering,[0],[0]
+"For each position i, sample an integer δi from [0, dper].
+2.",3.2.3 Reordering,[0],[0]
+"Add δi to index i and sort the incremented indices i+ δi in an increasing order.
+3.",3.2.3 Reordering,[0],[0]
+"Rearrange the words to be in the new positions, to which their original indices have moved by Step 2.
+",3.2.3 Reordering,[0],[0]
+"This is a generalized version of swapping two neighboring words (Hill et al., 2016).",3.2.3 Reordering,[0],[0]
+"Reordering is highly dependent of each language, but we found that this noise is generally close to wordby-word translation outputs.
+",3.2.3 Reordering,[0],[0]
+"Insertion, deletion, and reordering noises were applied to each mini-batch with different random seeds, allowing the model to see various noisy versions of the same clean sentence over the epochs.
+",3.2.3 Reordering,[0],[0]
+Note that the deletion and permutation noises are integrated in the neural MT training of Artetxe et al. (2018) and Lample et al. (2018) as additional training objectives.,3.2.3 Reordering,[0],[0]
+Whereas we optimize an independent model solely for denoising without architecture change.,3.2.3 Reordering,[0],[0]
+It allows us to easily train a larger network with a larger data.,3.2.3 Reordering,[0],[0]
+"Insertion noise is of our original design, which we found to be the most effective (Section 4.1).",3.2.3 Reordering,[0],[0]
+We applied the proposed methods on WMT 2016 German↔English task and WMT 2014 French↔English task.,4 Experiments,[0],[0]
+"For German/English, we trained word embeddings with 100M sentences sampled from News Crawl 2014-2017 monolingual corpora.",4 Experiments,[0],[0]
+"For French, we used News Crawl 2007-2014 (around 42M sentences).",4 Experiments,[1.0],"['For French, we used News Crawl 2007-2014 (around 42M sentences).']"
+The data was lowercased and filtered to have a maximum sentence length 100.,4 Experiments,[1.0],['The data was lowercased and filtered to have a maximum sentence length 100.']
+German compound words were splitted beforehand.,4 Experiments,[1.0],['German compound words were splitted beforehand.']
+Numbers were replaced with category labels and recovered back after decoding by looking at the source sentence.,4 Experiments,[0],[0]
+"Also, frequent casing was applied to the translation output.
+",4 Experiments,[0],[0]
+"fasttext (Bojanowski et al., 2017) was used to learn monolingual embeddings for only the words with minimum count 10.",4 Experiments,[0],[0]
+"MUSE (Conneau et al., 2018) was used for cross-lingual mappings with Vcross-train = 100k and 10 refinement iterations
+(Step 3-5 in Section 2).",4 Experiments,[0],[0]
+Other parameters follow the values in Conneau et al. (2018).,4 Experiments,[0],[0]
+"With the same data, we trained 5-gram count-based LMs using KenLM (Heafield, 2011) with its default setting.
+",4 Experiments,[0],[0]
+"Denoising autoencoders were trained using Sockeye (Hieber et al., 2017) on News Crawl 2016 for German/English and News Crawl 2014 for French.",4 Experiments,[0],[0]
+We considered only top 50k frequent words for each language and mapped other words to <unk>.,4 Experiments,[0],[0]
+"The unknowns in the denoised output were replaced with missing words from the noisy input by a simple line search.
+",4 Experiments,[0],[0]
+"We used 6-layer Transformer encoder/decoder (Vaswani et al., 2017) for denoisers, with embedding/hidden layer size 512, feedforward sublayer size 2048 and 8 attention heads.
+",4 Experiments,[0.9999999474867167],"['We used 6-layer Transformer encoder/decoder (Vaswani et al., 2017) for denoisers, with embedding/hidden layer size 512, feedforward sublayer size 2048 and 8 attention heads.']"
+"As a validation set for the denoiser training, we used newstest2015 (German ↔ English) or newstest2013 (French↔ English), where the input/output sides both have the same clean target sentences, encouraging a denoiser to keep at least clean part of word-by-word translations.",4 Experiments,[0],[0]
+"Here, the noisy input showed a slight degradation of performance; the model seemed to overfit to specific noises in the small validation set.
+",4 Experiments,[0],[0]
+"Optimization of the denoising models was done with Adam (Kingma and Ba, 2015): initial learning rate 0.0001, checkpoint frequency 4000, no learning rate warmup, multiplying 0.7 to the learning rate when the perplexity on the validation set did not improve for 3 checkpoints.",4 Experiments,[0],[0]
+"We stopped the training if it was not improved for 8 checkpoints.
+",4 Experiments,[0],[0]
+Table 1 shows the results.,4 Experiments,[0],[0]
+"LM improves wordby-word baselines consistently in all four tasks, giving at least +3% BLEU.",4 Experiments,[0],[0]
+"When our denoising model is applied on top of it, we have additional gain around +3% BLEU.",4 Experiments,[1.0],"['When our denoising model is applied on top of it, we have additional gain around +3% BLEU.']"
+"Note that our methods do not involve any decoding steps to generate pseudo-parallel training data, but still perform
+better than unsupervised MT systems that rely on repetitive back-translations (Artetxe et al., 2018; Lample et al., 2018) by up to +3.9% BLEU.",4 Experiments,[1.0000000337335984],"['Note that our methods do not involve any decoding steps to generate pseudo-parallel training data, but still perform better than unsupervised MT systems that rely on repetitive back-translations (Artetxe et al., 2018; Lample et al., 2018) by up to +3.9% BLEU.']"
+The total training time of our method is only 1-2 days with a single GPU.,4 Experiments,[0],[0]
+"To examine the effect of each noise type in denoising autoencoder, we tuned each parameter of the noise and combined them incrementally (Table 2).",4.1 Ablation Study: Denoising,[0],[0]
+"Firstly, for permutations, a significant improvement is achieved from dper = 3, since a local reordering usually involves a sequence of 3 to 4 words.",4.1 Ablation Study: Denoising,[0],[0]
+"With dper > 5, it shuffles too many consecutive words together, yielding no further improvement.",4.1 Ablation Study: Denoising,[0],[0]
+"This noise cannot handle long-range reordering, which is usually a swap of words that are far from each other, keeping the words in the middle as they are.
+",4.1 Ablation Study: Denoising,[0],[0]
+"Secondly, we applied the deletion noise with different values of pdel. 0.1 gives +0.8% BLEU, but we immediately see a degradation with a larger value; it is hard to observe one-to-many translations more than once in each sentence pair.
+",4.1 Ablation Study: Denoising,[0],[0]
+"Finally, we optimized Vins for the insertion noise, fixing pins = 0.1.",4.1 Ablation Study: Denoising,[0],[0]
+"Increasing Vins is generally not beneficial, since it provides too much variations in the inserted word; it might not be related to its neighboring words.",4.1 Ablation Study: Denoising,[0],[0]
+"Overall, we observe the best result (+1.5% BLEU) with Vins = 50.",4.1 Ablation Study: Denoising,[0],[0]
+We also examined how the translation performance varies with different vocabularies of crosslingual word embedding in Table 3.,4.2 Ablation Study: Vocabulary,[0],[0]
+"The first three rows show that BPE embeddings performs worse
+than word embeddings, especially with smaller vocabulary size.",4.2 Ablation Study: Vocabulary,[0],[0]
+"For small BPE tokens (1-3 characters), the context they meet during the embedding training is much more various than a complete word, and a direct translation of such small token to a BPE token of another language would be very ambiguous.
+",4.2 Ablation Study: Vocabulary,[0],[0]
+"For word level embeddings, we compared different vocabulary sizes used for training the cross-lingual mapping (the second step in Section 2).",4.2 Ablation Study: Vocabulary,[0],[0]
+"Surprisingly, cross-lingual word embedding learned only on top 20k words is comparable to that of 200k words in the translation quality.",4.2 Ablation Study: Vocabulary,[0],[0]
+We also increased the search vocabulary to more than 200k but the performance only degrades.,4.2 Ablation Study: Vocabulary,[0],[0]
+"This means that word-by-word translation with crosslingual embedding depends highly on the frequent word mappings, and learning the mapping between rare words does not have a positive effect.",4.2 Ablation Study: Vocabulary,[0],[0]
+"In this paper, we proposed a simple pipeline to greatly improve sentence translation based on cross-lingual word embedding.",5 Conclusion,[0],[0]
+"We achieved context-aware lexical choices using beam search with LM, and solved insertion/deletion/reordering problems using denoising autoencoder.",5 Conclusion,[0],[0]
+Our novel insertion noise shows a promising performance even combined with other noise types.,5 Conclusion,[0],[0]
+Our methods do not need back-translation steps but still outperforms costly unsupervised neural MT systems.,5 Conclusion,[0],[0]
+"In addition, we proved that for general translation purpose, an effective cross-lingual mapping can be learned using only a small set of frequent words, not on subword units.",5 Conclusion,[0],[0]
+"This work has received funding from the European Research Council (ERC) under the European Union’s Horizon 2020 research and innovation
+programme, grant agreement No. 694537 (SEQCLAS).",Acknowledgments,[0],[0]
+The GPU computing cluster was partially funded by Deutsche Forschungsgemeinschaft (DFG) under grant INST 222/1168-1 FUGG.,Acknowledgments,[0],[0]
+The work reflects only the authors’ views and neither ERC nor DFG is responsible for any use that may be made of the information it contains.,Acknowledgments,[0],[0]
+"Unsupervised learning of cross-lingual word embedding offers elegant matching of words across languages, but has fundamental limitations in translating sentences.",abstractText,[0],[0]
+"In this paper, we propose simple yet effective methods to improve word-by-word translation of crosslingual embeddings, using only monolingual corpora but without any back-translation.",abstractText,[0],[0]
+"We integrate a language model for context-aware search, and use a novel denoising autoencoder to handle reordering.",abstractText,[0],[0]
+Our system surpasses state-of-the-art unsupervised neural translation systems without costly iterative training.,abstractText,[0],[0]
+"We also analyze the effect of vocabulary size and denoising type on the translation performance, which provides better understanding of learning the cross-lingual word embedding and its usage in translation.",abstractText,[0],[0]
+Improving Unsupervised Word-by-Word Translation with Language Model and Denoising Autoencoder,title,[0],[0]

@@ -1,0 +1,1334 @@
+0,1,label2,summary_sentences
+"Proceedings of NAACL-HLT 2018, pages 1907–1918 New Orleans, Louisiana, June 1 - 6, 2018. c©2018 Association for Computational Linguistics",text,[0],[0]
+Deep Learning (DL) has radically changed the rules of the game in NLP by dramatically boosting performance figures in almost all applications areas.,1 Introduction,[0],[0]
+"Yet, one of the major premises of highperformance DL engines is their dependence on huge amounts of training data.",1 Introduction,[0],[0]
+"As such, DL seems ill-suited for areas where training data are scarce, such as in the field of word emotion induction.
+",1 Introduction,[0],[0]
+"We will use the terms polarity and emotion here to distinguish between research focusing on “semantic orientation” (Hatzivassiloglou and McKeown, 1997) (the positiveness or negativeness) of affective states, on the one hand, and approaches which provide predictions based on some of the many more elaborated representational systems for affective states, on the other hand.
+",1 Introduction,[0],[0]
+"Originally, research activities focused on polarity alone.",1 Introduction,[0],[0]
+"In the meantime, a shift towards more expressive representation models for emotion can be observed that heavily draws inspirations from psychological theory, e.g., Basic Emotions (Ekman, 1992) or the Valence-Arousal-Dominance model (Bradley and Lang, 1994).
+",1 Introduction,[0],[0]
+"Though this change turned out to be really beneficial for sentiment analysis in NLP, a large variety of mutually incompatible encodings schemes for emotion and, consequently, annotation formats for emotion metadata in corpora have emerged that hinder the interoperability of these resources and their subsequent reuse, e.g., on the basis of alignments or mergers (Buechel and Hahn, 2017).
+",1 Introduction,[0],[0]
+"As an alternative way of dealing with thus unwarranted heterogeneity, we here examine the potential of multi-task learning (MTL; Caruana (1997)) for word-level emotion prediction.",1 Introduction,[0],[0]
+"In MTL for neural networks, a single model is fitted to solve multiple, independent tasks (in our case, to predict different emotional dimensions) which typically results in learning more robust and meaningful intermediate representations.",1 Introduction,[0],[0]
+"MTL has been shown to greatly decrease the risk of overfitting (Baxter, 1997), work well for various NLP tasks (Setiawan et al., 2015; Liu et al., 2015; Søgaard and Goldberg, 2016; Cummins et al., 2016; Liu et al., 2017; Peng et al., 2017), and practically increases sample size, thus making it a natural choice for small-sized data sets typically found in the area of word emotion induction.
+1907
+After a discussion of related work in Section 2, we will introduce several reference methods and describe our proposed deep MTL model in Section 3.",1 Introduction,[0],[0]
+"In our experiments (Section 4), we will first validate our claim that MTL is superior to single-task learning for word emotion induction.",1 Introduction,[0],[0]
+"After that, we will provide a large-scale evaluation of our model featuring 9 typologically diverse languages and multiple publicly available embedding models for a total of 15 conditions.",1 Introduction,[0],[0]
+"Our MTL model surpasses the current state-of-the-art for each of them, and even performs competitive relative to human reliability.",1 Introduction,[0],[0]
+"Most notably however, our approach yields the largest benefit on the smallest data sets, comprising merely one thousand samples.",1 Introduction,[0],[0]
+"This finding, counterintuitive as it may be, strongly suggests that MTL is particularly beneficial for solving the word emotion induction problem.",1 Introduction,[0],[0]
+Our code base as well as the resulting experimental data is freely available.1,1 Introduction,[0],[0]
+"This section introduces the emotion representation format underlying our study and describes external resources we will use for evaluation before we discuss previous methodological work.
+",2 Related Work,[0],[0]
+Emotion Representation and Data Sets.,2 Related Work,[0],[0]
+"Psychological models of emotion can typically be subdivided into discrete (or categorical) and dimensional ones (Stevenson et al., 2007; Calvo and Mac Kim, 2013).",2 Related Work,[0],[0]
+Discrete models are centered around particular sets of emotional categories considered to be fundamental.,2 Related Work,[0],[0]
+"Ekman (1992), for instance, identifies six Basic Emotions (Joy, Anger, Sadness, Fear, Disgust and Surprise).
+",2 Related Work,[0],[0]
+"In contrast, dimensional models consider emotions to be composed of several influencing factors (mainly two or three).",2 Related Work,[0],[0]
+"These are often referred to as Valence (a positive–negative scale), Arousal (a calm–excited scale), and Dominance (perceived degree of control over a (social) situation)—the VAD model (Bradley and Lang (1994); see Figure 1 for an illustration).",2 Related Work,[0],[0]
+"Many contributions though omit Dominance (the VA model) (Russell, 1980).",2 Related Work,[0],[0]
+"For convenience, we will still use the term “VAD” to jointly refer to both variants (with and without Dominance).
+",2 Related Work,[0],[0]
+"VAD is the most common framework to acquire empirical emotion values for words in psychology.
+",2 Related Work,[0],[0]
+"1 https://github.com/JULIELab/wordEmotions
+Over the years, a considerable number of such resources (also called “emotion lexicons”) have emerged from psychological research labs (as well as some NLP labs) for diverse languages.",2 Related Work,[0],[0]
+The emotion lexicons we use in our experiments are listed in Table 1.,2 Related Work,[0],[0]
+An even more extensive list of such data sets is presented by Buechel and Hahn (2018).,2 Related Work,[0],[0]
+"For illustration, we also provide three sample entries from one of those lexicons in Table 2.",2 Related Work,[0],[0]
+"As can be seen, the three affective dimensions behave complementary to each other, e.g., “terrorism” and “orgasm” display similar Arousal but opposing Valence.
+",2 Related Work,[0],[0]
+"The task we address in this paper is to predict the values for Valence, Arousal and Dominance, given a lexical item.",2 Related Work,[0],[0]
+"As is obvious from these examples, we consider emotion prediction as a regression, not as a classification problem (see arguments discussed in Buechel and Hahn (2016)).
+",2 Related Work,[0],[0]
+"In this paper, we focus on the VAD format for the following reasons: First, note that the Valence dimension exactly corresponds to polarity (Turney and Littman, 2003).",2 Related Work,[0],[0]
+"Hence, with the VAD model, emotion prediction can be seen as a generalization over classical polarity prediction.",2 Related Work,[0],[0]
+"Second, to the best of our knowledge, the amount and diversity of available emotion lexicons with VAD encodings is larger than for any other format (see Table 1).
+",2 Related Work,[0],[0]
+Word Embeddings.,2 Related Work,[0],[0]
+"Word embeddings are dense, low-dimensional vector representations of words trained on large volumes of raw text in an unsupervised manner.",2 Related Work,[0],[0]
+"The following are among today’s most popular embedding algorithms:
+WORD2VEC (with its variants SGNS and CBOW) features an extremely trimmed down neural network (Mikolov et al., 2013).",2 Related Work,[0],[0]
+"FASTTEXT is a derivative of WORD2VEC, also incorporating sub-word character n-grams (Bojanowski et al., 2017).",2 Related Work,[0],[0]
+"Unlike the former two algorithms which fit word embeddings in a streaming fashion, GLOVE trains word vectors directly on a word co-occurrence matrix under the assumption to make more efficient use of word statistics (Pennington et al., 2014).",2 Related Work,[0],[0]
+"Somewhat similar, SVDPPMI performs singular value decomposition on top of a point-wise mutual information co-occurrence matrix (Levy et al., 2015).
+",2 Related Work,[0],[0]
+"In order to increase the reproducibility of our experiments, we rely on the following widely used, publicly available embedding models trained on very large corpora (summarized in Table 3): the SGNS model trained on the Google News corpus2",2 Related Work,[0],[0]
+"(GOOGLE), the FASTTEXT model trained on Common Crawl3 (COMMON), as well as the FASTTEXT models for a wide range of languages trained on the respective Wikipedias4 (WIKI).
+",2 Related Work,[0],[0]
+"2https://code.google.com/archive/p/ word2vec/
+3https://fasttext.cc/docs/en/ english-vectors.html
+4https://github.com/facebookresearch/ fastText/blob/master/pretrained-vectors.",2 Related Work,[0],[0]
+"md
+Note that WIKI denotes multiple embedding models with different training and vocabulary sizes (see Grave et al. (2018) for further details).",2 Related Work,[0],[0]
+"Additionally, we were given the opportunity to reuse the English embedding model from Sedoc et al. (2017) (GIGA), a strongly related contribution (see below).",2 Related Work,[0],[0]
+"Their embeddings were trained on the English Gigaword corpus (Parker et al., 2011).
+",2 Related Work,[0],[0]
+Word-Level Prediction.,2 Related Work,[0],[0]
+"One of the early approaches to word polarity induction which is still popular today (Köper and Schulte im Walde, 2016) was introduced by Turney and Littman (2003).",2 Related Work,[0],[0]
+"They compute the polarity of an unseen word based on its point-wise mutual information (PMI) to a set of positive and negative seed words, respectively.
+",2 Related Work,[0],[0]
+"SemEval-2015 Task 10E featured polarity induction on Twitter (Rosenthal et al., 2015).",2 Related Work,[0],[0]
+"The best system relied on support vector regression (SVR) using a radial base function kernel (Amir et al., 2015).",2 Related Work,[0],[0]
+They employ the embedding vector of the target word as features.,2 Related Work,[0],[0]
+"The results of their SVR-based system were beaten by the DENSIFIER algorithm (Rothe et al., 2016).",2 Related Work,[0],[0]
+"DENSIFIER learns an orthogonal transformation of an embedding space into a subspace of strongly reduced dimensionality.
+",2 Related Work,[0],[0]
+"Hamilton et al. (2016) developed SENTPROP, a graph-based, semi-supervised learning algorithm which builds up a word graph, where vertices correspond to words (of known as well as unknown polarity) and edge weights correspond to the similarity between them.",2 Related Work,[0],[0]
+"The polarity information is then propagated through the graph, thus computing scores for unlabeled nodes.",2 Related Work,[0],[0]
+"According to their evaluation, DENSIFIER seems to be superior overall, yet SENTPROP produces competitive results
+only when the seed lexicon or the corpus the word embeddings are trained on is very small.5
+For word emotion induction, a very similar approach to SENTPROP has been proposed by Wang et al. (2016a).",2 Related Work,[0],[0]
+"They also propagate affective information (Valence and Arousal, in this case) through a word graph with similarity weighted edges.
+",2 Related Work,[0],[0]
+"Sedoc et al. (2017) recently proposed an approach based on signed spectral clustering where a word graph is constructed not only based on word similarity but also on the considered affective information (again, Valence and Arousal).",2 Related Work,[0],[0]
+The emotion value of a target word is then computed based on the seed words in its cluster.,2 Related Work,[0],[0]
+"They report to outperform the results from Wang et al. (2016a).
+",2 Related Work,[0],[0]
+"Contrary to the trend to graph-based methods, the best system of the IALP 2016 Shared Task on Chinese word emotion induction (Yu et al., 2016b) employed a simple feed-forward neural network (FFNN) with one hidden layer in combination with boosting (Du and Zhang, 2016).
+",2 Related Work,[0],[0]
+Another very recent contribution which advocates a supervised set-up was published by Li et al. (2017).,2 Related Work,[0],[0]
+"They propose ridge regression, again using word embeddings as features.",2 Related Work,[0],[0]
+"Even with this simple approach, they report to outperform many of the above methods in the VAD prediction task.6
+Sentence-Level and Text-Level Prediction.",2 Related Work,[0],[0]
+"Different from the word-level prediction task (the one we focus on in this contribution), the determination of emotion values for higher-level linguistic units (especially sentences and texts) is also heavily investigated.",2 Related Work,[0],[0]
+"For this problem, DL approaches are meanwhile fully established as the method of choice (Wang et al., 2016b; Abdul-Mageed and Ungar, 2017; Felbo et al., 2017; Mohammad and Bravo-Marquez, 2017).
+",2 Related Work,[0.9584094764535948],"['Recent crowdsourced annotation efforts have yielded datasets for NLI in English (Bowman et al., 2015; Williams et al., 2017) with nearly a million examples, and these have been widely used to evaluate neural network architectures and training strategies (Rocktäschel et al., 2016; Gong et al., 2018; Peters et al., 2018; Wang et al., 2018), as well as to train effective, reusable sentence representations (Conneau et al., 2017; Subramanian et al., 2018; Cer et al., 2018).']"
+"5Personal correspondence with William L. Hamilton; See also README at https://github.com/ williamleif/socialsent
+6However, they also report extremely weak performance figures for some of their reference methods.
+",2 Related Work,[0],[0]
+"It is important to note, however, that the methods discussed for these higher-level units cannot easily be transferred to solve the word emotion induction problem.",2 Related Work,[0],[0]
+"Sentence-level and text-level architectures are either adapted to sequential input data (typical for RNN, LSTM, GRNN and related architectures) or spatially arranged input data (as with CNN architectures).",2 Related Work,[0],[0]
+"However, for word embeddings (the default input for word emotion induction) there does not seem to be any meaningful order of their components.",2 Related Work,[0],[0]
+"Therefore, these more sophisticated DL methods are, for the time being, not applicable for the study at hand.",2 Related Work,[0],[0]
+"In this section, we will first introduce various reference methods (two originally polarity-based for which we offer adaptations for VAD prediction) before defining our own neural MTL model and discussing its difference from previous work.
+",3 Methods,[0],[0]
+"Let V := {w1, w2, ..., wm} be our word vocabulary and let E := {e1, e2, ..., em} be a set of embedding vectors",3 Methods,[0],[0]
+such that ei ∈ Rn denotes the ndimensional vector representation of word wi.,3 Methods,[0],[0]
+"Let D := {d1, d2, ..., dl} be a set of emotional dimensions.",3 Methods,[0],[0]
+Our task is to predict the empirically determined emotion vector emo(w) ∈,3 Methods,[0],[0]
+Rl given a word w and the embedding space E.,3 Methods,[0],[0]
+Linear Regression Baseline (LinReg).,3.1 Reference Methods,[0],[0]
+"We propose (multi-variate) linear regression as an obvious baseline for the problem:
+emoLR(wk) := Wek + b (1)
+where W is a matrix, Wi∗ contains the regression coefficients for the i-th affective dimension and b is the vector of bias terms.",3.1 Reference Methods,[0],[0]
+The model parameters are fitted using ordinary least squares.,3.1 Reference Methods,[0],[0]
+"Technically, we use the scikit-learn.org implementation with default parameters.
+",3.1 Reference Methods,[0],[0]
+Ridge Regression (RidgReg).,3.1 Reference Methods,[0],[0]
+Li et al. (2017) propose ridge regression for word emotion induction.,3.1 Reference Methods,[0],[0]
+"Ridge regression works identically to linear regression during prediction, but introduces L2 regularization during training.",3.1 Reference Methods,[0],[0]
+"Following the authors, for our implementation, we again use the scikit-learn implementation with default parameters.
+",3.1 Reference Methods,[0],[0]
+Turney-Littman Algorithm (TL).,3.1 Reference Methods,[0],[0]
+"As one of the earliest contributions in the field, Turney and Littman (2003) defined a simple PMI-based approach to determine the semantic polarity SPTL of a word w: SPTL(w) := ∑
+s∈seeds+ pmi(w, s)",3.1 Reference Methods,[0],[0]
+"−
+∑
+s∈seeds− pmi(w, s)
+(2) where seeds+ and seeds− are sets of positive and negative seed words, respectively.",3.1 Reference Methods,[0],[0]
+"Since this algorithm is still popular today (Köper and Schulte im Walde, 2016), we here provide a novel modification for adapting this originally polarity-based approach to word emotion induction with vectorial seed and output values.
+",3.1 Reference Methods,[0],[0]
+"First, we replace PMI-based association of seed and target word w and s by their similarity sim based on their word embeddings ew and es:
+sim(w, s) := max(0, ew · es
+||ew|| × ||es|| ) (3)
+emo(w) := ∑
+s∈seeds+ sim(w, s)",3.1 Reference Methods,[0],[0]
+"−
+∑
+s∈seeds− sim(w, s)
+(4) Although this step is technically not required for the adaptation, it renders the TL algorithm more comparable to the other approaches evaluated in Section 4 besides from most likely increasing performance.",3.1 Reference Methods,[0],[0]
+"Equation (4) can be rewritten as
+emo(w) := ∑
+s∈seeds sim(w, s)× emo(s) (5)
+where seeds := seeds+ ∪ seeds− and emo(s) maps to 1, if s ∈ seeds+, and −1, if s ∈ seeds−.
+Equation (5) can be trivially adapted to an ndimensional emotion format by redefining emo(s) such that it maps to a vector from Rn instead of {−1, 1}.",3.1 Reference Methods,[0],[0]
+"Our last step is to introduce a normalization term such that emo(w)TL lies within the
+range of the seed lexicon.
+emoTL(w) :=
+∑ s∈seeds sim(w, s)× emo(s)∑
+s∈seeds sim(w, s) (6)
+As can be seen from Equation (6), for the more general case of n-dimensional emotion prediction, the Turney-Littman algorithm naturally translates into a weighted average where the seed emotion values are weighted according to the similarity to the target item.
+",3.1 Reference Methods,[0],[0]
+Densifier.,3.1 Reference Methods,[0],[0]
+"Rothe et al. (2016) train an orthogonal matrix Q ∈ Rn×n (n being the dimensionality of the word embeddings) such that applying Q to an embedding vector ei concentrates all the polarity information in its first dimension such that the polarity of a word wi can be computed as
+SPDENSIFIER(wi) := pQei (7)
+where p = (1, 0, 0, ..., 0)T ∈ R1×n .",3.1 Reference Methods,[0],[0]
+"For fitting Q, the seeds are arranged into pairs of equal polarity (the set pairs=) and those of opposing polarity (pairs6=).",3.1 Reference Methods,[0],[0]
+"A good fit for Q will minimize the distance within the former and maximize the distance within the latter which can be expressed by the following two training objectives:
+argmin Q
+∑
+(wi,wj)∈pairs= |pQ(ei − ej)| (8)
+argmax Q
+∑
+(wi,wj)∈pairs6= |pQ(ei",3.1 Reference Methods,[0],[0]
+"− ej)| (9)
+",3.1 Reference Methods,[0],[0]
+The objectives described in the expressions (8) and (9) are combined into a single loss function (using a weighting factor α ∈,3.1 Reference Methods,[0],[0]
+"[0, 1]) which is then minimized using stochastic gradient descent (SGD).
+",3.1 Reference Methods,[0],[0]
+"To adapt this algorithm to dimensional emotion formats, we construct a positive seed set, seeds+v , and a negative seed set, seeds−v , for each emotion dimension v ∈ D. LetMv be the mean value of all the entries of the training lexicon for the affective dimension v. Let SDv be the respective standard deviation and β ∈ R, β ≥ 0.",3.1 Reference Methods,[0],[0]
+Then all entries greater than Mv + βSDv are assigned to seeds+v and those less than Mv − βSDv are assigned to seeds−v .,3.1 Reference Methods,[0],[0]
+"Q is fitted individually for each emotion dimension v.
+Training was performed according to the original paper with the exception that (following Hamilton et al. (2016))",3.1 Reference Methods,[0],[0]
+"we did not apply the proposed re-orthogonalization after each training
+step, since we did not find any evidence that this procedure actually results in improved performance.",3.1 Reference Methods,[0],[0]
+The hyperparameters α and β were set to .7 and .5 (respectively) for all experiments based on a pilot study.,3.1 Reference Methods,[0],[0]
+"Since the original implementation is not accessible, we devised our own using tensorflow.org.
+",3.1 Reference Methods,[0],[0]
+Boosted Neural Networks (ensembleNN).,3.1 Reference Methods,[0],[0]
+Du and Zhang (2016) propose simple FFNNs in combination with a boosting algorithm.,3.1 Reference Methods,[0],[0]
+An FFNN consists of an input or embedding layer with activation a(0) ∈,3.1 Reference Methods,[0],[0]
+Rn which is equal to the embedding vector ek when predicting the emotion of a word wk.,3.1 Reference Methods,[0],[0]
+"The input layer is followed by multiple hidden layers with activation
+a(l+1) := σ(W (l+1)a(l) + b(l+1)) (10)
+where W (l+1) and b(l+1) are the weights and biases for layer l + 1 and σ is a nonlinear activation function.",3.1 Reference Methods,[0],[0]
+"Since we treat emotion prediction as a regression problem, the activation on the output layer aout (where out is the number of non-input layers in the network) is computed as the affine transformation
+a(out)",3.1 Reference Methods,[0],[0]
+:= W (out)a(out−1) +,3.1 Reference Methods,[0],[0]
+"b(out) (11)
+",3.1 Reference Methods,[0],[0]
+Boosting is a general machine learning technique where several weak estimators are combined to form a strong estimator.,3.1 Reference Methods,[0],[0]
+The authors used FFNNs with a single hidden layer of 100 units and rectified linear unit (ReLU) activation.,3.1 Reference Methods,[0],[0]
+The boosting algorithm AdaBoost.,3.1 Reference Methods,[0],[0]
+"R2 (Drucker, 1997) was used to train the ensemble (one per affective dimension).",3.1 Reference Methods,[0],[0]
+Our re-implementation copies their technical set-up7 exactly using scikit-learn.,3.1 Reference Methods,[0],[0]
+"The approaches introduced in Section 3.1 and Section 2 vary largely in their methodological foundations, i.e., they comprise semi-supervised and supervised machine learning techniques—both statistical and neural ones.",3.2 Multi-Task Learning Neural Network,[0],[0]
+"Yet, they all have in common that they treat the prediction of the different emotional dimensions as separate tasks.",3.2 Multi-Task Learning Neural Network,[0],[0]
+"That is, they fit one individual model per VAD dimension without sharing parameters between them.
+",3.2 Multi-Task Learning Neural Network,[0],[0]
+"In contradistinction, the key feature of our approach is that we fit a single FFNN model to
+7Original settings available at https://github.",3.2 Multi-Task Learning Neural Network,[0],[0]
+"com/StevenLOL/ialp2016_Shared_Task
+predict all VAD dimensions jointly, thus applying multi-task learning to word emotion induction.",3.2 Multi-Task Learning Neural Network,[0],[0]
+"Hence, we treat the prediction of Valence, Arousal and Dominance as three independent tasks.",3.2 Multi-Task Learning Neural Network,[0],[0]
+Our multi-task learning neural network (MTLNN) (depicted in Figure 2) has an output layer of three units such that each output unit represents one of the VAD dimensions.,3.2 Multi-Task Learning Neural Network,[0],[0]
+"However, the activation in our two hidden layers (of 256 and 128 units, respectively) is shared across all VAD dimensions, and so are the associated weights and biases.
+",3.2 Multi-Task Learning Neural Network,[0],[0]
+"Thus, while we train our MTLNN model it is forced to learn intermediate representations of the input which are generally informative for all VAD dimensions.",3.2 Multi-Task Learning Neural Network,[0],[0]
+"This serves as a form of regularization, since it becomes less likely for our model to fit the noise in the training set as noise patterns may vary across emotional dimensions.",3.2 Multi-Task Learning Neural Network,[0],[0]
+"Simultaneously, this has an effect similar to an increase of the training size, since each sample now leads to additional error signals during backpropagation.",3.2 Multi-Task Learning Neural Network,[0.9561979999676078],"['If an encoder produces an embedding of an English sentence close to the embedding of its translation in another language, then a classifier learned on top of English sentence embeddings will be able to classify sentences from different languages without needing a translation system at inference time.']"
+"Intuitively, both properties seem extremely useful for relatively small-sized emotion lexicons (see Section 4 for empirical evidence).
+",3.2 Multi-Task Learning Neural Network,[0],[0]
+The remaining specifications of our model are as follows.,3.2 Multi-Task Learning Neural Network,[0],[0]
+"We use leaky ReLU activation (LReLU) as nonlinearity (Maas et al., 2013).
+LReLU(zi)",3.2 Multi-Task Learning Neural Network,[0],[0]
+":= max(γzi, zi) (12)
+with γ := .01 for our experiments.",3.2 Multi-Task Learning Neural Network,[0],[0]
+"For regularization, dropout (Srivastava et al., 2014) is applied during training with a probability of .2 on the embedding layer and .5",3.2 Multi-Task Learning Neural Network,[0],[0]
+on the hidden layers.,3.2 Multi-Task Learning Neural Network,[0],[0]
+"We train for 15, 000 iterations (well beyond convergence on each data set we use) with the ADAM optimizer (Kingma and Ba, 2015) of .001 base learning rate,
+batch size of 128 and Mean-Squared-Error loss.",3.2 Multi-Task Learning Neural Network,[0],[0]
+The weights are randomly initialized (drawn from a normal distribution with a standard deviation .001) and biases are uniformly initialized as .01.,3.2 Multi-Task Learning Neural Network,[0],[0]
+Tensorflow is used for implementation.,3.2 Multi-Task Learning Neural Network,[0],[0]
+"In this section, we first validate our assumption that MTL is superior to single-task learning for word emotion induction.",4 Results,[0],[0]
+"Next, we compare our proposed MTLNN model in a large-scale evaluation experiment.
+",4 Results,[0],[0]
+Performance figures will be measured as Pearson correlation (r) between our automatically predicted values and human gold ratings.,4 Results,[0],[0]
+"The Pearson correlation between two data series X = x1, x2, ..., xn and Y = y1, y2, ..., yn takes values between +1 (perfect positive correlation) and −1 (perfect negative correlation) and is computed as
+rxy := ∑n i=1(xi − x̄)(yi",4 Results,[0],[0]
+"− ȳ)√∑n
+i=1(xi",4 Results,[0],[0]
+"− x̄)2 √∑n
+i=1(yi",4 Results,[0],[0]
+"− ȳ)2 (13)
+where x̄ and ȳ denote the mean values for X and Y , respectively.",4 Results,[0],[0]
+The main hypothesis of this contribution is that an MTL set-up is superior to single-task learning for word emotion induction.,4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"Before proceeding to the large-scale evaluation of our proposed model, we will first examine this aspect of our work.
+",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"For this, we use the following experimental setup: We will compare the MTLNN model against its single-task learning counterpart (SepNN).",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"SepNN simultaneously trains three separate neural networks where only the input layer, yet no parameters of the intermediate layers are shared across the models.",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"Each of the separate networks is identical to MTLNN (same layers, dropout, initialization, etc.), yet has only one output neuron, thus modeling only one of the three affective VAD dimensions.",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"SepNN is equivalent to fitting our proposed model (but with only one output unit) to the different VAD dimensions individually, one after the other.",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"Yet, training these separate networks simultaneously (not jointly!) makes both approaches, MTLNN and SepNN, easier to compare.
+",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"We will run MTLNN against SepNN on the EN and the EN+ data set (the former is very
+small, the latter relatively large; see Table 1) using the following set-up: for each gold lexicon and model, we randomly split the data 9/1 and train for 15, 000 iterations on the larger split (the same number of steps is used for the main experiment).",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"After each one-thousand iterations step, model performance is tested on the held-out data.",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+This process will be repeated 20 times and the performance figures at each one-thousand iterations step will be averaged.,4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"In a final step, we will average the results for each of the three emotional dimensions and only plot this average value.",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"The results of this experiment are depicted in Figure 3.
+",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"First of all, each combination of model and data set displays a satisfactory performance of at least r ≈ .75",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"after 15,000 steps compared to previous work (see below).",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"Overall, performance is higher for the smaller EN lexicon.",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"Although counterintuitive (since smaller lexicons lead to fewer training samples), this finding is consistent with prior work (Sedoc et al., 2017; Li et al., 2017) and is probably related to the fact that smaller lexicons usually comprise a larger portion of strongly emotionbearing words.",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"In contrast, larger lexicons add more neutral words which tend to be harder to predict in terms of correlation.
+",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"As hypothesized, the MTLNN model does indeed outperform the single task model on both data sets.",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+Our data also suggest that the gain from the MTL approach is larger on smaller data sets (again in concordance with our expectations).,4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"Figure 3 reveals that this might be due to the regularizing effect of MTL, since the SepNN model shows signs of overfitting on the EN data set.",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"Yet, even
+when the separate model does not overfit (as on the EN+ lexicon), MTLNN reveals better results.
+",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"Although SepNN needs fewer training steps before convergence, the MTLNN model trains much faster, thus still converging faster in terms of runtime (about a minute on a middle-class GPU).",4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+This is because MTLNN has only about a third as many parameters as the separate model SepNN.,4.1 Single-Task vs. Multi-Task Learning,[0],[0]
+"We combined each of the selected lexicon data sets (Table 1) with each of the applicable publicly available embedding models (Section 2; the embedding model provided by Sedoc et al. (2017) will be used separately) for a total of 15 conditions, i.e, the rows in Table 4.
+",4.2 Comparison against Reference Methods,[0],[0]
+"For each of these conditions, we performed a 10-fold cross-validation (CV) for each of the 6 methods presented in Section 3 such that each method is presented with the identical data splits.8 For each condition, algorithm, and VA(D) dimension, we compute the Pearson correlation r between gold ratings and predictions.",4.2 Comparison against Reference Methods,[0],[0]
+"For conciseness, we present only the average correlation over the respective affective dimensions in Table 4 (Valence and Arousal for ES+ and ZH, VAD for the others).",4.2 Comparison against Reference Methods,[0],[0]
+"Note that the methods we compare ourselves against comprise the current state-of-the art in both polarity and emotion induction (as described in Section 2).
+8This procedure constitutes a more direct comparison than using different splits for each method and allows using paired t-tests.
+",4.2 Comparison against Reference Methods,[0],[0]
+"As can be seen, our proposed MTLNN model outperforms all other approaches in each of the 15 conditions.",4.2 Comparison against Reference Methods,[0],[0]
+"Regarding the average over all affective dimensions and conditions, it outperforms the second best system, ensembleNN, by more than 5%-points.",4.2 Comparison against Reference Methods,[0],[0]
+"In line with our results from Section 4.1, those improvements are especially pronounced on smaller data sets containing one up to two thousand entries (EN, ES, IT, PT, ID) with close to 10%-points improvement over the respective second-best system.
+",4.2 Comparison against Reference Methods,[0],[0]
+"Concerning the relative ordering of the affective dimensions, in line with former studies (Sedoc et al., 2017; Li et al., 2017), the performance figures for the Valence dimension are usually much higher than for Arousal and Dominance.",4.2 Comparison against Reference Methods,[0],[0]
+"Using MTLNN, for many conditions, we see the pattern that Valence is about 10%-points above the VAD average, Arousal being 10%-points below and Dominance being roughly equal to the average over VAD (this applies, e.g., to EN, EN+ and IT).",4.2 Comparison against Reference Methods,[0],[0]
+"On other data sets (e.g., PL, NL and ID), the ordering between Arousal and Dominance is less clear though Valence still stands out with the best results.",4.2 Comparison against Reference Methods,[0],[0]
+"We observe the same general pattern for the reference methods, as well.
+",4.2 Comparison against Reference Methods,[0],[0]
+"Concerning the comparison to Sedoc et al. (2017), arguably one of most related contributions, they report a performance of r = .768 for Valence and .582 for Arousal on the EN+ data set in a 10- fold CV using their own embeddings.",4.2 Comparison against Reference Methods,[0],[0]
+"In contrast, MTLNN using the COMMON model achieves r = .870 and .674 in the same set-up—about 10%-
+points better on both dimensions.",4.2 Comparison against Reference Methods,[0],[0]
+"However, the COMMON model was trained on much more data than the embeddings Sedoc et al. (2017) use.",4.2 Comparison against Reference Methods,[0],[0]
+"For the most direct comparison, we also repeated this experiment using their embedding model (GIGA).",4.2 Comparison against Reference Methods,[0],[0]
+"We find that MTLNN still clearly outperforms their results with r = .814 for Valence and .607 for Arousal.9
+MTLNN achieves also very strong results in direct comparison to human performance (see Table 5).",4.2 Comparison against Reference Methods,[0],[0]
+"Warriner et al. (2013) (who created EN+) report an inter-study reliability (ISR; i.e., the correlation of the aggregated ratings from two different studies) between the EN and the EN+ lexicon of r = .953, .759 and .795 for VAD, respectively.",4.2 Comparison against Reference Methods,[0],[0]
+"Since EN is a subset of EN+, we can compare these performance figures against our own results on the EN data set where we achieved r = .918, .730 and .825, respectively.",4.2 Comparison against Reference Methods,[0],[0]
+"Thus, our proposed method did actually outperform human reliability for Dominance and is competitive for Valence and Arousal, as well.
+",4.2 Comparison against Reference Methods,[0],[0]
+"This general observation is also backed up by split-half reliability data (SHR; i.e., when randomly splitting all individual ratings in two groups and averaging the ratings within each group, how strong is the correlation between these averaged ratings?).",4.2 Comparison against Reference Methods,[0],[0]
+"For the EN+ data set, Warriner et al. (2013) report an SHR of r = .914, .689 and .770 for VAD, respectively.",4.2 Comparison against Reference Methods,[0],[0]
+"Again, our MTLNN model performs very competitive with r = .870, .674 and .758, respectively using the COMMON embeddings.",4.2 Comparison against Reference Methods,[0],[0]
+"In this paper, we propose multi-task learning (MTL) as a simple, yet surprisingly efficient method to improve the performance and, at the same time, to deal with existing data limitations
+9We also clearly outperform their results for the NL and ES+ data sets.",5 Conclusion,[0],[0]
+"For these cases, our embedding models were similar in training size.
+",5 Conclusion,[0],[0]
+in word emotion induction—the task to predict a complex emotion score for an individual word.,5 Conclusion,[0],[0]
+We validated our claim that MTL is superior to single-task learning by achieving better results with our proposed method in performance as well as training time compared to its single-task counterpart.,5 Conclusion,[0],[0]
+"We performed an extensive evaluation of our model on 9 typologically diverse languages, using different kinds of word embedding models for a total 15 conditions.",5 Conclusion,[0],[0]
+"Comparing our approach to state-of-the-art methods from word polarity and word emotion induction, our model turns out to be superior in each condition, thus setting a novel state-of-the-art performance for both polarity and emotion induction.",5 Conclusion,[0],[0]
+"Moreover, our results are even competitive to human annotation reliability in terms of inter-study as well as split-half reliability.",5 Conclusion,[0],[0]
+"Since this contribution was restricted to the VAD format of emotion representation, in future work we will examine whether MTL yields similar gains for other representational schemes, as well.",5 Conclusion,[0],[0]
+"We would like to thank the Positive Psychology Center, University of Pennsylvania for providing us with the embedding model used in Sedoc et al. (2017), Johannes Hellrich, JULIE Lab, for insightful discussions, and the reviewers for their valuable comments.",Acknowledgments,[0],[0]
+Predicting the emotional value of lexical items is a well-known problem in sentiment analysis.,abstractText,[0],[0]
+"While research has focused on polarity for quite a long time, meanwhile this early focus has been shifted to more expressive emotion representation models (such as Basic Emotions or Valence-Arousal-Dominance).",abstractText,[0],[0]
+"This change resulted in a proliferation of heterogeneous formats and, in parallel, often smallsized, non-interoperable resources (lexicons and corpus annotations).",abstractText,[0],[0]
+"In particular, the limitations in size hampered the application of deep learning methods in this area because they typically require large amounts of input data.",abstractText,[0],[0]
+We here present a solution to get around this language data bottleneck by rephrasing word emotion induction as a multi-task learning problem.,abstractText,[0],[0]
+"In this approach, the prediction of each independent emotion dimension is considered as an individual task and hidden layers are shared between these dimensions.",abstractText,[0],[0]
+We investigate whether multi-task learning is more advantageous than single-task learning for emotion prediction by comparing our model against a wide range of alternative emotion and polarity induction methods featuring 9 typologically diverse languages and a total of 15 conditions.,abstractText,[0],[0]
+Our model turns out to outperform each one of them.,abstractText,[0],[0]
+"Against all odds, the proposed deep learning approach yields the largest gain on the smallest data sets, merely composed of one thousand samples.",abstractText,[0],[0]
+Word Emotion Induction for Multiple Languages as a Deep Multi-Task Learning Problem,title,[0],[0]
+"Proceedings of the 2016 Conference on Empirical Methods in Natural Language Processing, pages 2319–2324, Austin, Texas, November 1-5, 2016. c©2016 Association for Computational Linguistics",text,[0],[0]
+"We address the task of recovering the original word order of a shuffled sentence, referred to as bag generation (Brown et al., 1990), shake-and-bake generation (Brew, 1992), or more recently, linearization, as standardized in a recent line of research as a method useful for isolating the performance of text-to-text generation models (Zhang and Clark, 2011; Liu et al., 2015; Liu and Zhang, 2015; Zhang and Clark, 2015).",1 Introduction,[0],[0]
+The predominant argument of the more recent works is that jointly recovering explicit syntactic structure is crucial for determining the correct word order of the original sentence.,1 Introduction,[0],[0]
+"As such, these methods either generate or rely on given parse structure to reproduce the order.
+",1 Introduction,[0],[0]
+"Independently, Elman (1990) explored linearization in his seminal work on recurrent neural networks.",1 Introduction,[0],[0]
+"Elman judged the capacity of early recurrent neural networks via, in part, the network’s ability to predict word order in simple sentences.",1 Introduction,[0],[0]
+"He notes,
+The order of words in sentences reflects a number of constraints. . .",1 Introduction,[0],[0]
+"Syntactic structure, selective restrictions, subcategorization, and discourse considerations are among the many factors which join together to fix the order in which words occur. . .",1 Introduction,[0],[0]
+[T]here is an abstract structure which underlies the surface strings and it is this structure which provides a more insightful basis for understanding the constraints on word order. . . .,1 Introduction,[0],[0]
+"It is, therefore, an interesting question to ask whether a network can learn any aspects of that underlying abstract structure (Elman, 1990).
+",1 Introduction,[0],[0]
+"Recently, recurrent neural networks have reemerged as a powerful tool for learning the latent structure of language.",1 Introduction,[0],[0]
+"In particular, work on long short-term memory (LSTM) networks for language modeling has provided improvements in perplexity.
+",1 Introduction,[0],[0]
+"We revisit Elman’s question by applying LSTMs to the word-ordering task, without any explicit syntactic modeling.",1 Introduction,[0],[0]
+"We find that language models are in general effective for linearization relative to existing syntactic approaches, with LSTMs in particular outperforming the state-of-the-art by 11.5 BLEU points, with further gains observed when training with additional text and decoding with larger beams.",1 Introduction,[0],[0]
+The task of linearization is to recover the original order of a shuffled sentence.,2 Background: Linearization,[0],[0]
+"We assume a vocabulary V and are given a sequence of out-of-order phrases x1, . . .",2 Background: Linearization,[0],[0]
+", xN , with xn ∈ V+ for 1 ≤ n ≤",2 Background: Linearization,[0],[0]
+N .,2 Background: Linearization,[0],[0]
+"Define M as the total number of tokens (i.e., the sum of the lengths of the phrases).",2 Background: Linearization,[0],[0]
+"We consider two varieties of the task: (1) WORDS, where each xn consists of a single word and M = N , and (2) WORDS+BNPS,
+2319
+where base noun phrases (noun phrases not containing inner noun phrases) are also provided and M ≥ N .",2 Background: Linearization,[0],[0]
+"The second has become a standard formulation in recent literature.
+",2 Background: Linearization,[0],[0]
+"Given input x, we define the output set Y to be all possible permutations over the N elements of x, where ŷ ∈ Y is the permutation generating the true order.",2 Background: Linearization,[0],[0]
+"We aim to find ŷ, or a permutation close to it.",2 Background: Linearization,[0],[0]
+"We produce a linearization by (approximately) optimizing a learned scoring function f over the set of permutations, y∗ = arg maxy∈Y f(x, y).",2 Background: Linearization,[0],[0]
+Recent approaches to linearization have been based on reconstructing the syntactic structure to produce the word order.,3 Related Work: Syntactic Linearization,[0],[0]
+Let Z represent all projective dependency parse trees over M words.,3 Related Work: Syntactic Linearization,[0],[0]
+"The objective is to find y∗, z∗ = arg maxy∈Y,z∈Z f(x, y, z) where f is now over both the syntactic structure and the linearization.",3 Related Work: Syntactic Linearization,[0],[0]
+"The current state of the art on the Penn Treebank (PTB) (Marcus et al., 1993), without external data, of Liu et al. (2015) uses a transitionbased parser with beam search to construct a sentence and a parse tree.",3 Related Work: Syntactic Linearization,[0],[0]
+"The scoring function is a linear model f(x, y) =",3 Related Work: Syntactic Linearization,[0],[0]
+"θ>Φ(x, y, z) and is trained with an early update structured perceptron to match both a given order and syntactic tree.",3 Related Work: Syntactic Linearization,[0],[0]
+The feature function Φ includes features on the syntactic tree.,3 Related Work: Syntactic Linearization,[0],[0]
+"This work improves upon past work which used best-first search over a similar objective (Zhang and Clark, 2011).
+",3 Related Work: Syntactic Linearization,[0],[0]
+"In follow-up work, Liu and Zhang (2015) argue that syntactic models yield improvements over pure surface n-gram models for the WORDS+BNPS case.",3 Related Work: Syntactic Linearization,[0],[0]
+This result holds particularly on longer sentences and even when the syntactic trees used in training are of low quality.,3 Related Work: Syntactic Linearization,[0],[0]
+"The n-gram decoder of this work utilizes a single beam, discarding the probabilities of internal, non-boundary words in the BNPs when comparing hypotheses.",3 Related Work: Syntactic Linearization,[0],[0]
+"We revisit this comparison between syntactic models and surface-level models, utilizing a surface-level decoder with heuristic future costs and an alternative approach for scoring partial hypotheses for the WORDS+BNPS case.
+",3 Related Work: Syntactic Linearization,[0],[0]
+Additional previous work has also explored ngram models for the word ordering task.,3 Related Work: Syntactic Linearization,[0],[0]
+"The work of de Gispert et al. (2014) demonstrates improve-
+ments over the earlier syntactic model of Zhang et al. (2012) by applying an n-gram language model over the space of word permutations restricted to concatenations of phrases seen in a large corpus.",3 Related Work: Syntactic Linearization,[0],[0]
+"Horvat and Byrne (2014) models the search for the highest probability permutation of words under an n-gram model as a Travelling Salesman Problem; however, direct comparisons to existing works are not provided.",3 Related Work: Syntactic Linearization,[0],[0]
+"In contrast to the recent syntax-based approaches, we use an LM directly for word ordering.",4 LM-Based Linearization,[0],[0]
+"We consider two types of language models: an ngram model and a long short-term memory network (Hochreiter and Schmidhuber, 1997).",4 LM-Based Linearization,[0],[0]
+"For the purpose of this work, we define a common abstraction for both models.",4 LM-Based Linearization,[0],[0]
+"Let h ∈ H be the current state of the model, with h0 as the initial state.",4 LM-Based Linearization,[0],[0]
+"Upon seeing a word wi ∈ V , the LM advances to a new state hi = δ(wi,hi−1).",4 LM-Based Linearization,[0],[0]
+"At any time, the LM can be queried to produce an estimate of the probability of the next word q(wi,hi−1)",4 LM-Based Linearization,[0],[0]
+"≈ p(wi | w1, . .",4 LM-Based Linearization,[0],[0]
+.,4 LM-Based Linearization,[0],[0]
+", wi−1).",4 LM-Based Linearization,[0],[0]
+"For n-gram language models, H, δ, and q can naturally be defined respectively as the state space, transition model, and edge costs of a finite-state machine.
+",4 LM-Based Linearization,[0],[0]
+LSTMs are a type of recurrent neural network (RNN) that are conducive to learning long-distance dependencies through the use of an internal memory cell.,4 LM-Based Linearization,[0],[0]
+"Existing work with LSTMs has generated stateof-the-art results in language modeling (Zaremba et al., 2014), along with a variety of other NLP tasks.
+",4 LM-Based Linearization,[0],[0]
+"In our notation we define H as the hidden states and cell states of a multi-layer LSTM, δ as the LSTM update function, and q as a final affine transformation and softmax given as q(∗,hi−1; θq) = softmax(Wh
+(L) i−1 + b) where h (L) i−1 is the top hid-
+den layer and θq = (W , b) are parameters.",4 LM-Based Linearization,[0],[0]
+"We direct readers to the work of Graves (2013) for a full description of the LSTM update.
+",4 LM-Based Linearization,[0],[0]
+"For both models, we simply define the scoring function as
+f(x, y) =
+N∑
+n=1
+log p(xy(n) | xy(1), . . .",4 LM-Based Linearization,[0],[0]
+", xy(n−1))
+where the phrase probabilities are calculated wordby-word by our language model.
+",4 LM-Based Linearization,[0],[0]
+Algorithm 1 LM beam-search word ordering 1: procedure ORDER(x1 . . .,4 LM-Based Linearization,[0],[0]
+"xN , K, g) 2: B0 ← 〈(〈〉, {1, . . .",4 LM-Based Linearization,[0],[0]
+", N}, 0,h0)〉 3: for m = 0, . . .",4 LM-Based Linearization,[0],[0]
+",M − 1 do 4: for k = 1, . . .",4 LM-Based Linearization,[0],[0]
+", |Bm| do 5: (y,R, s,h)← B(k)m 6: for i ∈ R do 7: (s′,h′)← (s,h) 8: for word w in phrase xi do 9: s′ ← s′ + log q(w,h′) 10: h′ ← δ(w,h′) 11: j ← m+ |xi| 12:",4 LM-Based Linearization,[0],[0]
+"Bj ← Bj + (y + xi,R− i, s′,h′) 13: keep top-K of Bj by f(x, y) + g(R) 14: return BM
+Searching over all permutations Y is intractable, so we instead follow past work on linearization (Liu et al., 2015) and LSTM generation (Sutskever et al., 2014) in adapting beam search for our generation step.",4 LM-Based Linearization,[0],[0]
+"Our work differs from the beam search approach for the WORDS+BNPS case of previous work in that we maintain multiple beams, as in stack decoding for phrase-based machine translation (Koehn, 2010), allowing us to incorporate the probabilities of internal, non-boundary words in the BNPs.",4 LM-Based Linearization,[0],[0]
+"Additionally, for both WORDS and WORDS+BNPS, we also include an estimate of future cost in order to improve search accuracy.
+",4 LM-Based Linearization,[0],[0]
+"Beam search maintains M + 1 beams, B0, . . .",4 LM-Based Linearization,[0],[0]
+", BM , each containing at most the topK partial hypotheses of that length.",4 LM-Based Linearization,[0],[0]
+"A partial hypothesis is a 4-tuple (y,R, s,h), where y is a partial ordering,R is the set of remaining indices to be ordered, s is the score of the partial linearization f(x, y), and h is the current LM state.",4 LM-Based Linearization,[0],[0]
+Each step consists of expanding all next possible phrases and adding the next hypothesis to a later beam.,4 LM-Based Linearization,[0],[0]
+"The full beam search is given in Algorithm 1.
+",4 LM-Based Linearization,[0],[0]
+"As part of the beam search scoring function we also include a future cost g, an estimate of the score contribution of the remaining elements in R. Together, f(x, y) + g(R) gives a noisy estimate of the total score, which is used to determine the K best elements in the beam.",4 LM-Based Linearization,[0],[0]
+"In our experiments we use a very simple unigram future cost estimate, g(R) =∑
+i∈R ∑ w∈xi log p(w).",4 LM-Based Linearization,[0],[0]
+"Setup Experiments are on PTB with sections 2- 21 as training, 22 as validation, and 23 as test1.",5 Experiments,[0],[0]
+"We utilize two UNK types, one for initial uppercase tokens and one for all other low-frequency tokens; end sentence tokens; and start/end tokens, which are treated as words, to mark BNPs for the WORDS+BNPS task.",5 Experiments,[0],[0]
+We also use a special symbol to replace tokens that contain at least one numeric character.,5 Experiments,[0],[0]
+"We otherwise train with punctuation and the original case of each token, resulting in a vocabulary containing around 16K types from around 1M training tokens.
+",5 Experiments,[0],[0]
+"For experiments marked GW we augment the PTB with a subset of the Annotated Gigaword corpus (Napoles et al., 2012).",5 Experiments,[0],[0]
+We follow Liu and Zhang (2015) and train on a sample of 900k Agence France-Presse sentences combined with the full PTB training set.,5 Experiments,[0],[0]
+"The GW models benefit from both additional data and a larger vocabulary of around 25K types, which reduces unknowns in the validation and test sets.
+",5 Experiments,[0],[0]
+"We compare the models of Liu et al. (2015)
+1In practice, the results in Liu et al. (2015) and Liu and Zhang (2015) use section 0 instead of 22 for validation (author correspondence).
+",5 Experiments,[0],[0]
+"(known as ZGEN), a 5-gram LM using Kneser-Ney smoothing (NGRAM)2, and an LSTM.",5 Experiments,[0],[0]
+"We experiment on the WORDS and WORDS+BNPS tasks, and we also experiment with including future costs (g), the Gigaword data (GW), and varying beam size.",5 Experiments,[0],[0]
+"We retrain ZGEN using publicly available code3 to replicate published results.
+",5 Experiments,[0],[0]
+The LSTM model is similar in size and architecture to the medium LSTM setup of Zaremba et al. (2014)4.,5 Experiments,[0],[0]
+"Our implementation uses the Torch5 framework and is publicly available6.
+",5 Experiments,[0],[0]
+"We compare the performance of the models using the BLEU metric (Papineni et al., 2002).",5 Experiments,[0],[0]
+"In generation if there are multiple tokens of identical UNK type, we randomly replace each with possible unused tokens in the original source before calculating BLEU.",5 Experiments,[0],[0]
+"For comparison purposes, we use the BLEU script distributed with the publicly available ZGEN code.
+",5 Experiments,[0],[0]
+Results Our main results are shown in Table 1.,5 Experiments,[0],[0]
+On the WORDS+BNPS task the NGRAM-64 model scores nearly 5 points higher than the syntax-based model ZGEN-64.,5 Experiments,[0],[0]
+"The LSTM-64 then surpasses
+2We use the KenLM Language Model Toolkit (https:// kheafield.com/code/kenlm/).
+",5 Experiments,[0],[0]
+3https://github.com/SUTDNLP/ZGen,5 Experiments,[0],[0]
+"4We hypothesize that additional gains are possible via a
+larger model and model averaging, ceteris paribus.",5 Experiments,[0],[0]
+"5http://torch.ch 6https://github.com/allenschmaltz/word_ ordering
+NGRAM-64 by more than 5 BLEU points.",5 Experiments,[0],[0]
+"Differences on the WORDS task are smaller, but show a similar pattern.",5 Experiments,[0],[0]
+Incorporating Gigaword further increases the result another 2 points.,5 Experiments,[0],[0]
+"Notably, the NGRAM model outperforms the combined result of ZGEN-64+LM+GW+POS from Liu and Zhang (2015), which uses a 4-gram model trained on Gigaword.",5 Experiments,[0],[0]
+We believe this is because the combined ZGEN model incorporates the n-gram scores as discretized indicator features instead of using the probability directly.7,5 Experiments,[0],[0]
+"A beam of 512 yields a further improvement at the cost of search time.
+",5 Experiments,[0],[0]
+"To further explore the impact of search accuracy, Table 2 shows the results of various models with beam widths ranging from 1 (greedy search) to 512, and also with and without future costs g. We see that for the better models there is a steady increase in accuracy even with large beams, indicating that search errors are made even with relatively large beams.
+",5 Experiments,[0],[0]
+"7In work of Liu and Zhang (2015), with the given decoder, N-grams only yielded a small further improvement over the syntactic models when discretized versions of the LM probabilities were incorporated as indicator features in the syntactic models.
+",5 Experiments,[0],[0]
+One proposed advantage of syntax in linearization models is that it can better capture long-distance relationships.,5 Experiments,[0],[0]
+"Figure 1 shows results by sentence length and distortion, which is defined as the absolute difference between a token’s index position in y∗ and ŷ, normalized by M .",5 Experiments,[0],[0]
+"The LSTM model exhibits consistently better performance than existing syntax models across sentence lengths and generates fewer long-range distortions than the ZGEN model.
+",5 Experiments,[0],[0]
+"Finally, Table 3 compares the syntactic fluency of the output.",5 Experiments,[0],[0]
+"As a lightweight test, we parse the output with the Yara Parser (Rasooli and Tetreault, 2015) and compare the unlabeled attachment scores (UAS) to the trees produced by the syntactic system.",5 Experiments,[0],[0]
+We first align the gold head to each output token.,5 Experiments,[0],[0]
+"(In cases where the alignment is not one-to-one, we randomly sample among the possibilities.)",5 Experiments,[0],[0]
+The models with no knowledge of syntax are able to recover a higher proportion of gold arcs.,5 Experiments,[0],[0]
+Strong surface-level language models recover word order more accurately than the models trained with explicit syntactic annotations appearing in a recent series of papers.,6 Conclusion,[0],[0]
+"This has implications for the utility of costly syntactic annotations in generation models, for both high- and low- resource languages and domains.",6 Conclusion,[0],[0]
+"We thank Yue Zhang and Jiangming Liu for assistance in using ZGen, as well as verification of the
+task setup for a valid comparison.",Acknowledgments,[0],[0]
+"Jiangming Liu also assisted in pointing out a discrepancy in the implementation of an earlier version of our NGRAM decoder, the resolution of which improved BLEU performance.",Acknowledgments,[0],[0]
+"Recent work on word ordering has argued that syntactic structure is important, or even required, for effectively recovering the order of a sentence.",abstractText,[0],[0]
+"We find that, in fact, an n-gram language model with a simple heuristic gives strong results on this task.",abstractText,[0],[0]
+"Furthermore, we show that a long short-term memory (LSTM) language model is even more effective at recovering order, with our basic model outperforming a state-of-the-art syntactic model by 11.5 BLEU points.",abstractText,[0],[0]
+"Additional data and larger beams yield further gains, at the expense of training and search time.",abstractText,[0],[0]
+Word Ordering Without Syntax,title,[0],[0]
+"Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics (Long Papers), pages 1000–1009 Melbourne, Australia, July 15 - 20, 2018. c©2018 Association for Computational Linguistics
+1000",text,[0],[0]
+A central ability needed to solve daily tasks is complex reasoning.,1 Introduction,[0],[0]
+"It involves the capacity to comprehend and represent the environment, retain information from past experiences, and solve problems based on the stored information.",1 Introduction,[0],[0]
+"Our ability to solve those problems is supported by
+multiple specialized components, including shortterm memory storage, long-term semantic and procedural memory, and an executive controller that, among others, controls the attention over memories (Baddeley, 1992).
+",1 Introduction,[0],[0]
+Many promising advances for achieving complex reasoning with neural networks have been obtained during the last years.,1 Introduction,[0],[0]
+"Unlike symbolic approaches to complex reasoning, deep neural networks can learn representations from perceptual information.",1 Introduction,[0],[0]
+"Because of that, they do not suffer from the symbol grounding problem (Harnad, 1999), and can generalize better than classical symbolic approaches.",1 Introduction,[0],[0]
+Most of these neural network models make use of an explicit memory storage and an attention mechanism.,1 Introduction,[0],[0]
+"For instance, Memory Networks (MemNN), Dynamic Memory Networks (DMN) or Neural Turing Machines (NTM) (Weston et al., 2014; Kumar et al., 2016; Graves et al., 2014) build explicit memories from the perceptual inputs and access these memories using learned attention mechanisms.",1 Introduction,[0],[0]
+"After that some memories have been attended, using a multi-step procedure, the attended memories are combined and passed through a simple output layer that produces a final answer.",1 Introduction,[0],[0]
+"While this allows some multi-step inferential process, these networks lack a more complex reasoning mechanism, needed for more elaborated tasks such as inferring relations among entities (relational reasoning).",1 Introduction,[0],[0]
+"On the contrary, Relation Networks (RNs), proposed in Santoro et al. (2017), have shown outstanding performance in relational reasoning tasks.",1 Introduction,[0],[0]
+"Nonetheless, a major drawback of RNs is that they consider each of the input objects in pairs, having to process a quadratic number of relations.",1 Introduction,[0],[0]
+That limits the usability of the model on large problems and makes forward and backward computations quite expensive.,1 Introduction,[0],[0]
+"To solve these problems we propose a novel Memory Network
+architecture called the Working Memory Network (W-MemNN).",1 Introduction,[0],[0]
+"Our model augments the original MemNN with a relational reasoning module and a new working memory buffer.
+",1 Introduction,[0],[0]
+"The attention mechanism of the Memory Network allows the filtering of irrelevant inputs, reducing a lot of the computational complexity while keeping the relational reasoning capabilities of the RN.",1 Introduction,[0.9595180185847882],"['Both approaches are limited by the quality of the translation system, which itself varies with the quantity of available training data and the similarity of the language pair involved.']"
+"Three main components compose the W-MemNN: An input module that converts the perceptual inputs into an internal vector representation and save these representations into a short-term storage, an attentional controller that attend to these internal representations and update a working memory buffer, and a reasoning module that operates on the set of objects stored in the working memory buffer in order to produce a final answer.",1 Introduction,[0],[0]
+"This component-based architecture is inspired by the well-known model from cognitive sciences called the multi-component working memory model, proposed in Baddeley and Hitch (1974).",1 Introduction,[0],[0]
+"We studied the proposed model on the text-based QA benchmark bAbI (Weston et al., 2015) which consists of 20 different toy tasks that measure different reasoning skills.",1 Introduction,[0],[0]
+"While models such as EntNet (Henaff et al., 2016) have focused on the pertask training version of the benchmark (where a different model is trained for each task), we decided to focus on the jointly trained version of the
+task, where the model is trained on all tasks simultaneously.",1 Introduction,[0],[0]
+"In the jointly trained bAbI-10k benchmark we achieved state-of-the-art performance, improving the previous state-of-the-art on more than 2%.",1 Introduction,[0],[0]
+"Moreover, a simple ensemble of two of our models can solve all 20 tasks simultaneously.",1 Introduction,[0],[0]
+"Also, we tested our model on the visual QA dataset NLVR.",1 Introduction,[0],[0]
+"In that dataset, we obtained performance at the level of the Module Neural Networks (Andreas et al., 2016).",1 Introduction,[0],[0]
+"Our model, however, achieves these results using the raw input statements, without the extra text processing used in the Module Networks.
+",1 Introduction,[0],[0]
+"Finally, qualitative and quantitative analysis shows that the inclusion of the Relational Reasoning module is crucial to improving the performance of the MemNN on tasks that involve relational reasoning.",1 Introduction,[0.9566060224651018],['Joint training of encoders and parameter sharing are also promising directions to improve and simplify the alignment of sentence embedding spaces.']
+We can achieve this performance by also reducing the computation times of the RN considerably.,1 Introduction,[0],[0]
+"Consequently, we hope that this contribution may allow applying RNs to larger problems.",1 Introduction,[0],[0]
+Our model is based on the Memory Network architecture.,2 Model,[0],[0]
+Unlike MemNN we have included a reasoning module that helps the network to solve more complex tasks.,2 Model,[0],[0]
+"The proposed model consists of three main modules: An input module, an at-
+tentional controller, and a reasoning module.",2 Model,[0],[0]
+The model processes the input information in multiple passes or hops.,2 Model,[0],[0]
+"At each pass the output of the previous hop can condition the current pass, allowing some incremental refinement.",2 Model,[0],[0]
+Input module: The input module converts the perceptual information into an internal feature representation.,2 Model,[0],[0]
+"The input information can be processed in chunks, and each chunk is saved into a short-term storage.",2 Model,[0],[0]
+The definition of what is a chunk of information depends on each task.,2 Model,[0],[0]
+"For instance, for textual question answering, we define each chunk as a sentence.",2 Model,[0],[0]
+Other options might be n-grams or full documents.,2 Model,[0],[0]
+This short-term storage can only be accessed during the hop.,2 Model,[0],[0]
+Attentional Controller:,2 Model,[0],[0]
+The attentional controller decides in which parts of the short-term storage the model should focus.,2 Model,[0],[0]
+The attended memories are kept during all the hops in a working memory buffer.,2 Model,[0],[0]
+"The attentional controller is conditioned by the task at hand, for instance, in question answering the question can condition the attention.",2 Model,[0],[0]
+"Also, it may be conditioned by the output of previous hops, allowing the model to change its focus to new portions of the memory over time.",2 Model,[0],[0]
+Many models compute the attention for each memory using a compatibility function between the memory and the question.,2 Model,[0],[0]
+"Then, the output is calculated as the weighted sum of the memory values, using the attention as weight.",2 Model,[0],[0]
+A simple way to compute the attention for each memory is to use dot-product attention.,2 Model,[0],[0]
+This kind of mechanism is used in the original Memory Network and computes the attention value as the dot product between each memory and the question.,2 Model,[0],[0]
+"Although this kind of attention is simple, it may not be enough for more complex tasks.",2 Model,[0],[0]
+"Also, since there are no learned weights in the attention mechanism, the attention relies entirely on the learned embeddings.",2 Model,[0],[0]
+That is something that we want to avoid in order to separate the learning of the input and attention module.,2 Model,[0],[0]
+One way to allow learning in the dot-product attention is to project the memories and query vectors linearly.,2 Model,[0],[0]
+That is done by multiplying each vector by a learned projection matrix (or equivalently a feed-forward neural network).,2 Model,[0],[0]
+"In this way, we can set apart the attention and input embeddings learning, and also allow more complex patterns of attention.
+",2 Model,[0],[0]
+"Reasoning Module: The memories stored in the working memory buffer are passed to the rea-
+soning module.",2 Model,[0],[0]
+The choice of reasoning mechanism is left open and may depend on the task at hand.,2 Model,[0],[0]
+"In this work, we use a Relation Network as the reasoning module.",2 Model,[0],[0]
+The RN takes the attended memories in pairs to infer relations among the memories.,2 Model,[0],[0]
+"That can be useful, for example, in tasks that include comparisons.",2 Model,[0],[0]
+A detailed description of the full model is shown in Figure 1.,2 Model,[0],[0]
+We proceed to describe an implementation of the model for textual question answering.,2.1 W-MemN2N for Textual Question Answering,[0],[0]
+"In textual question answering the input consists of a set of sentences or facts, a question, and an answer.",2.1 W-MemN2N for Textual Question Answering,[0],[0]
+The goal is to answer the question correctly based on the given facts.,2.1 W-MemN2N for Textual Question Answering,[0],[0]
+"Let (s, q, a) represents an input sample, consisting of a set of sentences s = {xi}Li=1, a query q and an answer a.",2.1 W-MemN2N for Textual Question Answering,[0],[0]
+"Each sentence contains M words, {wi}Mi=1, where each word is represented as a onehot vector of length |V |, being |V | the vocabulary size.",2.1 W-MemN2N for Textual Question Answering,[0],[0]
+"The question contains Q words, represented as in the input sentences.",2.1 W-MemN2N for Textual Question Answering,[0],[0]
+"Each word in each sentence is encoded into a vector representation vi using an embedding matrix W ∈ R|V |×d, where d is the embedding size.",Input Module,[0],[0]
+"Then, the sentence is converted into a memory vector mi using the final output of a gated recurrent neural network (GRU) (Chung et al., 2014):
+mi = GRU([v1, v2, ..., vM ])
+",Input Module,[0],[0]
+"Each memory {mi}Li=1, where mi ∈ Rd, is stored into the short-term memory storage.",Input Module,[0],[0]
+"The question is encoded into a vector u in a similar way, using the output of a gated recurrent network.",Input Module,[0],[0]
+Our attention module is based on the Multi-Head attention mechanism proposed in Vaswani et al. (2017).,Attentional Controller,[0],[0]
+"First, the memories are projected using a projection matrixWm ∈ Rd×d, asm′i =Wmmi.",Attentional Controller,[0],[0]
+"Then, the similarity between the projected memory and the question is computed using the Scaled Dot-Product attention:
+αi = Softmax (uTm′i√
+d
+) (1)
+= exp((uTm′i)/ √ d)∑
+j exp((u Tm′j)/
+√ d) .",Attentional Controller,[0],[0]
+"(2)
+Next, the memories are combined using the attention weights αi, obtaining an output vector h =∑
+j αjmj .",Attentional Controller,[0],[0]
+"In the Multi-Head mechanism, the memories are projected S times using different projection matrices {W sm}Ss=1.",Attentional Controller,[0],[0]
+"For each group of projected memories, an output vector {hi}Si=1 is obtained using the Scaled Dot-Product attention (eq. 2).",Attentional Controller,[0],[0]
+"Finally, all vector outputs are concatenated and projected again using a different matrix:
+",Attentional Controller,[0],[0]
+ok =,Attentional Controller,[0],[0]
+[h1;h2; ...;hS ],Attentional Controller,[0],[0]
+"Wo,
+where ; is the concatenation operator and Wo ∈ RSd×d.",Attentional Controller,[0],[0]
+The ok vector is the final response vector for the hop k.,Attentional Controller,[0],[0]
+This vector is stored in the working memory buffer.,Attentional Controller,[0],[0]
+The attention procedure can be repeated many times (or hops).,Attentional Controller,[0],[0]
+"At each hop, the attention can be conditioned on the previous hop by replacing the question vector u by the output of the previous hop.",Attentional Controller,[0],[0]
+To do that we pass the output through a simple neural network ft.,Attentional Controller,[0],[0]
+"Then, we use the output of the network as the new conditioner:
+onk = ft(ok).",Attentional Controller,[0],[0]
+"(3)
+This network allows some learning in the transition patterns between hops.",Attentional Controller,[0],[0]
+We found Multi-Head attention to be very useful in the joint bAbI task.,Attentional Controller,[0],[0]
+This can be a product of the intrinsic multi-task nature of the bAbI dataset.,Attentional Controller,[0],[0]
+A possibility is that each attention head is being adapted for different groups of related tasks.,Attentional Controller,[0],[0]
+"However, we did not investigate this further.",Attentional Controller,[0],[0]
+"Also, note that while in this section we use the same set of memories at each hop, this is not necessary.",Attentional Controller,[0],[0]
+"For larger sequences each hop can operate in different parts of the input sequence, allowing the processing of the input in various steps.",Attentional Controller,[0],[0]
+The outputs stored in the working memory buffer are passed to the reasoning module.,Reasoning Module,[0],[0]
+The reasoning module used in this work is a Relation Network (RN).,Reasoning Module,[0],[0]
+In the RN the output vectors are concatenated in pairs together with the question vector.,Reasoning Module,[0],[0]
+Each pair is passed through a neural network gθ and all the outputs of the network are added to produce a single vector.,Reasoning Module,[0],[0]
+"Then, the sum is passed to a final neural network fφ:
+r = fφ",Reasoning Module,[0],[0]
+"(∑ i,j gθ([oi; oj ;u]) )",Reasoning Module,[0],[0]
+", (4)
+The output of the Relation Network is then passed through a final weight matrix and a softmax to produce the predicted answer:
+â = Softmax(V r), (5)
+where V ∈ R|A|×dφ , |A| is the number of possible answers and dφ is the dimension of the output of fφ.",Reasoning Module,[0],[0]
+The full network is trained end-to-end using standard cross-entropy between â and the true label a.,Reasoning Module,[0],[0]
+"During the last years, there has been plenty of work on achieving complex reasoning with deep neural networks.",3.1 Memory Augmented Neural Networks,[0],[0]
+An important part of these developments has used some kind of explicit memory and attention mechanisms.,3.1 Memory Augmented Neural Networks,[0],[0]
+"One of the earliest recent work is that of Memory Networks (Weston et al., 2014).",3.1 Memory Augmented Neural Networks,[0],[0]
+Memory Networks work by building an addressable memory from the inputs and then accessing those memories in a series of reading operations.,3.1 Memory Augmented Neural Networks,[0],[0]
+"Another, similar, line of work is the one of Neural Turing Machines.",3.1 Memory Augmented Neural Networks,[0],[0]
+"They were proposed in Graves et al. (2014) and are the basis for recent neural architectures including the Differentiable Neural Computer (DNC) and the Sparse Access Memory (SAM) (Graves et al., 2016; Rae et al., 2016).",3.1 Memory Augmented Neural Networks,[0],[0]
+"The NTM model also uses a content addressable memory, as in the Memory Network, but adds a write operation that allows updating the memory over time.",3.1 Memory Augmented Neural Networks,[0],[0]
+"The management of the memory, however, is different from the one of the MemNN.",3.1 Memory Augmented Neural Networks,[0],[0]
+"While the MemNN model pre-load the memories using all the inputs, the NTM writes and read the memory one input at a time.
+",3.1 Memory Augmented Neural Networks,[0],[0]
+"An additional model that makes use of explicit external memory is the Dynamic Memory Network (DMN) (Kumar et al., 2016; Xiong et al., 2016).",3.1 Memory Augmented Neural Networks,[0],[0]
+The model shares some similarities with the Memory Network model.,3.1 Memory Augmented Neural Networks,[0],[0]
+"However, unlike the MemNN model, it operates in the input sequentially (as in the NTM model).",3.1 Memory Augmented Neural Networks,[0],[0]
+The model defines an Episodic Memory module that makes use of a Gated Recurrent Neural Network (GRU) to store and update an internal state that represents the episodic storage.,3.1 Memory Augmented Neural Networks,[0],[0]
+"Since our model is based on the MemNN architecture, we proceed to describe it in more detail.",3.2 Memory Networks,[0],[0]
+"The
+Memory Network model was introduced in Weston et al. (2014).",3.2 Memory Networks,[0],[0]
+"In that work, the authors proposed a model composed of four components: The input feature map that converts the input into an internal vector representation, the generalization module that updates the memories given the input, the output feature map that produces a new output using the stored memories, and the response module that produces the final answer.",3.2 Memory Networks,[0],[0]
+"The model, as initially proposed, needed some strong supervision that explicitly tells the model which memories to attend.",3.2 Memory Networks,[0],[0]
+"In order to solve that limitation, the End-To-End Memory Network (MemN2N) was proposed in Sukhbaatar et al. (2015).
+",3.2 Memory Networks,[0],[0]
+The model replaced the hard-attention mechanism used in the original MemNN by a softattention mechanism that allowed to train it endto-end without strong supervision.,3.2 Memory Networks,[0],[0]
+"In our model, we use a component-based approach, as in the original MemNN architecture.",3.2 Memory Networks,[0],[0]
+"However, there are some differences: First, our model makes use of two external storages: a short-term storage, and a working memory buffer.",3.2 Memory Networks,[0],[0]
+The first is equivalent to the one updated by the input and generalization module of the MemNN.,3.2 Memory Networks,[0],[0]
+"The working memory buffer, on the other hand, does not have a counterpart in the original model.",3.2 Memory Networks,[0],[0]
+"Second, our model replaces the response module by a reasoning module.",3.2 Memory Networks,[0],[0]
+"Unlike the original MemNN, our reasoning module is intended to make more complex work than the response module, that was only designed to produce a final answer.",3.2 Memory Networks,[0.9507257414588991],"['There are two natural ways to use a translation system: TRANSLATE TRAIN, where the training data is translated into each target language to provide data to train each classifier, and TRANSLATE TEST, where a translation system is used at test time to translate input sentences to the training language.']"
+The ability to infer and learn relations between entities is fundamental to solve many complex reasoning problems.,3.3 Relation Networks,[0],[0]
+"Recently, a number of neural network models have been proposed for this task.",3.3 Relation Networks,[0],[0]
+"These include Interaction Networks, Graph Neural Networks, and Relation Networks (Battaglia et al., 2016; Scarselli et al., 2009; Santoro et al., 2017).",3.3 Relation Networks,[0],[0]
+"In specific, Relation Networks (RNs) have shown excellent results in solving textual and visual question answering tasks requiring relational reasoning.",3.3 Relation Networks,[0],[0]
+"The model is relatively simple: First, all the inputs are grouped in pairs and each pair is passed through a neural network.",3.3 Relation Networks,[0],[0]
+"Then, the outputs of the first network are added, and another neural network processes the final vector.",3.3 Relation Networks,[0],[0]
+The role of the first network is to infer relations among each pair of objects.,3.3 Relation Networks,[0],[0]
+"In Palm et al. (2017) the authors
+propose a recurrent extension to the RN.",3.3 Relation Networks,[0],[0]
+"By allowing multiple steps of relational reasoning, the model can learn to solve more complex tasks.",3.3 Relation Networks,[0],[0]
+The main issue with the RN architecture is that its scale very poorly for larger problems.,3.3 Relation Networks,[0],[0]
+"That is because it operates on O(n2) pairs, where n is the number of input objects (for instance, sentences in the case of textual question answering).",3.3 Relation Networks,[0],[0]
+This becomes quickly prohibitive for tasks involving many input objects.,3.3 Relation Networks,[0],[0]
+The concept of working memory has been extensively developed in cognitive psychology.,3.4 Cognitive Science,[0],[0]
+It consists of a limited capacity system that allows temporary storage and manipulation of information and is crucial to any reasoning task.,3.4 Cognitive Science,[0],[0]
+One of the most influential models of working memory is the multi-component model of working memory proposed by Baddeley and Hitch (1974).,3.4 Cognitive Science,[0],[0]
+"This model is composed both of a supervisory attentional controller (the central executive) and two short-term storage systems: The phonological loop, capable of holding speech-based information, and the visuospatial sketchpad, concerned with visual storage.",3.4 Cognitive Science,[0],[0]
+"The central executive plays various functions, including the capacity to focus attention, to divide attention and to control access to long-term memory.",3.4 Cognitive Science,[0],[0]
+"Later modifications to the model (Baddeley, 2000) include an episodic buffer that is capable of integrating and holding information from different sources.",3.4 Cognitive Science,[0],[0]
+Connections of the working memory model to memory augmented neural networks have been already studied in Graves et al. (2014).,3.4 Cognitive Science,[0],[0]
+We follow this effort and subdivide our model into components that resemble (in a basic way),3.4 Cognitive Science,[0],[0]
+the multi-component model of working memory.,3.4 Cognitive Science,[0],[0]
+"Note, however, that we use the term working memory buffer instead of episodic buffer.",3.4 Cognitive Science,[0],[0]
+That is because the episodic buffer has an integration function that our model does not cover.,3.4 Cognitive Science,[0],[0]
+"However, that can be an interesting source of inspiration for next versions of the model that integrate both visual and textual information for question answering.",3.4 Cognitive Science,[0],[0]
+"To evaluate our model on textual question answering we used the Facebook bAbI-10k dataset (Weston et al., 2015).",4.1 Textual Question Answering,[0],[0]
+"The bAbI dataset is a textual
+QA benchmark composed of 20 different tasks.",4.1 Textual Question Answering,[0],[0]
+"Each task is designed to test a different reasoning skill, such as deduction, induction, and coreference resolution.",4.1 Textual Question Answering,[0],[0]
+"Some of the tasks need relational reasoning, for instance, to compare the size of different entities.",4.1 Textual Question Answering,[0],[0]
+"Each sample is composed of a question, an answer, and a set of facts.",4.1 Textual Question Answering,[0],[0]
+"There are two versions of the dataset, referring to different dataset sizes: bAbI-1k and bAbI-10k.",4.1 Textual Question Answering,[0],[0]
+"In this work, we focus on the bAbI-10k version of the dataset which consists of 10, 000 training samples per task.",4.1 Textual Question Answering,[0],[0]
+A task is considered solved if a model achieves greater than 95% accuracy.,4.1 Textual Question Answering,[0],[0]
+Note that training can be done per-task or joint (by training the model on all tasks at the same time).,4.1 Textual Question Answering,[0],[0]
+"Some models (Liu and Perez, 2017) have focused in the per-task training performance, including the EntNet model (Henaff et al., 2016) that solves all the tasks in the per-task training version.",4.1 Textual Question Answering,[0],[0]
+We choose to focus on the joint training version since we think is more indicative of the generalization properties of the model.,4.1 Textual Question Answering,[0],[0]
+"A detailed analysis of the dataset
+can be found in Lee et al. (2015).",4.1 Textual Question Answering,[0],[0]
+To encode the input facts we used a word embedding that projected each word in a sentence into a real vector of size d. We defined d = 30 and used a GRU with 30 units to process each sentence.,Model Details,[0],[0]
+We used the 30 sentences in the support set that were immediately prior to the question.,Model Details,[0],[0]
+The question was processed using the same configuration but with a different GRU.,Model Details,[0],[0]
+We used 8 heads in the Multi-Head attention mechanism.,Model Details,[0],[0]
+"For the transition networks ft, which operates in the output of each hop, we used a two-layer MLP consisting of 15 and 30 hidden units (so the output preserves the memory dimension).",Model Details,[0],[0]
+"We used H = 4 hops (or equivalently, a working memory buffer of size 4).",Model Details,[0],[0]
+"In the reasoning module, we used a 3- layer MLP consisting of 128 units in each layer and with ReLU non-linearities for gθ.",Model Details,[0],[0]
+We omitted the fφ network since we did not observe improvements when using it.,Model Details,[0],[0]
+"The final layer was a linear layer that produced logits for a softmax over the
+answer vocabulary.",Model Details,[0],[0]
+"We trained our model end-to-end with a crossentropy loss function and using the Adam optimizer (Kingma and Ba, 2014).",Training Details,[0],[0]
+We used a learning rate of ν = 1e−3.,Training Details,[0],[0]
+We trained the model during 400 epochs.,Training Details,[0],[0]
+"For training, we used a batch size of 32.",Training Details,[0],[0]
+As in Sukhbaatar et al. (2015) we did not average the loss over a batch.,Training Details,[0],[0]
+"Also, we clipped gradients with norm larger than 40 (Pascanu et al., 2013).",Training Details,[0],[0]
+For all the dense layers we used `2 regularization with value 1e−3.,Training Details,[0],[0]
+"All weights were initialized using Glorot normal initialization (Glorot and Bengio, 2010).",Training Details,[0],[0]
+10% of the training set was heldout to form a validation set that we used to select the architecture and for hyperparameter tunning.,Training Details,[0],[0]
+"In some cases, we found useful to restart training after the 400 epochs with a smaller learning rate of 1e−5 and anneals every 5 epochs by ν/2 until 20 epochs were reached.
+",Training Details,[0],[0]
+bAbI-10k Results On the jointly trained bAbI-10k dataset our best model (out of 10 runs) achieves an accuracy of 99.58%.,Training Details,[0],[0]
+"That is a 2.38% improvement over the previous state-of-the-art that was obtained by the Sparse Differential Neural Computer (SDNC) (Rae et al., 2016).",Training Details,[0],[0]
+The best model of the 10 runs solves almost all tasks of the bAbI-10k dataset (by a 0.3% margin).,Training Details,[0],[0]
+"However, a simple ensemble of the best two models solves all 20 tasks and achieves an almost perfect accuracy of 99.7%.",Training Details,[0],[0]
+We list the results for each task in Table 1.,Training Details,[0],[0]
+"Other authors have reported high variance in the results, for instance, the authors of the SDNC report a mean accuracy and standard deviation over 15 runs of 93.6± 2.5 (with 15.9± 1.6 passed tasks).",Training Details,[0],[0]
+"In contrast, our model achieves a mean accuracy of 98.3 ± 1.2 (with 18.6 ± 0.4 passed tasks), which is better and more stable than the average results obtained by the SDNC.",Training Details,[0],[0]
+The Relation Network solves 18/20 tasks.,Training Details,[0],[0]
+"We achieve even better performance, and with considerably fewer computations, as is explained in Section 4.3.",Training Details,[0],[0]
+"We think that by including the attention mechanism, the relation reasoning module can focus on learning the relation among relevant objects, instead of learning spurious relations among irrelevant objects.",Training Details,[0],[0]
+"For that, the Multi-Head attention mechanism was very helpful.",Training Details,[0],[0]
+"When compared to the original Memory Network, our model substantially improves the accuracy of tasks 17 (positional reasoning) and 19 (path finding).",The Effect of the Relational Reasoning Module,[0],[0]
+"Both tasks require the analysis of multiple relations (Lee et al., 2015).",The Effect of the Relational Reasoning Module,[0],[0]
+"For instance, the task 19 needs that the model reasons about the relation of different positions of the entities, and in that way find a path to arrive from one to another.",The Effect of the Relational Reasoning Module,[0],[0]
+The accuracy improves in 75.1% for task 19 and in 41.5% for task 17 when compared with the MemN2N model.,The Effect of the Relational Reasoning Module,[0],[0]
+"Since both tasks require reasoning about relations, we hypothesize that the relational reasoning module of the W-MemNN was of great help to improve the performance on both tasks.",The Effect of the Relational Reasoning Module,[0],[0]
+"The Relation Network, on the other hand, fails in the tasks 2 (2 supporting facts) and 3 (3 supporting facts).",The Effect of the Relational Reasoning Module,[0],[0]
+"Both tasks require handling a significant number of facts, especially in task 3.",The Effect of the Relational Reasoning Module,[0],[0]
+"In those cases, the attention mechanism is crucial to filter out irrelevant facts.",The Effect of the Relational Reasoning Module,[0],[0]
+To further study our model we evaluated its performance on a visual question answering dataset.,4.2 Visual Question Answering,[0],[0]
+"For that, we used the recently proposed NLVR dataset (Suhr et al., 2017).",4.2 Visual Question Answering,[0],[0]
+Each sample in the NLVR dataset is composed of an image with three sub-images and a statement.,4.2 Visual Question Answering,[0],[0]
+The task consists in judging if the statement is true or false for that image.,4.2 Visual Question Answering,[0],[0]
+"Evaluating the statement requires reasoning about the sets of objects in the image, comparing objects properties, and reasoning about spatial relations.",4.2 Visual Question Answering,[0],[0]
+The dataset is interesting for us for two reasons.,4.2 Visual Question Answering,[0],[0]
+"First, the statements evaluation requires complex relational reasoning about the objects in the image.",4.2 Visual Question Answering,[0],[0]
+"Second, unlike the bAbI dataset, the statements are written in natural language.",4.2 Visual Question Answering,[0],[0]
+"Because of that, each statement displays a range of syntactic and semantic phenomena that are not present in the bAbI dataset.",4.2 Visual Question Answering,[0],[0]
+Our model can be easily adapted to deal with visual information.,Model details,[0],[0]
+"Following the idea from Santoro et al. (2017), instead of processing each input using a recurrent neural network, we use a Convolutional Neural Network (CNN).",Model details,[0],[0]
+The CNN takes as input each sub-image and convolved them through convolutional layers.,Model details,[0],[0]
+"The output of the CNN consists of k feature maps (where k is the number
+of kernels in the final convolutional layer) of size d× d. Then, each memory is built from the vector composed by the concatenation of the cells in the same position of each feature map.",Model details,[0],[0]
+"Consequently, d × d memories of size k are stored in the shortterm storage.",Model details,[0],[0]
+The statement is processed using a GRU neural network as in the textual reasoning task.,Model details,[0],[0]
+"Then, we can proceed using the same architecture for the reasoning and attention module that the one used in the textual QA model.",Model details,[0],[0]
+"However, for the visual QA task, we used an additive attention mechanism.",Model details,[0],[0]
+The additive attention computes the attention weight using a feed-forward neural network applied to the concatenation of the memory vector and statement vector.,Model details,[0],[0]
+Our model achieves a validation / test accuracy of 65.6%/65.8%.,Results,[0],[0]
+"Notably, we achieved a performance comparable to the results of the Module Neural Networks (Andreas et al., 2016) that make use of standard NLP tools to process the statements into structured representations.",Results,[0],[0]
+"Unlike the Module Neural Networks, we achieved our results using only raw input statements, allowing the model to learn how to process the textual input by itself.",Results,[0],[0]
+Note that given the more complex nature of the language used in the NLVR dataset we needed to use a larger embedding size and GRU hidden layer than in the bAbI dataset (100 and 128 respectively).,Results,[0],[0]
+"That, however, is a nice feature of separating the input from the reasoning and attention component: One way to process more complex language statements is increasing the capacity of
+the input module.
+4.3",Results,[0],[0]
+"From O(n2) to O(n)
+",Results,[0],[0]
+One of the major limitations of RNs is that they need to process each one of the memories in pairs.,Results,[0],[0]
+"To do that, the RN must perform O(n2) forward and backward passes (where n is the number of memories).",Results,[0],[0]
+That becomes quickly prohibitive for a larger number of memories.,Results,[0],[0]
+"In contrast, the dependence of the W-MemNN run times on the number of memories is linear.",Results,[0],[0]
+"Note, however, that computation times in the W-MemNN depend quadratically on the size of the working memory buffer.",Results,[0],[0]
+"Nonetheless, this number is expected to be much smaller than the number of memories.",Results,[0],[0]
+To compare both models we measured the wall-clock time for a forward and backward pass for a single batch of size 32.,Results,[0],[0]
+We performed these experiments on a GPU NVIDIA K80.,Results,[0],[0]
+Figure 2 shows the results.,Results,[0],[0]
+One nice feature from Memory Networks is that they allow some interpretability of the reasoning procedure by looking at the attention weights.,4.4 Memory Visualizations,[0],[0]
+"At each hop, the attention weights show which parts of the memory the model found relevant to produce the output.",4.4 Memory Visualizations,[0],[0]
+"RNs, on the contrary, lack of this feature.",4.4 Memory Visualizations,[0],[0]
+Table 2 shows the attention values for visual and textual question answering.,4.4 Memory Visualizations,[0],[0]
+We have proposed a novel Working Memory Network architecture that introduces improved reasoning abilities to the original MemNN model.,5 Conclusion,[0],[0]
+"We demonstrated that by augmenting the MemNN architecture with a Relation Network, the computational complexity of the RN can be reduced, without loss of performance.",5 Conclusion,[0],[0]
+"That opens the opportunity for using RNs in larger problems, something that may be very useful, given the many tasks requiring a significant amount of memories.",5 Conclusion,[0],[0]
+"Although we have used RN as the reasoning module in this work, other options can be tested.",5 Conclusion,[0],[0]
+It might be interesting to analyze how other reasoning modules can improve different weaknesses of the model.,5 Conclusion,[0],[0]
+"We presented results on the jointly trained bAbI10k dataset, where we achieve a new state-of-theart, with an average error of less than 0.5%.",5 Conclusion,[0],[0]
+"Also, we showed that our model can be easily adapted for visual question answering.",5 Conclusion,[0],[0]
+"Our architecture combines perceptual input processing, short-term memory storage, an attention mechanism, and a reasoning module.",5 Conclusion,[0],[0]
+"While other models have focused on different parts of these components, we think that is important to find ways to combine these different mechanisms if we want to build models capable of complex reasoning.",5 Conclusion,[0],[0]
+Evidence from cognitive sciences seems to show that all these abilities are needed in order to achieve human-level complex reasoning.,5 Conclusion,[0],[0]
+JP was supported by the Scientific and Technological Center of Valparaı́so (CCTVal) under Fondecyt grant BASAL FB0821.,Acknowledgments,[0],[0]
+HA was supported through the research project Fondecyt-Conicyt 1170123.,Acknowledgments,[0],[0]
+The work of HAC was supported by the research project Fondecyt Initiation into Research 11150248.,Acknowledgments,[0],[0]
+"During the last years, there has been a lot of interest in achieving some kind of complex reasoning using deep neural networks.",abstractText,[0],[0]
+"To do that, models like Memory Networks (MemNNs) have combined external memory storages and attention mechanisms.",abstractText,[0],[0]
+"These architectures, however, lack of more complex reasoning mechanisms that could allow, for instance, relational reasoning.",abstractText,[0],[0]
+"Relation Networks (RNs), on the other hand, have shown outstanding results in relational reasoning tasks.",abstractText,[0],[0]
+"Unfortunately, their computational cost grows quadratically with the number of memories, something prohibitive for larger problems.",abstractText,[0],[0]
+"To solve these issues, we introduce the Working Memory Network, a MemNN architecture with a novel working memory storage and reasoning module.",abstractText,[0],[0]
+Our model retains the relational reasoning abilities of the RN while reducing its computational complexity from quadratic to linear.,abstractText,[0],[0]
+We tested our model on the text QA dataset bAbI and the visual QA dataset NLVR.,abstractText,[0],[0]
+"In the jointly trained bAbI-10k, we set a new state-of-the-art, achieving a mean error of less than 0.5%.",abstractText,[0],[0]
+"Moreover, a simple ensemble of two of our models solves all 20 tasks in the joint version of the benchmark.",abstractText,[0],[0]
+Working Memory Networks: Augmenting Memory Networks with a Relational Reasoning Module,title,[0],[0]
+"Over the last few years, we have witnessed significant progress in developing agents that can interact with increasingly complex environments (Mnih et al., 2015; Silver et al., 2016; Levine et al., 2016).",1. Introduction,[0],[0]
+"Critical to this progress are not only the core learning algorithms (Sutton et al., 1999; Mnih et al., 2015; Schulman et al., 2015a) and the associated techniques for learning at scale (Mnih et al., 2016), but simulated environments that feature complex dynamics and help benchmark our progress (e.g., Bellemare et al. (2013); Mikolov et al. (2015); Todorov et al.
+1Stanford University, Stanford, USA 2OpenAI, San Francisco, USA.",1. Introduction,[0],[0]
+"Correspondence to: Tianlin (Tim) Shi <tianlin@cs.stanford.edu>.
+",1. Introduction,[0],[0]
+"Proceedings of the 34 th International Conference on Machine Learning, Sydney, Australia, PMLR 70, 2017.",1. Introduction,[0],[0]
+"Copyright 2017 by the author(s).
+(2012); Johansson et al. (2016)).",1. Introduction,[0],[0]
+"However, simulated environments are intrinsically limited: agents in such environments never experience the sheer breadth of experience of the real world, and thus they miss out on important semantic knowledge crucial for developing intelligence.",1. Introduction,[0],[0]
+"For control tasks, it is possible to work with realistic environments in robotics, but the complexity of physical hardware constraints efficient data gathering and rapid iteration.",1. Introduction,[0],[0]
+"Even for narrow domains such as grasping (Levine et al., 2016; Pinto & Gupta, 2016), the cost and effort of large-scale data collection is daunting.
+",1. Introduction,[0],[0]
+"To address this, we introduce World of Bits (WoB),1 a learning platform that uses the web as a rich source of opendomain environments.",1. Introduction,[0],[0]
+"In WoB, an agent receives its observations in the form of the Document Object Model (DOM) of a webpage and its rendered pixels, and accomplishes web tasks by sending mouse and keyboard actions.",1. Introduction,[0],[0]
+"The use of web as a learning platform offers three benefits:
+Open-domain.",1. Introduction,[0],[0]
+"By allowing agents to interact with the web, we open up the world’s supply of websites as a rich source of learning environments and application domains.",1. Introduction,[0],[0]
+"Since agents directly work with the UI, we can use existing web infrastructure without designing specialized APIs.
+",1. Introduction,[0],[0]
+Open-source.,1. Introduction,[0],[0]
+"Unlike robotics, WoB is digital, which enables fast iteration and massive scaling.",1. Introduction,[0],[0]
+"Webpages are open-source and consist entirely of HTML/CSS/Javascript, which is easy to inspect and change dynamically.
+",1. Introduction,[0],[0]
+Easy to collect data.,1. Introduction,[0],[0]
+"Because agents use same interface as humans do, it is possible to crowdsource human demonstrations of a web task from anyone with an access to a web browser, keyboard and mouse at a low cost.",1. Introduction,[0],[0]
+"This unlocks
+1in contrast to the world of atoms https://goo.gl/JdLQGT
+the potential for large-scale data collection.
+",1. Introduction,[0],[0]
+"While WoB specifies a platform, the main conceptual challenge is to define meaningful web tasks in a scalable way.",1. Introduction,[0],[0]
+"In Section 2.2, we start by constructing the Mini World of Bits (MiniWoB), 100 web tasks (see Figure 7 for examples) of varying difficulty, in which the reward function is manually constructed.
+",1. Introduction,[0],[0]
+"Next, in Section 2.3, we describe FormWoB, which consists of four web tasks based on real flight booking websites.",1. Introduction,[0],[0]
+"The main difficulty here is that websites are constantly changing, and yet we would like to package them into reproducible research environments for our agents.",1. Introduction,[0],[0]
+"To this end, we use a man-in-the-middle proxy to capture and replay live HTTP traffic, building up an approximation of the live website.
+",1. Introduction,[0],[0]
+"Finally, inspired by large datasets such as ImageNet in computer vision (Deng et al., 2009) and SQuAD in NLP (Rajpurkar et al., 2016), we would like to scale up to a diverse set of web tasks without manual effort on each web task.",1. Introduction,[0],[0]
+"To tackle this, we develop a methodology based on crowdsourcing that effectively casts web tasks as question answering (Section 2.4).",1. Introduction,[0],[0]
+"First, we ask crowdworkers to write queries that can be answered by interacting with a given website.",1. Introduction,[0],[0]
+"Each query is defined by a query template and slot values (e.g., “New York”) that fill the template slots (See Figure 2 for examples).",1. Introduction,[0],[0]
+Positive reward is given if an agent clicks on the correct answer.,1. Introduction,[0],[0]
+"We create a dataset, QAWoB, which has 11,650 queries (from 521 templates).",1. Introduction,[0],[0]
+"We collected initial demonstrations for four of the templates, with one demonstration per query.",1. Introduction,[0],[0]
+"Collecting demonstration for the full dataset is on-going work.
+",1. Introduction,[0],[0]
+"To benchmark a standard approach, we evaluate the performance of convolutional neural networks that take as input the image and text from the DOM and outputs keyboard
+and mouse actions.",1. Introduction,[0],[0]
+"We train these models using both supervised learning and reinforcement learning, and show that in some cases we can generalize across different queries of the same template.",1. Introduction,[0],[0]
+"However, our overall error rates remain relatively high, suggesting that the proposed benchmark leaves a lot of room for improvement.",1. Introduction,[0],[0]
+"In this section, we describe a progression of three techniques for creating web tasks, MiniWoB (Section 2.2), FormWoB (Section 2.3), and QAWoB (Section 2.4).",2. Constructing Web Tasks,[0],[0]
+"To interact with a web browser, we developed our platform on top of OpenAI Universe (http://universe.openai.com/), which allows one to package nearly arbitrary programs into Gym (Brockman et al., 2016) environments suitable for reinforcement learning.",2.1. Web as an Environment,[0],[0]
+"Specifically, we package a Chrome browser inside a Docker container, which exposes a Gym interface for the agent to interact with.",2.1. Web as an Environment,[0],[0]
+"At each time step t, the agent receives an observation, which consists of the raw screen pixels I ∈ RW×H×3 (e.g. of resolution 1024×768×3), the text DOMD, and a scalar reward signal r.",2.1. Web as an Environment,[0],[0]
+"Each element of D is localized in the image by a 4-tuple (x, y, w, h), denoting its bounding box.",2.1. Web as an Environment,[0],[0]
+"The agent communicates back a list of actions, which can be 1) a KeyEvent (e.g. hold down the k button), or 2) a PointerEvent (e.g. move the mouse to location (140, 56) while holding down the left mouse button).",2.1. Web as an Environment,[0],[0]
+Then the agent obtains reward rt which is defined by the specific web task.,2.1. Web as an Environment,[0],[0]
+"Inspired by the ATARI Learning Environment (Bellemare et al., 2013), we designed a benchmark of 100 reinforce-
+ment learning environments called Mini World of Bits (MiniWoB) that share many of the characteristics of live web tasks (interacting with buttons, text fields, sliders, date pickers, etc.) and allows us to study these challenges in a controlled context.",2.2. Minimalistic Web Tasks: MiniWoB,[0],[0]
+"Since the web offers powerful visual design tools, the average MiniWoB environment is only 112 lines of HTML/CSS/JavaScript.",2.2. Minimalistic Web Tasks: MiniWoB,[0],[0]
+"Each MiniWoB environment is an HTML page that is 210 pixels high, 160 pixels wide (i.e. identical to the ATARI environment dimensions) — the top 50 pixels (in yellow background) contain the natural language task description (randomly generated) and the 160 × 160 area below is for interactions.",2.2. Minimalistic Web Tasks: MiniWoB,[0],[0]
+The rewards range from −1.0 (failure) to 1.0 (success) and are weighted linearly with time to encourage fast completion time.,2.2. Minimalistic Web Tasks: MiniWoB,[0],[0]
+See Figure 7 for examples.,2.2. Minimalistic Web Tasks: MiniWoB,[0],[0]
+"While it is possible to create web tasks from scratch (e.g. MiniWoB), the Internet already offers a massive repository of websites.",2.3. Live Web Tasks: FormWoB,[0],[0]
+"In this section we describe an approach that allows us to convert these websites into web tasks.
+",2.3. Live Web Tasks: FormWoB,[0],[0]
+"Since websites change over time and since we do not wish to spam websites with requests while the agent is training, we need to create an offline approximation that the agent can interact with.",2.3. Live Web Tasks: FormWoB,[0],[0]
+"To do this, when we collect human demonstrations, we use a proxy to record all HTTP requests and responses between the agent and the website.",2.3. Live Web Tasks: FormWoB,[0],[0]
+"To train and evaluate agents on a web task, we use the proxy to handle all requests with the recorded responses.
+",2.3. Live Web Tasks: FormWoB,[0],[0]
+We also use requests to define reward functions.,2.3. Live Web Tasks: FormWoB,[0],[0]
+"Formfilling tasks involve making a final request to the website with a set of key-value pairs (e.g., {from: DEN, to: JFK}).",2.3. Live Web Tasks: FormWoB,[0],[0]
+"We define the reward function as the fraction of key-value pairs that match those in human demonstrations.2
+When an agent performs an action that generates a request never seen during human demonstrations (i.e., a cache miss), we immediately end the episode with zero reward.",2.3. Live Web Tasks: FormWoB,[0],[0]
+"This provides a lower bound on the true reward if the agent
+2Ideally, we would require exact match, but this resulted in too sparse of a reward signal to train and evaluate with.
+were to interact with the real website (assuming all rewards are non-negative), since all action sequences that result in a cache miss receive the minimum possible reward.
+FormWoB benchmark.",2.3. Live Web Tasks: FormWoB,[0],[0]
+"We applied this approach to four flight booking websites (United, Alaska, AA, and JetBlue).",2.3. Live Web Tasks: FormWoB,[0],[0]
+"On each website, an agent must fill out a form and click on the submit button.",2.3. Live Web Tasks: FormWoB,[0],[0]
+"The form filling process requires a diverse set of interaction skills, such as typing cities in a text box using autocomplete, using a date picker, etc.",2.3. Live Web Tasks: FormWoB,[0],[0]
+"For each website, there is a query template parameterized by the following fields: an origin airport, a destination airport, a departure date, and a return date.",2.3. Live Web Tasks: FormWoB,[0],[0]
+"Airport names are sampled from 11 major US cities, and dates are sampled from March 2017.",2.3. Live Web Tasks: FormWoB,[0],[0]
+"We created 100 different instantiations for each query template, and collected on average 1 episode of human demonstration for every query.",2.3. Live Web Tasks: FormWoB,[0],[0]
+"To take full advantage of the scale and diversity of the web, we now present a more scalable approach to generating web tasks that does not involve specifying the reward functions manually for each web task.",2.4. Crowdsourcing Web Tasks at Scale: QAWoB,[0],[0]
+"The key is cast web tasks as question answering, and solicit questions from crowd-
+workers.",2.4. Crowdsourcing Web Tasks at Scale: QAWoB,[0],[0]
+"The approach has two stages:
+Stage 1.",2.4. Crowdsourcing Web Tasks at Scale: QAWoB,[0],[0]
+"A worker provides a website (e.g., yelp.com) and a query template (e.g., “What is the cheapest restaurant that serves (type of food) near (geographic location)?”).",2.4. Crowdsourcing Web Tasks at Scale: QAWoB,[0],[0]
+"We also ask workers to generate multiple slot values for each template (e.g. “brunch” / “San Francisco”, “hamburger” / “JFK international airport”, etc.).
+Stage 2.",2.4. Crowdsourcing Web Tasks at Scale: QAWoB,[0],[0]
+"Next, a worker takes a query from stage 1 and uses our demonstration interface to answer it (see Figure 4).3",2.4. Crowdsourcing Web Tasks at Scale: QAWoB,[0],[0]
+"The interface has a “Select” button, which allows the worker to mark the DOM element of the webpage corresponding to the answer.",2.4. Crowdsourcing Web Tasks at Scale: QAWoB,[0],[0]
+"We define the (very sparse!) reward for the task to be 1 only if an agent clicks on the annotated DOM element.
+",2.4. Crowdsourcing Web Tasks at Scale: QAWoB,[0],[0]
+We encouraged workers to be creative when they pick the website and the queries so that we can capture a wide distribution of online activities.,2.4. Crowdsourcing Web Tasks at Scale: QAWoB,[0],[0]
+"However, we do impose some constraints.",2.4. Crowdsourcing Web Tasks at Scale: QAWoB,[0],[0]
+"For instance, in the instruction we discourge queries that require too much reading comprehension (e.g. “How many royal families are mentioned in Game of Thrones?”",2.4. Crowdsourcing Web Tasks at Scale: QAWoB,[0],[0]
+on wikipedia.org).,2.4. Crowdsourcing Web Tasks at Scale: QAWoB,[0],[0]
+"We also require that the website be mobile-friendly, because the learning environment operates in mobile view.
+QAWoB benchmark.",2.4. Crowdsourcing Web Tasks at Scale: QAWoB,[0],[0]
+Our crowdsourced QAWoB dataset has 521 query templates.,2.4. Crowdsourcing Web Tasks at Scale: QAWoB,[0],[0]
+"The majority of the templates have 2 slots, while the average is 2.54.",2.4. Crowdsourcing Web Tasks at Scale: QAWoB,[0],[0]
+"We gather 10 - 100 slot values per template, resulting in 13,550 total queries.",2.4. Crowdsourcing Web Tasks at Scale: QAWoB,[0],[0]
+"11,650 of the queries have corresponding answers.",2.4. Crowdsourcing Web Tasks at Scale: QAWoB,[0],[0]
+"In most cases, one needs to navigate through multiple screens or menus, and perform a search before locating the answer.",2.4. Crowdsourcing Web Tasks at Scale: QAWoB,[0],[0]
+"This makes the problem particularly hard for pure RL approaches, as random exploration has little chance to stumble upon the goal state.
+",2.4. Crowdsourcing Web Tasks at Scale: QAWoB,[0],[0]
+We label 100 of the templates with the sequence of GUI operations required to find the answer.,2.4. Crowdsourcing Web Tasks at Scale: QAWoB,[0],[0]
+"Note that there are multiple ways to accomplish the task and some of the operations can be reordered, so we only provide one of the shortest paths.",2.4. Crowdsourcing Web Tasks at Scale: QAWoB,[0.9506055391687807],"['As opposed to Lalign, Lrank does not encourage the embeddings of sentence pairs to be close enough so that the shared classifier can understand that these sentences have the same meaning.']"
+"There are 7 GUI operations: search, text
+3 The interface runs VNC connected to a WoB docker container running a browser.
+",2.4. Crowdsourcing Web Tasks at Scale: QAWoB,[0],[0]
+"(any textbox that is not a search box), date, dropdown, scroll, click (any click that is not part of the other operations), and other (less common GUI widgets like sliders).",2.4. Crowdsourcing Web Tasks at Scale: QAWoB,[0],[0]
+"We also organize the templates into 7 categories: dining, entertainment, housing, transportation, shopping, calculator, and other.",2.4. Crowdsourcing Web Tasks at Scale: QAWoB,[0],[0]
+Figure 5 shows the distribution of categories and GUI operations.,2.4. Crowdsourcing Web Tasks at Scale: QAWoB,[0],[0]
+To build an agent for the WoB setting requires modeling a novel state space (images and DOM) and action space (keyboard and mouse).,3. Training Web Agents,[0],[0]
+State space.,3.1. Model,[0],[0]
+"The state consists of a color image I , the DOM D, and the query q.",3.1. Model,[0],[0]
+The color image I has size W × H × 3.,3.1. Model,[0],[0]
+"The DOM is a list of text elements, with bounding boxes (x, y, w, h) to represent their spatial relations.",3.1. Model,[0],[0]
+"For MiniWoB, the query is natural language.",3.1. Model,[0],[0]
+"For FormWoB and QAWoB, we assume a semantic frame is extracted for q, in the format of (template, slots).
+",3.1. Model,[0],[0]
+Action space.,3.1. Model,[0],[0]
+"We model the cursor position m = (mx,my) ∈",3.1. Model,[0],[0]
+"[0,W )",3.1. Model,[0],[0]
+×,3.1. Model,[0],[0]
+"[0, H) with a multinomial distribution over the positions in a regular grid over the image.4",3.1. Model,[0],[0]
+"We model the mouse actions with a multinomial distribution over four possibilities: no-op, click, drag, scroll-up, scroll-down.",3.1. Model,[0],[0]
+"Finally, the key actions also follow the multinomial distribution.",3.1. Model,[0],[0]
+"We found that giving the agent unrestricted access to the keyboard is impractical, as the agent may press key combinations such
+4We also experimented with a Gaussian distribution but found it inadequate due to its unimodal shape.
+as ‘CTRL+w’, which closes the window.",3.1. Model,[0],[0]
+"Therefore, in addition to keys we create atomic actions out of common and safe key combinations, such as ‘CTRL+c’ (copy), ‘CTRL+v’ (paste), and ‘CTRL+a’ (select all).
+",3.1. Model,[0],[0]
+Architecture.,3.1. Model,[0],[0]
+Our model (see Figure 6) first processes the image using a Convolutional Neural Network (CNN).,3.1. Model,[0],[0]
+"For DOM, we compute a text feature map based on the matching between query and DOM.",3.1. Model,[0],[0]
+Then the two maps are concatenated into a join representation.,3.1. Model,[0],[0]
+On top of this we develop two variants: first we flatten the features and feed them directly through a fully-connected layer (GlobalCNN).,3.1. Model,[0],[0]
+"Since we had the intuition that local features alone should suffice to characterize the action, we also examine a LocalCNN architecture to capture the intuition that agent should attend to where cursor is.",3.1. Model,[0.9544817464606822],"['We translate the premises and hypotheses separately, to ensure that no context is added to the hypothesis that was not there originally, and simply copy the labels from the English source text.']"
+"So the mouse distribution is used as soft attention (Bahdanau et al., 2014) to average the CNN features into a global representation to predict mouse buttons and keyboard events.",3.1. Model,[0],[0]
+"We train models on web tasks by sequencing behavior cloning and reinforcement learning.
+",3.2. Optimization,[0],[0]
+Behavior cloning.,3.2. Optimization,[0],[0]
+"Since our web tasks can have very long time horizons and sparse rewards, a naive application of reinforcement learning will likely fail.",3.2. Optimization,[0],[0]
+"Therefore, we pretrain our networks by optimizing a supervised learning objective (Pomerleau, 1989) on demonstrations (which were used to define the reward in the first place).",3.2. Optimization,[0],[0]
+"Since a typical recording might have thousands of frames, we filter out frames where there was no action to obtain a dataset of state-action tuples.
+",3.2. Optimization,[0],[0]
+Reinforcement learning.,3.2. Optimization,[0],[0]
+"Policies trained with supervised learning suffer from compounding errors, so we fine tune the policies by optimizing the expected reward using a policy gradient method (Sutton et al., 1999).",3.2. Optimization,[0],[0]
+"In particular, we use the Asynchronous Advantageous Actor-Critic (A3C) (Mnih et al., 2016) and estimate the advantage using the Generalized Advantage Estimation (Schulman et al., 2015b) with the standard settings γ = 0.9, λ = 0.95.",3.2. Optimization,[0],[0]
+"Our goal in this section is to establish baselines that current techniques provide on web environments, and highlight the challenges for future work in this area.",4. Experiments,[0],[0]
+Demonstration data.,4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+We collected 10 minutes of human demonstrations on each of the 100 MiniWoB environments (about 17 hours total).,4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+"Unlike the FormWoB and QAWoB settings, the MiniWoB dataset contains interactions that re-
+quire dragging and hovering (e.g. to trigger a menu expansion).",4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+"Therefore, we process the demonstrations at regular 83 millisecond intervals (12 frames per second) to extract approximately 720,000 state-action pairs.",4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+"With gridpoints spaced 8 pixels across the 160 pixel area, we obtain a 20 × 20 grid and 3 possible actions (move, drag, click), leading to a total of 20× 20× 3 = 1200 possible actions.
+",4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+Model.,4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+"In these experiments we use a 6-layer feedforward network that takes the 210× 160× 3 image, and applies 5 convolutional layers with 5 × 5 filters of stride 2 and sizes [16, 24, 32, 48, 32].",4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+We then average pool the representation and pass it through one fully-connected layer of 384 units and another to compute the logits for the mouse and key actions.,4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+"Surprisingly, we found that feeding in the previously taken actions hurts performance because the agent learns to use continuous paths similar to humans and develops a tendency to meander, which negatively impacts exploration in many environments.
+",4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+Evaluation.,4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+"For the purposes of evaluation, a robust statistic to use is the success rate (SR) for each environment.",4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+"The MiniWoB tasks are designed so that rewards in the interval (0, 1] indicate partial credit towards the task, while negative rewards indicate a failure.",4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+"Given a list of rewards R, we thus compute the success rate as ∑ 1[R >
+0]/ ∑
+1[R 6= 0].",4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+"We can immediately evaluate two methods on all environments: 1) the random baseline, and 2) humans (refer to Figure 7).
+",4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+Supervised Learning.,4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+"We obtain a behavior cloning policy by training on the demonstrations using Adam (Kingma & Ba, 2014) with a learning rate of 10−3 and batch size of 32.",4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+We achieved better results by weighing click and keyboard event losses (which are rare compared to move events) 10 times higher in the objective.,4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+"We then run the fixed policy on each environment for 100,000 steps (about 2 hours at 12FPS) and evaluate the success rate (see Figure 7, yellow bars).
+",4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+Reinforcement Learning.,4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+We run 12 environments in parallel at 12 FPS for up to 1 million steps and perform an update every 200 time steps (i.e. training batches have size 12 × 200 = 2400 steps) with Adam and a learning rate of 10−4.,4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+"To mitigate the effects of our asynchronous setting, we train 3 times and use the best one.",4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+"The results are shown in Figure 7 (green bars).
+",4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+Interpretation.,4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+We summarize the quantitative results across all environments in Table 1.,4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+We refer to an environment as “Solved” if its success rate is at least half (50%) that of a human.,4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+"From these numbers, it is evident that supervised learning slightly improves the policy (20.8% to 24.8%), but a much larger improvement can be obtained by fine-tuning the policy with reinforcement learning (24.8% to 34.8%).",4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+"We also see that most of our performance comes
+from environments that require mouse interaction (Click / Drag).",4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+We also see a sharp drop in tasks that require keyboard input (7.8% SR).,4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+"Finally, “Compound” environments are our most difficult environments (e.g. a synthetic email, flight booking, search engine, calendar, text editor, etc.); They combine multiple interactions over longer sequences (e.g. search for an email and reply with some text), and clearly pose a significant challenge (4.3% SR).",4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+"Note that Random policy can do well in some environments because the action frequency is high (12 FPS), and our rewards for correct actions are scaled linearly based on time.",4.1. Results on Synthetic Web Tasks (MiniWoB),[0],[0]
+Environment setup.,4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+"Next, we evaluate our model on the four FormWoB tasks.",4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+The resolution of these environments is 375 × 667 × 3.,4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+"The FormWoB dataset contains four flight booking website: United (united.com), Alaska (alaskaair.com), JetBlue (jetblue.com) and American (aa.com).",4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+"We run the environments at 1 frame per second to accommodate the load time of webpages.
+",4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+Demonstration Data.,4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+"For each website, we collected 100 (query, demonstration) pairs using AMT.",4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+"Unlike MiniWoB, most of the interactions here involve clicking and typing.",4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+"After preprocessing, each episode consists of approxi-
+mately 30–50 keyboard or mouse events.",4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+"Similar to MiniWoB, we divide the screen into 20×20 grid points, and use the key encoding scheme introduced in Section 3.1.
+",4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+Model.,4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+"Our model is the same 6-layer architecture in MiniWoB, except we remove the dragging actions.",4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+"We also evaluate the LocalCNN model that directly outputs a 20× 20× 32 dense feature map, which is used to drive attention and mouse clicks.",4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+"We use a simple heuristic to combine the DOM together with the query to compute a queryspecific feature map, which indicates salient locations in the input.",4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+"In particular, we intersect the words in the query and the DOM using a similarity score based on edit distance, and “put” that score into the middle of the bounding box that contains that DOM element.",4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+"For instance, if a query contains the word “From”, then any element in the webpage that contains the word “From” would have higher activation in the feature map.
+",4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+We found that treating the keyboard simply as another categorical distribution was very challenging because the model would have to learn to type out entire phrases such as “San Francisco” one character at a time.,4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+"Therefore, we augment the state with a pointer into each slot in the query and define actions for typing the next character of some slot.",4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+"As an example, consider the following query with four slots:
+Departure City
+Destination City
+Departure Month
+S a n F r a",4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+n c,4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+"i s c ok =
+Departure Day
+N e w Y o r k
+3
+15
+In this example, we would have a multinomial distribution over the 4 slots.",4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+"If the agent outputs the action sequence K1 K1 K1 K2 K2, it will first type ‘S’, ‘a’, ‘n’ (the prefix of “San Francisco”), reset the pointer for the first slot, and then type ‘N’, ‘e’.
+",4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+Supervised Learning.,4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+"We use similar supervised learning
+setting as in MiniWoB, except the learning rate is 10−4 and the keyboard event losses are weighted 20 times higher.
+",4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+Reinforcement Learning.,4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+We fine-tune the models using RL on each of the environments separately.,4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+"For every episode, we sample randomly from the set of queries and run the model at 8 FPS.
+Evaluation.",4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+We are interested in measuring the model’s generalization ability across queries.,4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+"We split the tasks on each website into 80% for training, and 20% for testing.",4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+"First, we report the test likelihood as a metric to show how well the agent models human trajectories.",4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+We then evaluate the rewards the agent is able to achieve on both training and test sets.,4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+"We report the average rewards over the final three checkpoints.
+",4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+Results on FormWoB. Figure 8 shows the learning curves on the United website.,4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+The performance of random agents is identically zero on these tasks.,4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+Our model shows some learning and generalization.,4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+"In particular, for flight booking, the model achieves 20%–30% of human level performance on training queries, and 16% on test queries.",4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+"Figure 9 summarizes the model’s performance on 8 web tasks in our experiment.
+",4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+We visualize the model’s attention output at some key frames in Figure 10.,4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+"As we can see, the model generalizes by correctly selecting the city in dropdown and picking the correct date, aided by text matching.",4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+"The CNN identifies
+the “Submit” button even after some random scrolling has occurred.",4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+"The most common failure mode is if the agent falls off the demonstrators’ state distributions (e.g. triggering an error message), it is difficult to take actions to recover.",4.2. Results on Live Web Tasks (FormWoB),[0],[0]
+"Using same setup as in FormWoB, we perform experiments on the following websites from the QAWoB dataset: Xe (xe.com), Allrecipes (allrecipes.com), Scrabblewordfinder (scrabblewordfinder.org), and Mapquest (mapquest.org).",4.3. Results on Crowdsourced Web Tasks (QAWoB),[0],[0]
+"The results of SL and SL+RL of both LocalCNN and GlobalCNN models on QAWoB are reported in Figure 9.
+",4.3. Results on Crowdsourced Web Tasks (QAWoB),[0],[0]
+"We find the performance of LocalCNN to be inadequate on these web tasks, while GlobalCNN performs much better.",4.3. Results on Crowdsourced Web Tasks (QAWoB),[0],[0]
+This is consistent with GlobalCNN achieving a lower training loss (∼ 0.08) compared to LocalCNN (∼ 0.2).,4.3. Results on Crowdsourced Web Tasks (QAWoB),[0],[0]
+It is likely that the inductive bias introduced in LocalCNN makes it incapable of fitting noisy human demonstrations.,4.3. Results on Crowdsourced Web Tasks (QAWoB),[0],[0]
+Figure 11(c) shows some example failure cases.,4.3. Results on Crowdsourced Web Tasks (QAWoB),[0],[0]
+Reinforcement learning environments.,5. Related Work,[0],[0]
+"Our work enjoys the company of many recent projects that aim to provide challenging environments for reinforcement learning agents, including the ATARI Learning Environment (Belle-
+.
+mare et al., 2013), MuJoCo",5. Related Work,[0],[0]
+"(Todorov et al., 2012), CommAI (Baroni et al., 2017), Project Malmo (Johansson et al., 2016), SNES (Bhonker et al., 2016), TorchCraft (Synnaeve et al., 2016), DeepMind Lab (Beattie et al., 2016) and ViZDoom (Kempka et al., 2016).",5. Related Work,[0],[0]
+"World of Bits differs primarily by its focus on the open-domain realism of the web.
+",5. Related Work,[0],[0]
+Performing tasks on the web.,5. Related Work,[0],[0]
+The web is a rich environment with a long tail of different phenomena and the emergence of high-level semantics.,5. Related Work,[0],[0]
+"The information retrieval and natural language processing communities have long used the web as a source of textual data (Hearst, 1992; Brill et al., 2002; Etzioni et al., 2005).",5. Related Work,[0],[0]
+"Nogueira & Cho (2016) introduced WebNav, a software tool that transforms a website into a synthetic goal-driven web navigation task.",5. Related Work,[0],[0]
+"Some work has also focused on mapping natural language queries to programs that operate on the DOM structure of web pages (Pasupat & Liang, 2014).",5. Related Work,[0],[0]
+"These previous works focus on higher-level actions that abstract away the visual layout and the keyboard and mouse movements, which limits their scope, especially given the increasing prevalence of highly interactive websites.",5. Related Work,[0],[0]
+"To our knowledge, our work is
+the first to tackle the problem of interacting with websites using both vision and raw mouse and keyboard actions on open-domain tasks at scale.
+",5. Related Work,[0],[0]
+Natural language to actions.,5. Related Work,[0],[0]
+There is a large body of work on connecting language to actions.,5. Related Work,[0],[0]
+"Closely related to our work is Branavan et al. (2009), who used reinforcement learning to map instructions (e.g. a Windows troubleshooting article) to actions over a user interface in a virtual machine; however, they used preprocessed actions.",5. Related Work,[0],[0]
+"Other work operates in the context of navigation (Vogel & Jurafsky, 2010; Tellex et al., 2011; Artzi & Zettlemoyer, 2013), and building tasks (Long et al., 2016; Wang et al., 2016).",5. Related Work,[0],[0]
+The focus of these efforts is on modeling natural language semantics.,5. Related Work,[0],[0]
+Our work provides a bridge between this semantic-oriented work and the more control-oriented tasks found in most reinforcement learning environments.,5. Related Work,[0],[0]
+"In this paper, we introduced World of Bits (WoB), a platform that allows agents to complete web tasks with keyboard and mouse actions.",6. Conclusion,[0],[0]
+"Unlike most existing reinforcement learning platforms, WoB offers the opportunity to tackle realistic tasks at scale.",6. Conclusion,[0],[0]
+"We described a progression of three techniques to create web tasks suitable for reinforcement learning: 1) Minimalistic tasks such as MiniWoB (hand-crafted tasks), 2) Proxy environments such as FormWoB (live websites, hand-crafted tasks), and 3)",6. Conclusion,[0],[0]
+"Crowdsourced environments such as QAWoB (live websites, crowdsourced tasks).",6. Conclusion,[0],[0]
+"Finally, we showed that while standard supervised and reinforcement learning techniques can be applied to achieve adequate results across these environments, the gap between agents and humans remains large, and welcomes additional modeling advances.",6. Conclusion,[0],[0]
+This work was done in collaboration between OpenAI and Stanford.,Acknowledgements,[0],[0]
+Tim Shi is partly funded by Tencent.,Acknowledgements,[0],[0]
+We would like to thank John Schulman for insightful discussions.,Acknowledgements,[0],[0]
+"While simulated game environments have greatly accelerated research in reinforcement learning, existing environments lack the open-domain realism of tasks in computer vision or natural language processing, which operate on artifacts created by humans in natural, organic settings.",abstractText,[0],[0]
+"To foster reinforcement learning research in such settings, we introduce the World of Bits (WoB), a platform in which agents complete tasks on the Internet by performing low-level keyboard and mouse actions.",abstractText,[0],[0]
+"The two main challenges are: (i) to curate a diverse set of natural webbased tasks, and (ii) to ensure that these tasks have a well-defined reward structure and are reproducible despite the transience of the web.",abstractText,[0],[0]
+"To tackle this, we develop a methodology in which crowdworkers create tasks defined by natural language questions and provide demonstrations of how to answer the question on real websites using keyboard and mouse; HTTP traffic is cached to create a reproducible offline approximation of the website.",abstractText,[0],[0]
+"Finally, we show that agents trained via behavioral cloning and reinforcement learning can complete a range of web-based tasks.",abstractText,[0],[0]
+World of Bits: An Open-Domain Platform for Web-Based Agents,title,[0],[0]
+"Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing, pages 2475–2485 Brussels, Belgium, October 31 - November 4, 2018. c©2018 Association for Computational Linguistics
+2475",text,[0],[0]
+"Contemporary natural language processing systems typically rely on annotated data to learn how to perform a task (e.g., classification, sequence tagging, natural language inference).",1 Introduction,[1.0],"['Contemporary natural language processing systems typically rely on annotated data to learn how to perform a task (e.g., classification, sequence tagging, natural language inference).']"
+"Most commonly the available training data is in a single language (e.g., English or Chinese) and the resulting system can perform the task only in the training language.",1 Introduction,[0],[0]
+"In practice, however, systems used in major international products need to handle inputs in many languages.",1 Introduction,[0],[0]
+"In these settings, it is nearly impossible to annotate data in all languages that a system might encounter during operation.
+",1 Introduction,[0],[0]
+"A scalable way to build multilingual systems is through cross-lingual language understanding (XLU), in which a system is trained primarily on data in one language and evaluated on data in others.",1 Introduction,[1.0],"['A scalable way to build multilingual systems is through cross-lingual language understanding (XLU), in which a system is trained primarily on data in one language and evaluated on data in others.']"
+"While XLU shows promising results for tasks such as cross-lingual document classification (Klementiev et al., 2012; Schwenk and Li, 2018), there are very few, if any, XLU benchmarks for more difficult language understanding tasks like natural language inference.",1 Introduction,[1.0],"['While XLU shows promising results for tasks such as cross-lingual document classification (Klementiev et al., 2012; Schwenk and Li, 2018), there are very few, if any, XLU benchmarks for more difficult language understanding tasks like natural language inference.']"
+"Large-scale natural language inference (NLI), also known as recognizing textual entailment (RTE), has emerged as a practical test bed for work on sentence understanding.",1 Introduction,[1.0],"['Large-scale natural language inference (NLI), also known as recognizing textual entailment (RTE), has emerged as a practical test bed for work on sentence understanding.']"
+"In NLI, a system is tasked with reading two sentences and determining whether one entails the other, contradicts it, or neither (neutral).",1 Introduction,[1.0],"['In NLI, a system is tasked with reading two sentences and determining whether one entails the other, contradicts it, or neither (neutral).']"
+"Recent crowdsourced annotation efforts have yielded datasets for NLI in English (Bowman et al., 2015; Williams et al., 2017) with nearly a million examples, and these have been widely used to evaluate neural network architectures and training strategies (Rocktäschel et al., 2016; Gong et al., 2018; Peters et al., 2018; Wang et al., 2018), as well as to train effective, reusable sentence representations (Conneau et al., 2017; Subramanian et al., 2018; Cer et al., 2018).
+",1 Introduction,[0],[0]
+"In this work, we introduce a benchmark that we call the Cross-lingual Natural Language Inference corpus, or XNLI, by extending these NLI corpora to 15 languages.",1 Introduction,[1.0],"['In this work, we introduce a benchmark that we call the Cross-lingual Natural Language Inference corpus, or XNLI, by extending these NLI corpora to 15 languages.']"
+"XNLI consists of 7500 human-annotated development and test examples in NLI three-way classification format in English, French, Spanish, German, Greek, Bulgarian, Russian, Turkish, Arabic, Vietnamese, Thai, Chinese, Hindi, Swahili and Urdu, making a total of 112,500 annotated pairs.",1 Introduction,[1.0],"['XNLI consists of 7500 human-annotated development and test examples in NLI three-way classification format in English, French, Spanish, German, Greek, Bulgarian, Russian, Turkish, Arabic, Vietnamese, Thai, Chinese, Hindi, Swahili and Urdu, making a total of 112,500 annotated pairs.']"
+"These languages span several language families, and with the inclusion of Swahili and Urdu, include two lower-resource languages as well.
+",1 Introduction,[0.9999999614734929],"['These languages span several language families, and with the inclusion of Swahili and Urdu, include two lower-resource languages as well.']"
+"Because of its focus on development and test
+data, this corpus is designed to evaluate crosslingual sentence understanding, where models have to be trained in one language and tested in different ones.
+",1 Introduction,[0],[0]
+We evaluate several approaches to cross-lingual learning of natural language inference that leverage parallel data from publicly available corpora at training time.,1 Introduction,[0],[0]
+We show that parallel data can help align sentence encoders in multiple languages such that a classifier trained with English NLI data can correctly classify pairs of sentences in other languages.,1 Introduction,[0],[0]
+"While outperformed by our machine translation baselines, we show that this alignment mechanism gives very competitive results.
+",1 Introduction,[0],[0]
+A second practical use of XNLI is the evaluation of pretrained general-purpose languageuniversal sentence encoders.,1 Introduction,[0],[0]
+We hope that this benchmark will help the research community build multilingual text embedding spaces.,1 Introduction,[0],[0]
+"Such embeddings spaces will facilitate the creation of multilingual systems that can transfer across languages with little or no extra supervision.
+",1 Introduction,[0],[0]
+The paper is organized as follows:,1 Introduction,[0],[0]
+We next survey the related literature on cross-lingual language understanding.,1 Introduction,[0],[0]
+We then describe our data collection methods and the resulting corpus in Section 3.,1 Introduction,[0],[0]
+"We describe our baselines in Section 4, and finally present and discuss results in Section 5.",1 Introduction,[0],[0]
+Multilingual Word Embeddings,2 Related Work,[0],[0]
+Much of the work on multilinguality in language understanding has been at the word level.,2 Related Work,[0],[0]
+"Several approaches have been proposed to learn cross-lingual word representations, i.e., word representations where translations are close in the embedding space.",2 Related Work,[0],[0]
+"Many of these methods require some form of supervision (typically in the form of a small bilingual lexicon) to align two sets of source and target embeddings to the same space (Mikolov et al., 2013a; Kociský et al., 2014; Faruqui and Dyer, 2014; Ammar et al., 2016).",2 Related Work,[0],[0]
+"More recent studies have showed that cross-lingual word embeddings can be generated with no supervision whatsoever (Artetxe et al., 2017; Conneau et al., 2018).
+",2 Related Work,[0],[0]
+"Sentence Representation Learning Many approaches have been proposed to extend word embeddings to sentence or paragraph representations (Le and Mikolov, 2014; Wieting et al., 2016; Arora et al., 2017).",2 Related Work,[0],[0]
+"The most straightforward way to generate sentence embeddings is to consider an average or weighted average of word representations, usually referred to as continuous bag-of-words (CBOW).",2 Related Work,[0],[0]
+"Although naïve, this method often provides a strong baseline.",2 Related Work,[0],[0]
+"More sophisticated approaches—such as the unsupervised SkipThought model of Kiros et al. (2015) that extends the skip-gram model of Mikolov et al. (2013b) to the sentence level—have been pro-
+posed to capture syntactic and semantic dependencies inside sentence representations.",2 Related Work,[0],[0]
+"While these fixed-size sentence embedding methods have been outperformed by their supervised counterparts (Conneau et al., 2017; Subramanian et al., 2018), some recent developments have shown that pretrained language models can also transfer very well, either when the hidden states of the model are used as contextualized word vectors (Peters et al., 2018), or when the full model is finetuned on transfer tasks (Radford et al.;",2 Related Work,[0],[0]
+"Howard and Ruder, 2018).
+",2 Related Work,[0],[0]
+Multilingual Sentence Representations There has been some effort on developing multilingual sentence embeddings.,2 Related Work,[0],[0]
+"For example, Chandar et al. (2013) train bilingual autoencoders with the objective of minimizing reconstruction error between two languages.",2 Related Work,[0],[0]
+Schwenk et al. (2017) and EspañaBonet et al. (2017) jointly train a sequence-tosequence MT system on multiple languages to learn a shared multilingual sentence embedding space.,2 Related Work,[0],[0]
+Hermann and Blunsom (2014) propose a compositional vector model involving unigrams and bigrams to learn document level representations.,2 Related Work,[0],[0]
+Pham et al. (2015) directly train embedding representations for sentences with no attempt at compositionality.,2 Related Work,[0],[0]
+"Zhou et al. (2016) learn bilingual document representations by minimizing the Euclidean distance between document representations and their translations.
+",2 Related Work,[0],[0]
+Cross-lingual Evaluation Benchmarks,2 Related Work,[0],[0]
+The lack of evaluation benchmark has hindered the development of such multilingual representations.,2 Related Work,[0],[0]
+Most previous approaches use the Reuters crosslingual document classification corpus Klementiev et al. (2012) for evaluation.,2 Related Work,[0],[0]
+"However, the classification in this corpus is done at document level, and, as there are many ways to aggregate sentence embeddings, the comparison between different sentence embeddings is difficult.",2 Related Work,[0],[0]
+"Moreover, the distribution of classes in the Reuters corpus is highly unbalanced, and the dataset does not provide a development set in the target language, further complicating experimental comparisons.
+",2 Related Work,[0],[0]
+"In addition to the Reuters corpus, Cer et al. (2017) propose sentence-level multilingual training and evaluation datasets for semantic textual similarity in four languages.",2 Related Work,[0],[0]
+"There have also been efforts to build multilingual RTE datasets, either through translating English data (Mehdad et al.,
+2011), or annotating sentences from a parallel corpora (Negri et al., 2011).",2 Related Work,[0],[0]
+"More recently, Agic and Schluter (2017) provide a corpus, that is very complementary to our work, of human translations for 1332 pairs of the SNLI data into Arabic, French, Russian, and Spanish.",2 Related Work,[0],[0]
+"Among all these benchmarks, XNLI is the first large-scale corpus for evaluating sentence-level representations on that many languages.
+",2 Related Work,[0],[0]
+"In practice, cross-lingual sentence understanding goes beyond translation.",2 Related Work,[0],[0]
+"For instance, Mohammad et al. (2016) analyze the differences in human sentiment annotations of Arabic sentences and their English translations, and conclude that most of them come from cultural differences.",2 Related Work,[0],[0]
+"Similarly, Smith et al. (2016) show that most of the degradation in performance when applying a classification model trained in English to Spanish data translated to English is due to cultural differences.",2 Related Work,[0],[0]
+"One of the limitations of the XNLI corpus is that it does not capture these differences, since it was obtained by translation.",2 Related Work,[0],[0]
+We see the XNLI evaluation as a necessary step for multilingual NLP before tackling the even more complex problem of domain-adaptation that occurs when handling this the change in style from one language to another.,2 Related Work,[0],[0]
+"Because the test portion of the Multi-Genre NLI data is private, the Cross-lingual NLI Corpus (XNLI) is based on new English NLI data.",3 The XNLI Corpus,[0],[0]
+"To collect the core English portion, we follow precisely the same crowdsourcing-based procedure used for the existing Multi-Genre NLI corpus, and collect and validate 750 new examples from each of the ten text sources used in that corpus for a total of 7500 examples.",3 The XNLI Corpus,[0],[0]
+"With that portion in place, we create the full XNLI corpus by employing professional translators to translate it into our ten target languages.",3 The XNLI Corpus,[0],[0]
+"This section describes this process and the resulting corpus.
+",3 The XNLI Corpus,[0],[0]
+"Translating, rather than generating new hypothesis sentences in each language separately, has multiple advantages.",3 The XNLI Corpus,[0],[0]
+"First, it ensures that the data distributions are maximally similar across languages.",3 The XNLI Corpus,[0],[0]
+"As speakers of different languages may have slightly different intuitions about how to fill in the supplied prompt, this allows us to avoid adding this unwanted degree of freedom.",3 The XNLI Corpus,[0],[0]
+"Second, it allows us to use the same trusted pool of workers as was used prior NLI crowdsourcing efforts,
+without the need for training a new pool of workers in each language.",3 The XNLI Corpus,[0],[0]
+"Third, for any premise, this process allows us to have a corresponding hypothesis in any language.
+",3 The XNLI Corpus,[0],[0]
+"This translation approach carries with it the risk that the semantic relations between the two sentences in each pair might not be reliably preserved in translation, as Mohammad et al. (2016) observed for sentiment.",3 The XNLI Corpus,[0],[0]
+"We investigate this potential issue in our corpus and find that, while it does occur, it only concerns a negligible number of sentences (see Section 3.2).",3 The XNLI Corpus,[0],[0]
+The English Corpus Our collection procedure for the English portion of the XNLI corpus follows the same procedure as the MultiNLI corpus.,3.1 Data Collection,[0],[0]
+"We sample 250 sentences from each of the ten sources that were used in that corpus, ensuring that none of those selected sentences overlap with the distributed corpus.",3.1 Data Collection,[0],[0]
+Nine of the ten text sources are drawn from the second release of the Open American National Corpus1:,3.1 Data Collection,[0],[0]
+"Face-To-Face, Telephone, Government, 9/11, Letters, Oxford University Press (OUP), Slate, Verbatim, and Government.",3.1 Data Collection,[0],[0]
+"The tenth, Fiction, is drawn from the novel Captain Blood (Sabatini, 1922).",3.1 Data Collection,[1.0],"['The tenth, Fiction, is drawn from the novel Captain Blood (Sabatini, 1922).']"
+"We refer the reader to Williams et al. (2017) for more details on each genre.
+",3.1 Data Collection,[0],[0]
+"Given these sentences, we ask the same MultiNLI worker pool from a crowdsourcing platform to produce three hypotheses for each premise, one for each possible label.
+",3.1 Data Collection,[0],[0]
+We present premise sentences to workers using the same templates as were used in MultiNLI.,3.1 Data Collection,[0],[0]
+We also follow that work in pursuing a second validation phase of data collection in which each pair of sentences is relabeled by four other workers.,3.1 Data Collection,[0],[0]
+"For each validated sentence pair, we assign a gold label representing a majority vote between the initial label assigned to the pair by the original annotator, and the four additional labels assigned by validation annotators.",3.1 Data Collection,[0],[0]
+We obtained a three-vote consensus for 93% of the data.,3.1 Data Collection,[0],[0]
+"In our experiments, we kept the 7% additional ones, but we mark these ones with a special label ’-’.
+Translating the Corpus Finally, we hire translators to translate the resulting sentences into 15 languages using the One Hour Translation platform.",3.1 Data Collection,[0],[0]
+"We translate the premises and hypotheses
+1http://www.anc.org/
+separately, to ensure that no context is added to the hypothesis that was not there originally, and simply copy the labels from the English source text.",3.1 Data Collection,[0],[0]
+Some examples are shown in Table 1.,3.1 Data Collection,[0],[0]
+"One main concern in studying the resulting corpus is to determine whether the gold label for some of the sentence pairs changes as a result of information added or removed in the translation process.
+",3.2 The Resulting Corpus,[0],[0]
+"Investigating the data manually, we find an example in the Chinese translation where an entailment relation becomes a contradictory relation, while the entailment is preserved in other languages.",3.2 The Resulting Corpus,[0],[0]
+"Specifically, the term upright which was used in English as entailment of standing, was translated into Chinese as sitting upright thus creating a contradiction.",3.2 The Resulting Corpus,[0],[0]
+"However, the difficulty of finding such an example in the data suggests its rarity.
+",3.2 The Resulting Corpus,[0],[0]
+"To quantify this observation, we recruit two bilingual annotators to re-annotate 100 examples each in both English and French following our standard validation procedure.",3.2 The Resulting Corpus,[0],[0]
+The examples are drawn from two non-overlapping random subsets of the development data to prevent the annotators from seeing the source English text for any translated text they annotate.,3.2 The Resulting Corpus,[0],[0]
+"With no training or burn-in period, these annotators recover the English consensus label 85% of the time on the original English data and 83% of the time on the translated French, suggesting that the overall semantic relationship between the two languages has been preserved.",3.2 The Resulting Corpus,[0],[0]
+"As most sentences are relatively easy to translate, in particular the hypotheses generated by the workers, there seems to be little ambiguity added by the translator.
+",3.2 The Resulting Corpus,[0],[0]
+"More broadly, we find that the resulting corpus has similar properties to the MultiNLI corpus.",3.2 The Resulting Corpus,[0],[0]
+"For all languages, on average, the premises are twice as long as the hypotheses (See Table 2).",3.2 The Resulting Corpus,[0],[0]
+"The top hypothesis words indicative of the class label – scored using the mutual information between each word and class in the corpus – are similar across languages, and overlap those of the MultiNLI corpus (Gururangan et al., 2018).",3.2 The Resulting Corpus,[0],[0]
+"For example, a translation of at least one of the words no, not or never is among the top two cues for contradiction in all languages.
+",3.2 The Resulting Corpus,[0],[0]
+"As in the original MultiNLI corpus, we expect that cues like these (‘artifacts’, in Guru-
+rangan’s terms, also observed by Poliak et al., 2018; Tsuchiya, 2018) allow a baseline system to achieve better-than-random accuracy with access only to the premise sentences.",3.2 The Resulting Corpus,[0],[0]
+"We accept this as an unavoidable property of the NLI task over naturalistic sentence pairs, and see no reason to expect that this baseline would achieve better accuracy than the relatively poor 53% seen in Gururangan et al. (2018).",3.2 The Resulting Corpus,[0],[0]
+In this section we present results with XLU systems that can serve as baselines for future work.,4 Cross-Lingual NLI,[0],[0]
+The most straightforward techniques for XLU rely on translation systems.,4.1 Translation-Based Approaches,[0],[0]
+"There are two natural ways to use a translation system: TRANSLATE TRAIN, where the training data is translated into each target language to provide data to train each classifier, and TRANSLATE TEST, where a translation system is used at test time to translate input sentences to the training language.",4.1 Translation-Based Approaches,[0],[0]
+"These two methods provide strong baselines, but both present practical challenges.",4.1 Translation-Based Approaches,[0],[0]
+"The former requires training and maintaining as many classifiers as there are languages, while the latter relies on computationally-intensive translation at test time.",4.1 Translation-Based Approaches,[0],[0]
+"Both approaches are limited by the quality of the translation system, which itself varies with the quantity of available training data and the similarity of the language pair involved.",4.1 Translation-Based Approaches,[0],[0]
+An alternative to translation is to rely on languageuniversal embeddings of text and build multilingual classifiers on top of these representations.,4.2 Multilingual Sentence Encoders,[0],[0]
+"If an encoder produces an embedding of an English sentence close to the embedding of its translation in another language, then a classifier learned on top of English sentence embeddings will be able to classify sentences from different languages without needing a translation system at inference time.
+",4.2 Multilingual Sentence Encoders,[0],[0]
+"We evaluate two types of cross-lingual sentence encoders: (i) pretrained universal multilingual sentence embeddings based on the average of word embeddings (X-CBOW), (ii) bidirectionalLSTM (BiLSTM) (Hochreiter and Schmidhuber, 1997) sentence encoders trained on the MultiNLI training data (X-BILSTM).",4.2 Multilingual Sentence Encoders,[1.0],"['We evaluate two types of cross-lingual sentence encoders: (i) pretrained universal multilingual sentence embeddings based on the average of word embeddings (X-CBOW), (ii) bidirectionalLSTM (BiLSTM) (Hochreiter and Schmidhuber, 1997) sentence encoders trained on the MultiNLI training data (X-BILSTM).']"
+The former evaluates transfer learning while the latter evaluates NLIspecific encoders trained on in-domain data.,4.2 Multilingual Sentence Encoders,[0],[0]
+Both approaches use the same alignment loss for aligning sentence embedding spaces from multiple languages which is present below.,4.2 Multilingual Sentence Encoders,[1.0],['Both approaches use the same alignment loss for aligning sentence embedding spaces from multiple languages which is present below.']
+"We consider two ways of extracting feature vectors from the BiLSTM: either using the initial and final hidden states (Sutskever et al., 2014), or using the element-wise max over all states (Collobert and Weston, 2008).
+",4.2 Multilingual Sentence Encoders,[0],[0]
+"The first approach is commonly used as a strong baseline for monolingual sentence embeddings (Arora et al., 2017; Conneau and Kiela, 2018; Gouews et al., 2014).",4.2 Multilingual Sentence Encoders,[0],[0]
+"Concretely, we consider the English fastText word embedding space as being fixed, and fine-tune embeddings in other languages so that the average of the word vectors in a sentence is close to the average of the word vectors in its English translation.",4.2 Multilingual Sentence Encoders,[0],[0]
+"The second approach consists in learning an English sentence encoder on the MultiNLI training data along with an encoder on the target language, with the objective that the representations of two translations are nearby in the embedding space.",4.2 Multilingual Sentence Encoders,[1.0],"['The second approach consists in learning an English sentence encoder on the MultiNLI training data along with an encoder on the target language, with the objective that the representations of two translations are nearby in the embedding space.']"
+"In both approaches, an English encoder is fixed, and we train target language encoders to match the output of this encoder.",4.2 Multilingual Sentence Encoders,[1.0],"['In both approaches, an English encoder is fixed, and we train target language encoders to match the output of this encoder.']"
+This allows us to build sentence representations that belong to the same space.,4.2 Multilingual Sentence Encoders,[1.0],['This allows us to build sentence representations that belong to the same space.']
+Joint training of encoders and parameter sharing are also promising directions to improve and simplify the alignment of sentence embedding spaces.,4.2 Multilingual Sentence Encoders,[0],[0]
+"We leave this for future work.
+",4.2 Multilingual Sentence Encoders,[0],[0]
+"In all experiments, we consider encoders that output a vector of fixed size as a sentence representation.",4.2 Multilingual Sentence Encoders,[0],[0]
+"While previous work shows that performance on the NLI task can be improved by using cross-sentence attention between the premise and
+hypothesis (Rocktäschel et al., 2016; Gong et al., 2018), we focus on methods with fixed-size sentence embeddings.",4.2 Multilingual Sentence Encoders,[0],[0]
+Multilingual word embeddings are an efficient way to transfer knowledge from one language to another.,4.2.1 Aligning Word Embeddings,[0],[0]
+"For instance, Zhang et al. (2016) show that cross-lingual embeddings can be used to extend an English part-of-speech tagger to the cross-lingual setting, and Xiao and Guo (2014) achieve similar results in dependency parsing.",4.2.1 Aligning Word Embeddings,[0],[0]
+"Cross-lingual embeddings also provide an efficient mechanism to bootstrap neural machine translation (NMT) systems for low-resource language pairs, which is critical in the case of unsupervised machine translation (Lample et al., 2018; Artetxe et al., 2018).",4.2.1 Aligning Word Embeddings,[1.0],"['Cross-lingual embeddings also provide an efficient mechanism to bootstrap neural machine translation (NMT) systems for low-resource language pairs, which is critical in the case of unsupervised machine translation (Lample et al., 2018; Artetxe et al., 2018).']"
+"In that case, the use cross-lingual embeddings directly helps the alignment of sentence-level encoders.",4.2.1 Aligning Word Embeddings,[1.0],"['In that case, the use cross-lingual embeddings directly helps the alignment of sentence-level encoders.']"
+Cross-lingual embeddings can be generated efficiently using a very small amount of supervision.,4.2.1 Aligning Word Embeddings,[1.0],['Cross-lingual embeddings can be generated efficiently using a very small amount of supervision.']
+"By using a small parallel dictionary with n = 5000 word pairs, it is possible to learn a linear mapping to minimize
+W ?",4.2.1 Aligning Word Embeddings,[0],[0]
+= argmin W∈Od(R),4.2.1 Aligning Word Embeddings,[0],[0]
+"‖WX − Y ‖F = UV T ,
+where d is the dimension of the embeddings, and X and Y are two matrices of shape (d, n) that correspond to the aligned word embeddings that appear in the parallel dictionary, Od(R) is the group of orthogonal matrices of dimension d, and U and V are obtained from the singular value decomposition (SVD) of Y XT : UΣV T = SVD(Y XT ).",4.2.1 Aligning Word Embeddings,[0],[0]
+"Xing et al. (2015) show that enforcing the orthogonality constraint on the linear mapping leads to better results on the word translation task.
+",4.2.1 Aligning Word Embeddings,[0.9999999258845179],['Xing et al. (2015) show that enforcing the orthogonality constraint on the linear mapping leads to better results on the word translation task.']
+"In this paper, we use common-crawl word embeddings (Grave et al., 2018) aligned with the MUSE library of Conneau et al. (2018).",4.2.1 Aligning Word Embeddings,[1.0],"['In this paper, we use common-crawl word embeddings (Grave et al., 2018) aligned with the MUSE library of Conneau et al. (2018).']"
+"Most of the successful recent approaches for learning universal sentence representations have relied on English (Kiros et al., 2015; Arora et al., 2017; Conneau et al., 2017; Subramanian et al., 2018; Cer et al., 2018).",4.2.2 Universal Multilingual Sentence Embeddings,[0],[0]
+"While notable recent approaches have considered building a shared sentence encoder for multiple languages using publicly available parallel corpora (Johnson et al.,
+2016; Schwenk et al., 2017; España-Bonet et al., 2017), the lack of a large-scale, sentence-level semantic evaluation has limited their adoption by the community.",4.2.2 Universal Multilingual Sentence Embeddings,[0],[0]
+"In particular, these works do not cover the scale of languages considered in XNLI, and are limited to high-resource languages.",4.2.2 Universal Multilingual Sentence Embeddings,[0],[0]
+"As a baseline for the evaluation of multilingual sentence representations in the 15 languages of XNLI, we consider state-of-the-art common-crawl embeddings with a CBOW encoder.",4.2.2 Universal Multilingual Sentence Embeddings,[0],[0]
+"Our approach, dubbed X-CBOW, consists in fixing the English pretrained word embeddings, and fine-tuning the target (e.g., French) word embeddings so that the CBOW representations of two translations are close in embedding space.",4.2.2 Universal Multilingual Sentence Embeddings,[0],[0]
+"In that case, we consider our multilingual sentence embeddings as being pretrained and only learn a classifier on top of them to evaluate their quality, similar to so-called “transfer” tasks in (Kiros et al., 2015; Conneau et al., 2017) but in the multilingual setting.",4.2.2 Universal Multilingual Sentence Embeddings,[0],[0]
+Training for similarity of source and target sentences in an embedding space is conceptually and computationally simpler than generating a translation in the target language from a source sentence.,4.2.3 Aligning Sentence Embeddings,[0],[0]
+We propose a method for training for crosslingual similarity and evaluate approaches based on the simpler task of aligning sentence representations.,4.2.3 Aligning Sentence Embeddings,[0],[0]
+"Under our objective, the embeddings of two parallel sentences need not be identical, but only close enough in the embedding space that the decision boundary of the English classifier captures the similarity.
+",4.2.3 Aligning Sentence Embeddings,[0],[0]
+We propose a simple alignment loss function to align the embedding spaces of two different languages.,4.2.3 Aligning Sentence Embeddings,[1.0],['We propose a simple alignment loss function to align the embedding spaces of two different languages.']
+"Specifically, we train an English encoder on NLI, and train a target encoder by minimizing the loss:
+Lalign(x, y) =",4.2.3 Aligning Sentence Embeddings,[0],[0]
+"sim(x, y)− λ(sim(xc, y) +",4.2.3 Aligning Sentence Embeddings,[0],[0]
+"sim(x, yc))
+",4.2.3 Aligning Sentence Embeddings,[0],[0]
+"where (x, y) corresponds to the source and target sentence embeddings, (xc, yc) is a contrastive term (i.e. negative sampling), λ controls the weight of the negative examples in the loss.",4.2.3 Aligning Sentence Embeddings,[0.9831248198160494],"['Specifically, we train an English encoder on NLI, and train a target encoder by minimizing the loss: Lalign(x, y) = sim(x, y)− λ(sim(xc, y) + sim(x, yc)) where (x, y) corresponds to the source and target sentence embeddings, (xc, yc) is a contrastive term (i.e. negative sampling), λ controls the weight of the negative examples in the loss.']"
+"For a similarity measure, we use the L2 norm with sim(x, y) = −‖x−y‖2.",4.2.3 Aligning Sentence Embeddings,[0],[0]
+We obtain similar results using the cosine similarity.,4.2.3 Aligning Sentence Embeddings,[0],[0]
+"A ranking loss (Weston et al., 2011) of the form
+Lrank(x, y) = max(0, α− sim(x, y) + s(x, yc)) + max(0, α− sim(x, y) + s(xc, y))
+that pushes the sentence embeddings of a translation pair to be closer than the ones of negative pairs leads to very poor results in this particular case.",4.2.3 Aligning Sentence Embeddings,[0],[0]
+"As opposed to Lalign, Lrank does not encourage the embeddings of sentence pairs to be close enough so that the shared classifier can understand that these sentences have the same meaning.
+",4.2.3 Aligning Sentence Embeddings,[0],[0]
+"We use Lalign in the cross-lingual embeddings baselines X-CBOW, X-BILSTM-LAST and XBILSTM-MAX.",4.2.3 Aligning Sentence Embeddings,[0],[0]
+"For X-CBOW, the encoder is pretrained (transfer-learning), while the English XBiLSTMs are trained on NLI (in-domain).",4.2.3 Aligning Sentence Embeddings,[1.0],"['For X-CBOW, the encoder is pretrained (transfer-learning), while the English XBiLSTMs are trained on NLI (in-domain).']"
+"For the three methods, the English encoder is then fixed.",4.2.3 Aligning Sentence Embeddings,[0],[0]
+Each of the 14 other languages have their own encoders with same architecture.,4.2.3 Aligning Sentence Embeddings,[0],[0]
+"These encoders are trained to ""copy"" the English encoder using the Lalign loss and the parallel data described in section 5.2.
+",4.2.3 Aligning Sentence Embeddings,[1.0000000724346727],"['These encoders are trained to ""copy"" the English encoder using the Lalign loss and the parallel data described in section 5.2.']"
+We only back-propagate through the target encoder when optimizing Lalign such that all 14 encoders live in the same English embedding space.,4.2.3 Aligning Sentence Embeddings,[0],[0]
+"In these experiments, we initialize lookup tables of the LSTMs with pretrained cross-lingual embeddings discussed in Section 4.2.1.",4.2.3 Aligning Sentence Embeddings,[0],[0]
+We use internal translation systems to translate data between English and the 10 other languages.,5.1 Training details,[0],[0]
+"For TRANSLATE TEST (see Table 4), we translate each test set into English, while for the TRANSLATE TRAIN, we translate the English training data of MultiNLI2.",5.1 Training details,[0],[0]
+"To give an idea of the translation quality, we give BLEU scores of the automatic translation from the foreign language into English of the XNLI test set in Table 3.
+",5.1 Training details,[0],[0]
+"We use pretrained 300D word embeddings and only consider the most 500,000 frequent words in the dictionary, which generally covers more than 98% of the words found in XNLI corpora.",5.1 Training details,[0],[0]
+"We
+2To allow replication of results, we share the MT translations of XNLI training and test sets.
+",5.1 Training details,[0],[0]
+"set the number of hidden units of the BiLSTMs to 512, and use the Adam optimizer (Kingma and Ba, 2014) with default parameters.",5.1 Training details,[0],[0]
+"For the alignment loss, setting λ to 0.25 worked best in our experiments, and we found that the trade-off between the importance of the positive and the negative pairs was particularly important (see Table 5).",5.1 Training details,[0],[0]
+"When fitting the target BiLSTM encoder to the English encoder, we fine-tune the lookup table associated to the target encoder, but keep the source word embeddings fixed.",5.1 Training details,[0],[0]
+"The classifier is a feed-forward neural network with one hidden layer of 128 hidden units, regularized with dropout (Srivastava et al., 2014) at a rate of 0.1.",5.1 Training details,[0],[0]
+"For X-BiLSTMs, we perform model selection on the XNLI validation set in each target language.",5.1 Training details,[0],[0]
+"For X-CBOW, we keep a validation set of parallel sentences to evaluate our alignment loss.",5.1 Training details,[0],[0]
+"The alignment loss requires a parallel dataset of sentences for each pair of languages, which we describe next.",5.1 Training details,[0],[0]
+We use publicly available parallel datasets to learn the alignment between English and target encoders.,5.2 Parallel Datasets,[0],[0]
+"For French, Spanish, Russian, Arabic and Chinese, we use the United Nation corpora (Ziemski et al., 2016), for German, Greek and Bulgarian, the Europarl corpora (Koehn, 2005), for Turkish, Vietnamese and Thai, the OpenSubtitles 2018 corpus (Tiedemann, 2012), and for Hindi, the IIT Bombay corpus (Anoop et al., 2018).",5.2 Parallel Datasets,[0],[0]
+"For all the above language pairs, we were able to gather more than 500,000 parallel sentences, and we set the maximum number of parallel sentences to 2 million.",5.2 Parallel Datasets,[0],[0]
+"For the lower-resource languages Urdu and Swahili, the number of parallel sentences is an order of magnitude smaller than for the other languages we consider.",5.2 Parallel Datasets,[0],[0]
+"For Urdu, we used the Bible and Quran transcriptions (Tiedemann, 2012), the OpenSubtitles 2016 and 2018 corpora (Tiedemann, 2012) and LDC2010T21, LDC2010T23 LDC corpora, and obtained a total of 64k parallel sentences.",5.2 Parallel Datasets,[0],[0]
+"For Swahili, we were
+only able to gather 42k sentences using the Global Voices corpus and the Tanzil Quran transcription corpus3.",5.2 Parallel Datasets,[0],[0]
+"Comparing in-language performance in Table 4, we observe that, when using BiLSTMs, results are consistently better when we take the dimensionwise maximum over all hidden states (BiLSTMmax) compared to taking the last hidden state (BiLSTM-last).",5.3 Analysis,[0],[0]
+"Unsuprisingly, BiLSTM results are better than the pretrained CBOW approach for all languages.",5.3 Analysis,[0],[0]
+"As in Bowman et al. (2015), we also observe the superiority of BiLSTM encoders over CBOW, even when fine-tuning the word embeddings of the latter on the MultiNLI training set, thereby again confirming that the NLI task requires more than just word information.",5.3 Analysis,[0],[0]
+"Both of these findings confirm previously published results (Conneau et al., 2017).
+",5.3 Analysis,[0],[0]
+Table 4 shows that translation offers a strong baseline for XLU.,5.3 Analysis,[0],[0]
+"Within translation, TRANSLATE TEST appears to perform consistently better than TRANSLATE TRAIN for all languages.",5.3 Analysis,[0],[0]
+The best cross-lingual results in our evaluation are obtained by the TRANSLATE TEST approach for all cross-lingual directions.,5.3 Analysis,[0],[0]
+"Within the translation approaches, as expected, we observe that crosslingual performance depends on the quality of the translation system.",5.3 Analysis,[0],[0]
+"In fact, translation-based results are very well-correlated with the BLEU scores for the translation systems; XNLI performance for three of the four languages with the best translation systems (comparing absolute BLEU,
+3http://opus.nlpl.eu/
+Table 3) is above 70%.",5.3 Analysis,[0],[0]
+This performance is still about three points below the English NLI performance of 73.7%.,5.3 Analysis,[0],[0]
+"This slight drop in performance may be related to translation error, changes in style, or artifacts introduced by the machine translation systems that result in discrepancies between the training and test data.
+",5.3 Analysis,[0],[0]
+"For cross-lingual performance, we observe a healthy gap between the English results and the results obtained on other languages.",5.3 Analysis,[0],[0]
+"For instance, for French, we obtain 67.7% accuracy when classifying French pairs using our English classifier and multilingual sentence encoder.",5.3 Analysis,[0],[0]
+"When using our alignment process, our method is competitive with the TRANSLATE TRAIN baseline, suggesting that it might be possible to encode similarity between languages directly in the embedding spaces generated by the encoders.",5.3 Analysis,[0],[0]
+"However, these methods are still below the other machine translation baseline TRANSLATE TEST, which significantly outperforms the multilingual sentence encoder approach by up to 6% (Swahili).",5.3 Analysis,[0],[0]
+"These production systems have been trained on much larger training data than the ones used for the alignment loss (section 5.2), which can partly explain the superiority of this method over the baseline.",5.3 Analysis,[0],[0]
+"Interestingly, the two points difference in accuracy between X-BiLSTM-last and X-BiLSTM-max is maintained across languages, which suggests that having a stronger encoder in English also positively impacts the transfer results on other languages.
+",5.3 Analysis,[0],[0]
+"In Table 5, we report the validation accuracy using BiLSTM-max on three languages with different training hyper-parameters.",5.3 Analysis,[0],[0]
+"Fine-tuning the
+embeddings does not significantly impact the results, suggesting that the LSTM alone is ensuring alignment of parallel sentence embeddings.",5.3 Analysis,[0],[0]
+"We also observe that the negative term is not critical to the performance of the model, but can lead to slight improvement in Chinese (up to 1.6%).",5.3 Analysis,[0],[0]
+"A typical problem in industrial applications is the lack of supervised data for languages other than English, and particularly for low-resource languages.",6 Conclusion,[0],[0]
+"Since annotating data in every language is not a realistic approach, there has been a growing interest in cross-lingual understanding and low-resource transfer in multilingual scenarios.",6 Conclusion,[0],[0]
+"In this work, we extend the development and test sets of the Multi-Genre Natural Language Inference Corpus to 15 languages, including lowresource languages such as Swahili and Urdu.",6 Conclusion,[0],[0]
+"Our dataset, dubbed XNLI, is designed to address the lack of standardized evaluation protocols in crosslingual understanding, and will hopefully help the community make further strides in this area.",6 Conclusion,[0],[0]
+We present several approaches based on cross-lingual sentence encoders and machine translation systems.,6 Conclusion,[0],[0]
+"While machine translation baselines obtained the best results in our experiments, these approaches rely on computationally-intensive translation models either at training or at test time.",6 Conclusion,[0],[0]
+"We found that cross-lingual encoder baselines provide an encouraging and efficient alternative, and that further work is required to match the performance of translation based methods.",6 Conclusion,[0],[0]
+"This project has benefited from financial support to Samuel R. Bowman by Google, Tencent Holdings, and Samsung Research.",Acknowledgments,[0],[0]
+State-of-the-art natural language processing systems rely on supervision in the form of annotated data to learn competent models.,abstractText,[0],[0]
+"These models are generally trained on data in a single language (usually English), and cannot be directly used beyond that language.",abstractText,[0],[0]
+"Since collecting data in every language is not realistic, there has been a growing interest in crosslingual language understanding (XLU) and low-resource cross-language transfer.",abstractText,[0],[0]
+"In this work, we construct an evaluation set for XLU by extending the development and test sets of the Multi-Genre Natural Language Inference Corpus (MultiNLI) to 15 languages, including low-resource languages such as Swahili and Urdu.",abstractText,[0],[0]
+"We hope that our dataset, dubbed XNLI, will catalyze research in cross-lingual sentence understanding by providing an informative standard evaluation task.",abstractText,[0],[0]
+"In addition, we provide several baselines for multilingual sentence understanding, including two based on machine translation systems, and two that use parallel data to train aligned multilingual bag-of-words and LSTM encoders.",abstractText,[0],[0]
+"We find that XNLI represents a practical and challenging evaluation suite, and that directly translating the test data yields the best performance among available baselines.",abstractText,[0],[0]
+XNLI: Evaluating Cross-lingual Sentence Representations,title,[0],[0]

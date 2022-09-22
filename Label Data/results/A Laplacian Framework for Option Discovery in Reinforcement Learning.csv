@@ -1,0 +1,456 @@
+0,1,label2,summary_sentences
+Two important challenges in reinforcement learning (RL) are the problems of representation learning and of automatic discovery of skills.,1. Introduction,[0],[0]
+"Proto-value functions (PVFs) are a well-known solution for the problem of representation learning (Mahadevan, 2005; Mahadevan & Maggioni, 2007); while the problem of skill discovery is generally posed under the options framework (Sutton et al., 1999; Precup, 2000), which models skills as options.
+",1. Introduction,[0.9999999444252586],"['Proto-value functions (PVFs) are a well-known solution for the problem of representation learning (Mahadevan, 2005; Mahadevan & Maggioni, 2007); while the problem of skill discovery is generally posed under the options framework (Sutton et al., 1999; Precup, 2000), which models skills as options.']"
+"In this paper, we tie together representation learning and option discovery by showing how PVFs implicitly define options.",1. Introduction,[0],[0]
+One of our main contributions is to introduce the concepts of eigenpurpose and eigenbehavior.,1. Introduction,[1.0],['One of our main contributions is to introduce the concepts of eigenpurpose and eigenbehavior.']
+Eigenpurposes are intrinsic reward functions that incentivize the agent to traverse the state space by following the principal directions of the learned representation.,1. Introduction,[1.0],['Eigenpurposes are intrinsic reward functions that incentivize the agent to traverse the state space by following the principal directions of the learned representation.']
+"Each intrinsic reward function leads to a different eigenbehavior, which is
+1University of Alberta 2Google DeepMind.",1. Introduction,[0],[0]
+"Correspondence to: Marlos C. Machado <machado@ualberta.ca>.
+",1. Introduction,[0],[0]
+"Proceedings of the 34 th International Conference on Machine Learning, Sydney, Australia, PMLR 70, 2017.",1. Introduction,[0],[0]
+"Copyright 2017 by the author(s).
+",1. Introduction,[0],[0]
+the optimal policy for that reward function.,1. Introduction,[0],[0]
+In this paper we introduce an algorithm for option discovery that leverages these ideas.,1. Introduction,[0],[0]
+"The options we discover are task-independent because, as PVFs, the eigenpurposes are obtained without any information about the environment’s reward structure.",1. Introduction,[0],[0]
+"We first present these ideas in the tabular case and then show how they can be generalized to the function approximation case.
+",1. Introduction,[0],[0]
+"Exploration, while traditionally a separate problem from option discovery, can also be addressed through the careful construction of options (McGovern & Barto, 2001; Şimşek et al., 2005; Solway et al., 2014; Kulkarni et al., 2016).",1. Introduction,[0],[0]
+"In this paper, we provide evidence that not all options capable of accelerating planning are useful for exploration.",1. Introduction,[0],[0]
+We show that options traditionally used in the literature to speed up planning hinder the agents’ performance if used for random exploration during learning.,1. Introduction,[0],[0]
+"Our options have two important properties that allow them to improve exploration: (i) they operate at different time scales, and (ii) they can be easily sequenced.",1. Introduction,[0],[0]
+Having options that operate at different time scales allows agents to make finely timed actions while also decreasing the likelihood the agent will explore only a small portion of the state space.,1. Introduction,[1.0],['Having options that operate at different time scales allows agents to make finely timed actions while also decreasing the likelihood the agent will explore only a small portion of the state space.']
+"Moreover, because our options are defined across the whole state space, multiple options are available in every state, which allows them to be easily sequenced.",1. Introduction,[0],[0]
+"We generally indicate random variables by capital letters (e.g., R
+t ), vectors by bold letters (e.g., ✓), functions by lowercase letters (e.g., v), and sets by calligraphic font (e.g., S).",2. Background,[0],[0]
+"In the RL framework (Sutton & Barto, 1998), an agent aims to maximize cumulative reward by taking actions in an environment.",2.1. Reinforcement Learning,[0],[0]
+These actions affect the agent’s next state and the rewards it experiences.,2.1. Reinforcement Learning,[1.0],['These actions affect the agent’s next state and the rewards it experiences.']
+We use the MDP formalism throughout this paper.,2.1. Reinforcement Learning,[0],[0]
+"An MDP is a 5-tuple hS,A, r, p, i.",2.1. Reinforcement Learning,[0],[0]
+"At time t the agent is in state s
+t 2 S where it takes action a
+t 2 A that leads to the next state s t+1 2 S according to the transition probability kernel p(s0|s, a), which encodes Pr(S t+1 = s 0|S t = s,A t
+= a).",2.1. Reinforcement Learning,[0],[0]
+The agent also observes a reward R t+1 ⇠,2.1. Reinforcement Learning,[0],[0]
+"r(s, a).",2.1. Reinforcement Learning,[0],[0]
+"The agent’s goal is to learn a
+policy µ : S ⇥",2.1. Reinforcement Learning,[0],[0]
+A !,2.1. Reinforcement Learning,[0],[0]
+"[0, 1] that maximizes the expected discounted return G
+t
+.",2.1. Reinforcement Learning,[0],[0]
+"= E p,µ ⇥P1 k=0",2.1. Reinforcement Learning,[0],[0]
+"k R t+k+1|st ⇤ , where
+2 [0, 1) is the discount factor.
+",2.1. Reinforcement Learning,[0],[0]
+"It is common to use the policy improvement theorem (Bellman, 1957) when learning to maximize G
+t .",2.1. Reinforcement Learning,[0],[0]
+"One technique is to alternate between solving the Bellman equations for the action-value function q
+µk(s, a),
+q µk(s, a) .",2.1. Reinforcement Learning,[0],[0]
+"= E µk,p
+⇥",2.1. Reinforcement Learning,[0],[0]
+"G
+t |S",2.1. Reinforcement Learning,[0],[0]
+"t = s,A t = a
+⇤
+=
+X
+s 0 ,r
+p(s 0 , r|s, a) ⇥",2.1. Reinforcement Learning,[0],[0]
+"r +
+X
+a
+0
+µ
+k
+(a 0|s0)q µk(s 0 , a 0 )
+",2.1. Reinforcement Learning,[0],[0]
+"⇤
+and making the next policy, µ k+1",2.1. Reinforcement Learning,[0],[0]
+", greedy w.r.t. qµk ,
+µ k+1 .",2.1. Reinforcement Learning,[0],[0]
+=,2.1. Reinforcement Learning,[0],[0]
+"argmax
+a2A q µk(s, a),
+until converging to an optimal policy µ⇤.
+",2.1. Reinforcement Learning,[0],[0]
+Sometimes it is not feasible to learn a value for each stateaction pair due to the size of the state space.,2.1. Reinforcement Learning,[0],[0]
+"Generally, this is addressed by parameterizing q
+µ (s, a) with a set of weights ✓ 2 Rn such that q
+µ (s, a) ⇡ q µ (s, a,✓).",2.1. Reinforcement Learning,[0],[0]
+"It is common to approximate q
+µ through a linear function, i.e., q
+µ (s, a,✓) =",2.1. Reinforcement Learning,[0],[0]
+"✓> (s, a), where (s, a) denotes a linear feature representation of state s when taking action a.",2.1. Reinforcement Learning,[0],[0]
+The options framework extends RL by introducing temporally extended actions called skills or options.,2.2. The Options Framework,[1.0],['The options framework extends RL by introducing temporally extended actions called skills or options.']
+An option ! is a 3-tuple !,2.2. The Options Framework,[0],[0]
+"= hI,⇡, T i where I 2 S denotes the option’s initiation set, ⇡ : A⇥S !",2.2. The Options Framework,[0],[0]
+"[0, 1] denotes the option’s policy, and T 2 S denotes the option’s termination set.",2.2. The Options Framework,[0],[0]
+After the agent decides to follow option !,2.2. The Options Framework,[1.0],['After the agent decides to follow option !']
+"from a state in I, actions are selected according to ⇡ until the agent reaches a state in T .",2.2. The Options Framework,[0],[0]
+"Intuitively, options are higher-level actions that extend over several time steps, generalizing MDPs to semiMarkov decision processes (SMDPs) (Puterman, 1994).
+",2.2. The Options Framework,[0],[0]
+"Traditionally, options capable of moving agents to bottleneck states are sought after.",2.2. The Options Framework,[0],[0]
+"Bottleneck states are those states that connect different densely connected regions of the state space (e.g., doorways) (Şimşek & Barto, 2004; Solway et al., 2014).",2.2. The Options Framework,[1.0],"['Bottleneck states are those states that connect different densely connected regions of the state space (e.g., doorways) (Şimşek & Barto, 2004; Solway et al., 2014).']"
+"They have been shown to be very efficient for planning as these states are the states most frequently visited when considering the shortest distance between any two states in an MDP (Solway et al., 2014).",2.2. The Options Framework,[0],[0]
+"Proto-value functions (PVFs) are learned representations that capture large-scale temporal properties of an environment (Mahadevan, 2005; Mahadevan & Maggioni, 2007).",2.3. Proto-Value Functions,[1.0],"['Proto-value functions (PVFs) are learned representations that capture large-scale temporal properties of an environment (Mahadevan, 2005; Mahadevan & Maggioni, 2007).']"
+"They are obtained by diagonalizing a diffusion model, which is constructed from the MDP’s transition matrix.",2.3. Proto-Value Functions,[0],[0]
+"A diffusion model captures information flow on a graph, and
+it is commonly defined by the combinatorial graph Laplacian matrix L = D A, where A is the graph’s adjacency matrix and D the diagonal matrix whose entries are the row sums of A. Notice that the adjacency matrix A easily generalizes to a weight matrix W .",2.3. Proto-Value Functions,[0.9918759824001289],"['A diffusion model captures information flow on a graph, and it is commonly defined by the combinatorial graph Laplacian matrix L = D A, where A is the graph’s adjacency matrix and D the diagonal matrix whose entries are the row sums of A.']"
+"PVFs are defined to be the eigenvectors obtained after the eigendecomposition of L. Different diffusion models can be used to generate PVFs, such as the normalized graph Laplacian L = D 12 (D A)D 12 , which we use in this paper.",2.3. Proto-Value Functions,[1.0],"['PVFs are defined to be the eigenvectors obtained after the eigendecomposition of L. Different diffusion models can be used to generate PVFs, such as the normalized graph Laplacian L = D 12 (D A)D 12 , which we use in this paper.']"
+"PVFs capture the large-scale geometry of the environment, such as symmetries and bottlenecks.",3. Option Discovery through the Laplacian,[0],[0]
+"They are task independent, in the sense that they do not use information related to reward functions.",3. Option Discovery through the Laplacian,[1.0],"['They are task independent, in the sense that they do not use information related to reward functions.']"
+"Moreover, they are defined over the whole state space since each eigenvector induces a realvalued mapping over each state.",3. Option Discovery through the Laplacian,[1.0],"['Moreover, they are defined over the whole state space since each eigenvector induces a realvalued mapping over each state.']"
+We can imagine that options with these properties should also be useful.,3. Option Discovery through the Laplacian,[0],[0]
+"In this section we show how to use PVFs to discover options.
+",3. Option Discovery through the Laplacian,[0],[0]
+Let us start with an example.,3. Option Discovery through the Laplacian,[0],[0]
+Consider the traditional 4- room domain depicted in Figure 1c.,3. Option Discovery through the Laplacian,[0],[0]
+Gray squares represent walls and white squares represent accessible states.,3. Option Discovery through the Laplacian,[0],[0]
+"Four actions are available: up, down, right, and left.",3. Option Discovery through the Laplacian,[0],[0]
+The transitions are deterministic and the agent is not allowed to move into a wall.,3. Option Discovery through the Laplacian,[0],[0]
+"Ideally, we would like to discover options that move the agent from room to room.",3. Option Discovery through the Laplacian,[0],[0]
+"Thus, we should be able to automatically distinguish between the different rooms in the environment.",3. Option Discovery through the Laplacian,[0],[0]
+"This is exactly what PVFs do, as depicted in Figure 2 (left).",3. Option Discovery through the Laplacian,[0],[0]
+"Instead of interpreting a PVF as a basis function, we can interpret the PVF in our example as a desire to reach the highest point of the plot, corresponding to the centre of the room.",3. Option Discovery through the Laplacian,[0],[0]
+"Because the sign of an eigenvector is arbitrary, a PVF can also be interpreted as a desire to reach the lowest point of the plot, corresponding to the opposite room.",3. Option Discovery through the Laplacian,[0],[0]
+"In this paper we use the eigenvectors in both directions (i.e., both signs).
+",3. Option Discovery through the Laplacian,[0],[0]
+An eigenpurpose formalizes the interpretation above by defining an intrinsic reward function.,3. Option Discovery through the Laplacian,[1.0],['An eigenpurpose formalizes the interpretation above by defining an intrinsic reward function.']
+"We can see it as defining a purpose for the agent, that is, to maximize the discounted sum of these rewards.
+",3. Option Discovery through the Laplacian,[0],[0]
+Definition 3.1 (Eigenpurpose).,3. Option Discovery through the Laplacian,[0],[0]
+"An eigenpurpose is the intrinsic reward function re
+i
+(s, s 0 ) of a proto-value function
+e 2 R|S| such that
+r e i (s, s 0 )",3. Option Discovery through the Laplacian,[0],[0]
+"= e > ( (s0) (s)), (1)
+where (x) denotes the feature representation of state x.
+Notice that an eigenpurpose, in the tabular case, can be written as re
+i
+(s, s 0 )",3. Option Discovery through the Laplacian,[0],[0]
+"= e[s 0 ] e[s].
+",3. Option Discovery through the Laplacian,[0],[0]
+"We can now define a new MDP to learn the option associated with the purpose, Me
+i = hS,A[{?}, re i , p, i, where
+the reward function is defined as in (1) and the action set is augmented by the action terminate (?), which allows the agent to leave Me
+i without any cost.",3. Option Discovery through the Laplacian,[0],[0]
+The state space and the transition probability kernel remain unchanged from the original problem.,3. Option Discovery through the Laplacian,[0],[0]
+"The discount rate can be chosen arbitrarily, although it impacts the timescale the option encodes.
+",3. Option Discovery through the Laplacian,[0],[0]
+"With Me i we define a new state-value function ve ⇡ (s), for policy ⇡, as the expected value of the cumulative discounted intrinsic reward if the agent starts in state s and follows policy ⇡ until termination.",3. Option Discovery through the Laplacian,[0],[0]
+"Similarly, we define a new action-value function qe
+⇡ (s, a) as the expected value of the cumulative discounted intrinsic reward if the agent starts in state s, takes action a, and then follows policy ⇡ until termination.",3. Option Discovery through the Laplacian,[0],[0]
+"We can also describe the optimal value function for any eigenpurpose obtained through e:
+v e ⇤(s) = max
+⇡
+v e ⇡ (s) and qe⇤(s, a) = max ⇡ q e ⇡ (s, a).
+",3. Option Discovery through the Laplacian,[0],[0]
+"These definitions naturally lead us to eigenbehaviors.
+",3. Option Discovery through the Laplacian,[0],[0]
+Definition 3.2 (Eigenbehavior).,3. Option Discovery through the Laplacian,[0],[0]
+An eigenbehavior is a policy e : S !,3. Option Discovery through the Laplacian,[0],[0]
+"A that is optimal with respect to the eigenpurpose re
+i
+, i.e., e(s) = argmax a2A",3. Option Discovery through the Laplacian,[0],[0]
+"q e ⇤(s, a).
+",3. Option Discovery through the Laplacian,[0],[0]
+"Finding the optimal policy ⇡e⇤ now becomes a traditional RL problem, with a different reward function.",3. Option Discovery through the Laplacian,[0],[0]
+"Importantly, this reward function tends to be dense, avoiding challenging situations due to exploration issues.",3. Option Discovery through the Laplacian,[0],[0]
+"In this paper we use policy iteration to solve for an optimal policy.
+",3. Option Discovery through the Laplacian,[0],[0]
+"If each eigenpurpose defines an option, its corresponding eigenbehavior is the option’s policy.",3. Option Discovery through the Laplacian,[0],[0]
+"Thus, we need to define the option’s initiation and termination set.",3. Option Discovery through the Laplacian,[1.0],"['Thus, we need to define the option’s initiation and termination set.']"
+"An option should be available in every state where it is possible to achieve its purpose, and to terminate when it is achieved.
+",3. Option Discovery through the Laplacian,[0],[0]
+"When defining the MDP to learn the option, we augmented the agent’s action set with the terminate action, allowing the agent to interrupt the option anytime.",3. Option Discovery through the Laplacian,[0],[0]
+"We want options to terminate when the agent achieves its purpose, i.e., when it is unable to accumulate further positive intrinsic rewards.",3. Option Discovery through the Laplacian,[0],[0]
+"With the defined reward function, this happens when the agent reaches the state with largest value in the eigenpurpose (or a local maximum when < 1).",3. Option Discovery through the Laplacian,[0],[0]
+Any subsequent reward will be negative.,3. Option Discovery through the Laplacian,[0],[0]
+"We are able to formalize this con-
+dition by defining q",3. Option Discovery through the Laplacian,[0],[0]
+"(s,?)",3. Option Discovery through the Laplacian,[0],[0]
+.= 0,3. Option Discovery through the Laplacian,[0],[0]
+"for all e. When the terminate action is selected, control is returned to the higher level policy (Dietterich, 2000).",3. Option Discovery through the Laplacian,[0],[0]
+"An option following a policy e terminates when qe
+(s, a)  0 for all a 2 A.",3. Option Discovery through the Laplacian,[0],[0]
+"We define the initiation set to be all states in which there exists an action a 2 A such that qe
+(s, a) > 0.",3. Option Discovery through the Laplacian,[0],[0]
+"Thus, the option’s policy is ⇡e(s) =",3. Option Discovery through the Laplacian,[0],[0]
+"argmax
+a2A",3. Option Discovery through the Laplacian,[0],[0]
+"[{?} q e ⇡ (s, a).",3. Option Discovery through the Laplacian,[0],[0]
+We refer to the options discovered with our approach as eigenoptions.,3. Option Discovery through the Laplacian,[0],[0]
+"The eigenoption corresponding to the example at the beginning of this section is depicted in Figure 2 (right).
+",3. Option Discovery through the Laplacian,[0],[0]
+"For any eigenoption, there is always at least one state in which it terminates, as we now show.",3. Option Discovery through the Laplacian,[0],[0]
+Theorem 3.1 (Option’s Termination).,3. Option Discovery through the Laplacian,[0],[0]
+"Consider an eigenoption o = hI
+o
+,⇡
+o , T o",3. Option Discovery through the Laplacian,[0],[0]
+i and < 1.,3. Option Discovery through the Laplacian,[0],[0]
+"Then, in an MDP with finite state space, T
+o
+is nonempty.
+",3. Option Discovery through the Laplacian,[0],[0]
+Proof.,3. Option Discovery through the Laplacian,[0],[0]
+"We can write the Bellman equation in the matrix form: v = r+ Tv, where v is a finite column vector with one entry per state encoding its value function.",3. Option Discovery through the Laplacian,[0],[0]
+"From (1) we have r = Tw w with w = (s)>e, where e denotes the eigenpurpose of interest.",3. Option Discovery through the Laplacian,[0],[0]
+"Therefore:
+v +w = Tw + Tv
+= (1 )Tw + T (v +w) = (1 )(I T ) 1Tw.
+",3. Option Discovery through the Laplacian,[0],[0]
+||v +w||1 = (1 )||(I,3. Option Discovery through the Laplacian,[0],[0]
+T ),3. Option Discovery through the Laplacian,[0],[0]
+1Tw||1 ||v +w||1  (1 )||(I,3. Option Discovery through the Laplacian,[0],[0]
+"T ) 1T ||1||w||1
+||v +w||1  (1 ) 1 (1 ) ||w||1
+||v +w||1  ||w||1
+We can shift w by any finite constant without changing the reward, i.e., Tw w = T (w+ ) (w+ )",3. Option Discovery through the Laplacian,[0],[0]
+"because T1 = 1 since P j T i,j
+= 1.",3. Option Discovery through the Laplacian,[0],[0]
+"Hence, we can assume w 0.",3. Option Discovery through the Laplacian,[0],[0]
+"Let s ⇤ = argmax
+s
+w
+s ⇤ , so that w s ⇤ = ||w||1.",3. Option Discovery through the Laplacian,[0],[0]
+"Clearly vs⇤ 
+0, otherwise ||v +w||1 |vs⇤ +",3. Option Discovery through the Laplacian,[0],[0]
+ws⇤ | = vs⇤ +,3. Option Discovery through the Laplacian,[0],[0]
+"ws⇤ > w
+s ⇤ = ||w||1, arriving at a contradiction.
+",3. Option Discovery through the Laplacian,[0],[0]
+This result is applicable in both the tabular and linear function approximation case.,3. Option Discovery through the Laplacian,[0],[0]
+An algorithm that does not rely on knowing the underlying graph is provided in Section 5.,3. Option Discovery through the Laplacian,[0],[0]
+"We used three MDPs in our empirical study (c.f. Figure 1): an open room, an I-Maze, and the 4-room domain.",4. Empirical Evaluation,[0],[0]
+Their transitions are deterministic and gray squares denote walls.,4. Empirical Evaluation,[0],[0]
+"Agents have access to four actions: up, down, right, and left.",4. Empirical Evaluation,[0],[0]
+"When an action that would have taken the agent into a wall is chosen, the agent’s state does not change.",4. Empirical Evaluation,[0],[0]
+"We demonstrate three aspects of our framework:1
+• How the eigenoptions present specific purposes.",4. Empirical Evaluation,[0],[0]
+"Interestingly, options leading to bottlenecks are not the first ones we discover.
+",4. Empirical Evaluation,[0],[0]
+"• How eigenoptions improve exploration by reducing the expected number of steps required to navigate between any two states.
+",4. Empirical Evaluation,[0],[0]
+• How eigenoptions help agents to accumulate reward faster.,4. Empirical Evaluation,[0],[0]
+We show how few options may hurt the agents’ performance while enough options speed up learning.,4. Empirical Evaluation,[0],[0]
+"In the PVF theory, the “smoothest” eigenvectors, corresponding to the smallest eigenvalues, are preferred (Mahadevan & Maggioni, 2007).",4.1. Discovered Options,[0],[0]
+"The same intuition applies to eigenoptions, with the eigenpurposes corresponding to the smallest eigenvalues being preferred.",4.1. Discovered Options,[0],[0]
+"Figures 3, 4, and 5 depict the first eigenoptions discovered in the three domains used for evaluation.
+",4.1. Discovered Options,[0],[0]
+"Eigenoptions do not necessarily look for bottleneck states, 1Python code can be found at: https://github.com/mcmachado/options
+allowing us to apply our algorithm in many environments in which there are no obvious, or meaningful, bottlenecks.",4.1. Discovered Options,[0],[0]
+"We discover meaningful options in these environments, such as walking down a corridor, or going to the corners of an open room.",4.1. Discovered Options,[1.0],"['We discover meaningful options in these environments, such as walking down a corridor, or going to the corners of an open room.']"
+"Interestingly, doorways are not the first options we discover in the 4-room domain (the fifth eigenoption is the first to terminate at the entrance of a doorway).",4.1. Discovered Options,[0],[0]
+"In the next sections we provide empirical evidence that eigenoptions are useful, and often more so than bottleneck options.",4.1. Discovered Options,[0],[0]
+"A major challenge for agents to explore an environment is to be decisive, avoiding the dithering commonly observed in random walks (Machado & Bowling, 2016; Osband et al., 2016).",4.2. Exploration,[0],[0]
+Options provide such decisiveness by operating in a higher level of abstraction.,4.2. Exploration,[0],[0]
+"Agents performing a random walk, when equipped with options, are expected to cover larger distances in the state space, navigating back and forth between subgoals instead of dithering around the starting state.",4.2. Exploration,[0],[0]
+"However, options need to satisfy two conditions to improve exploration: (1) they have to be available in several parts of the state space, ensuring the agent always has access to many different options; and (2) they have to operate at different time scales.",4.2. Exploration,[0],[0]
+"For instance, in the 4-room domain, it is unlikely an agent randomly selects enough primitive actions leading it to a corner if all options move the agent between doorways.",4.2. Exploration,[0],[0]
+"An important result in this section is to show that it is very unlikely for an agent to explore the whole environment if it keeps going back and forth between similar high-level goals.
+",4.2. Exploration,[0],[0]
+Eigenoptions satisfy both conditions.,4.2. Exploration,[0],[0]
+"As demonstrated in Section 4.1, eigenoptions are often defined in the whole state space, allowing sequencing.",4.2. Exploration,[0],[0]
+"Moreover, PVFs can be seen as a “frequency” basis, with different PVFs being associated with different frequencies (Mahadevan & Maggioni, 2007).",4.2. Exploration,[0],[0]
+"The corresponding eigenoptions also operate
+at different frequencies, with the length of a trajectory until termination varying.",4.2. Exploration,[0],[0]
+This behavior can be seen when comparing the second and fourth eigenoptions in the 10 ⇥ 10 grid (Figure 3).,4.2. Exploration,[0],[0]
+"The fourth eigenoption terminates, on expectation, twice as often as the second eigenoption.
+",4.2. Exploration,[0],[0]
+In this section we show that eigenoptions improve exploration.,4.2. Exploration,[0],[0]
+"We do so by introducing a new metric, which we call diffusion time.",4.2. Exploration,[0],[0]
+Diffusion time encodes the expected number of steps required to navigate between two states randomly chosen in the MDP while following a random walk.,4.2. Exploration,[1.0],['Diffusion time encodes the expected number of steps required to navigate between two states randomly chosen in the MDP while following a random walk.']
+A small expected number of steps implies that it is more likely that the agent will reach all states with a random walk.,4.2. Exploration,[0],[0]
+"We discuss how this metric can be computed in the Appendix.
+Figure 6 depicts, for our the three environments, the diffusion time with options and the diffusion time using only primitive actions.",4.2. Exploration,[0],[0]
+"We add options incrementally in order of increasing eigenvalue when computing the diffusion time for different sets of options.
+",4.2. Exploration,[0.9999999413302859],['We add options incrementally in order of increasing eigenvalue when computing the diffusion time for different sets of options.']
+"The first options added hurt exploration, but when enough options are added, exploration is greatly improved when compared to a random walk using only primitive actions.",4.2. Exploration,[1.0],"['The first options added hurt exploration, but when enough options are added, exploration is greatly improved when compared to a random walk using only primitive actions.']"
+"The fact that few options hurt exploration may be surprising at first, based on the fact that few useful options are generally sought after in the literature.",4.2. Exploration,[0],[0]
+"However, this is a major difference between using options for planning and for learning.",4.2. Exploration,[0],[0]
+"In planning, options shortcut the agents’ trajectories, pruning the search space.",4.2. Exploration,[0],[0]
+All other actions are still taken into consideration.,4.2. Exploration,[0],[0]
+"When exploring, a uniformly random policy over options and primitive actions skews where
+agents spend their time.",4.2. Exploration,[0],[0]
+"Options that are much longer than primitive actions reduce the likelihood that an agent will deviate much from the options’ trajectories, since sampling an option may undo dozens of primitive actions.",4.2. Exploration,[0],[0]
+"This biasing is often observed when fewer options are available.
+",4.2. Exploration,[0],[0]
+The discussion above can be made clearer with an example.,4.2. Exploration,[0],[0]
+"In the 4-room domain, if the only options available are those leading the agent to doorways (c.f. Appendix), it is less likely the agent will reach the outer corners.",4.2. Exploration,[0],[0]
+To do so the agent would have to select enough consecutive primitive actions without sampling an option.,4.2. Exploration,[1.0],['To do so the agent would have to select enough consecutive primitive actions without sampling an option.']
+"Also, it is very likely agents will be always moving between rooms, never really exploring inside a room.",4.2. Exploration,[0],[0]
+These issues are mitigated with eigenoptions.,4.2. Exploration,[0],[0]
+"The first eigenoptions lead agents to individual rooms, but other eigenoptions operate in different time scales, allowing agents to explore different parts of rooms.
+",4.2. Exploration,[0],[0]
+"Figure 6d supports the intuition that options leading to bottleneck states are not sufficient, by themselves, for exploration.",4.2. Exploration,[0],[0]
+It shows how the diffusion time in the 4-room domain is increased when only bottleneck options are used.,4.2. Exploration,[0],[0]
+"As in the PVF literature, the ideal number of options to be used by an agent can be seen as a model selection problem.",4.2. Exploration,[1.0],"['As in the PVF literature, the ideal number of options to be used by an agent can be seen as a model selection problem.']"
+We now illustrate the usefulness of our options when the agent’s goal is to accumulate reward.,4.3. Accumulating Rewards,[0],[0]
+We also study the impact of an increasing number of options in such a task.,4.3. Accumulating Rewards,[0],[0]
+"In these experiments, the agent starts at the bottom left cor-
+ner and its goal is to reach the top right corner.",4.3. Accumulating Rewards,[0],[0]
+"The agent observes a reward of 0 until the goal is reached, when it observes a reward of +1.",4.3. Accumulating Rewards,[0],[0]
+"We used Q-Learning (Watkins & Dayan, 1992) (↵ = 0.1, = 0.9) to learn a policy over primitive actions.",4.3. Accumulating Rewards,[0],[0]
+"The behavior policy chooses uniformly over primitive actions and options, following them until termination.",4.3. Accumulating Rewards,[0],[0]
+"Figure 7 depicts, after learning for a given number of episodes, the average over 100 trials of the agents’ final performance.",4.3. Accumulating Rewards,[0],[0]
+"Episodes were 100 time steps long, and we learned for 250 episodes in the 10 ⇥ 10 grid and in the I-Maze, and for 500 episodes in the 4-room domain.
+",4.3. Accumulating Rewards,[0],[0]
+In most scenarios eigenoptions improve performance.,4.3. Accumulating Rewards,[0],[0]
+"As in the previous section, exceptions occur when only a few options are added to the agent’s action set.",4.3. Accumulating Rewards,[0],[0]
+The best results were obtained using 64 options.,4.3. Accumulating Rewards,[0],[0]
+"Despite being an additional parameter, our results show that the agent’s performance is fairly robust across different numbers of options.
+",4.3. Accumulating Rewards,[0],[0]
+Eigenoptions are task-independent by construction.,4.3. Accumulating Rewards,[0],[0]
+Additional results in the appendix show how the same set of eigenoptions is able to speed-up learning in different tasks.,4.3. Accumulating Rewards,[1.0],['Additional results in the appendix show how the same set of eigenoptions is able to speed-up learning in different tasks.']
+"In the appendix we also compare eigenoptions to random options, that is, options that use a random state as subgoal.",4.3. Accumulating Rewards,[1.0],"['In the appendix we also compare eigenoptions to random options, that is, options that use a random state as subgoal.']"
+So far we have assumed that agents have access to the adjacency matrix representing the underlying MDP.,5. Approximate Option Discovery,[0],[0]
+"However, in practical settings this is generally not true.",5. Approximate Option Discovery,[0],[0]
+"In fact, the number of states in these settings is often so large that agents rarely visit the same state twice.",5. Approximate Option Discovery,[0],[0]
+"These problems are generally tackled with sample-based methods and some sort of function approximation.
+",5. Approximate Option Discovery,[0.9999999162540526],['These problems are generally tackled with sample-based methods and some sort of function approximation.']
+In this section we propose a sample-based approach for option discovery that asymptotically discovers eigenoptions.,5. Approximate Option Discovery,[0],[0]
+We then extend this algorithm to linear function approximation.,5. Approximate Option Discovery,[0],[0]
+We provide anecdotal evidence in Atari 2600 games that this relatively naı̈ve sample-based approach to function approximation discovers purposeful options.,5. Approximate Option Discovery,[0],[0]
+"In the online setting, agents must sample trajectories.",5.1. Sample-based Option Discovery,[0],[0]
+"Naturally, one can sample trajectories until one is able to perfectly construct the MDP’s adjacency matrix, as suggested by Mahadevan & Maggioni (2007).",5.1. Sample-based Option Discovery,[1.0],"['Naturally, one can sample trajectories until one is able to perfectly construct the MDP’s adjacency matrix, as suggested by Mahadevan & Maggioni (2007).']"
+"However, this approach does not easily extend to linear function approximation.",5.1. Sample-based Option Discovery,[0],[0]
+"In this section we provide an approach that does not build the adjacency matrix allowing us to extend the concept of eigenpurposes to linear function approximation.
+",5.1. Sample-based Option Discovery,[0],[0]
+"In our algorithm, a sample transition is added to a matrix T if it was not previously encountered.",5.1. Sample-based Option Discovery,[0],[0]
+"The transition is added as the difference between the current and previous observations, i.e., (s0) (s).",5.1. Sample-based Option Discovery,[0],[0]
+"In the tabular case we define (s) to be the one-hot encoding of state s. Once enough transitions have been sampled, we perform a singular value decomposition on the matrix T such that T = U⌃V
+>.",5.1. Sample-based Option Discovery,[0.9999999768581437],"['In the tabular case we define (s) to be the one-hot encoding of state s. Once enough transitions have been sampled, we perform a singular value decomposition on the matrix T such that T = U⌃V >.']"
+"We use the columns of V , which correspond to the right-eigenvectors of T , to generate the eigenpurposes.",5.1. Sample-based Option Discovery,[0],[0]
+"The intrinsic reward and the termination criterion for an eigenbehavior are the same as before.
+",5.1. Sample-based Option Discovery,[0],[0]
+Matrix T is known as the incidence matrix.,5.1. Sample-based Option Discovery,[0],[0]
+"If all transitions in the graph are sampled once, for tabular representations, this algorithm discovers the same options we obtain with the combinatorial Laplacian.",5.1. Sample-based Option Discovery,[1.0],"['If all transitions in the graph are sampled once, for tabular representations, this algorithm discovers the same options we obtain with the combinatorial Laplacian.']"
+"The theorem below states the equivalence between the obtained eigenpurposes.
+",5.1. Sample-based Option Discovery,[0],[0]
+Theorem 5.1.,5.1. Sample-based Option Discovery,[0],[0]
+"Consider the SVD of T = U T ⌃ T V > T , with each row of T consisting of the difference between observations, i.e., (s0) (s).",5.1. Sample-based Option Discovery,[0],[0]
+"In the tabular case, if all transitions in the MDP have been sampled once, the orthonormal eigenvectors of L are the columns of V >
+T
+.
+Proof.",5.1. Sample-based Option Discovery,[0.9981834493521684],"['In the tabular case, if all transitions in the MDP have been sampled once, the orthonormal eigenvectors of L are the columns of V > T .']"
+"Given the SVD decomposition of a matrix A = U⌃V
+>, the columns of V are the eigenvectors of A > A (Strang, 2005).",5.1. Sample-based Option Discovery,[0],[0]
+"We know that T>T = 2L, where L = D W (Lemma 5.1, c.f. Appendix).",5.1. Sample-based Option Discovery,[0],[0]
+"Thus, the columns of V
+T are the eigenvectors of T>T , which can be rewritten as 2(D W ).",5.1. Sample-based Option Discovery,[0],[0]
+"Therefore, the columns of V
+T are also the eigenvectors of L.
+There is a trade-off between reconstructing the adjacency matrix and constructing the incidence matrix.",5.1. Sample-based Option Discovery,[0],[0]
+"In MDPs in which states are sparsely connected, such as the I-Maze, the latter is preferred since it has fewer transitions than states.",5.1. Sample-based Option Discovery,[0],[0]
+"However, what makes this result interesting is the fact that our algorithm can be easily generalized to linear function approximation.",5.1. Sample-based Option Discovery,[0],[0]
+An adjacency matrix is not very useful when the agent has access only to features of the state.,5.2. Function Approximation,[0],[0]
+"However, we can use the intuition about the incidence matrix to propose an algorithm compatible with linear function approximation.
+",5.2. Function Approximation,[0],[0]
+"In fact, to apply the algorithm proposed in the previous section, we just need to define what constitutes a new transition.",5.2. Function Approximation,[0],[0]
+"We define two vectors, t and t0, to be identical if and only if t t0 = 0.",5.2. Function Approximation,[0],[0]
+We then use a set data structure to avoid duplicates when storing (s0) (s).,5.2. Function Approximation,[0],[0]
+"This is a naı̈ve approach, but it provides encouraging evidence eigenoptions generalize to linear function approximation.",5.2. Function Approximation,[0],[0]
+"We expect more involved methods to perform even better.
+",5.2. Function Approximation,[0],[0]
+"We tested our method in the ALE (Bellemare et al., 2013).",5.2. Function Approximation,[0],[0]
+"The agent’s representation consists of the emulator’s RAM state (1,024 bits).",5.2. Function Approximation,[0],[0]
+"The final incidence matrix in which we ran the SVD had 25,000 rows, which we sampled uniformly from the set of observed transitions.",5.2. Function Approximation,[0],[0]
+"We provide further details of the experimental setup in the appendix.
+",5.2. Function Approximation,[0],[0]
+"In the tabular case we start selecting eigenpurposes generated by the eigenvectors with smallest eigenvalue, because these are the “smoothest” ones.",5.2. Function Approximation,[0],[0]
+"However, it is not clear such intuition holds here because we are in the function approximation setting and the matrix of transitions does not contain all possible transitions.",5.2. Function Approximation,[0],[0]
+"Therefore, we analyzed, for each game, all 1,024 discovered options.
+",5.2. Function Approximation,[0],[0]
+We approximate these options greedily ( = 0) with the ALE emulator’s look-ahead.,5.2. Function Approximation,[0],[0]
+"The next action a0 for an eigenpurpose e is selected as argmax b2A R s 0 p(s 0|s, b) re i (s, s 0 ).
+",5.2. Function Approximation,[0],[0]
+"Even with such a myopic action selection mechanism we
+were able to obtain options that clearly demonstrate intent.",5.2. Function Approximation,[0],[0]
+"In FREEWAY, a game in which a chicken is expected to cross the road while avoiding cars, we observe options in which the agent clearly wants to reach a specific lane in the street.",5.2. Function Approximation,[0],[0]
+Figure 8 (left) depicts where the chicken tends to be when the option is executed.,5.2. Function Approximation,[0],[0]
+On the right we see a histogram representing the chicken’s height during an episode.,5.2. Function Approximation,[0],[0]
+"We can clearly see how the chicken’s height varies for different options, and how a random walk over primitive actions (rand) does not explore the environment properly.",5.2. Function Approximation,[0],[0]
+"Remarkably, option #445 scores 28 points at the end of the episode, without ever explicitly taking the reward signal into consideration.",5.2. Function Approximation,[0],[0]
+"This performance is very close to those obtained by state-of-the-art algorithms.
+",5.2. Function Approximation,[0],[0]
+"In MONTEZUMA’S REVENGE, a game in which the agent needs to navigate through a room to pickup a key so it can open a door, we also observe the agent having the clear intent of reaching particular positions on the screen, such as staircases, ropes and doors (Figure 9).",5.2. Function Approximation,[0],[0]
+"Interestingly, the options we discover are very similar to those handcrafted by Kulkarni et al. (2016) when evaluating the usefulness of options to tackle such a game.",5.2. Function Approximation,[0],[0]
+A video of the highlighted options can be found online.2,5.2. Function Approximation,[0],[0]
+Most algorithms for option discovery can be seen as topdown approaches.,6. Related Work,[0],[0]
+"Agents use trajectories leading to informative rewards3 as a starting point, decomposing and refining them into options.",6. Related Work,[0],[0]
+"There are many approaches based on this principle, such as methods that use the observed rewards to generate intrinsic rewards leading to new value functions (e.g., McGovern & Barto, 2001; Menache et al., 2002; Konidaris & Barto, 2009), methods that use the observed rewards to climb a gradient (e.g., Mankowitz et al., 2016; Vezhnevets et al., 2016; Bacon et al., 2017), or to do
+2 https://youtu.be/2BVicx4CDWA
+3We define an informative reward to be the signal that informs the agent it has reached a goal.",6. Related Work,[0],[0]
+"For example, when trying to escape from a maze, we consider 0 to be an informative reward if the agent observes rewards of value 1 in every time step it is inside the maze.",6. Related Work,[0],[0]
+"A different example is a positive reward observed by an agent that typically observes rewards of value 0.
+",6. Related Work,[0],[0]
+"probabilistic inference (Daniel et al., 2016).",6. Related Work,[0],[0]
+"However, such approaches are not applicable in large state spaces with sparse rewards.",6. Related Work,[0],[0]
+"If informative rewards are unlikely to be found by an agent using only primitive actions, requiring long or specific sequences of actions, options are equally unlikely to be discovered.
+",6. Related Work,[0],[0]
+"Our algorithm can be seen as a bottom-up approach, in which options are constructed before the agent observes any informative reward.",6. Related Work,[0],[0]
+These options are composed to generate the desired policy.,6. Related Work,[0],[0]
+"Options discovered this way tend to be independent of an agent’s intention, and are potentially useful in many different tasks (Gregor et al., 2016).",6. Related Work,[0],[0]
+"Such options can also be seen as being useful for exploration by allowing agents to commit to a behavior for an extended period of time (Machado & Bowling, 2016).",6. Related Work,[0],[0]
+"Among the approaches to discover options without using extrinsic rewards are the use of global or local graph centrality measures (Şimşek & Barto, 2004; Şimşek et al., 2005; Şimşek & Barto, 2008) and clustering of states (Mannor et al., 2004; Bacon, 2013; Lakshminarayanan et al., 2016).",6. Related Work,[0],[0]
+"Interestingly, Şimşek et al. (2005) and Lakshminarayanan et al. (2016) also use the graph Laplacian in their algorithm, but to identify bottleneck states.
+",6. Related Work,[0],[0]
+Baranes & Oudeyer (2013) and Moulin-Frier & Oudeyer (2013) show how one can build policies to explicitly assist agents to explore the environment.,6. Related Work,[0],[0]
+The proposed algorithms self-generate subgoals in order to maximize learning progress.,6. Related Work,[0],[0]
+The policies built can be seen as options.,6. Related Work,[0],[0]
+"Recently, Solway et al. (2014) proved that “optimal hierarchy minimizes the geometric mean number of trial-and-error attempts necessary for the agent to discover the optimal policy for any selected task (...)”.",6. Related Work,[0],[0]
+"Our experiments confirm this result, although we propose diffusion time as a different metric to evaluate how options improve exploration.
+",6. Related Work,[0],[0]
+The idea of discovering options by learning to control parts of the environment is also related to our work.,6. Related Work,[0],[0]
+"Eigenpurposes encode different rates of change in the agents representation of the world, while the corresponding options aim at maximizing such change.",6. Related Work,[0],[0]
+Others have also proposed ways to discover options based on the idea of learning to control the environment.,6. Related Work,[0],[0]
+"Hengst (2002), for instance, proposes an algorithm that explicitly models changes in the variables that form the agent’s representation.",6. Related Work,[0],[0]
+"Recently, Gregor et al. (2016) proposed an algorithm in which agents discover options by maximizing a notion of empowerment (Salge et al., 2014), where the agent aims at getting to states with a maximal set of available intrinsic options.
+",6. Related Work,[0],[0]
+"Continual Curiosity driven Skill Acquisition (CCSA) (Kompella et al., In Press) is the closest approach to ours.",6. Related Work,[0],[0]
+CCSA also discovers skills that maximize an intrinsic reward obtained by some extracted representation.,6. Related Work,[0],[0]
+"While we use PVFs, CCSA uses Incremental Slow Feature Analysis
+(SFA) (Kompella et al., 2011) to define the intrinsic reward function.",6. Related Work,[0],[0]
+"Sprekeler (2011) has shown that, given a specific choice of adjacency function, PVFs are equivalent to SFA (Wiskott & Sejnowski, 2002).",6. Related Work,[0],[0]
+SFA becomes an approximation of PVFs if the function space used in the SFA does not allow arbitrary mappings from the observed data to an embedding.,6. Related Work,[0],[0]
+"Our method differs in how we define the initiation and termination sets, as well as in the objective being maximized.",6. Related Work,[0],[0]
+"CCSA acquires skills that produce a large variation in the slow-feature outputs, leading to options that seek for bottlenecks.",6. Related Work,[0],[0]
+"Our approach does not seek for bottlenecks, focusing on traversing different directions of the learned representation.",6. Related Work,[0],[0]
+"Being able to properly abstract MDPs into SMDPs can reduce the overall expense of learning (Sutton et al., 1999; Solway et al., 2014), mainly when the learned options are reused in multiple tasks.",7. Conclusion,[0],[0]
+"On the other hand, the wrong hierarchy can hinder the agents’ learning process, moving the agent away from desired goal states.",7. Conclusion,[0],[0]
+"Current algorithms for option discovery often depend on an initial informative reward signal, which may not be readily available in large MDPs.",7. Conclusion,[0],[0]
+"In this paper, we introduced an approach that is effective in different environments, for a multitude of tasks.
+",7. Conclusion,[0],[0]
+"Our algorithm uses the graph Laplacian, being directly related to the concept of proto-value functions.",7. Conclusion,[0],[0]
+The learned representation informs the agent what are meaningful options to be sought after.,7. Conclusion,[0],[0]
+The discovered options can be seen as traversing each one of the dimensions in the learned representation.,7. Conclusion,[0],[0]
+We believe successful algorithms in the future will be able to simultaneously discover representations and options.,7. Conclusion,[0],[0]
+"Agents will use their learned representation to discover options, which will be used to further explore the environment, improving the agent’s representation.
+",7. Conclusion,[0],[0]
+"Interestingly, the options first discovered by our approach do not necessarily find bottlenecks, which are commonly sought after.",7. Conclusion,[0],[0]
+"In this paper we showed how bottleneck options can hinder exploration strategies if naively added to the agent’s action set, and how the options we discover can help an agent to explore.",7. Conclusion,[0],[0]
+"Also, we have shown how the discovered options can be used to accumulate reward in a multitude of tasks, leveraging their exploratory properties.
+",7. Conclusion,[0],[0]
+There are several exciting avenues for future work.,7. Conclusion,[0],[0]
+"As noted, SFA can be seen as an approximation to PVFs.",7. Conclusion,[0],[0]
+It would be interesting to compare such an approach to eigenoptions.,7. Conclusion,[0],[0]
+It would also be interesting to see if the options we discover can be generated incrementally and with incomplete graphs.,7. Conclusion,[0],[0]
+"Finally, one can also imagine extensions to the proposed algorithm where a hierarchy of options is built.",7. Conclusion,[0],[0]
+"The authors would like to thank Will Dabney, Rémi Munos and Csaba Szepesvári for useful discussions.",Acknowledgements,[0],[0]
+This work was supported by grants from Alberta Innovates Technology Futures and the Alberta Machine Intelligence Institute (Amii).,Acknowledgements,[0],[0]
+Computing resources were provided by Compute Canada through CalculQuébec.,Acknowledgements,[0],[0]
+Representation learning and option discovery are two of the biggest challenges in reinforcement learning (RL).,abstractText,[0],[0]
+Proto-value functions (PVFs) are a well-known approach for representation learning in MDPs.,abstractText,[0],[0]
+In this paper we address the option discovery problem by showing how PVFs implicitly define options.,abstractText,[0],[0]
+"We do it by introducing eigenpurposes, intrinsic reward functions derived from the learned representations.",abstractText,[0],[0]
+The options discovered from eigenpurposes traverse the principal directions of the state space.,abstractText,[0],[0]
+They are useful for multiple tasks because they are discovered without taking the environment’s rewards into consideration.,abstractText,[0],[0]
+"Moreover, different options act at different time scales, making them helpful for exploration.",abstractText,[0],[0]
+We demonstrate features of eigenpurposes in traditional tabular domains as well as in Atari 2600 games.,abstractText,[0],[0]
+A Laplacian Framework for Option Discovery in Reinforcement Learning,title,[0],[0]

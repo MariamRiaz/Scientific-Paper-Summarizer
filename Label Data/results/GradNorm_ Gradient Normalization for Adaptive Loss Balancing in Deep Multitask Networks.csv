@@ -1,0 +1,1427 @@
+0,1,label2,summary_sentences
+"ar X
+iv :1
+80 2.
+06 09
+3v 4
+[ cs
+.L G",text,[0],[0]
+"Residual networks (He et al., 2016) are deep neural networks in which, roughly, subnetworks determine how a feature transformation should differ from the identity, rather than how it should differ from zero.",1 Introduction,[0],[0]
+"After enabling the winning entry in the ILSVRC 2015 classification task, they have become established as a central idea in deep networks.
+",1 Introduction,[0],[0]
+Hardt & Ma (2017) provided a theoretical analysis that shed light on residual networks.,1 Introduction,[0],[0]
+"They showed that (a) any linear transformation with a positive determinant and a bounded condition number can be approximated by a “deep linear network” of the form f(x) = ΘLΘL−1...Θ1x, where,
+for large L, each layer Θi is close to the identity, and (b) for networks that compose near-identity transformations this way, if the excess loss is large, then the gradient is steep.",1 Introduction,[0],[0]
+"Bartlett et al. (2018) extended both results to the nonlinear case, showing that any smooth, bi-Lipschitz map can be represented as a composition of near-identity functions, and that a suboptimal loss in a composition of near-identity functions implies that the functional gradient of the loss with respect to a function in the composition cannot be small.",1 Introduction,[0],[0]
+"These results are interesting because they suggest that, in many cases, this non-convex objective may be efficiently optimized through gradient descent if the layers stay close to the identity, possibly with the help of a regularizer.
+",1 Introduction,[0],[0]
+"This paper describes and analyzes such algorithms for linear regression with d input variables and d response variables with respect to the quadratic loss, the same setting analyzed by Hardt and Ma.",1 Introduction,[0],[0]
+We abstract away sampling issues by analyzing an algorithm that performs gradient descent with respect to the population loss.,1 Introduction,[0],[0]
+We focus on the case that the distribution on the input patterns is isotropic.,1 Introduction,[0],[0]
+(The data may be transformed through a preprocessing step to satisfy this constraint.),1 Introduction,[0],[0]
+"
+",1 Introduction,[0],[0]
+"The traditional analysis of convex optimization algorithms (see Boyd & Vandenberghe, 2004) provides a bound in terms of the quality of the initial solution, together with bounds on the eigenvalues of the Hessian of the loss.",1 Introduction,[0],[0]
+"For the non-convex problem of this paper, we show that if gradient descent starts at the identity in each layer, and if the excess loss of that initial solution is bounded by a constant, then the Hessian remains well-conditioned enough throughout training for successful learning.",1 Introduction,[0],[0]
+"Specifically, there is a constant c0 such that, if the excess loss of the identity (over the least squares linear map) is at most c0, then back-propagation initialized at the identity in each layer achieves loss within at most ǫ of optimal in time polynomial in log(1/ǫ), d, and L (Section 3).",1 Introduction,[0],[0]
+"On the other hand, we show that there is a constant c1 and a least squares matrix Φ such that the identity has excess loss c1 with respect to Φ, but backpropagation with identity initialization fails to learn Φ (Section 6).
+",1 Introduction,[0],[0]
+"We also show that if the least squares matrix Φ is symmetric positive definite then gradient descent with identity initialization achieves excess loss at most ǫ in a number of steps bounded by a polynomial in log(d/ǫ), L and the condition number of Φ (Section 4).
+",1 Introduction,[0],[0]
+"In contrast, for any least squares matrix Φ that is symmetric but has a negative eigenvalue, we show that no such guarantee is possible for a wide variety of algorithms of this type: the excess loss is forever bounded below by the square of this negative eigenvalue.",1 Introduction,[0],[0]
+"This holds for step-and-project algorithms, and also algorithms that initialize to the identity and regularize by early stopping or penalizing ∑
+i ||Θi − I|| 2 F (Section 6).",1 Introduction,[0],[0]
+"Both this and the previous impossibility result can be
+proved using a least squares matrix Φ with a positive determinant and a good condition number.",1 Introduction,[0],[0]
+"Recall that such Φ were proved by Hardt and Ma to have a good approximation as a product of near-identity matrices – we prove that gradient descent cannot learn them, even with the help of regularizers that reward near-identity representations.
+",1 Introduction,[0],[0]
+"In Section 5 we provide a convergence guarantee for a least squares matrix Φ that may not be symmetric, but satisfies the positivity condition u⊤Φu",1 Introduction,[0],[0]
+> γ for some γ > 0,1 Introduction,[0],[0]
+that appears in the bounds.,1 Introduction,[0],[0]
+We call such matrices γ-positive.,1 Introduction,[0],[0]
+Such Φ include rotations by acute angles.,1 Introduction,[0],[0]
+"In this case, we consider an algorithm that regularizes in addition to a near-identity initialization.",1 Introduction,[0],[0]
+"After the gradient update, the algorithm performs what we call power projection, projecting its hypothesis ΘLΘL−1...Θ1 onto the set of γ-positive matrices.",1 Introduction,[0],[0]
+"Second, it “balances” Θ1, ...,ΘL so that, informally, they contribute equally to ΘLΘL−1...Θ1.",1 Introduction,[0],[0]
+(See Section 5 for the details.),1 Introduction,[0],[0]
+"We view this
+regularizer as a theoretically tractable proxy for regularizers that promote positivity and balance between layers by adding penalties.
+",1 Introduction,[0],[0]
+"While, in practice, deep networks are non-linear, analysis of the linear case can provide a tractable way to gain insight through rigorous theoretical analysis (Saxe et al., 2013; Kawaguchi, 2016; Hardt & Ma, 2017).",1 Introduction,[0],[0]
+We might view back-propagation in the non-linear case as an approximation to a procedure that locally modifies the function computed by each layer in a manner that reduces the loss as fast as possible.,1 Introduction,[0],[0]
+"If a non-linear network is obtained by composing transformations, each of which is chosen from a Hilbert space of functions (as in Daniely et al. (2016)), then a step in “function space” corresponds to a step in an (infinite-dimensional) linear space of functions.
+",1 Introduction,[0],[0]
+Related work.,1 Introduction,[0],[0]
+The motivation for this work comes from the papers of Hardt & Ma (2017) and Bartlett et al. (2018).,1 Introduction,[0],[0]
+Saxe et al. (2013) studied the dynamics of a continuous-time process obtained by taking the step size of backpropagation applied to deep linear neural networks to zero.,1 Introduction,[0],[0]
+Kawaguchi (2016) showed that deep linear neural networks have no suboptimal local minima.,1 Introduction,[0],[0]
+"In the case that L = 2, the problem studied here has a similar structure as problems arising from low-rank approximation of matrices, especially as regards algorithms that approximate a matrix A by iteratively improving an approximation of the form UV .",1 Introduction,[0],[0]
+"For an interesting survey on the rich literature on these algorithms, please see Ge et al. (2017a); successful algorithms have included a regularizer that promotes balance in the sizes of U and V .",1 Introduction,[0],[0]
+"Taghvaei et al. (2017) studied the properties of critical points on the loss when learning deep linear neural networks in the presence of a weight decay regularizer; they studied networks that transform the input to the output through a process indexed by a continuous variable, instead of through discrete layers.",1 Introduction,[0],[0]
+"Lee et al. (2016) showed that, given regularity conditions, for a random initialization, gradient descent converges to a local minimizer almost surely; while their paper yields useful insights, their regularity condition does not hold for our problem.",1 Introduction,[0],[0]
+Many papers have analyzed learning of neural networks with non-linearities.,1 Introduction,[0],[0]
+The papers most closely related to this work analyze algorithms based on gradient descent.,1 Introduction,[0],[0]
+"Some of these (Andoni et al., 2014; Brutzkus & Globerson, 2017; Ge et al., 2017b; Li & Yuan, 2017; Zhong et al., 2017; Zhang et al., 2018; Brutzkus et al., 2018; Ge et al., 2018) analyze constant-depth networks.",1 Introduction,[0],[0]
+Daniely (2017) showed that stochastic gradient descent learns a subclass of functions computed by log-depth networks in polynomial time; this class includes constant-degree polynomials with polynomially bounded coefficients.,1 Introduction,[0],[0]
+"Other theoretical treatments of neural network learning algorithms include Lee et al. (1996); Arora et al. (2014); Livni et al. (2014); Janzamin et al. (2015); Safran & Shamir (2016); Zhang et al. (2016); Nguyen & Hein (2017); Zhang et al. (2017); Orhan & Pitkow (2018), although these are less closely related.
+",1 Introduction,[0],[0]
+Our three upper bound analyses combine a new upper bound on the operator norm of the Hessian of a deep linear network with the result of Hardt and Ma that gradients are lower bounded in terms of the loss for near-identity matrices.,1 Introduction,[0],[0]
+They otherwise have different outlines.,1 Introduction,[0],[0]
+The bound in terms of the loss of the initial solution proceeds by showing that the distance from each layer to the identity grows slowly enough that the loss is reduced before the layers stray far enough to harm the conditioning of the Hessian.,1 Introduction,[0],[0]
+"The bound for symmetric positive definite matrices proceeds by showing that, in this case, all of the layers are the same, and each of their eigenvalues converges to the Lth root of a corresponding eigenvalue of Φ. As mentioned above, the bound for γ-positive matrices Φ is for an algorithm that achieves favorable conditioning through regularization.
+",1 Introduction,[0],[0]
+"We expect that the theoretical analysis reported here will inform the design of practical algorithms
+for learning non-linear deep networks.",1 Introduction,[0],[0]
+One potential avenue for this arises from the fact that the leverage provided by regularizing toward the identity appears to already be provided by a weaker policy of promoting the property that the composition of layers is (potentially asymmetric) positive definite.,1 Introduction,[0],[0]
+"Also, balancing singular values of the layers of the network aided our analysis; an analogous balancing of Jacobians associated with various layers may improve conditioning in practice in the non-linear case.",1 Introduction,[0],[0]
+"For a joint distribution P with support contained in ℜd × ℜd and g : ℜd → ℜd, define ℓP (g) = E(X,Y )∼P (||g(X)",2.1 Setting,[0],[0]
+− Y || 2/2).,2.1 Setting,[0],[0]
+"We focus on the case that, for (X,Y ) drawn from P , the marginal on X is isotropic, with",2.1 Setting,[0],[0]
+EXX⊤ = Id.,2.1 Setting,[0],[0]
+"For convenience, we assume that Y = ΦX for Φ ∈ ℜd×d.",2.1 Setting,[0],[0]
+This assumption is without loss of generality: if Φ is the least squares matrix (so that f defined by f(X) = ΦX minimizes ℓP,2.1 Setting,[0],[0]
+"(f) among linear functions), for any linear g we have
+ℓP (g) =",2.1 Setting,[0],[0]
+E‖g(X),2.1 Setting,[0],[0]
+− f(X)‖ 2/2 + E‖f(X)−,2.1 Setting,[0],[0]
+"Y ‖2/2
++ E",2.1 Setting,[0],[0]
+((g(X),2.1 Setting,[0],[0]
+− f(X))(f(X),2.1 Setting,[0],[0]
+"− Y ))
+= E‖g(X)",2.1 Setting,[0],[0]
+− f(X)‖2/2 +,2.1 Setting,[0],[0]
+"E‖f(X)− Y ‖2/2
+= E‖g(X)",2.1 Setting,[0],[0]
+− ΦX)‖2/2 + E‖ΦX,2.1 Setting,[0],[0]
+"− Y ‖2/2,
+since f is the projection of Y onto the set of linear functions ofX.",2.1 Setting,[0],[0]
+"So assuming Y = ΦX corresponds to setting Φ as the least squares matrix and replacing the loss ℓP (g) by the excess loss
+E‖g(X)",2.1 Setting,[0],[0]
+− ΦX‖2/2 = E‖g(X),2.1 Setting,[0],[0]
+− Y ‖2/2−,2.1 Setting,[0],[0]
+E‖ΦX,2.1 Setting,[0],[0]
+"− Y ‖2/2.
+",2.1 Setting,[0],[0]
+We study algorithms that learn linear mappings parameterized by deep networks.,2.1 Setting,[0],[0]
+"The network with L layers and parameters Θ = (Θ1, . . .",2.1 Setting,[0],[0]
+",ΘL) computes the parameterized function fΘ(x) = ΘLΘL−1 · · ·Θ1x, where",2.1 Setting,[0],[0]
+"x ∈ ℜd and Θi ∈ ℜd×d.
+",2.1 Setting,[0],[0]
+"We use the notation Θi:j = ΘjΘj−1 · · ·Θi for i ≤ j, so that we can write fΘ(x) = Θ1:Lx = Θi+1:LΘiΘ1:i−1x.
+",2.1 Setting,[0],[0]
+"When there is no possibility of confusion, we will sometimes refer to loss ℓ(fΘ) simply as ℓ(Θ).",2.1 Setting,[0],[0]
+"Because the distribution of X is isotropic, ℓ(Θ) = 12 ||Θ1:L − Φ|| 2 F with respect to least squares matrix Φ. When Θ is produced by an iterative algorithm, will we also refer to loss of the tth iterate by ℓ(t).
+",2.1 Setting,[0],[0]
+Definition 1.,2.1 Setting,[0],[0]
+"For γ > 0, a matrix A ∈ ℜd×d is γ-positive if, for all unit length u, we have u⊤Au > γ.",2.1 Setting,[0],[0]
+"We use ||A||F for the Frobenius norm of matrix A, ||A||2 for its operator norm, and σmin(A) for its least singular value.",2.2 Tools and background,[0],[0]
+"For vector v, we use ||v|| for its Euclidian norm.
+",2.2 Tools and background,[0],[0]
+"For a matrix A and a matrix-valued function B, define DAB(A) to be the matrix with
+(DAB(A))i,j = ∂vec(B(A))i ∂vec(A)j ,
+where vec(A) is the column vector constructed by stacking the columns of A. We use Td,d to denote the d2 × d2 permutation matrix mapping vec(A) to vec(A⊤) for A ∈ ℜd×d.",2.2 Tools and background,[0],[0]
+"For A ∈ ℜn×m and B ∈ ℜp×q, A⊗B denotes the Kronecker product, that is, the np×mq matrix of n×m blocks, with the i, jth block given by AijB.
+We will need the gradient and Hessian of ℓ. (The gradient, which can be computed using backprop, is of course well known.)",2.2 Tools and background,[0],[0]
+"The proof is in Appendix A.
+Lemma 1.
+DΘiℓ (fΘ)=(vec(Id))",2.2 Tools and background,[0],[0]
+"⊤ (( Θ⊤1:i−1 ⊗ (Θ1:L−Φ) ⊤Θi+1:L ))
+",2.2 Tools and background,[0],[0]
+"= vec(G)⊤,
+where G is the d× d matrix given by
+G def = Θ⊤i+1:",2.2 Tools and background,[0],[0]
+"L (Θ1:L − Φ)Θ ⊤ 1:i−1. (1)
+",2.2 Tools and background,[0],[0]
+"For i < j,
+DΘjDΘiℓ (fΘ) =",2.2 Tools and background,[0],[0]
+(Id2 ⊗ (vec(Id)) ⊤),2.2 Tools and background,[0],[0]
+"(Id ⊗ Td,d ⊗ Id)
+( vec(Θ⊤1:i−1)⊗ Id2 )
+",2.2 Tools and background,[0],[0]
+"((Θ⊤i+1:LΘj+1:L ⊗Θ ⊤ 1:j−1)Td,d + (Θ ⊤ i+1:j−1 ⊗ (Θ1:L − Φ) ⊤Θj+1:L)).
+DΘiDΘiℓ (fΘ)",2.2 Tools and background,[0],[0]
+=,2.2 Tools and background,[0],[0]
+(Id2 ⊗ (vec(Id)) ⊤),2.2 Tools and background,[0],[0]
+"(Id ⊗ Td,d ⊗ Id)
+( vec(Θ⊤1:i−1)⊗ Id2 )
+(
+Θ⊤i+1:LΘi+1:L ⊗Θ ⊤ 1:i−1
+)
+",2.2 Tools and background,[0],[0]
+"Td,d.",2.2 Tools and background,[0],[0]
+"In this section, we prove an upper bound for gradient descent in terms of the loss of the initial solution.",3 Targets near the identity,[0],[0]
+"First, set Θ(0) =",3.1 Procedure and upper bound,[0],[0]
+"(I, I, ..., I), and then iteratively update
+Θ (t+1)",3.1 Procedure and upper bound,[0],[0]
+i = Θ,3.1 Procedure and upper bound,[0],[0]
+(t),3.1 Procedure and upper bound,[0],[0]
+"i − η(Θ (t) i+1:L)
+⊤ (
+Θ (t) 1:",3.1 Procedure and upper bound,[0],[0]
+"L − Φ
+)
+",3.1 Procedure and upper bound,[0],[0]
+"(Θ (t) 1:i−1) ⊤.
+Theorem 1.",3.1 Procedure and upper bound,[0],[0]
+"There are positive constants c1 and c2 and polynomials p1 and p2 such that, if ℓ(Θ (0) 1:L) ≤ c1, L ≥ c2, and η ≤ 1 p1(L,d,||Φ||2) , then the above gradient descent procedure achieves
+ℓ(fΘ(t)) ≤ ǫ within t = p2
+(
+1 η
+)",3.1 Procedure and upper bound,[0],[0]
+"ln (
+ℓ(0) ǫ
+)
+iterations.",3.1 Procedure and upper bound,[0],[0]
+"The following lemma, which is implicit in the proof of Theorem 2.2 in Hardt & Ma (2017), shows that the gradient is steep if the loss is large and the singular values of the layers are not too small.
+",3.2 Proof of Theorem 1,[0],[0]
+Lemma 2 (Hardt & Ma 2017).,3.2 Proof of Theorem 1,[0],[0]
+Let ∇Θℓ(Θ) be the gradient of ℓ(Θ) with respect to any flattening of Θ.,3.2 Proof of Theorem 1,[0],[0]
+"If, for all layers i, σmin(Θi) ≥ 1− a, then ||∇Θℓ(Θ)|| 2 ≥ 4ℓ(Θ)L(1− a)2L.
+Next, we show that, if Θ(t) and Θ(t+1) are both close to the identity, then the gradient is not changing very fast between them, so that rapid progress continues to be made.",3.2 Proof of Theorem 1,[0],[0]
+"We prove this through an upper bound on the operator norm of the Hessian that holds uniformly over members of a ball around the identity, which in turn can be obtained through a bound on the Frobenius norm.",3.2 Proof of Theorem 1,[0],[0]
+"The proof is in Appendix B.
+Lemma 3.",3.2 Proof of Theorem 1,[0],[0]
+"Choose an arbitrary Θ with ||Θi||2 ≤ 1 + z for all i, and least squares matrix Φ with ||Φ||2 ≤ (1 + z)
+L.",3.2 Proof of Theorem 1,[0],[0]
+"Let ∇2 be the Hessian of ℓ(fΘ) with respect to an arbitrary flattening of the parameters of Θ. We have
+||∇2||F ≤ 3Ld 5(1 + z)2L.
+Armed with Lemmas 2 and 3, let us now analyze gradient descent.",3.2 Proof of Theorem 1,[0],[0]
+"Very roughly, our strategy will be to show that the distance from the identity to the various layers grows slowly enough for the leverage from Lemmas 2 and 3 to enable successful learning.",3.2 Proof of Theorem 1,[0],[0]
+Let R(Θ) = maxi ||Θi − I||2.,3.2 Proof of Theorem 1,[0],[0]
+"From the update, we have
+||Θ (t+1)",3.2 Proof of Theorem 1,[0],[0]
+i − I||2 ≤ ||Θ (t) i,3.2 Proof of Theorem 1,[0],[0]
+"− I||2 + η||(Θ (t) i+1:L)
+⊤ (
+Θ (t) 1:L − Φ
+)
+(Θ (t) 1:i−1) ⊤||2
+≤ ||Θ (t) i",3.2 Proof of Theorem 1,[0],[0]
+− I||2,3.2 Proof of Theorem 1,[0],[0]
++ η(1,3.2 Proof of Theorem 1,[0],[0]
++R(Θ (t)))L||Θ (t) 1:L − Φ||2 ≤ ||Θ,3.2 Proof of Theorem 1,[0],[0]
+(t),3.2 Proof of Theorem 1,[0],[0]
+i,3.2 Proof of Theorem 1,[0],[0]
+− I||2,3.2 Proof of Theorem 1,[0],[0]
++ η(1,3.2 Proof of Theorem 1,[0],[0]
+"+R(Θ (t)))L||Θ (t) 1:L − Φ||F .
+",3.2 Proof of Theorem 1,[0],[0]
+If R(t) = maxs≤tR(Θ(s)),3.2 Proof of Theorem 1,[0],[0]
+(so R(0) = 0) and ℓ(t) = 12 ||Θ (t) 1:,3.2 Proof of Theorem 1,[0],[0]
+"L − Φ|| 2 F , this implies
+R(t+ 1) ≤",3.2 Proof of Theorem 1,[0],[0]
+R(t),3.2 Proof of Theorem 1,[0],[0]
++ η(1,3.2 Proof of Theorem 1,[0],[0]
++R(t))L √ 2ℓ(t).,3.2 Proof of Theorem 1,[0],[0]
+"(2)
+By Lemma 3, for all Θ on the line segment from Θ(t) to Θ(t+1), we have
+||∇2Θ||2 ≤ ||∇ 2 Θ||F ≤",3.2 Proof of Theorem 1,[0],[0]
+"3Ld 5 max{(1 +R(t+ 1))2L, ||Φ||22},
+so that
+ℓ(t+ 1) ≤ ℓ(t)− η||∇Θ(t)",3.2 Proof of Theorem 1,[0],[0]
+||,3.2 Proof of Theorem 1,[0],[0]
+"2 +
+3 2",3.2 Proof of Theorem 1,[0],[0]
+η2Ld5 max{(1,3.2 Proof of Theorem 1,[0],[0]
+"+R(t+ 1))2L, ||Φ||22}||∇Θ(t) || 2.
+",3.2 Proof of Theorem 1,[0],[0]
+"Thus, if we ensure
+η ≤ 1
+3Ld5 max{(1 +R(t+ 1))2L, ||Φ||22} , (3)
+we have ℓ(t+ 1) ≤ ℓ(t)− (η/2)||∇Θ(t) || 2, which, using Lemma 2, gives
+ℓ(t+ 1) ≤ ( 1− 2ηL(1 −R(t))2L ) ℓ(t).",3.2 Proof of Theorem 1,[0],[0]
+"(4)
+Pick any c ≥ 1.",3.2 Proof of Theorem 1,[0],[0]
+"Assume that L ≥ (4/3) ln c = c2, ℓ(Θ (0) 1:L) ≤
+ln(c)2
+8c10 = c1 and η ≤ 1
+3Ld5 max{c4,||Φ||22} .
+",3.2 Proof of Theorem 1,[0],[0]
+"We claim that, for all t ≥ 0,
+1. R(t) ≤ ηc √ 2ℓ(0) ∑ 0≤s<t exp ( − sηLc4 )
+2.",3.2 Proof of Theorem 1,[0],[0]
+"ℓ(t) ≤ ( exp (
+−2tηL c4
+))
+",3.2 Proof of Theorem 1,[0],[0]
+"ℓ(0).
+",3.2 Proof of Theorem 1,[0],[0]
+"The base case holds as R(0) = 0 and ℓ(0) = ℓ(0).
+",3.2 Proof of Theorem 1,[0],[0]
+"Before starting the inductive step, notice that for any t ≥ 0,
+ηc √ 2ℓ(0) ∑
+0≤s<t exp
+(
+− sηL
+c4
+)
+≤ ηc √ 2ℓ(0)× 1
+1− exp (
+−ηL c4
+)
+≤ ηc √ 2ℓ(0)× 2c4
+ηL (since ηLc4 ≤ 1)
+= 2c5 √ 2ℓ(0)
+L ≤
+ln c
+L ≤ 3/4
+where the last two inequalities follow from the constraints on ℓ(0) and L.
+Using (2),
+R(t+ 1) ≤ R(t) + η(1",3.2 Proof of Theorem 1,[0],[0]
+"+R(t))L √ 2ℓ(t)
+≤",3.2 Proof of Theorem 1,[0],[0]
+R(t),3.2 Proof of Theorem 1,[0],[0]
+"+ η
+(
+1 + ln c
+L
+)L √
+2ℓ(t)
+≤ R(t) + ηc √ 2ℓ(t)
+≤ R(t) + ηc √ 2ℓ(0) exp
+(
+− tηL
+c4
+)
+≤ ηc √ 2ℓ(0)",3.2 Proof of Theorem 1,[0],[0]
+"∑
+0≤s<t+1 exp
+(
+− sηL
+c4
+)
+.
+",3.2 Proof of Theorem 1,[0],[0]
+"Since R(t+ 1) ≤ ln cL , the choice of η satisfies (3), so
+ℓ(t+ 1) ≤ ( 1− 2ηL(1 −R(t))2L ) ℓ(t).
+",3.2 Proof of Theorem 1,[0],[0]
+"Now consider (1−R(t))2L:
+ln ( (1−R(t))2L )",3.2 Proof of Theorem 1,[0],[0]
+"= 2L ln(1−R(t))
+",3.2 Proof of Theorem 1,[0],[0]
+≥ 2L(−2R(t)),3.2 Proof of Theorem 1,[0],[0]
+since R(t) ∈,3.2 Proof of Theorem 1,[0],[0]
+"[0, 3/4]
+≥ 2L
+(
+−2 ln c
+L
+)
+since R(t) ≤",3.2 Proof of Theorem 1,[0],[0]
+ln,3.2 Proof of Theorem 1,[0],[0]
+"c
+L
+(1−R(t))2L ≥ 1/c4.
+",3.2 Proof of Theorem 1,[0],[0]
+"Using this in the bound on ℓ(t+ 1):
+ℓ(t+ 1) ≤",3.2 Proof of Theorem 1,[0],[0]
+"( 1− 2ηL(1 −R(t))2L ) ℓ(t)
+≤
+(
+1− 2ηL
+c4
+)
+ℓ(t)
+≤
+(
+exp
+(
+− 2ηL
+c4
+))",3.2 Proof of Theorem 1,[0],[0]
+"(
+exp
+(
+− 2tηL
+c4
+))
+",3.2 Proof of Theorem 1,[0],[0]
+"ℓ(0)
+",3.2 Proof of Theorem 1,[0],[0]
+"=
+(
+exp
+(
+− 2(t+ 1)ηL
+c4
+))
+",3.2 Proof of Theorem 1,[0],[0]
+"ℓ(0).
+",3.2 Proof of Theorem 1,[0],[0]
+"Solving ℓ(0) exp (
+−2tηL c4
+)
+≤ ǫ for t and recalling that η < 1/c4 completes the proof of the theorem.",3.2 Proof of Theorem 1,[0],[0]
+"In this section, we analyze the procedure of Section 3.1 when the least squares matrix Φ is symmetric and positive definite.
+Theorem 2.",4 Symmetric positive definite targets,[0],[0]
+"There is an absolute positive constant c3 such that, if Φ is symmetric and γ-positive with 0 <",4 Symmetric positive definite targets,[0],[0]
+"γ < 1, and L ≥ c3 ln (||Φ||2/γ), then for all η ≤
+1 L(1+||Φ||22) , gradient descent achieves
+ℓ(fΘ(t))",4 Symmetric positive definite targets,[0],[0]
+"≤ ǫ in poly(L, ||Φ||2/γ, 1/η) log(d/ǫ) iterations.
+",4 Symmetric positive definite targets,[0],[0]
+Note that a symmetric matrix is γ-positive when its minimum eigenvalue is at least γ.,4 Symmetric positive definite targets,[0],[0]
+"Let Φ be a symmetric, real, γ-positive matrix with γ > 0, and let Θ(0),Θ(1), ... be the iterates of gradient descent with a step size 0 < η ≤ 1
+L(1+||Φ||22) .
+",4.1 Proof of Theorem 2,[0],[0]
+Definition 2.,4.1 Proof of Theorem 2,[0],[0]
+"Symmetric matrices A ⊆ ℜd×d are commuting normal matrices if there is a single unitary matrix U such that for all A ∈ A, U⊤AU is diagonal.
+",4.1 Proof of Theorem 2,[0],[0]
+"We will use the following well-known facts about commuting normal matrices.
+",4.1 Proof of Theorem 2,[0],[0]
+Lemma 4 (Horn & Johnson 2013),4.1 Proof of Theorem 2,[0],[0]
+.,4.1 Proof of Theorem 2,[0],[0]
+"If A ⊆ ℜd×d is a set of symmetric commuting normal matrices and A,B ∈ A, the following hold:
+• AB = BA;
+",4.1 Proof of Theorem 2,[0],[0]
+"• for all scalars α and β, A ∪ {αA+ βB,AB} are commuting normal;
+• there is a unitary matrix U such that U⊤AU and U⊤BU are real and diagonal;
+• the multiset of singular values of A is the same as the multiset of magnitudes of its eigenvalues;
+• ||A− I||2 is the largest value of |z",4.1 Proof of Theorem 2,[0],[0]
+"− 1| for an eigenvalue z of A.
+Lemma 5.",4.1 Proof of Theorem 2,[0],[0]
+"The matrices {Φ} ∪ {Θ (t) i : i ∈ {1, ..., L}, t ∈ Z +} are commuting normal.",4.1 Proof of Theorem 2,[0],[0]
+"For all t, Θ (t) 1 = ... = Θ (t) L .
+Proof.",4.1 Proof of Theorem 2,[0],[0]
+The proof is by induction.,4.1 Proof of Theorem 2,[0],[0]
+"The base case follows from the fact that Φ and I are commuting normal.
+",4.1 Proof of Theorem 2,[0],[0]
+"For the induction step, the fact that
+{Φ} ∪ {
+Θ (s)",4.1 Proof of Theorem 2,[0],[0]
+i :,4.1 Proof of Theorem 2,[0],[0]
+"i ∈ {1, ..., L}, s ≤ t
+} ∪ {
+Θ (s+1)",4.1 Proof of Theorem 2,[0],[0]
+i :,4.1 Proof of Theorem 2,[0],[0]
+"i ∈ {1, ..., L}, s ≤ t
+}
+are commuting normal follows from Lemma 4.",4.1 Proof of Theorem 2,[0],[0]
+"The update formula now reveals that Θ (t+1) 1 = ... = Θ (t+1) L .
+",4.1 Proof of Theorem 2,[0],[0]
+Now we are ready to analyze the dynamics of the learning process.,4.1 Proof of Theorem 2,[0],[0]
+"Let Φ = U⊤DLU be a diagonalization of Φ. Let Γ = max{1, ||Φ||2}.",4.1 Proof of Theorem 2,[0],[0]
+"We next describe a sense in which gradient descent learns each eigenvalue independently.
+",4.1 Proof of Theorem 2,[0],[0]
+Lemma 6.,4.1 Proof of Theorem 2,[0],[0]
+"For each t, there is a real diagonal matrix D̂(t) such that, for all i, Θ (t)",4.1 Proof of Theorem 2,[0],[0]
+"i = U ⊤D̂(t)U and
+D̂(t+1) = D̂(t)",4.1 Proof of Theorem 2,[0],[0]
+− η(D̂(t))L−1((D̂(t))L −DL).,4.1 Proof of Theorem 2,[0],[0]
+"(5)
+Proof.",4.1 Proof of Theorem 2,[0],[0]
+Lemma 5 implies that there is a single real U such that Θ (t),4.1 Proof of Theorem 2,[0],[0]
+"i = U ⊤D̂(t)U for all i. Applying Lemma 1, recalling that Θ (t) 1 = ...",4.1 Proof of Theorem 2,[0],[0]
+"= Θ (t) L , and applying the fact that Θ (t) i and Φ commute, we get
+Θ (t+1)",4.1 Proof of Theorem 2,[0],[0]
+i = Θ,4.1 Proof of Theorem 2,[0],[0]
+(t),4.1 Proof of Theorem 2,[0],[0]
+"i − η(Θ (t) i )
+",4.1 Proof of Theorem 2,[0],[0]
+"L−1 (
+(Θ (t) i )
+",4.1 Proof of Theorem 2,[0],[0]
+"L − Φ ) .
+",4.1 Proof of Theorem 2,[0],[0]
+"Replacing each matrix by its diagonalization, we get
+U⊤D̂(t+1)U = U⊤D̂(t)U",4.1 Proof of Theorem 2,[0],[0]
+"− η(U⊤(D̂(t))L−1U) ( U⊤(D̂(t))LU − U⊤DLU )
+",4.1 Proof of Theorem 2,[0],[0]
+"= U⊤D̂(t)U − ηU⊤(D̂(t))L−1 ( (D̂(t))L −DL ) U,
+and left-multiplying by U and right-multiplying by U⊤ gives (5).
+",4.1 Proof of Theorem 2,[0],[0]
+We will now analyze the convergence of each D̂ (t) kk to Dkk separately.,4.1 Proof of Theorem 2,[0],[0]
+"Let us focus for now on an arbitrary single index k, let λ = Dkk and λ̂",4.1 Proof of Theorem 2,[0],[0]
+(t) =,4.1 Proof of Theorem 2,[0],[0]
+"D̂ (t) kk .
+",4.1 Proof of Theorem 2,[0],[0]
+Recalling that ||Φ||2 ≤,4.1 Proof of Theorem 2,[0],[0]
+"Γ, we have γ 1/L ≤ λ ≤",4.1 Proof of Theorem 2,[0],[0]
+"Γ1/L. Also, Γ1/L = e 1 L ln Γ ≤ e1/a ≤ 1+2/a whenever a ≥ 1 and L ≥ a ln Γ. Similarly, γ1/L ≥ 1 − a whenever L ≥ a ln(1/γ).",4.1 Proof of Theorem 2,[0],[0]
+"Thus, there are absolute constants c3 and c4 such that",4.1 Proof of Theorem 2,[0],[0]
+|1−,4.1 Proof of Theorem 2,[0],[0]
+"λ| ≤ c4 ln(Γ/γ)
+L < 1 for all L ≥ c3 ln(Γ/γ).
+",4.1 Proof of Theorem 2,[0],[0]
+"We claim that, for all t, λ̂(t) lies between 1 and λ inclusive, so that |λ̂(t)",4.1 Proof of Theorem 2,[0],[0]
+− λ| ≤ c4 ln(Γ/γ)L .,4.1 Proof of Theorem 2,[0],[0]
+The base case holds because λ̂(t) = 1 and |1,4.1 Proof of Theorem 2,[0],[0]
+− λ| ≤ c4 ln(Γ/γ)L .,4.1 Proof of Theorem 2,[0],[0]
+Now let us work on the induction step.,4.1 Proof of Theorem 2,[0],[0]
+"Applying (5) together with Lemma 1, we get
+λ̂(t+1) = λ̂(t) +",4.1 Proof of Theorem 2,[0],[0]
+η(λ̂(t))L−1(λL,4.1 Proof of Theorem 2,[0],[0]
+− (λ̂(t))L).,4.1 Proof of Theorem 2,[0],[0]
+"(6)
+By the induction hypothesis, we just need to show that sign(λ̂(t+1)",4.1 Proof of Theorem 2,[0],[0]
+− λ̂(t)),4.1 Proof of Theorem 2,[0],[0]
+= sign(λ − λ̂(t)) and |λ̂(t+1),4.1 Proof of Theorem 2,[0],[0]
+− λ̂(t)| ≤ |λ,4.1 Proof of Theorem 2,[0],[0]
+"− λ̂(t)| (i.e., the step is in the correct direction, and does not “overshoot”).",4.1 Proof of Theorem 2,[0],[0]
+"First, to see that the step is in the right direction, note that λL ≥ (λ̂(t))L if and only if λ ≥ (λ̂(t)), and the inductive hypothesis implies that λ̂(t), and therefore (λ̂(t))L−1, is non-negative.",4.1 Proof of Theorem 2,[0],[0]
+To show that |λ̂(t+1),4.1 Proof of Theorem 2,[0],[0]
+− λ̂(t)| ≤ |λ,4.1 Proof of Theorem 2,[0],[0]
+"− λ̂(t)|, it suffices to show that η(λ̂(t))L−1 ∣ ∣ ∣ λL − (λ̂(t))L) ∣ ∣ ∣ ≤ |λ",4.1 Proof of Theorem 2,[0],[0]
+"− λ̂(t)|,
+which, in turn would be implied by η ≤
+∣ ∣ ∣ ∣ 1 (λ̂(t))L−1( ∑L−1 i=0 (λ̂ (t))iλL−1−i) ∣ ∣ ∣ ∣ (since λL − (λ̂(t))L = (λ −
+λ̂(t))",4.1 Proof of Theorem 2,[0],[0]
+"∑L−1 i=0 (λ̂ (t))iλL−1−i), which follows from the inductive hypothesis and η ≤ 1 LΓ2 .",4.1 Proof of Theorem 2,[0],[0]
+"We have proved that each λ̂(t) lies between λ and 1, so that |1−",4.1 Proof of Theorem 2,[0],[0]
+λ̂(t)| ≤ |1−,4.1 Proof of Theorem 2,[0],[0]
+"λ| ≤ c4 ln(Γ/γ).
+",4.1 Proof of Theorem 2,[0],[0]
+"Now, since the step is in the right direction, and does not overshoot,
+|λ̂(t+1)",4.1 Proof of Theorem 2,[0],[0]
+− λ| ≤ |λ̂(t) − λ| − η(λ̂(t))L−1|λL,4.1 Proof of Theorem 2,[0],[0]
+"− (λ̂(t))L|
+≤ |λ̂(t) − λ|
+( 1− η(λ̂(t))L−1 ( L−1 ∑
+i=0
+(λ̂(t))iλL−1−i ))
+≤ |λ̂(t)",4.1 Proof of Theorem 2,[0],[0]
+"− λ| ( 1− ηLγ2 ) ,
+since the fact that λ̂(t) lies between 1 and λ implies that λ̂(t) ≥ γ1/L. Thus, |λ̂(t) − λ| ≤ (
+1− ηLγ2 )t c4",4.1 Proof of Theorem 2,[0],[0]
+ln(Γ/γ).,4.1 Proof of Theorem 2,[0],[0]
+"This implies that, for any ǫ ∈ (0, 1), for any absolute constant c5, there is a
+constant c6 such that, after c6 1 ηLγ2 ln ( dL lnΓ γǫ )
+steps, we have |λ̂(t)−λ| ≤ c5γ √ ǫ
+LΓ √ d .Writing",4.1 Proof of Theorem 2,[0],[0]
+"r = λ̂(t)−λ,
+this implies, if c5 is small enough, that
+((λ̂(t))L − λL)2 = ((λ+r)L−λL)2
+≤ Γ2",4.1 Proof of Theorem 2,[0],[0]
+"( ( 1+ r
+λ
+)L −1
+)2
+≤ Γ2 ( 2c5rL
+λ
+)2
+≤ Γ2 ( 2c5rL
+γ
+)2
+≤ ǫ
+d .
+",4.1 Proof of Theorem 2,[0],[0]
+"Thus, after O (
+1 ηLγ2
+ln (
+dL lnΓ γǫ
+))
+steps, (Dkk − D̂ (t) kk ) 2 ≤ ǫ/d for all k, and therefore ℓ(Θ(t))",4.1 Proof of Theorem 2,[0],[0]
+"≤ ǫ,
+completing the proof.",4.1 Proof of Theorem 2,[0],[0]
+"We have seen that if the least squares matrix is symmetric, γ-positivity is sufficient for convergence of gradient descent.",5 Asymmetric positive definite matrices,[0],[0]
+We shall see in Section 6 that positivity is also necessary for a broad family of gradient-based algorithms to converge to the optimal solution when the least squares matrix is symmetric.,5 Asymmetric positive definite matrices,[0],[0]
+"Thus, in the symmetric case, positivity characterizes the success of gradient methods.
+",5 Asymmetric positive definite matrices,[0],[0]
+"In this section, we show that positivity suffices for the convergence of a gradient method even without the assumption that the least squares matrix is symmetric.
+",5 Asymmetric positive definite matrices,[0],[0]
+Note that the set of γ-positive (but not necessarily symmetric) matrices includes both rotations by an acute angle and “partial reflections” of the form ax + b refl(x) where refl(·) is a lengthpreserving reflection and 0 ≤,5 Asymmetric positive definite matrices,[0],[0]
+|b| < a.,5 Asymmetric positive definite matrices,[0],[0]
+"Since ( u⊤Au )⊤
+= u⊤A⊤u, a matrix A is γ-positive if",5 Asymmetric positive definite matrices,[0],[0]
+"and only if u⊤(A+A⊤)u ≥ 2γ for all unit length u, i.e. A+A⊤ is positive definite with eigenvalues at least 2γ.",5 Asymmetric positive definite matrices,[0],[0]
+"The algorithm analyzed in this section uses a construction that is new, as far as we know, that we call a balanced factorization.",5.1 Balanced factorizations,[0],[0]
+"This factorization may be of independent interest.
+",5.1 Balanced factorizations,[0],[0]
+Recall that a polar decomposition of a matrix A consists of a unitary matrix R and a positive semidefinite matrix P such that A = RP .,5.1 Balanced factorizations,[0],[0]
+The principal Lth root of a complex number whose expression in polar coordinates is reθi is r1/Leθi/L.,5.1 Balanced factorizations,[0],[0]
+"The principal Lth root of a matrix A is the matrix B such that BL = A, and each eigenvalue of B is the principal Lth root of the corresponding eigenvalue of A.
+Definition 3.",5.1 Balanced factorizations,[0],[0]
+"If A be a matrix with polar decomposition RP , then A has the balanced factorization A = A1, ..., AL where for each i,
+Ai = R 1/LPi, with Pi = R (L−i)/LP 1/LR−(L−i)/L,
+and each of the Lth roots is the principal Lth root.
+",5.1 Balanced factorizations,[0],[0]
+The motivation for balanced factorization is as follows.,5.1 Balanced factorizations,[0],[0]
+"We want each factor to do a 1/L fraction of the total amount of rotation, and a 1/L fraction of the total amount of scaling.",5.1 Balanced factorizations,[0],[0]
+"However, the scaling done by the ith factor should be done in directions that take account of the partial rotations done by the other factors.",5.1 Balanced factorizations,[0],[0]
+"The following is the key property of the balanced factorization; its proof is in Appendix C.
+Lemma 7.",5.1 Balanced factorizations,[0],[0]
+"If σ1, ..., σd are the singular values of A, and A1, ..., AL is a balanced factorization of A, then the following hold: (a) A = ∏L
+i=1Ai; (b) for each i ∈ {1, ..., L}, σ 1/L 1 , ..., σ 1/L d are the singular
+values of Ai.",5.1 Balanced factorizations,[0],[0]
+The following is the power projection algorithm.,5.2 Procedure and upper bound,[0],[0]
+"It has a positivity parameter γ > 0, and uses H = {A : ∀u s.t. ||u||",5.2 Procedure and upper bound,[0],[0]
+"= 1, u⊤Au ≥ γ} as its “hypothesis space”.",5.2 Procedure and upper bound,[0],[0]
+"First, it initializes Θ(0)i = γ 1/LI for all i ∈ {1, ..., L}.",5.2 Procedure and upper bound,[0],[0]
+"Then, for each t, it does the following.
+",5.2 Procedure and upper bound,[0],[0]
+• Gradient Step.,5.2 Procedure and upper bound,[0],[0]
+"For each i ∈ {1, ..., L}, update:
+Θ (t+1/2)",5.2 Procedure and upper bound,[0],[0]
+i = Θ,5.2 Procedure and upper bound,[0],[0]
+(t),5.2 Procedure and upper bound,[0],[0]
+"i − η(Θ (t) i+1:L)
+⊤ (
+Θ (t) 1:",5.2 Procedure and upper bound,[0],[0]
+"L − Φ
+)
+",5.2 Procedure and upper bound,[0],[0]
+"(Θ (t) 1:i−1) ⊤.
+• Power Project.",5.2 Procedure and upper bound,[0],[0]
+Compute the projection Ψ(t+1/2) (w.r.t.,5.2 Procedure and upper bound,[0],[0]
+"the Frobenius norm) of Θ (t+1/2) 1:L
+onto H.
+• Factor.",5.2 Procedure and upper bound,[0],[0]
+"Let Θ (t+1) 1 , ...,Θ (t+1) L be the balanced factorization of Ψ (t+1/2), so that Ψ(t+1/2) =
+Θ (t+1) 1:L .
+",5.2 Procedure and upper bound,[0],[0]
+Theorem 3.,5.2 Procedure and upper bound,[0],[0]
+For any Φ such that u⊤Φu >,5.2 Procedure and upper bound,[0],[0]
+"γ for all unit-length u, the power projection algorithm produces Θ(t) with ℓ(Θ(t))",5.2 Procedure and upper bound,[0],[0]
+"≤ ǫ in poly(d, ||Φ||F , 1 γ ) log(1/ǫ) iterations.",5.2 Procedure and upper bound,[0],[0]
+Lemma 8.,5.3 Proof of Theorem 3,[0],[0]
+"For all t, Θ (t) 1:L ∈ H.
+Proof.",5.3 Proof of Theorem 3,[0],[0]
+"Θ (0) 1:L = γI ∈ H, and, for all t, Ψ (t+1/2) is obtained by projection onto H, and Θ (t+1) 1:L = Ψ(t+1/2).
+",5.3 Proof of Theorem 3,[0],[0]
+Definition 4.,5.3 Proof of Theorem 3,[0],[0]
+The exponential of a matrix A is exp(A),5.3 Proof of Theorem 3,[0],[0]
+"def = ∑∞
+k=0 1 k!A k, and B is a logarithm of A if A = exp(B).
+",5.3 Proof of Theorem 3,[0],[0]
+Lemma 9 (Culver 1966).,5.3 Proof of Theorem 3,[0],[0]
+"A real matrix has a real logarithm if and only if it is invertible and each Jordan block belonging to a negative eigenvalue occurs an even number of times.
+",5.3 Proof of Theorem 3,[0],[0]
+Lemma 10.,5.3 Proof of Theorem 3,[0],[0]
+"For all t, Θ (t) 1:L has a real Lth root.
+",5.3 Proof of Theorem 3,[0],[0]
+Proof.,5.3 Proof of Theorem 3,[0],[0]
+Since Θ (t) 1:L ∈ H implies u,5.3 Proof of Theorem 3,[0],[0]
+⊤Θ(t)1,5.3 Proof of Theorem 3,[0],[0]
+:Lu > 0,5.3 Proof of Theorem 3,[0],[0]
+"for all u, Θ (t) 1:L does not have a negative eigenvalue and is invertible.",5.3 Proof of Theorem 3,[0],[0]
+"By Lemma 9, Θ (t) 1:L has a real logarithm.",5.3 Proof of Theorem 3,[0],[0]
+"Thus, its real Lth root can be constructed via exp(log(Θ (t) 1:L)/L).
+",5.3 Proof of Theorem 3,[0],[0]
+"The preceding lemma implies that the algorithm is well-defined, since all of the required roots can be calculated.
+",5.3 Proof of Theorem 3,[0],[0]
+Lemma 11.,5.3 Proof of Theorem 3,[0],[0]
+"H is convex.
+",5.3 Proof of Theorem 3,[0],[0]
+Proof.,5.3 Proof of Theorem 3,[0],[0]
+"Suppose A and B are in H and λ ∈ (0, 1).",5.3 Proof of Theorem 3,[0],[0]
+"We have
+u⊤(λA+ (1− λ)B)u = λu⊤Au+ (1− λ)u⊤Bu ≥ γ.
+Lemma 12.",5.3 Proof of Theorem 3,[0],[0]
+"For all A ∈ H, σmin(A) ≥ γ.
+",5.3 Proof of Theorem 3,[0],[0]
+Proof.,5.3 Proof of Theorem 3,[0],[0]
+"Let u and v be singular vectors such that u⊤Av = σmin(A).
+",5.3 Proof of Theorem 3,[0],[0]
+"γ ≤ v⊤Av = σmin(A)v ⊤u ≤ σmin(A).
+",5.3 Proof of Theorem 3,[0],[0]
+Lemma 13.,5.3 Proof of Theorem 3,[0],[0]
+"For all t, σmin(Θ (t) i )",5.3 Proof of Theorem 3,[0],[0]
+"≥ γ 1/L.
+Proof.",5.3 Proof of Theorem 3,[0],[0]
+"First, σmin(Θ (0) i ) =",5.3 Proof of Theorem 3,[0],[0]
+γ 1/L ≥ γ1/L. Now consider t > 0.,5.3 Proof of Theorem 3,[0],[0]
+"Since Ψ(t−1/2) was projected into H, we have σmin(Ψ(t−1/2))",5.3 Proof of Theorem 3,[0],[0]
+≥ γ.,5.3 Proof of Theorem 3,[0],[0]
+"Lemma 7 then completes the proof.
+",5.3 Proof of Theorem 3,[0],[0]
+"Define U(t) = max {
+maxs≤tmaxi ||Θ (s) i ||2, ||Φ|| 1/L 2
+}
+, B(t) = mins≤tmini σmin(Θ (s) i ), and recall that
+ℓ(t) = ||Θ (t) 1:L − Φ|| 2 F .
+",5.3 Proof of Theorem 3,[0],[0]
+"Arguing as in the initial portion of Section 3.2, as long as
+η ≤ 1
+3Ld5U(t)2L (7)
+we have ℓ(t + 1/2) ≤",5.3 Proof of Theorem 3,[0],[0]
+( 1− ηLB(t)2L ) ℓ(t) (see Equation 4).,5.3 Proof of Theorem 3,[0],[0]
+"Lemma 13 gives B(t) ≥ γ1/L, so ℓ(t+ 1/2) ≤",5.3 Proof of Theorem 3,[0],[0]
+"( 1− ηLγ2 )
+ℓ(t).",5.3 Proof of Theorem 3,[0],[0]
+"Since Ψ(t+1/2) is the projection of Θ (t+1/2) 1:L onto a convex set H that
+contains Φ, and Θ (t+1) 1:L = Ψ (t+1/2), (7) implies
+ℓ(t+ 1) ≤ ℓ(t+ 1/2) ≤",5.3 Proof of Theorem 3,[0],[0]
+( 1− ηLγ2 ) ℓ(t).,5.3 Proof of Theorem 3,[0],[0]
+"(8)
+Next, we prove an upper bound on U .
+",5.3 Proof of Theorem 3,[0],[0]
+Lemma 14.,5.3 Proof of Theorem 3,[0],[0]
+"For all t, U(t) ≤ ( √
+ℓ(t) + ||Φ||F
+)1/L .
+",5.3 Proof of Theorem 3,[0],[0]
+Proof.,5.3 Proof of Theorem 3,[0],[0]
+Recall that ℓ(t) = ||Θ (t) 1:L−Φ|| 2 F .,5.3 Proof of Theorem 3,[0],[0]
+"By the triangle inequality, ||Θ (t) 1:L||F ≤",5.3 Proof of Theorem 3,[0],[0]
+√ ℓ(t)+ ||Φ||F .,5.3 Proof of Theorem 3,[0],[0]
+Thus ||Θ (t) 1:L||2 ≤ √ ℓ(t) + ||Φ||F .,5.3 Proof of Theorem 3,[0],[0]
+"By Lemma 7, for all i, we have ||Θ (t)",5.3 Proof of Theorem 3,[0],[0]
+i ||2 ≤ ( √ ℓ(t) + ||Φ||F )1/L .,5.3 Proof of Theorem 3,[0],[0]
+"Since ||Φ||2 ≤ ||Φ||F , this completes the proof.
+",5.3 Proof of Theorem 3,[0],[0]
+Note that the triangle inequality implies that ℓ(0) ≤ ||Θ (0) 1:L|| 2 F + ||Φ|| 2 F ≤,5.3 Proof of Theorem 3,[0],[0]
+γ 2d,5.3 Proof of Theorem 3,[0],[0]
++,5.3 Proof of Theorem 3,[0],[0]
+||Φ||2F .,5.3 Proof of Theorem 3,[0],[0]
+Since σmin(Φ) ≥,5.3 Proof of Theorem 3,[0],[0]
+"γ, we have ||Φ|| 2 F ≥ γ 2d, so ℓ(t) ≤ 2||Φ||2F and U(t) ≤ (3||Φ||2) 1/L.",5.3 Proof of Theorem 3,[0],[0]
+"Now, if we set η = 1 cLd5||Φ||2
+F , for a large enough absolute constant c, then (7) is satisfied, so that (8) gives ℓ(t+1) ≤ (
+1− γ 2
+cd5||Φ||2 F
+)
+ℓ(t) and the power projection algorithm achieves ℓ(t+ 1) ≤ ǫ after
+O
+(
+d5||Φ||2F γ2 log
+(
+ℓ(0)
+ǫ
+))
+",5.3 Proof of Theorem 3,[0],[0]
+"=O
+(
+d5||Φ||2F γ2 log
+(
+||Φ||2F ǫ
+))
+updates.",5.3 Proof of Theorem 3,[0],[0]
+"In this section, we show that positive definite Φ are necessary for several gradient descent algorithms with different kinds of regularization to minimize the loss.",6 Failure,[0],[0]
+"One family of algorithms that we will
+analyze is parameterized by a function ψ mapping the number of inputs d and the number of layers L to a radius ψ(d, L), step sizes ηt and initialization parameter γ ≥ 0.",6 Failure,[0],[0]
+"In particular, a ψ-step-and-project algorithm is any instantiation of the following algorithmic template.
+",6 Failure,[0],[0]
+Initialize each Θ (0),6 Failure,[0],[0]
+"i = γ 1/LI for some γ ≥ 0 and iterate:
+• Gradient Step.",6 Failure,[0],[0]
+"For each i ∈ {1, ..., L}, update:
+Θ (t+1/2)",6 Failure,[0],[0]
+i = Θ,6 Failure,[0],[0]
+(t),6 Failure,[0],[0]
+"i − ηt(Θ (t) i+1:L)
+⊤ (
+Θ (t) 1:L − Φ
+)
+(Θ (t) 1:i−1) ⊤.
+• Project.",6 Failure,[0],[0]
+Set each Θt+1i,6 Failure,[0],[0]
+"to the projection of Θ t+1/2 i onto {A : ||A− I||2 ≤ ψ(d, L)}.
+",6 Failure,[0],[0]
+We will also show that Penalty Regularized Gradient Descent which uses gradient descent with any step sizes ηt on the regularized objective ℓ(Θ) + κ 2 ∑ i ||I,6 Failure,[0],[0]
+"−Θ|| 2 F also fails to minimize the loss.
+",6 Failure,[0],[0]
+"Both results use the simple observation that when Θ1:L and Φ are mutually diagonalizable then
+||Θ1:L − Φ|| 2 F = ||U ⊤D̂U",6 Failure,[0],[0]
+"− U⊤DU ||2F = d ∑
+j=1
+(D̂jj −Djj) 2,
+where the Dii are the eigenvalues of Φ.
+Theorem 4.",6 Failure,[0],[0]
+If the least squares matrix Φ is symmetric then Penalty Regularized Gradient Descent produces hypotheses Θ (t) 1:L that are commuting normal with Φ.,6 Failure,[0],[0]
+"In addition, if Φ has a negative eigenvalue −λ and L is even, then ℓ(Θ(t))",6 Failure,[0],[0]
+"≥ λ2/2 for all t.
+Proof.",6 Failure,[0],[0]
+"For all t, Penalty Regularized Gradient Descent produces Θ (t+1) i = (1 − κ)Θ (t) i + κI",6 Failure,[0],[0]
+− ηt(Θ (t) i+1:L) ⊤ ( Θ (t) 1:L −Φ ) (Θ (t) 1:i−1) ⊤.,6 Failure,[0],[0]
+"Thus, by induction, the Θ(t)i are matrix polynomials of Φ, and therefore they are all commuting normal.",6 Failure,[0],[0]
+As in Lemmas 5 and 6 each Θ (t) i is the same U ⊤D̃(t)U and Θ (t) 1,6 Failure,[0],[0]
+:L = U ⊤(D̃(t))LU .,6 Failure,[0],[0]
+"Since L is even, each (D̃(t))Ljj ≥ 0, so ℓ(Θ (t))",6 Failure,[0],[0]
+"= 12 ||Θ (t) 1:L−Φ|| 2 F ≥ λ 2/2.
+To analyze step-and-project algorithms, it is helpful to first characterize the project step (see also (Lefkimmiatis et al., 2013)).
+",6 Failure,[0],[0]
+Lemma 15.,6 Failure,[0],[0]
+"Let X be a symmetric matrix and let U⊤DU be its diagonalization.
+",6 Failure,[0],[0]
+"For a > 0, let Y be the Frobenius norm projection of X onto Ba = {A : A is symmetric psd and ||A−I||2 ≤ a}.",6 Failure,[0],[0]
+"Then Y = U
+⊤D̃U where D̃ is obtained from D by projecting all of its diagonal elements onto [1− a, 1 + a].
+",6 Failure,[0],[0]
+"Thus {X,Y } are symmetric commuting normal matrices.
+",6 Failure,[0],[0]
+Proof.,6 Failure,[0],[0]
+"First, if X ∈ Ba, then Y = X and we are done.",6 Failure,[0],[0]
+Assume X 6∈ Ba.,6 Failure,[0],[0]
+"Clearly U ⊤D̃U ∈ Ba, so we just need to show that any member of Ba is at least as far from X as U⊤D̃U is.",6 Failure,[0],[0]
+"Let Λ be the multiset of eigenvalues of X (with repetitions) that are not in [1 − a, 1 + a], and for each λ ∈ Λ, let eλ be the adjustment to λ necessary to bring it to [1− a, 1 + a]; i.e., so that λ+ eλ is the projection of λ onto [1− a, 1 + a].
+",6 Failure,[0],[0]
+"If uλ is the eigenvector associated with λ, we have U ⊤D̃U −X = ∑ λ∈Λ eλuλu ⊤ λ , so that ||U ⊤D̃U",6 Failure,[0],[0]
+− X||2F = ∑,6 Failure,[0],[0]
+λ∈Λ,6 Failure,[0],[0]
+e 2 λ.,6 Failure,[0],[0]
+Let Z be an arbitrary member of Ba.,6 Failure,[0],[0]
+We would like to show that ||Z,6 Failure,[0],[0]
+− X|| 2 F ≥ ∑ λ∈Λ e 2 λ.,6 Failure,[0],[0]
+"Since Z ∈ Ba, we have ||Z − I||2 ≤ a. ||Z",6 Failure,[0],[0]
+− I||2 is the largest singular value of Z,6 Failure,[0],[0]
+"− I so, for any unit length vector, in particular some uλ for λ ∈ Λ, |u ⊤ λ (Z",6 Failure,[0],[0]
+− I)uλ| = |u ⊤ λ,6 Failure,[0],[0]
+"Zuλ − 1| ≤ a, which implies u⊤λZuλ ∈",6 Failure,[0],[0]
+"[1 − a, 1 + a].",6 Failure,[0],[0]
+Since U is unitary U ⊤(X,6 Failure,[0],[0]
+"− Z)U has the same eigenvalues as X − Z, and, since the Frobenius norm is a function of the eigenvalues, ||U⊤(X − Z)U ||F = ||X − Z||F .",6 Failure,[0],[0]
+But since u⊤λZuλ ∈,6 Failure,[0],[0]
+"[1 − a, 1 + a] for all λ ∈ Λ, just summing over the diagonal elements, we get ||U⊤(X − Z)U",6 Failure,[0],[0]
+"||2F ≥ ∑ λ∈Λ e 2 λ, completing the proof.
+",6 Failure,[0],[0]
+Theorem 5.,6 Failure,[0],[0]
+If the least squares matrix Φ is symmetric then ψ-step-and-project algorithms produce hypotheses Θ (t) 1:L that are commuting normal with Φ.,6 Failure,[0],[0]
+"In addition, if Φ has a negative eigenvalue −λ and either L is even or ψ(L, d) ≤ 1, then ℓ(Θ(t))",6 Failure,[0],[0]
+"≥ λ2/2 for all t.
+Proof.",6 Failure,[0],[0]
+"As in Lemmas 5 and 6, the Θ (t+1/2)",6 Failure,[0],[0]
+i are identical and mutually diagonalizable with Φ. Lemma 15 shows that this is preserved by the projection step.,6 Failure,[0],[0]
+Thus there is a real diagonal D̃(t) such that each Θ (t) i = U ⊤D(t)i,6 Failure,[0],[0]
+"U , so Θ (t) 1:L = U ⊤(D̃(t))LU .",6 Failure,[0],[0]
+"When L is even, each (D̃(t))L)j,j ≥ 0.",6 Failure,[0],[0]
+"When ψ(d, L) ≤ 1",6 Failure,[0],[0]
+"then the projection ensures that the elements of D̃(t) are non-negative, and thus each (D̃(t))L)j,j ≥ 0.",6 Failure,[0],[0]
+"In either case, ℓ(Θ (t))",6 Failure,[0],[0]
+"= 12 ||Θ (t) 1:L− Φ||2F ≥ λ 2/2.
+",6 Failure,[0],[0]
+"One choice of Φ that satisfies the requirements of Theorems 4 and 5 is Φ = diag(−λ, 1, 1, ..., 1).",6 Failure,[0],[0]
+"For constant λ, the loss of Θ(0) = (I, I, ..., I) is a constant for this target.",6 Failure,[0],[0]
+"Another choice is Φ = diag(−λ,−λ, 1, 1, ..., 1), which has a positive determinant.
+",6 Failure,[0],[0]
+Our proof of failure to minimize the loss exploits the fact that the layers are initialized to multiples of the identity.,6 Failure,[0],[0]
+"Since the training process is a continuous function of the initial solution, this implies that any convergence to a good solution will be very slow if the initializations are sufficiently close to the identity.",6 Failure,[0],[0]
+"We thank Yair Carmon, Nigel Duffy, Matt Feiszli, Roy Frostig, Vineet Gupta, Moritz Hardt, Tomer Koren, Antoine Saliou, Hanie Sedghi, Yoram Singer and Kunal Talwar for valuable conversations.
+",Acknowledgements,[0],[0]
+Peter Bartlett gratefully acknowledges the support of the NSF through grant IIS-1619362 and of the Australian Research Council through an Australian Laureate Fellowship (FL110100281) and through the Australian Research Council Centre of Excellence for Mathematical and Statistical Frontiers (ACEMS).,Acknowledgements,[0],[0]
+"We rely on the following facts (Horn, 1986; Harville, 1997).
+",A Proof of Lemma 1,[0],[0]
+Lemma 16.,A Proof of Lemma 1,[0],[0]
+"For compatible matrices (and, where m,n, p, q, r, s are mentioned, A ∈ ℜm×n, B ∈ ℜp×q, X ∈ ℜr×s):
+A⊗ (B ⊗ E) =",A Proof of Lemma 1,[0],[0]
+"(A⊗B)⊗E,
+AC ⊗BD = (A⊗B)(C ⊗D),
+(A⊗B)⊤ = A⊤ ⊗B⊤,
+vec(AXB) = (B⊤ ⊗A)vec(X),
+Tm,nvec(A) def = vec(A⊤),
+Tn,mTm,n = Imn,
+Tm,n = T ⊤ n,m,
+T1,n = Tn,1 =",A Proof of Lemma 1,[0],[0]
+"In,
+DX(A(B(X)))",A Proof of Lemma 1,[0],[0]
+"= DB(A(B(X)))DX (B(X)),
+DX(A(X)B(X))",A Proof of Lemma 1,[0],[0]
+= (B(X) ⊤ ⊗ Im)DXA(X),A Proof of Lemma 1,[0],[0]
++,A Proof of Lemma 1,[0],[0]
+"(Iq ⊗A(X))DXB(X),
+DX(A(X) T ) = Tn,mDX(A(X)),
+DX(AXB)",A Proof of Lemma 1,[0],[0]
+"= B ⊤ ⊗A,
+DA(A⊗B) =",A Proof of Lemma 1,[0],[0]
+"(In ⊗ Tq,m ⊗ Ip)(Imn ⊗ vec(B))
+=",A Proof of Lemma 1,[0],[0]
+"(Inq ⊗ Tm,p)(In ⊗ vec(B)⊗",A Proof of Lemma 1,[0],[0]
+"Im),
+DB(A⊗B) =",A Proof of Lemma 1,[0],[0]
+"(In ⊗ Tq,m ⊗ Ip)(vec(A)⊗ Ipq)
+= (Tp,q ⊗ Imn)(Iq ⊗ vec(A)⊗",A Proof of Lemma 1,[0],[0]
+"Ip).
+",A Proof of Lemma 1,[0],[0]
+"Armed with Lemma 16, we now prove Lemma 1.",A Proof of Lemma 1,[0],[0]
+"We have
+DΘifΘ(x) = DΘi (Θi+1:LΘiΘ1:i−1x) =",A Proof of Lemma 1,[0],[0]
+"(Θ1:i−1x) ⊤ ⊗Θi+1:L.
+Again, from Lemma 16
+DΘi ( DΘjfΘ(x) )",A Proof of Lemma 1,[0],[0]
+"= DΘi
+(
+(Θ1:j−1x) ⊤ ⊗Θj+1:L
+)
+= DΘ1:j−1x
+(
+(Θ1:j−1x) ⊤ ⊗Θj+1:L
+)
+DΘi (Θ1:j−1x)
+(by the chain rule, since i < j)
+= DΘ1:j−1x
+(
+(
+(Θ1:j−1x)⊗Θ ⊤ j+1:L
+)⊤ ) (
+(Θ1:i−1x) ⊤",A Proof of Lemma 1,[0],[0]
+"⊗Θi+1:j−1
+)
+.",A Proof of Lemma 1,[0],[0]
+"(9)
+Define P = Θ1:j−1x and Q = Θj+1:L, so that P ∈ ℜd×1 and Q ∈ ℜd×d.",A Proof of Lemma 1,[0],[0]
+"We have
+DP
+(
+( P ⊗Q⊤ )⊤ )
+= Td2,dDP
+( P ⊗Q⊤ )
+",A Proof of Lemma 1,[0],[0]
+"= Td2,d(I1 ⊗ Td,d ⊗ Id)(Id ⊗ vec(Q T ))",A Proof of Lemma 1,[0],[0]
+"= Td2,d(Td,d ⊗ Id)(Id ⊗ vec(Q ⊤)).
+",A Proof of Lemma 1,[0],[0]
+"Substituting back into (9), we get
+DΘi ( DΘjfΘ(x) )",A Proof of Lemma 1,[0],[0]
+"= Td2,d(Td,d ⊗ Id)(Id ⊗ vec(Θ ⊤ j+1:L))
+",A Proof of Lemma 1,[0],[0]
+"(
+(Θ1:i−1x) ⊤",A Proof of Lemma 1,[0],[0]
+"⊗Θi+1:j−1
+)
+.
+",A Proof of Lemma 1,[0],[0]
+"The product rule in Lemma 16 gives, for each i,
+DΘiℓ (fΘ)",A Proof of Lemma 1,[0],[0]
+"= E(DΘi(ℓ(fΘ(X)))
+= E(DΘi( 1
+2 (fΘ(X)− ΦX)
+⊤(fΘ(X)",A Proof of Lemma 1,[0],[0]
+"−ΦX)))
+",A Proof of Lemma 1,[0],[0]
+= E(((Θ1:L − Φ)X) ⊤DΘifΘ(X)),A Proof of Lemma 1,[0],[0]
+"= E ( ((Θ1:L − Φ)X) ⊤ ( (Θ1:i−1X) ⊤ ⊗Θi+1:L ))
+",A Proof of Lemma 1,[0],[0]
+= E,A Proof of Lemma 1,[0],[0]
+( (I1 ⊗,A Proof of Lemma 1,[0],[0]
+"((Θ1:L − Φ)X) ⊤) ( (Θ1:i−1X) ⊤ ⊗Θi+1:L ))
+",A Proof of Lemma 1,[0],[0]
+"= E (( (Θ1:i−1X) ⊤ ⊗ ((Θ1:L −Φ)X) ⊤Θi+1:L ))
+",A Proof of Lemma 1,[0],[0]
+= E,A Proof of Lemma 1,[0],[0]
+(( X⊤Θ⊤1:i−1 ) ⊗,A Proof of Lemma 1,[0],[0]
+( X⊤(Θ1:L −Φ) ⊤Θi+1:,A Proof of Lemma 1,[0],[0]
+L )),A Proof of Lemma 1,[0],[0]
+"= E ( (X⊤ ⊗X⊤) (
+Θ⊤1:i−1 ⊗ (Θ1:L − Φ) ⊤Θi+1:L
+))
+= E ((X ⊗X)vec(1))⊤ ( Θ⊤1:i−1 ⊗",A Proof of Lemma 1,[0],[0]
+"(Θ1:L − Φ) ⊤Θi+1:L )
+= E ( vec(XX⊤) )",A Proof of Lemma 1,[0],[0]
+"⊤ (
+Θ⊤1:i−1 ⊗ (Θ1:L − Φ) ⊤Θi+1:L
+)
+= (vec(Id))",A Proof of Lemma 1,[0],[0]
+"T ( Θ⊤1:i−1 ⊗ (Θ1:L − Φ) ⊤Θi+1:L ) .
+",A Proof of Lemma 1,[0],[0]
+"Hence,
+(DΘiℓ (fΘ))",A Proof of Lemma 1,[0],[0]
+"⊤ =
+(
+Θ1:i−1 ⊗Θ ⊤ i+1:L(Θ1:L − Φ)
+)
+(vec(Id))
+",A Proof of Lemma 1,[0],[0]
+"= vec ( Θ⊤i+1:L(Θ1:L − Φ)IdΘ ⊤ 1:i−1 ) .
+",A Proof of Lemma 1,[0],[0]
+"Also, recalling that i < j, we have
+DΘjDΘiℓ (fΘ)",A Proof of Lemma 1,[0],[0]
+"= DΘj
+( (vec(Id))",A Proof of Lemma 1,[0],[0]
+T ( Θ⊤1:i−1 ⊗ (Θ1:L − Φ) ⊤Θi+1,A Proof of Lemma 1,[0],[0]
+":L ))
+",A Proof of Lemma 1,[0],[0]
+= (Id2 ⊗ (vec(Id)),A Proof of Lemma 1,[0],[0]
+"T )DΘj
+(
+Θ⊤1:i−1 ⊗",A Proof of Lemma 1,[0],[0]
+"(Θ1:L − Φ) ⊤Θi+1:L
+)
+= (Id2 ⊗ (vec(Id))",A Proof of Lemma 1,[0],[0]
+"T ) (Id ⊗ Td,d ⊗",A Proof of Lemma 1,[0],[0]
+"Id)
+( vec(Θ⊤1:i−1)⊗ Id2 ) DΘj",A Proof of Lemma 1,[0],[0]
+( (Θ1:L − Φ) ⊤Θi+1,A Proof of Lemma 1,[0],[0]
+":L ) .
+",A Proof of Lemma 1,[0],[0]
+"Continuing with the subproblem,
+DΘj
+(
+(Θ1:L −Φ) ⊤Θi+1:",A Proof of Lemma 1,[0],[0]
+"L
+)
+",A Proof of Lemma 1,[0],[0]
+"= (Θ⊤i+1:L ⊗ Id)DΘj
+( (Θ1:L − Φ) ⊤ )
+",A Proof of Lemma 1,[0],[0]
++ (Id ⊗ (Θ1:,A Proof of Lemma 1,[0],[0]
+L − Φ) ⊤)DΘj,A Proof of Lemma 1,[0],[0]
+"(Θi+1:L)
+= (Θ⊤i+1:L ⊗ Id)DΘj
+( Θ⊤1:L )
++",A Proof of Lemma 1,[0],[0]
+(Id ⊗ (Θ1:L − Φ) ⊤)DΘj,A Proof of Lemma 1,[0],[0]
+"(Θi+1:L)
+= (Θ⊤i+1:L ⊗ Id) ( Θj+1:L ⊗Θ ⊤ 1:j−1 ) DΘj (Θ ⊤ j )
++",A Proof of Lemma 1,[0],[0]
+"(Id ⊗ (Θ1:L − Φ) ⊤) ( Θ⊤i+1:j−1 ⊗Θj+1:L )
+= (Θ⊤i+1:L ⊗ Id) ( Θj+1:L ⊗Θ ⊤ 1:j−1 )",A Proof of Lemma 1,[0],[0]
+"Td,d
++ (Id ⊗ (Θ1:L − Φ) ⊤)",A Proof of Lemma 1,[0],[0]
+"( Θ⊤i+1:j−1 ⊗Θj+1:L )
+=",A Proof of Lemma 1,[0],[0]
+( Θ⊤i+1:LΘj+1:L ⊗Θ ⊤ 1:j−1 ),A Proof of Lemma 1,[0],[0]
+"Td,d
++ ( Θ⊤i+1:j−1 ⊗ (Θ1:L − Φ) ⊤Θj+1:L ) .
+",A Proof of Lemma 1,[0],[0]
+"Finally,
+DΘiDΘiℓ (fΘ) = DΘi
+( (vec(Id)) T ( Θ⊤1:i−1 ⊗ (Θ1:",A Proof of Lemma 1,[0],[0]
+"L − Φ) ⊤Θi+1:L ))
+",A Proof of Lemma 1,[0],[0]
+= (Id2 ⊗ (vec(Id)),A Proof of Lemma 1,[0],[0]
+"T )DΘi
+(
+Θ⊤1:i−1 ⊗ (Θ1:",A Proof of Lemma 1,[0],[0]
+L − Φ) ⊤Θi+1:,A Proof of Lemma 1,[0],[0]
+"L
+)
+= (Id2 ⊗ (vec(Id)) T )",A Proof of Lemma 1,[0],[0]
+"(Id ⊗ Td,d ⊗ Id)
+( vec(Θ⊤1:i−1)⊗ Id2 ) DΘi",A Proof of Lemma 1,[0],[0]
+( (Θ1:L − Φ) ⊤Θi+1,A Proof of Lemma 1,[0],[0]
+":L )
+and
+DΘi
+(
+(Θ1:L − Φ) ⊤Θi+1:L
+)
+= (Θ⊤i+1:L ⊗ Id)DΘi
+( (Θ1:L − Φ) ⊤ )
+= (Θ⊤i+1:L ⊗ Id)DΘi
+( Θ⊤1:L )
+= (Θ⊤i+1:L ⊗ Id) ( Θi+1:L ⊗Θ ⊤ 1:i−1 ) DΘi(Θ ⊤ i ) =",A Proof of Lemma 1,[0],[0]
+(Θ⊤i+1:L ⊗ Id) ( Θi+1:L ⊗Θ ⊤ 1:i−1 ),A Proof of Lemma 1,[0],[0]
+"Td,d = (
+Θ⊤i+1:LΘi+1:",A Proof of Lemma 1,[0],[0]
+"L ⊗Θ ⊤ 1:i−1
+)
+",A Proof of Lemma 1,[0],[0]
+"Td,d.",A Proof of Lemma 1,[0],[0]
+"We have ||∇2||2F = 2 ∑
+i<j
+||DΘjDΘiℓ(fΘ)|| 2 F +
+∑
+i
+||DΘiDΘiℓ(fΘ)|| 2 F .",B Proof of Lemma 3,[0],[0]
+"(10)
+Let’s start with the easier term.",B Proof of Lemma 3,[0],[0]
+Choose Θ such that ||Θi − I||2 ≤ z,B Proof of Lemma 3,[0],[0]
+"for all i. We have
+||DΘiDΘiℓ (fΘ) ||F = ∣ ∣ ∣ ∣(Id2⊗(vec(Id)) ⊤) (Id⊗Td,d⊗Id)
+( vec(Θ⊤1:i−1)⊗Id2 )
+(
+Θ⊤i+1:LΘi+1:L ⊗Θ ⊤ 1:i−1
+)
+",B Proof of Lemma 3,[0],[0]
+"Td,d ∣ ∣ ∣ ∣
+F
+≤ ∣ ∣
+∣
+∣ ∣ ∣ (Id2 ⊗ (vec(Id)) ⊤) (Id ⊗ Td,d ⊗ Id) ∣ ∣ ∣ ∣ ∣ ∣
+F
+× ∣ ∣
+∣
+∣ ∣ ∣ ( vec(Θ⊤1:i−1)⊗Id2 )( Θ⊤i+1:LΘi+1:L⊗Θ ⊤ 1:i−1 )",B Proof of Lemma 3,[0],[0]
+"Td,d ∣ ∣ ∣ ∣ ∣ ∣
+F
+= d3/2 ∣ ∣
+∣
+∣ ∣ ∣ ( vec(Θ⊤1:i−1)⊗ Id2 )
+(
+Θ⊤i+1:LΘi+1:",B Proof of Lemma 3,[0],[0]
+"L ⊗Θ ⊤ 1:i−1
+)
+",B Proof of Lemma 3,[0],[0]
+"Td,d
+∣ ∣ ∣ ∣ ∣ ∣
+F
+≤ d3/2 ∣ ∣
+∣
+∣ ∣ ∣ ( vec(Θ⊤1:i−1)⊗ Id2 ) ∣ ∣ ∣ ∣ ∣ ∣
+F
+× ∣ ∣
+∣
+∣ ∣ ∣ ( Θ⊤i+1:LΘi+1:",B Proof of Lemma 3,[0],[0]
+L ⊗Θ ⊤ 1:i−1 ),B Proof of Lemma 3,[0],[0]
+"Td,d ∣ ∣ ∣ ∣ ∣ ∣
+F
+= d7/2 ∣ ∣
+∣
+∣ ∣
+∣ vec(Θ⊤1:i−1)
+∣ ∣ ∣ ∣ ∣ ∣
+F
+∣ ∣ ∣ ∣ ∣ ∣ ( Θ⊤i+1:LΘi+1:L⊗Θ ⊤ 1:i−1 )",B Proof of Lemma 3,[0],[0]
+"Td,d ∣ ∣ ∣ ∣ ∣ ∣
+F
+= d7/2 ||Θ1:i−1||F
+∣ ∣ ∣ ∣ ∣ ∣ ( Θ⊤i+1:LΘi+1:",B Proof of Lemma 3,[0],[0]
+L ⊗Θ ⊤ 1:i−1 ),B Proof of Lemma 3,[0],[0]
+"Td,d ∣ ∣ ∣ ∣ ∣ ∣
+F
+≤ d4 ||Θ1:i−1||2
+∣ ∣ ∣ ∣ ∣ ∣ ( Θ⊤i+1:LΘi+1:L ⊗Θ ⊤ 1:i−1 )",B Proof of Lemma 3,[0],[0]
+"Td,d ∣ ∣ ∣ ∣ ∣ ∣
+F
+≤ d4(1 + z)i−1 ∣ ∣
+∣
+∣ ∣ ∣ ( Θ⊤i+1:LΘi+1:L ⊗Θ ⊤ 1:i−1 )",B Proof of Lemma 3,[0],[0]
+"Td,d ∣ ∣ ∣ ∣ ∣ ∣
+F
+= d4(1 + z)i−1 ∣ ∣
+∣
+∣ ∣ ∣ ( Θ⊤i+1:LΘi+1:L ⊗Θ ⊤ 1:i−1 ) ∣ ∣ ∣ ∣ ∣ ∣
+F
+= d4(1 + z)i−1 ∣ ∣
+∣
+∣ ∣
+∣ Θ⊤i+1:LΘi+1:L
+∣ ∣ ∣ ∣ ∣ ∣ F × ∣ ∣ ∣ ∣ ∣ ∣ Θ⊤1:i−1 ∣ ∣ ∣ ∣ ∣ ∣ F
+≤",B Proof of Lemma 3,[0],[0]
+"d5(1 + z)i−1 ∣ ∣
+∣
+∣ ∣
+∣ Θ⊤i+1:LΘi+1:L
+∣ ∣ ∣ ∣ ∣ ∣ 2 × ∣ ∣ ∣ ∣ ∣ ∣ Θ⊤1:i−1 ∣ ∣ ∣ ∣ ∣ ∣ 2
+≤ d5(1 + z)2(L−1).
+",B Proof of Lemma 3,[0],[0]
+"Similarly,
+||DΘjDΘiℓ (fΘ) ||F = ∣ ∣ ∣ ∣(Id2⊗(vec(I)) ⊤) (Id⊗Td,d⊗Id)
+( vec(Θ⊤1:i−1)⊗Id2 )
+(
+(
+Θ⊤i+1:LΘj+1:L ⊗Θ ⊤ 1:j−1
+)
+",B Proof of Lemma 3,[0],[0]
+"Td,d
++ ( Θ⊤i+1:j−1 ⊗ (Θ1:L −Φ) ⊤Θj+1",B Proof of Lemma 3,[0],[0]
+":L )
+)
+∣ ∣ ∣ ∣
+F
+≤ d4(1 + z)i−1 ∣ ∣ ∣ ∣
+(
+Θ⊤i+1:LΘj+1:L ⊗Θ ⊤ 1:j−1
+)
+",B Proof of Lemma 3,[0],[0]
+"Td,d
++ ( Θ⊤i+1:j−1 ⊗ (Θ1:L −Φ) ⊤Θj+1",B Proof of Lemma 3,[0],[0]
+":L ) ∣ ∣ ∣ ∣
+F
+≤ d4(1 + z)i−1",B Proof of Lemma 3,[0],[0]
+"(∣ ∣
+∣
+∣ ∣ ∣ ( Θ⊤i+1:LΘj+1:L ⊗Θ ⊤ 1:j−1 )",B Proof of Lemma 3,[0],[0]
+"Td,d ∣ ∣ ∣ ∣ ∣ ∣
+F
++ ∣ ∣
+∣
+∣ ∣ ∣ ( Θ⊤i+1:j−1 ⊗ (Θ1:L − Φ) ⊤Θj+1",B Proof of Lemma 3,[0],[0]
+":L )∣ ∣ ∣ ∣ ∣ ∣
+F
+)
+≤ d4(1 + z)i−1",B Proof of Lemma 3,[0],[0]
+"( d(1 + z)2L−1−i
++ ∣ ∣
+∣
+∣ ∣ ∣ ( Θ⊤i+1:j−1 ⊗ (Θ1:L − Φ) ⊤Θj+1",B Proof of Lemma 3,[0],[0]
+":L )∣ ∣ ∣ ∣ ∣ ∣
+F
+)
+= d4(1 + z)i−1",B Proof of Lemma 3,[0],[0]
+"( d(1 + z)2L−1−i
++ ||Θi+1:j−1||F × ∣ ∣ ∣ ∣ ∣ ∣ (Θ1:L − Φ) ⊤Θj+1",B Proof of Lemma 3,[0],[0]
+":L ∣ ∣ ∣ ∣ ∣ ∣
+F
+)
+≤ d4(1 + z)i−1",B Proof of Lemma 3,[0],[0]
+( d(1 + z)2L−1−i + 2d(1 + z)2L−1−i ),B Proof of Lemma 3,[0],[0]
+"= 3d5(1 + z)2L−2.
+",B Proof of Lemma 3,[0],[0]
+"Putting these together with (10), we get ||∇2||2F ≤",B Proof of Lemma 3,[0],[0]
+"L 29d10(1 + z)4L, so that
+||∇2||F ≤ 3Ld 5(1 + z)2L.",B Proof of Lemma 3,[0],[0]
+"Recall that a polar decomposition of a matrix A consists of a unitary matrix R and a positive semidefinite matrix P such that A = RP .
+",C Proof of Lemma 7,[0],[0]
+"Lemma 17 ((Horn & Johnson, 2013)).",C Proof of Lemma 7,[0],[0]
+"A is a unitary matrix if and only if all of the (complex) eigenvalues z of A have magnitude 1.
+",C Proof of Lemma 7,[0],[0]
+"Lemma 18 ((Horn & Johnson, 2013))",C Proof of Lemma 7,[0],[0]
+.,C Proof of Lemma 7,[0],[0]
+"If A is unitary then A is normal.
+",C Proof of Lemma 7,[0],[0]
+"Lemma 19 ((Horn & Johnson, 2013))",C Proof of Lemma 7,[0],[0]
+.,C Proof of Lemma 7,[0],[0]
+"If A is normal with eigenvalues λ1, ..., λd, the singular values of A are |λ1|, ..., |λd|.
+Lemma 20.",C Proof of Lemma 7,[0],[0]
+"If A is unitary, then A1/L is unitary, and thus Ai/L is unitary for any non-negative integer i.
+Lemma 21.",C Proof of Lemma 7,[0],[0]
+"If A is invertible and normal with singular values σ1, ..., σd, then, for any positive integer L, the singular values of A1/L are σ 1/L 1 , ..., σ 1/L d .
+",C Proof of Lemma 7,[0],[0]
+Proof.,C Proof of Lemma 7,[0],[0]
+"Follows from Lemma 19 together with the fact that raising a non-singular matrix to a power results in raising its eigenvalues to the same power.
+",C Proof of Lemma 7,[0],[0]
+"Lemma 22 ((Horn & Johnson, 2013))",C Proof of Lemma 7,[0],[0]
+.,C Proof of Lemma 7,[0],[0]
+"If A = RP is the polar decomposition of A, then the singular values of A are the same as the singular values of P .
+",C Proof of Lemma 7,[0],[0]
+Lemma 23.,C Proof of Lemma 7,[0],[0]
+"If σ1, ..., σd are the principal components of A, and A = ∏L i=1Ai is a balanced factorization of A, then then σ 1/L 1 , ..., σ 1/L d are the principal components of Ai, for each i ∈ {1, ..., L}.
+",C Proof of Lemma 7,[0],[0]
+Proof.,C Proof of Lemma 7,[0],[0]
+"The singular values of Ai = RiPi are the same as the singular values of Pi, which is similar to P 1/L, whose singular values are the Lth roots of the singular values of P , which are the same as the singular values of A.
+Lemma 24.",C Proof of Lemma 7,[0],[0]
+"If A1, ..., AL is a balanced factorization of A, then
+A = L ∏
+i=1
+Ai.
+Proof.",C Proof of Lemma 7,[0],[0]
+"We have
+A = RP
+= R1/LR1−1/LP 1/LP 1−1/L = R1/LR1−1/LP 1/LR−(1−1/L)R1−1/LP 1−1/L = R1P1R 1−1/LP 1−1/L = A1R 1−1/LP 1−1/L = A1R 1/LR1−2/LP 1/LP 1−2/L
+and so on.",C Proof of Lemma 7,[0],[0]
+"We analyze algorithms for approximating a function f(x) = Φxmapping R to R using deep linear neural networks, i.e. that learn a function h parameterized by matrices Θ1, ...,ΘL and defined by h(x)",abstractText,[0],[0]
+= ΘLΘL−1...Θ1x.,abstractText,[0],[0]
+We focus on algorithms that learn through gradient descent on the population quadratic loss in the case that the distribution over the inputs is isotropic.,abstractText,[0],[0]
+"We provide polynomial bounds on the number of iterations for gradient descent to approximate the least squares matrix Φ, in the case where the initial hypothesis Θ1 = ...",abstractText,[0],[0]
+= ΘL = I has excess loss bounded by a small enough constant.,abstractText,[0],[0]
+"On the other hand, we show that gradient descent fails to converge for Φ whose distance from the identity is a larger constant, and we show that some forms of regularization toward the identity in each layer do not help.",abstractText,[0],[0]
+"If Φ is symmetric positive definite, we show that an algorithm that initializes Θi = I learns an ǫ-approximation of f using a number of updates polynomial in L, the condition number of Φ, and log(d/ǫ).",abstractText,[0],[0]
+"In contrast, we show that if the least squares matrix Φ is symmetric and has a negative eigenvalue, then all members of a class of algorithms that perform gradient descent with identity initialization, and optionally regularize toward the identity in each layer, fail to converge.",abstractText,[0],[0]
+"We analyze an algorithm for the case that Φ satisfies uΦu > 0 for all u, but may not be symmetric.",abstractText,[0],[0]
+This algorithm uses two regularizers: one that maintains the invariant u⊤ΘLΘL−1...,abstractText,[0],[0]
+Θ1u > 0,abstractText,[0],[0]
+"for all u, and another that “balances” Θ1, ...,ΘL so that they have the same singular values.",abstractText,[0],[0]
+"Single-task learning in computer vision has enjoyed much success in deep learning, with many single-task models now performing at or beyond human accuracies for a wide array of tasks.",1. Introduction,[1.0],"['Single-task learning in computer vision has enjoyed much success in deep learning, with many single-task models now performing at or beyond human accuracies for a wide array of tasks.']"
+"However, an ultimate visual system for full scene understanding must be able to perform many diverse perceptual tasks simultaneously and efficiently, especially within the limited compute environments of embedded systems
+1Magic Leap, Inc. Correspondence to: Zhao Chen <zchen@magicleap.com>.
+",1. Introduction,[0],[0]
+"Proceedings of the 35 th International Conference on Machine Learning, Stockholm, Sweden, PMLR 80, 2018.",1. Introduction,[0],[0]
+"Copyright 2018 by the author(s).
+such as smartphones, wearable devices, and robots/drones.",1. Introduction,[0],[0]
+"Such a system can be enabled by multitask learning, where one model shares weights across multiple tasks and makes multiple inferences in one forward pass.",1. Introduction,[1.0],"['Such a system can be enabled by multitask learning, where one model shares weights across multiple tasks and makes multiple inferences in one forward pass.']"
+"Such networks are not only scalable, but the shared features within these networks can induce more robust regularization and boost performance as a result.",1. Introduction,[0],[0]
+"In the ideal limit, we can thus have the best of both worlds with multitask networks: more efficiency and higher performance.
+",1. Introduction,[0],[0]
+"In general, multitask networks are difficult to train; different tasks need to be properly balanced so network parameters converge to robust shared features that are useful across all tasks.",1. Introduction,[1.0],"['In general, multitask networks are difficult to train; different tasks need to be properly balanced so network parameters converge to robust shared features that are useful across all tasks.']"
+"Methods in multitask learning thus far have largely tried to find this balance by manipulating the forward pass of the network (e.g. through constructing explicit statistical relationships between features (Long & Wang, 2015) or optimizing multitask network architectures (Misra et al., 2016), etc.), but such methods ignore a key insight: task imbalances impede proper training because they manifest as imbalances between backpropagated gradients.",1. Introduction,[0],[0]
+"A task that is too dominant during training, for example, will necessarily express that dominance by inducing gradients which have relatively large magnitudes.",1. Introduction,[1.0],"['A task that is too dominant during training, for example, will necessarily express that dominance by inducing gradients which have relatively large magnitudes.']"
+"We aim to mitigate such issues at their root by directly modifying gradient magnitudes through tuning of the multitask loss function.
+",1. Introduction,[0],[0]
+"In practice, the multitask loss function is often assumed to be linear in the single task losses Li, L = ∑ i wiLi, where the sum runs over all T tasks.",1. Introduction,[1.0],"['In practice, the multitask loss function is often assumed to be linear in the single task losses Li, L = ∑ i wiLi, where the sum runs over all T tasks.']"
+"In our case, we propose an adaptive method, and so wi can vary at each training step t: wi = wi(t).",1. Introduction,[1.0],"['In our case, we propose an adaptive method, and so wi can vary at each training step t: wi = wi(t).']"
+"This linear form of the loss function is convenient for implementing gradient balancing, as wi very directly and linearly couples to the backpropagated gradient magnitudes from each task.",1. Introduction,[0],[0]
+The challenge is then to find the best value for each wi at each training step t that balances the contribution of each task for optimal model training.,1. Introduction,[0],[0]
+"To optimize the weights wi(t) for gradient balancing, we propose a simple algorithm that penalizes the network when backpropagated gradients from any task are too large or too small.",1. Introduction,[0],[0]
+"The correct balance is struck when tasks are training at similar rates; if task i is training relatively quickly, then its weight wi(t) should decrease relative to other task weights wj(t)|j 6=i to allow other tasks more influence on
+training.",1. Introduction,[0.9999999946581641],"['The correct balance is struck when tasks are training at similar rates; if task i is training relatively quickly, then its weight wi(t) should decrease relative to other task weights wj(t)|j 6=i to allow other tasks more influence on training.']"
+"Our algorithm is similar to batch normalization (Ioffe & Szegedy, 2015) with two main differences: (1) we normalize across tasks instead of across data batches, and (2) we use rate balancing as a desired objective to inform our normalization.",1. Introduction,[0],[0]
+"We will show that such gradient normalization (hereafter referred to as GradNorm) boosts network performance while significantly curtailing overfitting.
+",1. Introduction,[0],[0]
+"Our main contributions to multitask learning are as follows:
+1.",1. Introduction,[0],[0]
+"An efficient algorithm for multitask loss balancing which directly tunes gradient magnitudes.
+2.",1. Introduction,[0],[0]
+"A method which matches or surpasses the performance of very expensive exhaustive grid search procedures, but which only requires tuning a single hyperparameter.
+3.",1. Introduction,[0],[0]
+A demonstration that direct gradient interaction provides a powerful way of controlling multitask learning.,1. Introduction,[0],[0]
+"Multitask learning was introduced well before the advent of deep learning (Caruana, 1998; Bakker & Heskes, 2003), but the robust learned features within deep networks and their excellent single-task performance have spurned renewed interest.",2. Related Work,[0],[0]
+"Although our primary application area is computer vision, multitask learning has applications in multiple other fields, from natural language processing (Collobert & Weston, 2008; Hashimoto et al., 2016; Søgaard & Goldberg, 2016) to speech synthesis (Seltzer & Droppo, 2013; Wu et al., 2015), from very domain-specific applications such as traffic prediction (Huang et al., 2014) to very general cross-domain work (Bilen & Vedaldi, 2017).",2. Related Work,[0],[0]
+"Multitask learning has also been explored in the context of curriculum learning (Graves et al., 2017), where subsets of tasks are subsequently trained based on local rewards; we here explore the opposite approach, where tasks are jointly trained based on global rewards such as total loss decrease.
+",2. Related Work,[0],[0]
+"Multitask learning is very well-suited to the field of computer vision, where making multiple robust predictions is crucial for complete scene understanding.",2. Related Work,[0],[0]
+"Deep networks have been used to solve various subsets of multiple vision tasks, from 3-task networks (Eigen & Fergus, 2015; Teichmann et al., 2016) to much larger subsets as in UberNet (Kokkinos, 2016).",2. Related Work,[0],[0]
+"Often, single computer vision problems can even be framed as multitask problems, such as in Mask R-CNN for instance segmentation (He et al., 2017) or YOLO-9000 for object detection (Redmon & Farhadi, 2016).",2. Related Work,[0],[0]
+Particularly of note is the rich and significant body of work on finding explicit ways to exploit task relationships within a multitask model.,2. Related Work,[0],[0]
+"Clustering methods have shown success beyond deep models (Jacob et al., 2009; Kang et al., 2011), while constructs such as deep relationship networks (Long & Wang, 2015) and cross-stich networks (Misra et al., 2016)
+give deep networks the capacity to search for meaningful relationships between tasks and to learn which features to share between them.",2. Related Work,[0],[0]
+"Work in (Warde-Farley et al., 2014) and (Lu et al., 2016) use groupings amongst labels to search through possible architectures for learning.",2. Related Work,[0],[0]
+"Perhaps the most relevant to the current work, (Kendall et al., 2017) uses a joint likelihood formulation to derive task weights based on the intrinsic uncertainty in each task.",2. Related Work,[0],[0]
+"For a multitask loss function L(t) = ∑ wi(t)Li(t), we aim to learn the functions wi(t) with the following goals: (1) to place gradient norms for different tasks on a common scale through which we can reason about their relative magnitudes, and (2) to dynamically adjust gradient norms so different tasks train at similar rates.",3.1. Definitions and Preliminaries,[0],[0]
+"To this end, we first define the relevant quantities, first with respect to the gradients we will be manipulating.
+",3.1. Definitions and Preliminaries,[0],[0]
+•,3.1. Definitions and Preliminaries,[0],[0]
+W : The subset of the full network weights W ⊂ W where we actually apply GradNorm.,3.1. Definitions and Preliminaries,[0],[0]
+"W is generally chosen as the last shared layer of weights to save on compute costs1.
+",3.1. Definitions and Preliminaries,[1.000000012699507],['W is generally chosen as the last shared layer of weights to save on compute costs1.']
+• G(i)W (t) = ||∇Wwi(t)Li(t)||2: the L2 norm of the gradient of the weighted single-task loss wi(t)Li(t),3.1. Definitions and Preliminaries,[0],[0]
+"with respect to the chosen weights W .
+• GW (t) = Etask[G(i)W (t)]: the average gradient norm across all tasks at training time t.
+We also define various training rates for each task i:
+• L̃i(t) = Li(t)/Li(0): the loss ratio for task",3.1. Definitions and Preliminaries,[0],[0]
+"i at time t. L̃i(t) is a measure of the inverse training rate of task i (i.e. lower values of L̃i(t) correspond to a faster training rate for task i)2.
+• ri(t) = L̃i(t)/Etask[L̃i(t)]",3.1. Definitions and Preliminaries,[0],[0]
+": the relative inverse training rate of task i.
+With the above definitions in place, we now complete our description of the GradNorm algorithm.",3.1. Definitions and Preliminaries,[0],[0]
+"As stated in Section 3.1, GradNorm should establish a common scale for gradient magnitudes, and also should balance
+1In our experiments this choice of W causes GradNorm to increase training time by only ∼ 5% on NYUv2.
+2Networks in this paper all had stable initializations and Li(0) could be used directly.",3.2. Balancing Gradients with GradNorm,[0],[0]
+"When Li(0) is sharply dependent on initialization, we can use a theoretical initial loss instead.",3.2. Balancing Gradients with GradNorm,[0],[0]
+"E.g. for Li the CE loss across C classes, we can use Li(0) = log(C).
+training rates of different tasks.",3.2. Balancing Gradients with GradNorm,[0],[0]
+"The common scale for gradients is most naturally the average gradient norm, GW (t), which establishes a baseline at each timestep t by which we can determine relative gradient sizes.",3.2. Balancing Gradients with GradNorm,[0],[0]
+"The relative inverse training rate of task i, ri(t), can be used to rate balance our gradients.",3.2. Balancing Gradients with GradNorm,[0],[0]
+"Concretely, the higher the value of ri(t), the higher the gradient magnitudes should be for task i in order to encourage the task to train more quickly.",3.2. Balancing Gradients with GradNorm,[0],[0]
+"Therefore, our desired gradient norm for each task i is simply:
+G (i) W (t) 7→ GW (t)× [ri(t)]",3.2. Balancing Gradients with GradNorm,[0],[0]
+"α, (1)
+where α is an additional hyperparameter.",3.2. Balancing Gradients with GradNorm,[0],[0]
+α sets the strength of the restoring force which pulls tasks back to a common training rate.,3.2. Balancing Gradients with GradNorm,[0],[0]
+"In cases where tasks are very different in their complexity, leading to dramatically different learning dynamics between tasks, a higher value of α should be used to enforce stronger training rate balancing.",3.2. Balancing Gradients with GradNorm,[0],[0]
+"When tasks are more symmetric (e.g. the synthetic examples in Section 4), a lower value of α is appropriate.",3.2. Balancing Gradients with GradNorm,[0],[0]
+Note that α = 0 will always try to pin the norms of backpropagated gradients from each task to be equal at W .,3.2. Balancing Gradients with GradNorm,[0],[0]
+"See Section 5.4 for more details on the effects of tuning α.
+",3.2. Balancing Gradients with GradNorm,[0],[0]
+"Equation 1 gives a target for each task i’s gradient norms, and we update our loss weights wi(t) to move gradient
+norms towards this target for each task.",3.2. Balancing Gradients with GradNorm,[0],[0]
+"GradNorm is then implemented as an L1 loss function Lgrad between the actual and target gradient norms at each timestep for each task, summed over all tasks:
+Lgrad(t;wi(t))",3.2. Balancing Gradients with GradNorm,[0],[0]
+"= ∑ i ∣∣∣∣G(i)W (t)−GW (t)× [ri(t)]α∣∣∣∣ 1 (2)
+where the summation runs through all T tasks.",3.2. Balancing Gradients with GradNorm,[0],[0]
+"When differentiating this loss Lgrad, we treat the target gradient norm GW (t)× [ri(t)]α as a fixed constant to prevent loss weights wi(t) from spuriously drifting towards zero.",3.2. Balancing Gradients with GradNorm,[0],[0]
+"Lgrad is then differentiated only with respect to the wi, as the wi(t) directly control gradient magnitudes per task.",3.2. Balancing Gradients with GradNorm,[0],[0]
+The computed gradients ∇wiLgrad are then applied via standard update rules to update each wi (as shown in Figure 1).,3.2. Balancing Gradients with GradNorm,[0],[0]
+The full GradNorm algorithm is summarized in Algorithm 1.,3.2. Balancing Gradients with GradNorm,[0],[0]
+"Note that after every update step, we also renormalize the weights wi(t) so that ∑ i wi(t) = T in order to decouple gradient normalization from the global learning rate.",3.2. Balancing Gradients with GradNorm,[0],[0]
+"To illustrate GradNorm on a simple, interpretable system, we construct a common scenario for multitask networks: training tasks which have similar loss functions but different loss scales.",4. A Toy Example,[0],[0]
+"In such situations, if we naı̈vely pick wi(t) = 1
+Algorithm 1 Training with GradNorm Initialize wi(0) = 1 ∀i Initialize network weightsW Pick value for α > 0 and pick the weightsW (usually the
+final layer of weights which are shared between tasks) for t = 0",4. A Toy Example,[0],[0]
+"to max train steps do
+Input batch xi to compute Li(t) ∀i and L(t) = ∑ i wi(t)Li(t)",4. A Toy Example,[0],[0]
+"[standard forward pass] Compute G(i)W (t) and ri(t) ∀i Compute GW (t) by averaging the G (i) W (t)
+Compute Lgrad = ∑ i|G (i) W (t)−GW (t)× [ri(t)]α|1 Compute GradNorm gradients∇wiLgrad, keeping targets GW (t)× [ri(t)]α constant Compute standard gradients∇WL(t) Update wi(t) 7→ wi(t+ 1) using ∇wiLgrad UpdateW(t) 7→ W(t+ 1) using∇WL(t)",4. A Toy Example,[0],[0]
+"[standard
+backward pass] Renormalize wi(t+ 1) so that ∑ i wi(t+ 1) = T
+end for
+for all loss weights wi(t), the network training will be dominated by tasks with larger loss scales that backpropagate larger gradients.",4. A Toy Example,[0],[0]
+"We will demonstrate that GradNorm overcomes this issue.
+",4. A Toy Example,[0],[0]
+"Consider T regression tasks trained using standard squared loss onto the functions
+fi(x) =",4. A Toy Example,[0],[0]
+"σi tanh((B + i)x), (3)
+where tanh(·) acts element-wise.",4. A Toy Example,[0],[0]
+"Inputs are dimension 250 and outputs dimension 100, while B and i are constant matrices with their elements generated IID from N (0, 10) and N (0, 3.5), respectively.",4. A Toy Example,[0],[0]
+Each task therefore shares information in B but also contains task-specific information i.,4. A Toy Example,[0],[0]
+The σi are the key parameters within this problem; they are fixed scalars which set the scales of the outputs fi.,4. A Toy Example,[0],[0]
+A higher scale for fi induces a higher expected value of squared loss for that task.,4. A Toy Example,[0],[0]
+"Such tasks are harder to learn due to the higher variances in their response values, but they also backpropagate larger gradients.",4. A Toy Example,[0],[0]
+"This scenario generally leads to suboptimal training dynamics when the higher σi tasks dominate the training across all tasks.
+",4. A Toy Example,[0],[0]
+"To train our toy models, we use a 4-layer fully-connected ReLU-activated network with 100 neurons per layer as a common trunk.",4. A Toy Example,[0],[0]
+A final affine transformation layer gives T final predictions (corresponding to T different tasks).,4. A Toy Example,[0],[0]
+"To ensure valid analysis, we only compare models initialized to the same random values and fed data generated from the same fixed random seed.",4. A Toy Example,[0],[0]
+"The asymmetry α is set low to 0.12 for these experiments, as the output functions fi are all of the same functional form and thus we expect the asymmetry between tasks to be minimal.
+",4. A Toy Example,[0],[0]
+"In these toy problems, we measure the task-normalized testtime loss to judge test-time performance, which is the sum of the test loss ratios for each task, ∑ i Li(t)/Li(0).",4. A Toy Example,[0],[0]
+We do this because a simple sum of losses is an inadequate performance metric for multitask networks when different loss scales exist; higher loss scale tasks will factor disproportionately highly in the loss.,4. A Toy Example,[0],[0]
+"There unfortunately exists no general single scalar which gives a meaningful measure of multitask performance in all scenarios, but our toy problem was specifically designed with tasks which are statistically identical except for their loss scales σi.",4. A Toy Example,[0],[0]
+"There is therefore a clear measure of overall network performance, which is the sum of losses normalized by each task’s variance σ2i - equivalent (up to a scaling factor) to the sum of loss ratios.
+",4. A Toy Example,[0],[0]
+"For T = 2, we choose the values (σ0, σ1)",4. A Toy Example,[0],[0]
+"= (1.0, 100.0) and show the results of training in the top panels of Figure 2.",4. A Toy Example,[0],[0]
+"If we train with equal weightswi = 1, task 1 suppresses task 0 from learning due to task 1’s higher loss scale.",4. A Toy Example,[0],[0]
+"However, gradient normalization increases w0(t) to counteract the larger gradients coming from T1, and the improved task balance results in better test-time performance.
+",4. A Toy Example,[1.0000000727558263],"['However, gradient normalization increases w0(t) to counteract the larger gradients coming from T1, and the improved task balance results in better test-time performance.']"
+The possible benefits of gradient normalization become even clearer when the number of tasks increases.,4. A Toy Example,[0],[0]
+"For T = 10, we sample the σi from a wide normal distribution and plot the results in the bottom panels of Figure 2.",4. A Toy Example,[0],[0]
+GradNorm significantly improves test time performance over naı̈vely weighting each task the same.,4. A Toy Example,[0],[0]
+"Similarly to the T = 2 case, for T = 10 the wi(t) grow larger for smaller σi tasks.
+",4. A Toy Example,[0],[0]
+"For both T = 2 and T = 10, GradNorm is more stable and outperforms the uncertainty weighting proposed by (Kendall et al., 2017).",4. A Toy Example,[0],[0]
+"Uncertainty weighting, which enforces that wi(t) ∼ 1/Li(t), tends to grow the weights wi(t) too large and too quickly as the loss for each task drops.",4. A Toy Example,[0],[0]
+"Although such networks train quickly at the onset, the training soon deteriorates.",4. A Toy Example,[1.0],"['Although such networks train quickly at the onset, the training soon deteriorates.']"
+"This issue is largely caused by the fact that uncertainty weighting allows wi(t) to change without constraint (compared to GradNorm which ensures∑ wi(t) = T always), which pushes the global learning rate up rapidly as the network trains.
+",4. A Toy Example,[0],[0]
+The traces for each wi(t) during a single GradNorm run are observed to be stable and convergent.,4. A Toy Example,[1.0],['The traces for each wi(t) during a single GradNorm run are observed to be stable and convergent.']
+"In Section 5.3 we will see how the time-averaged weightsEt[wi(t)] lie close to the optimal static weights, suggesting GradNorm can greatly simplify the tedious grid search procedure.",4. A Toy Example,[0],[0]
+"We use two variants of NYUv2 (Nathan Silberman & Fergus, 2012) as our main datasets.",5. Application to a Large Real-World Dataset,[1.0],"['We use two variants of NYUv2 (Nathan Silberman & Fergus, 2012) as our main datasets.']"
+"Please refer to the Supplementary Materials for additional results on a 9-task facial landmark dataset found in (Zhang et al., 2014).",5. Application to a Large Real-World Dataset,[0],[0]
+"The standard NYUv2 dataset carries depth, surface normals, and semantic
+segmentation labels (clustered into 13 distinct classes) for a variety of indoor scenes in different room types (bathrooms, living rooms, studies, etc.).",5. Application to a Large Real-World Dataset,[0.9999999334583815],"['The standard NYUv2 dataset carries depth, surface normals, and semantic segmentation labels (clustered into 13 distinct classes) for a variety of indoor scenes in different room types (bathrooms, living rooms, studies, etc.).']"
+"NYUv2 is relatively small (795 training, 654 test images), but contains both regression and classification labels, making it a good choice to test the robustness of GradNorm across various tasks.
+",5. Application to a Large Real-World Dataset,[0.9999999767239665],"['NYUv2 is relatively small (795 training, 654 test images), but contains both regression and classification labels, making it a good choice to test the robustness of GradNorm across various tasks.']"
+"We augment the standard NYUv2 depth dataset with flips and additional frames from each video, resulting in 90,000 images complete with pixel-wise depth, surface normals, and room keypoint labels (segmentation labels are, unfortunately, not available for these additional frames).",5. Application to a Large Real-World Dataset,[0],[0]
+"Keypoint labels are professionally annotated by humans, while surface normals are generated algorithmically.",5. Application to a Large Real-World Dataset,[0],[0]
+The full dataset is then split by scene for a 90/10 train/test split.,5. Application to a Large Real-World Dataset,[1.0],['The full dataset is then split by scene for a 90/10 train/test split.']
+See Figure 6 for examples.,5. Application to a Large Real-World Dataset,[0],[0]
+"We will generally refer to these two datasets as NYUv2+seg and NYUv2+kpts, respectively.
+",5. Application to a Large Real-World Dataset,[0],[0]
+All inputs are downsampled to 320 x 320 pixels and outputs to 80 x 80 pixels.,5. Application to a Large Real-World Dataset,[0],[0]
+"We use these resolutions following (Lee et al., 2017), which represents the state-of-the-art in room keypoint prediction and from which we also derive our VGG-style model architecture.",5. Application to a Large Real-World Dataset,[0],[0]
+These resolutions also allow us to keep models relatively slim while not compromising semantic complexity in the ground truth output maps.,5. Application to a Large Real-World Dataset,[0],[0]
+"We try two different models: (1) a SegNet (Badrinarayanan et al., 2015; Lee et al., 2017) network with a symmetric VGG16 (Simonyan & Zisserman, 2014) encoder/decoder,
+and (2) an FCN (Long et al., 2015) network with a modified ResNet-50",5.1. Model and General Training Characteristics,[0],[0]
+"(He et al., 2016) encoder and shallow ResNet decoder.",5.1. Model and General Training Characteristics,[0],[0]
+"The VGG SegNet reuses maxpool indices to perform upsampling, while the ResNet FCN learns all upsampling filters.",5.1. Model and General Training Characteristics,[0],[0]
+"The ResNet architecture is further thinned (both in its filters and activations) to contrast with the heavier, more complex VGG SegNet:",5.1. Model and General Training Characteristics,[0],[0]
+stride-2 layers are moved earlier and all 2048-filter layers are replaced by 1024-filter layers.,5.1. Model and General Training Characteristics,[0],[0]
+"Ultimately, the VGG SegNet has 29M parameters versus 15M for the thin ResNet.",5.1. Model and General Training Characteristics,[0],[0]
+All model parameters are shared amongst all tasks until the final layer.,5.1. Model and General Training Characteristics,[1.0],['All model parameters are shared amongst all tasks until the final layer.']
+"Although we will focus on the VGG SegNet in our more in-depth analysis, by designing and testing on two extremely different network topologies we will further demonstrate GradNorm’s robustness to the choice of base architecture.
+",5.1. Model and General Training Characteristics,[0],[0]
+"We use standard pixel-wise loss functions for each task: cross entropy for segmentation, squared loss for depth, and cosine similarity for normals.",5.1. Model and General Training Characteristics,[0],[0]
+"As in (Lee et al., 2017), for room layout we generate Gaussian heatmaps for each of 48 room keypoint types and predict these heatmaps with a pixel-wise squared loss.",5.1. Model and General Training Characteristics,[0],[0]
+"Note that all regression tasks are quadratic losses (our surface normal prediction uses a cosine loss which is quadratic to leading order), allowing us to use ri(t) for each task i as a direct proxy for each task’s relative inverse training rate.
+",5.1. Model and General Training Characteristics,[0],[0]
+All runs are trained at a batch size of 24 across 4 Titan X GTX 12GB GPUs and run at 30fps on a single GPU at inference.,5.1. Model and General Training Characteristics,[0],[0]
+All NYUv2 runs begin with a learning rate of 2e5.,5.1. Model and General Training Characteristics,[0],[0]
+"NYUv2+kpts runs last 80000 steps with a learning rate
+decay of 0.2 every 25000 steps.",5.1. Model and General Training Characteristics,[0],[0]
+NYUv2+seg runs last 20000 steps with a learning rate decay of 0.2 every 6000 steps.,5.1. Model and General Training Characteristics,[0],[0]
+"Updating wi(t) is performed at a learning rate of 0.025 for both GradNorm and the uncertainty weighting ((Kendall et al., 2017)) baseline.",5.1. Model and General Training Characteristics,[0],[0]
+"All optimizers are Adam, although we find that GradNorm is insensitive to the optimizer chosen.",5.1. Model and General Training Characteristics,[0],[0]
+We implement GradNorm using TensorFlow v1.2.1.,5.1. Model and General Training Characteristics,[0],[0]
+In Table 1 we display the performance of GradNorm on the NYUv2+seg dataset.,5.2. Main Results on NYUv2,[0],[0]
+"We see that GradNorm α = 1.5 improves the performance of all three tasks with respect to the equal-weights baseline (where wi(t) = 1 for all t,i), and either surpasses or matches (within statistical noise) the best performance of single networks for each task.",5.2. Main Results on NYUv2,[0],[0]
+"The GradNorm Static network uses static weights derived from a GradNorm network by calculating the time-averaged weights Et[wi(t)] for each task during a GradNorm training run, and retraining a network with weights fixed to those values.",5.2. Main Results on NYUv2,[0],[0]
+GradNorm thus can also be used to extract good values for static weights.,5.2. Main Results on NYUv2,[0],[0]
+"We pursue this idea further in Section 5.3 and show that these weights lie very close to the optimal weights extracted from exhaustive grid search.
+",5.2. Main Results on NYUv2,[1.0000000385677406],['We pursue this idea further in Section 5.3 and show that these weights lie very close to the optimal weights extracted from exhaustive grid search.']
+"To show how GradNorm can perform in the presence of a larger dataset, we also perform extensive experiments on the NYUv2+kpts dataset, which is augmented to a factor of 50x more data.",5.2. Main Results on NYUv2,[1.0],"['To show how GradNorm can perform in the presence of a larger dataset, we also perform extensive experiments on the NYUv2+kpts dataset, which is augmented to a factor of 50x more data.']"
+The results are shown in Table 2.,5.2. Main Results on NYUv2,[0],[0]
+"As with the NYUv2+seg runs, GradNorm networks outperform other multitask methods, and either matches (within noise) or surpasses the performance of single-task networks.
+",5.2. Main Results on NYUv2,[0],[0]
+Figure 3 shows test and training loss curves for GradNorm (α = 1.5) and baselines on the larger NYUv2+kpts dataset for our VGG SegNet models.,5.2. Main Results on NYUv2,[0],[0]
+"GradNorm improves test-time depth error by ∼ 5%, despite converging to a much higher training loss.",5.2. Main Results on NYUv2,[0],[0]
+"GradNorm achieves this by aggressively rate balancing the network (enforced by a high asymmetry α = 1.5), and ultimately suppresses the depth weight wdepth(t) to lower than 0.10 (see Section 5.4 for more details).",5.2. Main Results on NYUv2,[0],[0]
+"The same
+trend exists for keypoint regression, and is a clear signal of network regularization.",5.2. Main Results on NYUv2,[0],[0]
+"In contrast, uncertainty weighting (Kendall et al., 2017) always moves test and training error in the same direction, and thus is not a good regularizer.",5.2. Main Results on NYUv2,[0],[0]
+"Only results for the VGG SegNet are shown here, but the Thin ResNet FCN produces consistent results.",5.2. Main Results on NYUv2,[0],[0]
+"For our VGG SegNet, we train 100 networks from scratch with random task weights on NYUv2+kpts.",5.3. Gradient Normalization Finds Optimal Grid-Search Weights in One Pass,[1.0],"['For our VGG SegNet, we train 100 networks from scratch with random task weights on NYUv2+kpts.']"
+Weights are sampled from a uniform distribution and renormalized to sum to T = 3.,5.3. Gradient Normalization Finds Optimal Grid-Search Weights in One Pass,[0],[0]
+"For computational efficiency, we only train for 15000 iterations out of the normal 80000, and then compare the performance of that network to our GradNorm
+α = 1.5 VGG SegNet network at the same 15000 steps.",5.3. Gradient Normalization Finds Optimal Grid-Search Weights in One Pass,[0],[0]
+"The results are shown in Figure 4.
+",5.3. Gradient Normalization Finds Optimal Grid-Search Weights in One Pass,[0],[0]
+"Even after 100 networks trained, grid search still falls short of our GradNorm network.",5.3. Gradient Normalization Finds Optimal Grid-Search Weights in One Pass,[0],[0]
+"Even more remarkably, there is a strong, negative correlation between network performance and task weight distance to our time-averaged GradNorm weights Et[wi(t)].",5.3. Gradient Normalization Finds Optimal Grid-Search Weights in One Pass,[0],[0]
+"At an L2 distance of ∼ 3, grid search networks on average have almost double the errors per task compared to our GradNorm network.",5.3. Gradient Normalization Finds Optimal Grid-Search Weights in One Pass,[0],[0]
+GradNorm has therefore found the optimal grid search weights in one single training run.,5.3. Gradient Normalization Finds Optimal Grid-Search Weights in One Pass,[0],[0]
+The only hyperparameter in our algorithm is the asymmetry α.,5.4. Effects of tuning the asymmetry α,[0],[0]
+"The optimal value of α for NYUv2 lies near α = 1.5, while in the highly symmetric toy example in Section 4 we used α = 0.12.",5.4. Effects of tuning the asymmetry α,[0],[0]
+"This observation reinforces our characterization of α as an asymmetry parameter.
+",5.4. Effects of tuning the asymmetry α,[0],[0]
+"Tuning α leads to performance gains, but we found that for NYUv2, almost any value of 0",5.4. Effects of tuning the asymmetry α,[0],[0]
+< α < 3 will improve network performance over an equal weights baseline (see Supplementary for details).,5.4. Effects of tuning the asymmetry α,[0],[0]
+"Figure 5 shows that higher values of α tend to push the weights wi(t) further apart, which more aggressively reduces the influence of tasks which overfit or learn too quickly (in our case, depth).",5.4. Effects of tuning the asymmetry α,[0],[0]
+"Remarkably, at α = 1.75 (not shown) wdepth(t) is suppressed to below 0.02 at no detriment to network performance on the depth task.",5.4. Effects of tuning the asymmetry α,[0],[0]
+"Figure 6 shows visualizations of the VGG SegNet outputs on test set images along with the ground truth, for both the NYUv2+seg and NYUv2+kpts datasets.",5.5. Qualitative Results,[1.0],"['Figure 6 shows visualizations of the VGG SegNet outputs on test set images along with the ground truth, for both the NYUv2+seg and NYUv2+kpts datasets.']"
+"Ground truth labels are juxtaposed with outputs from the equal weights network, 3 single networks, and our best GradNorm network.",5.5. Qualitative Results,[1.0],"['Ground truth labels are juxtaposed with outputs from the equal weights network, 3 single networks, and our best GradNorm network.']"
+"Some
+improvements are incremental, but GradNorm produces superior visual results in tasks for which there are significant quantitative improvements in Tables 1 and 2.",5.5. Qualitative Results,[0],[0]
+"We introduced GradNorm, an efficient algorithm for tuning loss weights in a multi-task learning setting based on balancing the training rates of different tasks.",6. Conclusions,[1.0],"['We introduced GradNorm, an efficient algorithm for tuning loss weights in a multi-task learning setting based on balancing the training rates of different tasks.']"
+"We demonstrated on both synthetic and real datasets that GradNorm improves multitask test-time performance in a variety of scenarios, and can accommodate various levels of asymmetry amongst the different tasks through the hyperparameter α.",6. Conclusions,[0],[0]
+"Our empirical results indicate that GradNorm offers su-
+perior performance over state-of-the-art multitask adaptive weighting methods and can match or surpass the performance of exhaustive grid search while being significantly less time-intensive.
+",6. Conclusions,[0.9999999260260072],['Our empirical results indicate that GradNorm offers su- perior performance over state-of-the-art multitask adaptive weighting methods and can match or surpass the performance of exhaustive grid search while being significantly less time-intensive.']
+"Looking ahead, algorithms such as GradNorm may have applications beyond multitask learning.",6. Conclusions,[1.0],"['Looking ahead, algorithms such as GradNorm may have applications beyond multitask learning.']"
+"We hope to extend the GradNorm approach to work with class-balancing and sequence-to-sequence models, all situations where problems with conflicting gradient signals can degrade model performance.",6. Conclusions,[1.0],"['We hope to extend the GradNorm approach to work with class-balancing and sequence-to-sequence models, all situations where problems with conflicting gradient signals can degrade model performance.']"
+"We thus believe that our work not only provides a robust new algorithm for multitask learning, but also reinforces the powerful idea that gradient tuning is fundamental for training large, effective models on complex tasks.",6. Conclusions,[1.0],"['We thus believe that our work not only provides a robust new algorithm for multitask learning, but also reinforces the powerful idea that gradient tuning is fundamental for training large, effective models on complex tasks.']"
+"Deep multitask networks, in which one neural network produces multiple predictive outputs, can offer better speed and performance than their single-task counterparts but are challenging to train properly.",abstractText,[0],[0]
+We present a gradient normalization (GradNorm) algorithm that automatically balances training in deep multitask models by dynamically tuning gradient magnitudes.,abstractText,[0],[0]
+"We show that for various network architectures, for both regression and classification tasks, and on both synthetic and real datasets, GradNorm improves accuracy and reduces overfitting across multiple tasks when compared to single-task networks, static baselines, and other adaptive multitask loss balancing techniques.",abstractText,[0],[0]
+"GradNorm also matches or surpasses the performance of exhaustive grid search methods, despite only involving a single asymmetry hyperparameter α.",abstractText,[0],[0]
+"Thus, what was once a tedious search process that incurred exponentially more compute for each task added can now be accomplished within a few training runs, irrespective of the number of tasks.",abstractText,[0],[0]
+"Ultimately, we will demonstrate that gradient manipulation affords us great control over the training dynamics of multitask networks and may be one of the keys to unlocking the potential of multitask learning.",abstractText,[0],[0]
+GradNorm: Gradient Normalization for Adaptive Loss Balancing in Deep Multitask Networks,title,[0],[0]

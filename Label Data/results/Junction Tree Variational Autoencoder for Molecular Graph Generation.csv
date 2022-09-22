@@ -1,0 +1,656 @@
+0,1,label2,summary_sentences
+"Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics (Short Papers), pages 364–369 Melbourne, Australia, July 15 - 20, 2018. c©2018 Association for Computational Linguistics
+364",text,[0],[0]
+"Semantic role labeling (SRL) captures predicateargument relations, such as “who did what to whom.”",1 Introduction,[0],[0]
+"Recent high-performing SRL models (He et al., 2017; Marcheggiani et al., 2017; Tan et al., 2018) are BIO-taggers, labeling argument spans for a single predicate at a time (as shown in Figure 1).",1 Introduction,[0],[0]
+"They are typically only evaluated with gold predicates, and must be pipelined with error-prone predicate identification models for deployment.
+",1 Introduction,[0],[0]
+We propose an end-to-end approach for predicting all the predicates and their argument spans in one forward pass.,1 Introduction,[0],[0]
+"Our model builds on a recent coreference resolution model (Lee et al., 2017), by making central use of learned, contextualized span representations.",1 Introduction,[0],[0]
+We use these representations to predict SRL graphs directly over text spans.,1 Introduction,[0],[0]
+"Each edge is identified by independently predicting which role, if any, holds between every possible pair of text spans, while using aggressive beam
+1Code and models: https://github.com/luheng/lsgn
+pruning for efficiency.",1 Introduction,[0],[0]
+"The final graph is simply the union of predicted SRL roles (edges) and their associated text spans (nodes).
+",1 Introduction,[0],[0]
+"Our span-graph formulation overcomes a key limitation of semi-markov and BIO-based models (Kong et al., 2016; Zhou and Xu, 2015; Yang and Mitchell, 2017; He et al., 2017; Tan et al., 2018): it can model overlapping spans across different predicates in the same output structure (see Figure 1).",1 Introduction,[0],[0]
+"The span representations also generalize the token-level representations in BIObased models, letting the model dynamically decide which spans and roles to include, without using previously standard syntactic features (Punyakanok et al., 2008; FitzGerald et al., 2015).
+",1 Introduction,[0],[0]
+"To the best of our knowledge, this is the first span-based SRL model that does not assume that predicates are given.",1 Introduction,[0],[0]
+"In this more realistic setting, where the predicate must be predicted, our model achieves state-of-the-art performance on PropBank.",1 Introduction,[0],[0]
+"It also reinforces the strong performance of similar span embedding methods for coreference (Lee et al., 2017), suggesting that this style of models could be used for other span-span relation tasks, such as syntactic parsing (Stern et al., 2017), relation extraction (Miwa and Bansal, 2016), and QA-SRL (FitzGerald et al., 2018).",1 Introduction,[0],[0]
+"We consider the space of possible predicates to be all the tokens in the input sentence, and the space of arguments to be all continuous spans.",2 Model,[0],[0]
+"Our model decides what relation exists between each predicate-argument pair (including no relation).
+",2 Model,[0],[0]
+"Formally, given a sequence X = w1, . . .",2 Model,[0],[0]
+", wn, we wish to predict a set of labeled predicateargument relations Y ⊆ P ×",2 Model,[0],[0]
+"A × L, where P = {w1, . . .",2 Model,[0],[0]
+", wn} is the set of all tokens (predicates), A = {(wi, . . .",2 Model,[0],[0]
+", wj) | 1 ≤",2 Model,[0],[0]
+"i ≤ j ≤ n} contains all the spans (arguments), and L is the space of semantic role labels, including a null label indicating no relation.",2 Model,[0],[0]
+"The final SRL output would be all the non-empty relations {(p, a, l) ∈ Y",2 Model,[0],[0]
+"| l 6= }.
+",2 Model,[0],[0]
+"We then define a set of random variables, where each random variable yp,a corresponds to a predicate p ∈ P and an argument a ∈ A, taking value from the discrete label space L.",2 Model,[0],[0]
+"The random variables yp,a are conditionally independent of each other given the input X:
+P (Y | X) = ∏
+p∈P,a∈A P (yp,a | X) (1)
+P (yp,a = l | X) = exp(φ(p, a, l))∑
+l′∈L exp(φ(p, a, l′))
+",2 Model,[0],[0]
+"(2)
+Where φ(p, a, l) is a scoring function for a possible (predicate, argument, label) combination.",2 Model,[0],[0]
+"φ is decomposed into two unary scores on the predicate and the argument (defined in Section 3), as well as a label-specific score for the relation:
+φ(p, a, l) = Φa(a) + Φp(p) +",2 Model,[0],[0]
+"Φ (l) rel (a, p) (3)
+",2 Model,[0],[0]
+"The score for the null label is set to a constant: φ(p, a, ) = 0, similar to logistic regression.
+",2 Model,[0],[0]
+"Learning For each input X , we minimize the negative log likelihood of the gold structure Y ∗:
+",2 Model,[0],[0]
+J (X) =,2 Model,[0],[0]
+"− logP (Y ∗ | X) (4)
+Beam pruning As our model deals with O(n2) possible argument spans and O(n) possible predicates, it needs to consider O(n3|L|) possible relations, which is computationally impractical.",2 Model,[0],[0]
+"To overcome this issue, we define two beams Ba and Bp for storing the candidate arguments and predicates, respectively.",2 Model,[0],[0]
+The candidates in each beam are ranked by their unary score (Φa or Φp).,2 Model,[0],[0]
+The sizes of the beams are limited by λan and λpn.,2 Model,[0],[0]
+"Elements that fall out of the beam do not participate
+in computing the edge factors Φ(l)rel , reducing the overall number of relational factors evaluated by the model to O(n2|L|).",2 Model,[0],[0]
+"We also limit the maximum width of spans to a fixed number W (e.g. W = 30), further reducing the number of computed unary factors to O(n).",2 Model,[0],[0]
+"Our model builds contextualized representations for argument spans a and predicate words p based on BiLSTM outputs (Figure 2) and uses feedforward networks to compute the factor scores in φ(p, a, l) described in Section 2 (Figure 3).
+",3 Neural Architecture,[0],[0]
+"Word-level contexts The bottom layer consists of pre-trained word embeddings concatenated with character-based representations, i.e. for each token wi, we have xi = [WORDEMB(wi); CHARCNN(wi)].",3 Neural Architecture,[0],[0]
+"We then contextualize each xi using an m-layered bidirectional LSTM with highway connections (Zhang et al., 2016), which we denote as x̄i.
+Argument and predicate representation We build contextualized representations for all candidate arguments a ∈ A and predicates p ∈ P .",3 Neural Architecture,[0],[0]
+"The argument representation contains the following: end points from the BiLSTM outputs (x̄START(a), x̄END(a)), a soft head word xh(a), and embedded span width features f(a), similar to Lee et al. (2017).",3 Neural Architecture,[0],[0]
+"The predicate representation is simply the BiLSTM output at the position INDEX(p).
+",3 Neural Architecture,[0],[0]
+"g(a) =[x̄START(a); x̄END(a); xh(a); f(a)] (5)
+g(p) =x̄INDEX(p) (6)
+The soft head representation xh(a) is an attention mechanism over word inputs x in the argument span, where the weights e(a) are computed via a linear layer over the BiLSTM outputs x̄.
+xh(a) = xSTART(a):END(a)e(s) ᵀ (7) e(a)",3 Neural Architecture,[0],[0]
+"= SOFTMAX(wᵀe x̄START(a):END(a)) (8)
+xSTART(a):END(a) is a shorthand for stacking a list of vectors xt, where START(a) ≤ t ≤ END(a).
+",3 Neural Architecture,[0],[0]
+"Scoring The scoring functions Φ are implemented with feed-forward networks based on the predicate and argument representations g:
+Φa(a) =w ᵀ a MLPa(g(a))",3 Neural Architecture,[0],[0]
+(9) Φp(p),3 Neural Architecture,[0],[0]
+"=w ᵀ pMLPp(g(p)) (10)
+Φ (l) rel (a, p) =w (l)ᵀ r MLPr([g(a); g(p)]) (11)",3 Neural Architecture,[0],[0]
+"We experiment on the CoNLL 2005 (Carreras and Màrquez, 2005) and CoNLL 2012 (OntoNotes 5.0, (Pradhan et al., 2013)) benchmarks, using two SRL setups: end-to-end and gold predicates.",4 Experiments,[0],[0]
+"In the end-to-end setup, a system takes a tokenized sentence as input, and predicts all the predicates and their arguments.",4 Experiments,[0],[0]
+"Systems are evaluated on the micro-averaged F1 for correctly predicting (predicate, argument span, label) tuples.",4 Experiments,[0],[0]
+"For comparison with previous systems, we also report results with gold predicates, in which the complete set of predicates in the input sentence is given as well.",4 Experiments,[0],[0]
+"Other experimental setups and hyperparameteres are listed in Appendix A.1.
+ELMo embeddings To further improve performance, we also add ELMo word representations (Peters et al., 2018) to the BiLSTM input (in the +ELMo rows).",4 Experiments,[0],[0]
+"Since the contextualized representations ELMo provides can be applied to most previous neural systems, the improvement is orthogonal to our contribution.",4 Experiments,[0],[0]
+"In Table 1 and 2, we organize all the results into two categories: the comparable single model systems, and the mod-
+els augmented with ELMo or ensembling (in the PoE rows).
+",4 Experiments,[0],[0]
+"End-to-end results As shown in Table 1,2 our joint model outperforms the previous best pipeline system (He et al., 2017) by an F1 difference of anywhere between 1.3 and 6.0 in every setting.",4 Experiments,[0],[0]
+"The improvement is larger on the Brown test set, which is out-of-domain, and the CoNLL 2012 test set, which contains nominal predicates.",4 Experiments,[0],[0]
+"On all datasets, our model is able to predict over 40% of the sentences completely correctly.
+",4 Experiments,[0],[0]
+"Results with gold predicates To compare with additional previous systems, we also conduct experiments with gold predicates by constraining our predicate beam to be gold predicates only.",4 Experiments,[0],[0]
+"As shown in Table 2, our model significantly out-performs He et al. (2017), but falls short of Tan et al. (2018), a very recent attention-based (Vaswani et al., 2017)",4 Experiments,[0],[0]
+BIO-tagging model that was developed concurrently with our work.,4 Experiments,[0],[0]
+"By adding the contextualized ELMo representations, we are able to out-perform all previous systems, including Peters et al. (2018), which applies ELMo to the SRL model introduced in He et al. (2017).",4 Experiments,[0],[0]
+Our model’s architecture differs significantly from previous BIO systems in terms of both input and decision space.,5 Analysis,[0],[0]
+"To better understand our model’s strengths and weaknesses, we perform three analyses following Lee et al. (2017) and He et al. (2017), studying (1) the effectiveness of beam
+2For the end-to-end setting on CoNLL 2012, we used a subset of the train/dev data from previous work due to noise in the dataset; the dev result is not directly comparable.",5 Analysis,[0],[0]
+"See Appendix A.2 for detailed explanation.
+",5 Analysis,[0],[0]
+"pruning, (2) the ability to capture long-range dependencies, (3) agreement with syntactic spans, and (4) the ability to predict globally consistent SRL structures.",5 Analysis,[0],[0]
+The analyses are performed on the development sets without using ELMo embeddings.,5 Analysis,[0],[0]
+"3
+Effectiveness of beam pruning Figure 4 shows the predicate and argument spans kept in the beam, sorted with their unary scores.",5 Analysis,[0],[0]
+"Our model efficiently prunes unlikely argument spans and predicates, significantly reduces the number of edges it needs to consider.",5 Analysis,[0],[0]
+Figure 5 shows the recall of predicate words on the CoNLL 2012 development set.,5 Analysis,[0],[0]
+"By retaining λp = 0.4 predicates per word, we are able to keep over 99.7% argument-bearing predicates.",5 Analysis,[0],[0]
+"Compared to having a part-of-speech tagger (POS:X in Figure 5), our joint beam pruning allowing the model to have a soft trade-off between efficiency and recall.4
+Long-distance dependencies Figure 6 shows the performance breakdown by binned distance between arguments to the given predicates.",5 Analysis,[0],[0]
+"Our model is better at accurately predicting arguments that are farther away from the predicates, even
+3For comparability with prior work, analyses (2)-(4) are performed on the CoNLL 05 dev set with gold predicates.
+",5 Analysis,[0],[0]
+"4The predicate ID accuracy of our model is not comparable with that reported in He et al. (2017), since our model does not predict non-argument-bearing predicates.
+",5 Analysis,[0],[0]
+"compared to an ensemble model (He et al., 2017) that has a higher overall F1.",5 Analysis,[0],[0]
+"This is very likely due to architectural differences; in a BIO tagger, predicate information passes through many LSTM timesteps before reaching a long-distance argument, whereas our architecture enables direct connections between all predicates-arguments pairs.
+Agreement with syntax As mentioned in He et al. (2017), their BIO-based SRL system has good agreement with gold syntactic span boundaries (94.3%) but falls short of previous syntaxbased systems (Punyakanok et al., 2004).",5 Analysis,[0],[0]
+"By directly modeling span information, our model achieves comparable syntactic agreement (95.0%) to Punyakanok et al. (2004) without explicitly modeling syntax.
+",5 Analysis,[0],[0]
+"Global consistency On the other hand, our model suffers from global consistency issues.",5 Analysis,[0],[0]
+"For example, on the CoNLL 2005 test set, our model has lower complete-predicate accuracy (62.6%) than the BIO systems (He et al., 2017; Tan et al., 2018) (64.3%-66.4%).",5 Analysis,[0],[0]
+"Table 3 shows its viola-
+tions of global structural constraints5 compared to previous systems.",5 Analysis,[0],[0]
+Our model made more constraint violations compared to previous systems.,5 Analysis,[0],[0]
+"For example, our model predicts duplicate core arguments6 (shown in the U column in Table 3) more often than previous work.",5 Analysis,[0],[0]
+"This is due to the fact that our model uses independent classifiers to label each predicate-argument pair, making it difficult for them to implicitly track the decisions made for several arguments with the same predicate.
+",5 Analysis,[0],[0]
+"The Ours+decode row in Table 3 shows SRL performance after enforcing the U-constraint using dynamic programming (Täckström et al., 2015) at decoding time.",5 Analysis,[0],[0]
+"Constrained decoding at test time is effective at eliminating all the core-role inconsistencies (shown in the U-column), but did not bring significant gain on the end result (shown
+5Punyakanok et al. (2008) described a list of global constraints for SRL systems, e.g., there can be at most one core argument of each type for each predicate.
+6Arguments with labels ARG0,ARG1,. . .",5 Analysis,[0],[0]
+",",5 Analysis,[0],[0]
+"ARG5 and AA.
+in SRL F1), which only evaluates the piece-wise predicate-argument structures.",5 Analysis,[0],[0]
+"We proposed a new SRL model that is able to jointly predict all predicates and argument spans, generalized from a recent coreference system (Lee et al., 2017).",6 Conclusion and Future Work,[0],[0]
+"Compared to previous BIO systems, our new model supports joint predicate identification and is able to incorporate span-level features.",6 Conclusion and Future Work,[0],[0]
+"Empirically, the model does better at longrange dependencies and agreement with syntactic boundaries, but is weaker at global consistency, due to our strong independence assumption.
+",6 Conclusion and Future Work,[0],[0]
+"In the future, we could incorporate higher-order inference methods (Lee et al., 2018) to relax this assumption.",6 Conclusion and Future Work,[0],[0]
+"It would also be interesting to combine our span-based architecture with the selfattention layers (Tan et al., 2018; Strubell et al., 2018) for more effective contextualization.",6 Conclusion and Future Work,[0],[0]
+"This research was supported in part by the ARO (W911NF-16-1-0121), the NSF (IIS-1252835, IIS-1562364), a gift from Tencent, and an Allen Distinguished Investigator Award.",Acknowledgments,[0],[0]
+"We thank Eunsol Choi, Dipanjan Das, Nicholas Fitzgerald, Ariel Holtzman, Julian Michael, Noah Smith, Swabha Swayamdipta, and our anonymous reviewers for helpful feedback.",Acknowledgments,[0],[0]
+"Recent BIO-tagging-based neural semantic role labeling models are very high performing, but assume gold predicates as part of the input and cannot incorporate span-level features.",abstractText,[0],[0]
+"We propose an endto-end approach for jointly predicting all predicates, arguments spans, and the relations between them.",abstractText,[0],[0]
+"The model makes independent decisions about what relationship, if any, holds between every possible word-span pair, and learns contextualized span representations that provide rich, shared input features for each decision.",abstractText,[0],[0]
+Experiments demonstrate that this approach sets a new state of the art on PropBank SRL without gold predicates.1,abstractText,[0],[0]
+Jointly Predicting Predicates and Arguments in Neural Semantic Role Labeling,title,[0],[0]
+"Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics (Short Papers), pages 401–406 Melbourne, Australia, July 15 - 20, 2018. c©2018 Association for Computational Linguistics
+401",text,[0],[0]
+"Neural NER trains a deep neural network for the NER task and has become quite popular as they minimize the need for hand-crafted features and, learn feature representations from the training data itself.",1 Introduction,[0],[0]
+"Recently, multilingual learning has been shown to benefit Neural NER in a resource-rich language setting (Gillick et al., 2016; Yang et al., 2017).",1 Introduction,[0],[0]
+Multilingual learning aims to improve the NER performance on the language under consideration (primary language) by adding training data from one or more assisting languages.,1 Introduction,[0],[0]
+The neural network is trained on the combined data of the primary (DP ) and the assisting languages (DA).,1 Introduction,[0],[0]
+"The neural network has a combination of languagedependent and language-independent layers, and, the network learns better cross-lingual features via these language-independent layers.
+∗This work began when the second author was a research scholar at IIT Bombay
+Existing approaches add all training sentences from the assisting language to the primary language and train the neural network on the combined data.",1 Introduction,[0],[0]
+"However, data from assisting languages can introduce a drift in the tag distribution for named entities, since the common named entities from the two languages may have vastly divergent tag distributions.",1 Introduction,[0],[0]
+"For example, the entity China appears in training split of Spanish (primary) and English (assisting) (Tjong Kim Sang, 2002; Tjong Kim Sang and De Meulder, 2003) with the corresponding tag frequencies, Spanish = { Loc : 20, Org : 49, Misc : 1 } and English = { Loc : 91, Org : 7 }.",1 Introduction,[0],[0]
+"By adding English data to Spanish, the tag distribution of China is skewed towards Location entity in Spanish.",1 Introduction,[0],[0]
+This leads to a drop in named entity recognition performance.,1 Introduction,[0],[0]
+"In this work, we address this problem of drift in tag distribution owing to adding training data from a supporting language.
+",1 Introduction,[0],[0]
+"The problem is similar to the problem of data selection for domain adaptation of various NLP tasks, except that additional complexity is introduced due to the multilingual nature of the learning task.",1 Introduction,[0],[0]
+"For domain adaptation in various NLP tasks, several approaches have been proposed to address drift in data distribution (Moore and Lewis, 2010; Axelrod et al., 2011; Ruder and Plank, 2017).",1 Introduction,[0],[0]
+"For instance, in machine translation, sentences from out-of-domain data are selected based on a suitably defined metric (Moore and Lewis, 2010; Axelrod et al., 2011).",1 Introduction,[0],[0]
+The metric attempts to capture similarity of the out-of-domain sentences with the in-domain data.,1 Introduction,[0],[0]
+"Out-of-domain sentences most similar to the in-domain data are added.
+",1 Introduction,[0],[0]
+"Like the domain adaptation techniques summarized above, we propose to judiciously add sentences from the assisting language to the primary language data based on the divergence between the tag distributions of named entities in the train-
+ing instances.",1 Introduction,[0],[0]
+"Adding assisting language sentences with lower divergence reduces the possibility of entity drift enabling the multilingual model to learn better cross-lingual features.
+",1 Introduction,[0],[0]
+Following are the contributions of the paper: (a) We present a simple approach to select assisting language sentences based on symmetric KLDivergence of overlapping entities (b) We demonstrate the benefits of multilingual Neural NER on low-resource languages.,1 Introduction,[0],[0]
+"We compare the proposed data selection approach with monolingual Neural NER system, and the multilingual Neural NER system trained using all assisting language sentences.",1 Introduction,[0],[0]
+"To the best of our knowledge, ours is the first work for judiciously selecting a subset of sentences from an assisting language for multilingual Neural NER.",1 Introduction,[0],[0]
+"For every assisting language sentence, we calculate the sentence score based on the average symmetric KL-Divergence score of overlapping entities present in that sentence.",2 Judicious Selection of Assisting Language Sentences,[0],[0]
+"By overlapping entities, we mean entities whose surface form appears in both the languages’ training data.",2 Judicious Selection of Assisting Language Sentences,[0],[0]
+"The symmetric KL-Divergence SKL(x), of a named entity x, is defined as follows,
+SKL(x) =",2 Judicious Selection of Assisting Language Sentences,[0],[0]
+[ KL( Pp(x) || Pa(x) ),2 Judicious Selection of Assisting Language Sentences,[0],[0]
++KL( Pa(x) ||,2 Judicious Selection of Assisting Language Sentences,[0],[0]
+Pp(x) ) ] /2,2 Judicious Selection of Assisting Language Sentences,[0],[0]
+"(1)
+where Pp(x) and Pa(x) are the probability distributions for entity x in the primary (p) and the assisting (a) languages respectively.",2 Judicious Selection of Assisting Language Sentences,[0],[0]
+"KL refers to the standard KL-Divergence score between the two probability distributions.
+",2 Judicious Selection of Assisting Language Sentences,[0],[0]
+KL-Divergence calculates the distance between the two probability distributions.,2 Judicious Selection of Assisting Language Sentences,[0],[0]
+"Lower the KLDivergence score, higher is the tag agreement for an entity in both the languages thereby, reducing the possibility of entity drift in multilingual learning.",2 Judicious Selection of Assisting Language Sentences,[0],[0]
+Assisting language sentences with the sentence score below a threshold value are added to the primary language data for multilingual learning.,2 Judicious Selection of Assisting Language Sentences,[0],[0]
+"If an assisting language sentence contains no overlapping entities, the corresponding sentence score is zero resulting in its selection.
+",2 Judicious Selection of Assisting Language Sentences,[0],[0]
+"Network Architecture
+Several deep learning models (Collobert et al., 2011; Ma and Hovy, 2016; Murthy and Bhattacharyya, 2016; Lample et al., 2016; Yang et al., 2017) have been proposed for monolingual NER in the literature.",2 Judicious Selection of Assisting Language Sentences,[0],[0]
+"Apart from the model by Collobert et al. (2011), remaining approaches extract sub-word features using either Convolution Neural Networks (CNNs) or Bi-LSTMs.",2 Judicious Selection of Assisting Language Sentences,[0],[0]
+The proposed data selection strategy for multilingual Neural NER can be used with any of the existing models.,2 Judicious Selection of Assisting Language Sentences,[0],[0]
+"We choose the model by Murthy and Bhattacharyya (2016)1 in our experiments.
+",2 Judicious Selection of Assisting Language Sentences,[0],[0]
+"Multilingual Learning
+We consider two parameter sharing configurations for multilingual learning (i) sub-word feature extractors shared across languages (Yang et al., 2017)",2 Judicious Selection of Assisting Language Sentences,[0],[0]
+(Sub-word) (ii) the entire network trained in a language independent way (All).,2 Judicious Selection of Assisting Language Sentences,[0],[0]
+"As Murthy and Bhattacharyya (2016) use CNNs to extract sub-word features, only the character-level CNNs are shared for the Sub-word configuration.
+",2 Judicious Selection of Assisting Language Sentences,[0],[0]
+1The code is available here: https://github.com/ murthyrudra/NeuralNER,2 Judicious Selection of Assisting Language Sentences,[0],[0]
+In this section we list the datasets used and the network configurations used in our experiments.,3 Experimental Setup,[0],[0]
+The Table 1 lists the datasets used in our experiments along with pre-trained word embeddings used and other dataset statistics.,3.1 Datasets,[0],[0]
+"For German NER, we use ep-96-04-16.conll to create train and development splits, and use ep-96-04-15.conll as test split.",3.1 Datasets,[0],[0]
+"As Italian has a different tag set compared to English, Spanish and Dutch, we do not share output layer for All configuration in multilingual experiments involving Italian.",3.1 Datasets,[0],[0]
+"Even though the languages considered are resource-rich languages, we consider German and Italian as primary languages due to their relatively lower number of train tokens.",3.1 Datasets,[0],[0]
+"The German NER data followed IO notation and for all experiments involving German, we converted other language data to IO notation.",3.1 Datasets,[0],[0]
+"Similarly, the Italian NER data followed IOBES notation and for all experiments involving Italian, we converted other language data to IOBES notation.
+",3.1 Datasets,[0],[0]
+"For low-resource language setup, we consider the following Indian languages: Hindi, Marathi2, Bengali, Tamil and Malayalam.",3.1 Datasets,[0],[0]
+Except for Hindi all are low-resource languages.,3.1 Datasets,[0],[0]
+"We consider only Person, Location and Organization tags.",3.1 Datasets,[0],[0]
+"Though the scripts of these languages are different, they share the same set of phonemes making script mapping across languages easier.",3.1 Datasets,[0],[0]
+"We convert Tamil, Bengali and Malayalam data to the Devanagari script using the Indic NLP li-
+2Data is available here: http://www.cfilt.iitb.",3.1 Datasets,[0],[0]
+"ac.in/ner/annotated_corpus/
+brary3 (Kunchukuttan et al., 2015)",3.1 Datasets,[0],[0]
+"thereby, allowing sharing of sub-word features across the Indian languages.",3.1 Datasets,[0],[0]
+"For Indian languages, the annotated data followed the IOB format.",3.1 Datasets,[0],[0]
+"With the exception of English, Spanish and Dutch, remaining language datasets did not have official train and development splits provided.",3.2 Network Hyper-parameters,[0],[0]
+We randomly select 70% of the train split for training the model and remaining as development split.,3.2 Network Hyper-parameters,[0],[0]
+"The threshold for sentence score SKL, is selected based on cross-validation for every language pair.",3.2 Network Hyper-parameters,[0],[0]
+The dimensions of the Bi-LSTM hidden layer are 200 and 400 for the monolingual and multilingual experiments respectively.,3.2 Network Hyper-parameters,[0],[0]
+"We extract 20 features per convolution filter, with width varying from 1 to 9.",3.2 Network Hyper-parameters,[0],[0]
+The initial learning rate is 0.4 and multiplied by 0.7 when validation error increases.,3.2 Network Hyper-parameters,[0],[0]
+The training is stopped when the learning rate drops below 0.002.,3.2 Network Hyper-parameters,[0],[0]
+"We assign a weight of 0.1 to assisting language sentences and oversample primary language sentences to match the assisting language sentence count in all multilingual experiments.
+",3.2 Network Hyper-parameters,[0],[0]
+"For European languages, we have performed hyper-parameter tuning for both the monolingual and multilingual learning (with all assisting language sentences) configurations.",3.2 Network Hyper-parameters,[0],[0]
+The best hyperparameter values for the language pair involved were observed to be within similar range.,3.2 Network Hyper-parameters,[0],[0]
+"Hence, we chose the same set of hyper-parameter values for all languages.
+",3.2 Network Hyper-parameters,[0],[0]
+3https://github.com/anoopkunchukuttan/ indic_nlp_library,3.2 Network Hyper-parameters,[0],[0]
+We now present the results on both resource-rich and resource-poor languages.,4 Results,[0],[0]
+Table 2 presents the results for German and Italian NER.,4.1 Resource-Rich Languages,[0],[0]
+"We consistently observe improvements for German and Italian NER using our data selection strategy, irrespective of whether only subword features are shared (Sub-word) or the entire network (All) is shared across languages.
+",4.1 Resource-Rich Languages,[0],[0]
+Adding all Spanish/Dutch sentences to Italian data leads to drop in Italian NER performance when all layers are shared.,4.1 Resource-Rich Languages,[0],[0]
+Label drift from overlapping entities is one of the reasons for the poor results.,4.1 Resource-Rich Languages,[0],[0]
+This can be observed by comparing the histograms of English and Spanish sentences ranked by the SKL scores for Italian multilingual learning (Figure 1).,4.1 Resource-Rich Languages,[0],[0]
+Most English sentences have lower SKL scores indicating higher tag agreement for overlapping entities and lower drift in tag distribution.,4.1 Resource-Rich Languages,[0],[0]
+"Hence, adding all English sentences improves Italian NER accuracy.",4.1 Resource-Rich Languages,[0],[0]
+"In contrast, most Spanish sentences have larger SKL
+scores and adding these sentences adversely impacts Italian NER performance.",4.1 Resource-Rich Languages,[0],[0]
+"By judiciously selecting assisting language sentences, we eliminate sentences which are responsible for drift occurring during multilingual learning.
+",4.1 Resource-Rich Languages,[0],[0]
+"To understand how overlapping entities impact the NER performance, we study the statistics of overlapping named entities between ItalianEnglish and Italian-Spanish pairs.",4.1 Resource-Rich Languages,[0],[0]
+911 and 916 unique entities out of 4061 unique Italian entities appear in the English and Spanish data respectively.,4.1 Resource-Rich Languages,[0],[0]
+We had hypothesized that entities with divergent tag distribution are responsible for hindering the performance in multilingual learning.,4.1 Resource-Rich Languages,[0],[0]
+If we sort the common entities based on their SKL divergence value.,4.1 Resource-Rich Languages,[0],[0]
+We observe that 484 out of 911 common entities in English and 535 out of 916 common entities in Spanish have an SKL score greater than 1.0. 162 out of 484 common entities in English-Italian data having SKL divergence value greater than 1.0 also appear more than 10 times in the English corpus.,4.1 Resource-Rich Languages,[0],[0]
+"Similarly, 123 out of 535 common entities in Spanish-Italian data having SKL divergence value greater than 1.0 also appear more than 10 times in the Spanish corpus.",4.1 Resource-Rich Languages,[0],[0]
+"However, these common 162 entities have a combined frequency of 12893 in English, meanwhile the 123 common entities have a combined frequency of 34945 in Spanish.",4.1 Resource-Rich Languages,[0],[0]
+"To summarize, although the number of overlapping entities is comparable in English and Spanish sentences, entities with larger SKL divergence score appears more frequently in Spanish sentences compared to English sentences.",4.1 Resource-Rich Languages,[0],[0]
+"As a consequence, adding all Spanish sentences leads to significant drop in Italian NER performance which is not the case when all English sentences are added.",4.1 Resource-Rich Languages,[0],[0]
+"As Indian languages exhibit high lexical overlap (Kunchukuttan and Bhattacharyya, 2016) and syntactic relatedness (V Subbãrão, 2012), we share all layers of the network across languages.",4.2 Resource-Poor Languages,[0],[0]
+Table 3 presents the results.,4.2 Resource-Poor Languages,[0],[0]
+"Bengali, Malayalam, and Tamil (low-resource languages) benefits from our data selection strategy.",4.2 Resource-Poor Languages,[0],[0]
+"Hindi and Marathi NER performance improves when the other is used as assisting language.
+",4.2 Resource-Poor Languages,[0],[0]
+"Bengali, Malayalam, and Tamil have weaker baselines compared to Hindi and Marathi, and are benefited from our approach irrespective of the assisting language chosen.",4.2 Resource-Poor Languages,[0],[0]
+"However, Hindi and Marathi are not benefited from multilingual learning with Bengali, Malayalam and Tamil.",4.2 Resource-Poor Languages,[0],[0]
+Malayalam and Tamil being morphologically rich have low entity overlap (surface level) with Hindi and Marathi.,4.2 Resource-Poor Languages,[0],[0]
+"As a result, only 2-3% of Malayalam and Tamil sentences are eliminated from our approach, leading to no gains from multilingual learning.",4.2 Resource-Poor Languages,[0],[0]
+Hindi and Marathi are negatively impacted by noisy Bengali data.,4.2 Resource-Poor Languages,[0],[0]
+"Bengali has less training sentences compared to other languages and, choosing a low SKL threshold results in selecting very few Bengali sentences for multilingual learning.",4.2 Resource-Poor Languages,[0],[0]
+"Here, we study the influence of SKL score threshold on the NER performance.",4.3 Influence of SKL Threshold,[0],[0]
+We run experiments for Italian NER by adding Spanish training sentences and sharing all layers except for output layer across languages.,4.3 Influence of SKL Threshold,[0],[0]
+"We vary the threshold value from 1.0 to 9.0 in steps of 1, and select sentences with score less than the threshold.",4.3 Influence of SKL Threshold,[0],[0]
+"A threshold of 0.0 indicates monolingual training and threshold greater than 9.0 indicates all assist-
+ing language sentences considered.",4.3 Influence of SKL Threshold,[0],[0]
+The plot of Italian test F-Score against SKL score is shown in the Figure 2.,4.3 Influence of SKL Threshold,[0],[0]
+Italian test F-Score increases initially as we add more and more Spanish sentences and then drops due to influence of drift becoming significant.,4.3 Influence of SKL Threshold,[0],[0]
+"Finding the right SKL threshold is important, hence we use a validation set to tune the SKL threshold.",4.3 Influence of SKL Threshold,[0],[0]
+"In this paper, we address the problem of divergence in tag distribution between primary and assisting languages for multilingual Neural NER.",5 Conclusion,[0],[0]
+We show that filtering out the assisting language sentences exhibiting significant divergence in the tag distribution can improve NER accuracy.,5 Conclusion,[0],[0]
+We propose to use the symmetric KL-Divergence metric to measure the tag distribution divergence.,5 Conclusion,[0],[0]
+We observe consistent improvements in multilingual Neural NER performance using our data selection strategy.,5 Conclusion,[0],[0]
+"The strategy shows benefits for extremely low resource primary languages too.
+",5 Conclusion,[0],[0]
+"This problem of drift in data distribution may not be unique to multilingual NER, and we plan to study the influence of data selection for multilingual learning on other NLP tasks like sentiment analysis, question answering, neural machine translation, etc.",5 Conclusion,[0],[0]
+"We also plan to explore more metrics for multilingual learning, specifically for morphologically rich languages.",5 Conclusion,[0],[0]
+"We thank Gajanan Rane and Geetanjali Rane for annotating the Marathi data, which was created as part of the CLIA project.",Acknowledgements,[0],[0]
+Multilingual learning for Neural Named Entity Recognition (NNER) involves jointly training a neural network for multiple languages.,abstractText,[0],[0]
+"Typically, the goal is improving the NER performance of one of the languages (the primary language) using the other assisting languages.",abstractText,[0],[0]
+We show that the divergence in the tag distributions of the common named entities between the primary and assisting languages can reduce the effectiveness of multilingual learning.,abstractText,[0],[0]
+"To alleviate this problem, we propose a metric based on symmetric KL divergence to filter out the highly divergent training instances in the assisting language.",abstractText,[0],[0]
+"We empirically show that our data selection strategy improves NER performance in many languages, including those with very limited training data.",abstractText,[0],[0]
+Judicious Selection of Training Data in Assisting Language for Multilingual Neural NER,title,[0],[0]
+The key challenge of drug discovery is to find target molecules with desired chemical properties.,1. Introduction,[1.0],['The key challenge of drug discovery is to find target molecules with desired chemical properties.']
+"Currently, this task takes years of development and exploration by expert chemists and pharmacologists.",1. Introduction,[0],[0]
+Our ultimate goal is to automate this process.,1. Introduction,[0],[0]
+"From a computational perspective, we decompose the challenge into two complementary subtasks: learning to represent molecules in a continuous manner that facilitates the prediction and optimization of their properties (encoding); and learning to map an optimized continuous representation back into a molecular graph with improved properties (decoding).",1. Introduction,[0],[0]
+"While deep learning has been extensively investigated for molecular graph encoding (Duvenaud et al., 2015; Kearnes et al., 2016; Gilmer et al., 2017), the harder combinatorial task of molecular graph generation from latent representation remains under-explored.
+",1. Introduction,[0.9999999595151875],"['While deep learning has been extensively investigated for molecular graph encoding (Duvenaud et al., 2015; Kearnes et al., 2016; Gilmer et al., 2017), the harder combinatorial task of molecular graph generation from latent representation remains under-explored.']"
+1MIT Computer Science & Artificial Intelligence Lab.,1. Introduction,[0],[0]
+"Correspondence to: Wengong Jin <wengong@csail.mit.edu>.
+",1. Introduction,[0],[0]
+"Proceedings of the 35 th International Conference on Machine Learning, Stockholm, Sweden, PMLR 80, 2018.",1. Introduction,[0],[0]
+"Copyright 2018 by the author(s).
+",1. Introduction,[0],[0]
+"Prior work on drug design formulated the graph generation task as a string generation problem (Gómez-Bombarelli et al., 2016; Kusner et al., 2017) in an attempt to side-step direct generation of graphs.",1. Introduction,[1.0],"['Prior work on drug design formulated the graph generation task as a string generation problem (Gómez-Bombarelli et al., 2016; Kusner et al., 2017) in an attempt to side-step direct generation of graphs.']"
+"Specifically, these models start by generating SMILES (Weininger, 1988), a linear string notation used in chemistry to describe molecular structures.",1. Introduction,[1.0],"['Specifically, these models start by generating SMILES (Weininger, 1988), a linear string notation used in chemistry to describe molecular structures.']"
+"SMILES strings can be translated into graphs via deterministic mappings (e.g., using RDKit (Landrum, 2006)).",1. Introduction,[0],[0]
+"However, this design has two critical limitations.",1. Introduction,[0],[0]
+"First, the SMILES representation is not designed to capture molecular similarity.",1. Introduction,[0],[0]
+"For instance, two molecules with similar chemical structures may be encoded into markedly different SMILES strings (e.g., Figure 1).",1. Introduction,[0],[0]
+This prevents generative models like variational autoencoders from learning smooth molecular embeddings.,1. Introduction,[0],[0]
+"Second, essential chemical properties such as molecule validity are easier to express on graphs rather than linear SMILES representations.",1. Introduction,[0],[0]
+"We hypothesize that operating directly on graphs improves generative modeling of valid chemical structures.
+",1. Introduction,[0],[0]
+Our primary contribution is a new generative model of molecular graphs.,1. Introduction,[1.0],['Our primary contribution is a new generative model of molecular graphs.']
+While one could imagine solving the problem in a standard manner – generating graphs node by node – the approach is not ideal for molecules.,1. Introduction,[1.0],['While one could imagine solving the problem in a standard manner – generating graphs node by node – the approach is not ideal for molecules.']
+"This is because creating molecules atom by atom would force the model to generate chemically invalid intermediaries (see, e.g., Figure 2), delaying validation until a complete graph is generated.",1. Introduction,[1.0],"['This is because creating molecules atom by atom would force the model to generate chemically invalid intermediaries (see, e.g., Figure 2), delaying validation until a complete graph is generated.']"
+"Instead, we propose to generate molecular graphs in two phases by exploiting valid subgraphs as components.",1. Introduction,[0],[0]
+"The overall generative approach, cast as a junction tree variational autoencoder, first generates a tree structured object (a junction tree) whose role is to represent the scaffold of subgraph components and their coarse relative arrangements.",1. Introduction,[1.0],"['The overall generative approach, cast as a junction tree variational autoencoder, first generates a tree structured object (a junction tree) whose role is to represent the scaffold of subgraph components and their coarse relative arrangements.']"
+The components are valid chemical substructures automatically extracted from the training set using tree decomposition and are used as building blocks.,1. Introduction,[0],[0]
+"In the sec-
+ond phase, the subgraphs (nodes in the tree) are assembled together into a coherent molecular graph.
+",1. Introduction,[0],[0]
+We evaluate our model on multiple tasks ranging from molecular generation to optimization of a given molecule according to desired properties.,1. Introduction,[0],[0]
+"As baselines, we utilize state-of-the-art SMILES-based generation approaches (Kusner et al., 2017; Dai et al., 2018).",1. Introduction,[0],[0]
+"We demonstrate that our model produces 100% valid molecules when sampled from a prior distribution, outperforming the top performing baseline by a significant margin.",1. Introduction,[0],[0]
+"In addition, we show that our model excels in discovering molecules with desired properties, yielding a 30% relative gain over the baselines.",1. Introduction,[0],[0]
+"Our approach extends the variational autoencoder (Kingma & Welling, 2013) to molecular graphs by introducing a suitable encoder and a matching decoder.",2. Junction Tree Variational Autoencoder,[0],[0]
+"Deviating from previous work (Gómez-Bombarelli et al., 2016; Kusner et al., 2017), we interpret each molecule as having been built from subgraphs chosen out of a vocabulary of valid components.",2. Junction Tree Variational Autoencoder,[0],[0]
+These components are used as building blocks both when encoding a molecule into a vector representation as well as when decoding latent vectors back into valid molecular graphs.,2. Junction Tree Variational Autoencoder,[0],[0]
+"The key advantage of this view is that the decoder can realize a valid molecule piece by piece by utilizing the collection of valid components and how they interact, rather than trying to build the molecule atom by atom through chemically invalid intermediaries (Figure 2).",2. Junction Tree Variational Autoencoder,[0],[0]
+"An aromatic bond, for example, is chemically invalid on its own unless the entire aromatic ring is present.",2. Junction Tree Variational Autoencoder,[1.0],"['An aromatic bond, for example, is chemically invalid on its own unless the entire aromatic ring is present.']"
+"It would be therefore challenging to learn to build rings atom by atom rather than by introducing rings as part of the basic vocabulary.
+",2. Junction Tree Variational Autoencoder,[0],[0]
+"Our vocabulary of components, such as rings, bonds and individual atoms, is chosen to be large enough so that a given molecule can be covered by overlapping components or clusters of atoms.",2. Junction Tree Variational Autoencoder,[0],[0]
+"The clusters serve the role analogous to cliques in graphical models, as they are expressive enough that a molecule can be covered by overlapping clusters without forming cluster cycles.",2. Junction Tree Variational Autoencoder,[0],[0]
+"In this sense, the clusters serve as cliques in a (non-optimal) triangulation of the molecular graph.",2. Junction Tree Variational Autoencoder,[0],[0]
+We form a junction tree of such clusters and use it as the tree representation of the molecule.,2. Junction Tree Variational Autoencoder,[0],[0]
+"Since our choice of cliques is constrained a priori, we cannot guarantee that a junction tree exists with such clusters for an arbitrary
+molecule.",2. Junction Tree Variational Autoencoder,[0],[0]
+"However, our clusters are built on the basis of the molecules in the training set to ensure that a corresponding junction tree can be found.",2. Junction Tree Variational Autoencoder,[0],[0]
+"Empirically, our clusters cover most of the molecules in the test set.
+",2. Junction Tree Variational Autoencoder,[0],[0]
+The original molecular graph and its associated junction tree offer two complementary representations of a molecule.,2. Junction Tree Variational Autoencoder,[0],[0]
+We therefore encode the molecule into a two-part latent representation z,2. Junction Tree Variational Autoencoder,[0],[0]
+=,2. Junction Tree Variational Autoencoder,[0],[0]
+"[zT , zG] where zT encodes the tree structure and what the clusters are in the tree without fully capturing how exactly the clusters are mutually connected.",2. Junction Tree Variational Autoencoder,[0],[0]
+zG encodes the graph to capture the fine-grained connectivity.,2. Junction Tree Variational Autoencoder,[0],[0]
+Both parts are created by tree and graph encoders q(zT |T ) and q(zG|G).,2. Junction Tree Variational Autoencoder,[0],[0]
+The latent representation is then decoded back into a molecular graph in two stages.,2. Junction Tree Variational Autoencoder,[0],[0]
+"As illustrated in Figure 3, we first reproduce the junction tree using a tree decoder p(T |zT )",2. Junction Tree Variational Autoencoder,[0],[0]
+based on the information in zT .,2. Junction Tree Variational Autoencoder,[0],[0]
+"Second, we predict the fine grain connectivity between the clusters in the junction tree using a graph decoder p(G|T , zG) to realize the full molecular graph.",2. Junction Tree Variational Autoencoder,[0],[0]
+"The junction tree approach allows us to maintain chemical feasibility during generation.
+",2. Junction Tree Variational Autoencoder,[1.0000000148815313],['The junction tree approach allows us to maintain chemical feasibility during generation.']
+"Notation A molecular graph is defined as G = (V,E) where V is the set of atoms (vertices) and E the set of bonds (edges).",2. Junction Tree Variational Autoencoder,[0],[0]
+Let N(x) be the neighbor of x. We denote sigmoid function as σ(·) and ReLU function as τ(·).,2. Junction Tree Variational Autoencoder,[0],[0]
+"We use i, j, k for nodes in the tree and u, v, w for nodes in the graph.",2. Junction Tree Variational Autoencoder,[0],[0]
+A tree decomposition maps a graph G into a junction tree by contracting certain vertices into a single node so that G becomes cycle-free.,2.1. Junction Tree,[0],[0]
+"Formally, given a graph G, a junction tree TG = (V, E ,X ) is a connected labeled tree whose node set is V = {C1, · · · , Cn} and edge set is E .",2.1. Junction Tree,[0],[0]
+"Each node or cluster Ci = (Vi, Ei) is an induced subgraph of G, satisfying the following constraints:
+1.",2.1. Junction Tree,[0],[0]
+"The union of all clusters equals G. That is, ⋃ i Vi = V
+and ⋃ iEi = E.
+2.",2.1. Junction Tree,[0],[0]
+"Running intersection: For all clusters Ci, Cj and Ck, Vi ∩ Vj ⊆ Vk if Ck is on the path from Ci to Cj .
+",2.1. Junction Tree,[0],[0]
+"Viewing induced subgraphs as cluster labels, junction trees are labeled trees with label vocabulary X .",2.1. Junction Tree,[1.0],"['Viewing induced subgraphs as cluster labels, junction trees are labeled trees with label vocabulary X .']"
+"By our molecule tree decomposition, X contains only cycles (rings) and single edges.",2.1. Junction Tree,[0],[0]
+"Thus the vocabulary size is limited (|X | = 780 for a standard dataset with 250K molecules).
+",2.1. Junction Tree,[0],[0]
+"Tree Decomposition of Molecules Here we present our tree decomposition algorithm tailored for molecules, which finds its root in chemistry (Rarey & Dixon, 1998).",2.1. Junction Tree,[0],[0]
+Our cluster vocabulary X includes chemical structures such as bonds and rings (Figure 3).,2.1. Junction Tree,[0],[0]
+"Given a graphG, we first find all its simple cycles, and its edges not belonging to any cycles.",2.1. Junction Tree,[0],[0]
+"Two simple rings are merged together if they have more than two overlapping atoms, as they constitute a specific structure called bridged compounds (Clayden et al., 2001).",2.1. Junction Tree,[0],[0]
+Each of those cycles or edges is considered as a cluster.,2.1. Junction Tree,[0],[0]
+"Next, a cluster graph is constructed by adding edges between all intersecting clusters.",2.1. Junction Tree,[0],[0]
+"Finally, we select one of its spanning trees as the junction tree of G (Figure 3).",2.1. Junction Tree,[1.0],"['Finally, we select one of its spanning trees as the junction tree of G (Figure 3).']"
+"As a result of ring merging, any two clusters in the junction tree have at most two atoms in common, facilitating efficient inference in the graph decoding phase.",2.1. Junction Tree,[1.0],"['As a result of ring merging, any two clusters in the junction tree have at most two atoms in common, facilitating efficient inference in the graph decoding phase.']"
+The detailed procedure is described in the supplementary.,2.1. Junction Tree,[0],[0]
+"We first encode the latent representation of G by a graph message passing network (Dai et al., 2016; Gilmer et al., 2017).",2.2. Graph Encoder,[1.0],"['We first encode the latent representation of G by a graph message passing network (Dai et al., 2016; Gilmer et al., 2017).']"
+"Each vertex v has a feature vector xv indicating the atom type, valence, and other properties.",2.2. Graph Encoder,[0],[0]
+"Similarly, each edge (u, v) ∈ E has a feature vector xuv indicating its bond type, and two hidden vectors νuv and νvu denoting the message from u to v and vice versa.",2.2. Graph Encoder,[0],[0]
+"Due to the loopy structure of the graph, messages are exchanged in a loopy belief propagation fashion:
+ν(t)uv = τ(W",2.2. Graph Encoder,[0],[0]
+"g 1xu +W g 2xuv +W g 3 ∑ w∈N(u)\v ν(t−1)wu ) (1)
+where ν(t)uv is the message computed in t-th iteration, initialized with ν(0)uv = 0.",2.2. Graph Encoder,[0],[0]
+"After T steps of iteration, we aggregate
+those messages as the latent vector of each vertex, which captures its local graphical structure:
+hu =",2.2. Graph Encoder,[0],[0]
+"τ(U g 1xu + ∑ v∈N(u) Ug2ν (T ) vu ) (2)
+",2.2. Graph Encoder,[0],[0]
+The final graph representation is hG = ∑ i hi/|V |.,2.2. Graph Encoder,[0],[0]
+The mean µG and log variance logσG of the variational posterior approximation are computed from hG with two separate affine layers.,2.2. Graph Encoder,[0],[0]
+"zG is sampled from a Gaussian N (µG,σG).",2.2. Graph Encoder,[0],[0]
+We similarly encode TG with a tree message passing network.,2.3. Tree Encoder,[0],[0]
+Each cluster Ci is represented by a one-hot encoding xi representing its label type.,2.3. Tree Encoder,[0],[0]
+"Each edge (Ci, Cj) is associated with two message vectors mij and mji.",2.3. Tree Encoder,[0],[0]
+We pick an arbitrary leaf node as the root and propagate messages in two phases.,2.3. Tree Encoder,[0],[0]
+"In the first bottom-up phase, messages are initiated from the leaf nodes and propagated iteratively towards root.",2.3. Tree Encoder,[0],[0]
+"In the top-down phase, messages are propagated from the root to all the leaf nodes.",2.3. Tree Encoder,[0],[0]
+"Message mij is updated as:
+mij = GRU(xi, {mki}k∈N(i)\j) (3)
+where GRU is a Gated Recurrent Unit (Chung et al., 2014; Li et al., 2015) adapted for tree message passing:
+sij = ∑
+k∈N(i)\j mki (4)
+",2.3. Tree Encoder,[0],[0]
+zij = σ(W zxi +U zsij + b z) (5) rki = σ(W rxi +U rmki + b r),2.3. Tree Encoder,[0],[0]
+"(6)
+m̃ij = tanh(Wxi +U ∑
+k∈N(i)\j
+rki mki) (7)
+mij = (1− zij) sij + zij m̃ij (8)
+The message passing follows the schedule where mij is computed only when all its precursors {mki | k ∈ N(i)\j} have been computed.",2.3. Tree Encoder,[0],[0]
+"This architectural design is motivated by the belief propagation algorithm over trees and is thus different from the graph encoder.
+",2.3. Tree Encoder,[0],[0]
+"After the message passing, we obtain the latent representation of each node hi by aggregating its inward messages:
+hi = τ(W oxi + ∑ k∈N(i) Uomki) (9)
+",2.3. Tree Encoder,[0],[0]
+"The final tree representation is hTG = hroot, which encodes a rooted tree (T , root).",2.3. Tree Encoder,[0],[0]
+"Unlike the graph encoder, we do not apply node average pooling because it confuses the tree decoder which node to generate first.",2.3. Tree Encoder,[0],[0]
+zTG is sampled in a similar way as in the graph encoder.,2.3. Tree Encoder,[1.0],['zTG is sampled in a similar way as in the graph encoder.']
+"For simplicity, we abbreviate zTG as zT from now on.
+",2.3. Tree Encoder,[0],[0]
+This tree encoder plays two roles in our framework.,2.3. Tree Encoder,[0],[0]
+"First, it is used to compute zT , which only requires the bottom-up phase of the network.",2.3. Tree Encoder,[0],[0]
+"Second, after a tree T̂ is decoded
+from zT , it is used to compute messages m̂ij over the entire T̂ , to provide essential contexts of every node during graph decoding.",2.3. Tree Encoder,[0],[0]
+This requires both top-down and bottom-up phases.,2.3. Tree Encoder,[0],[0]
+We will elaborate this in section 2.5.,2.3. Tree Encoder,[0],[0]
+We decode a junction tree T from its encoding zT with a tree structured decoder.,2.4. Tree Decoder,[0],[0]
+The tree is constructed in a top-down fashion by generating one node at a time.,2.4. Tree Decoder,[0],[0]
+"As illustrated in Figure 4, our tree decoder traverses the entire tree from the root, and generates nodes in their depth-first order.",2.4. Tree Decoder,[1.0],"['As illustrated in Figure 4, our tree decoder traverses the entire tree from the root, and generates nodes in their depth-first order.']"
+"For every visited node, the decoder first makes a topological prediction: whether this node has children to be generated.",2.4. Tree Decoder,[0],[0]
+"When a new child node is created, we predict its label and recurse this process.",2.4. Tree Decoder,[0],[0]
+Recall that cluster labels represent subgraphs in a molecule.,2.4. Tree Decoder,[0],[0]
+"The decoder backtracks when a node has no more children to generate.
+",2.4. Tree Decoder,[0],[0]
+"At each time step, a node receives information from other nodes in the current tree for making those predictions.",2.4. Tree Decoder,[0],[0]
+The information is propagated through message vectors hij when trees are incrementally constructed.,2.4. Tree Decoder,[1.0],['The information is propagated through message vectors hij when trees are incrementally constructed.']
+"Formally, let Ẽ = {(i1, j1), · · · , (im, jm)} be the edges traversed in a depth first traversal over T = (V, E), where m = 2|E| as each edge is traversed in both directions.",2.4. Tree Decoder,[0],[0]
+The model visits node it at time t. Let Ẽt be the first t edges in Ẽ .,2.4. Tree Decoder,[0],[0]
+"The message hit,jt is updated through previous messages:
+hit,jt = GRU(xit , {hk,it}(k,it)∈Ẽt,k 6=jt) (10)
+where GRU is the same recurrent unit as in the tree encoder.
+",2.4. Tree Decoder,[1.0000000264201587],"['The message hit,jt is updated through previous messages: hit,jt = GRU(xit , {hk,it}(k,it)∈Ẽt,k 6=jt) (10) where GRU is the same recurrent unit as in the tree encoder.']"
+"Topological Prediction When the model visits node it, it makes a binary prediction on whether it still has children to be generated.",2.4. Tree Decoder,[0],[0]
+"We compute this probability by combining
+Algorithm 1 Tree decoding at sampling time Require:",2.4. Tree Decoder,[0],[0]
+"Latent representation zT
+1: Initialize: Tree T̂ ← ∅ 2: function SampleTree(i, t) 3:",2.4. Tree Decoder,[0],[0]
+Set Xi ← all cluster labels that are chemically compatible with node i and its current neighbors.,2.4. Tree Decoder,[0],[0]
+4: Set dt ← expand with probability pt. .,2.4. Tree Decoder,[0],[0]
+Eq.(11) 5:,2.4. Tree Decoder,[0],[0]
+if dt = expand and Xi 6= ∅,2.4. Tree Decoder,[0],[0]
+then 6: Create a node j and add it to tree T̂ .,2.4. Tree Decoder,[0],[0]
+"7: Sample the label of node j from Xi .. Eq.(12) 8: SampleTree(j, t+ 1) 9: end if
+10: end function
+zT , node features xit and inward messages hk,it via a one hidden layer network followed by a sigmoid function:
+pt = σ(u d ·τ(Wd1xit+Wd2zT +Wd3 ∑ (k,it)∈Ẽt hk,it) (11)
+Label Prediction When a child node j is generated from its parent i, we predict its node label with
+qj = softmax(Ulτ(Wl1zT",2.4. Tree Decoder,[0],[0]
++,2.4. Tree Decoder,[0],[0]
+W l 2hij)),2.4. Tree Decoder,[0],[0]
+"(12)
+where qj is a distribution over label vocabulary X .",2.4. Tree Decoder,[0],[0]
+"When j is a root node, its parent i is a virtual node and hij = 0.
+",2.4. Tree Decoder,[0],[0]
+Learning The tree decoder aims to maximize the likelihood p(T |zT ).,2.4. Tree Decoder,[0],[0]
+"Let p̂t ∈ {0, 1} and q̂j be the ground truth topological and label values, the decoder minimizes the following cross entropy loss:1
+Lc(T ) =",2.4. Tree Decoder,[0],[0]
+"∑
+t Ld(pt, p̂t)",2.4. Tree Decoder,[0],[0]
+"+ ∑ j Ll(qj , q̂j) (13)
+",2.4. Tree Decoder,[0],[0]
+"Similar to sequence generation, during training we perform teacher forcing: after topological and label prediction at each step, we replace them with their ground truth so that the model makes predictions given correct histories.
+",2.4. Tree Decoder,[0],[0]
+Decoding & Feasibility Check Algorithm 1 shows how a tree is sampled from zT .,2.4. Tree Decoder,[0],[0]
+The tree is constructed recursively guided by topological predictions without any external guidance used in training.,2.4. Tree Decoder,[0],[0]
+"To ensure the sampled tree could be realized into a valid molecule, we define set Xi to be cluster labels that are chemically compatible with node i and its current neighbors.",2.4. Tree Decoder,[0],[0]
+"When a child node j is generated from node i, we sample its label from Xi with a renormalized distribution qj over Xi by masking out invalid labels.",2.4. Tree Decoder,[0],[0]
+"The final step of our model is to reproduce a molecular graph G that underlies the predicted junction tree T̂ = (V̂, Ê).
+",2.5. Graph Decoder,[0],[0]
+1The node ordering is not unique as the order within sibling nodes is ambiguous.,2.5. Graph Decoder,[0],[0]
+"In this paper we train our model with one ordering and leave this issue for future work.
+",2.5. Graph Decoder,[0],[0]
+Note that this step is not deterministic since there are potentially many molecules that correspond to the same junction tree.,2.5. Graph Decoder,[0],[0]
+The underlying degree of freedom pertains to how neighboring clusters Ci and Cj are attached to each other as subgraphs.,2.5. Graph Decoder,[0],[0]
+"Our goal here is to assemble the subgraphs (nodes in the tree) together into the correct molecular graph.
+",2.5. Graph Decoder,[1.0000000788421823],['Our goal here is to assemble the subgraphs (nodes in the tree) together into the correct molecular graph.']
+Let G(T ) be the set of graphs whose junction tree is T .,2.5. Graph Decoder,[0],[0]
+"Decoding graph Ĝ from T̂ = (V̂, Ê) is a structured prediction:
+Ĝ = arg max G′∈G(T̂ )
+",2.5. Graph Decoder,[0],[0]
+"fa(G′) (14)
+where fa is a scoring function over candidate graphs.",2.5. Graph Decoder,[0],[0]
+We only consider scoring functions that decompose across the clusters and their neighbors.,2.5. Graph Decoder,[0],[0]
+"In other words, each term in the scoring function depends only on how a cluster Ci is attached to its neighboring clusters",2.5. Graph Decoder,[0],[0]
+"Cj , j ∈ NT̂ (i) in the tree T̂ .",2.5. Graph Decoder,[0],[0]
+The problem of finding the highest scoring graph Ĝ – the assembly task – could be cast as a graphical model inference task in a model induced by the junction tree.,2.5. Graph Decoder,[0],[0]
+"However, for efficiency reasons, we will assemble the molecular graph one neighborhood at a time, following the order in which the tree itself was decoded.",2.5. Graph Decoder,[0],[0]
+"In other words, we start by sampling the assembly of the root and its neighbors according to their
+scores.",2.5. Graph Decoder,[0],[0]
+"Then we proceed to assemble the neighbors and their associated clusters (removing the degrees of freedom set by the root assembly), and so on.
+",2.5. Graph Decoder,[0],[0]
+It remains to be specified how each neighborhood realization is scored.,2.5. Graph Decoder,[0],[0]
+"Let Gi be the subgraph resulting from a particular merging of cluster Ci in the tree with its neighbors Cj , j ∈ NT̂ (i).",2.5. Graph Decoder,[0],[0]
+We score Gi as a candidate subgraph by first deriving a vector representation hGi and then using fai (Gi) = hGi · zG as the subgraph score.,2.5. Graph Decoder,[0],[0]
+"To this end, let u, v specify atoms in the candidate subgraph Gi and let αv = i",2.5. Graph Decoder,[0],[0]
+if v ∈ Ci and αv = j if v ∈,2.5. Graph Decoder,[0],[0]
+Cj \ Ci.,2.5. Graph Decoder,[0],[0]
+"The indices αv are used to mark the position of the atoms in the junction tree, and to retrieve messages m̂i,j summarizing the subtree under i along the edge (i, j) obtained by running the tree encoding algorithm.",2.5. Graph Decoder,[0],[0]
+"The neural messages pertaining to the atoms and bonds in subgraph Gi are obtained and aggregated into hGi , similarly to the encoding step, but with different (learned) parameters:
+µ(t)uv = τ(W a 1xu +W a 2xuv +W a 3µ̃ (t−1) uv ) (15)
+µ̃(t−1)uv =
+{∑ w∈N(u)\v µ (t−1) wu",2.5. Graph Decoder,[0],[0]
+"αu = αv
+m̂αu,αv + ∑ w∈N(u)\v µ",2.5. Graph Decoder,[0],[0]
+(t−1) wu,2.5. Graph Decoder,[0],[0]
+"αu 6= αv
+The major difference from Eq.",2.5. Graph Decoder,[0],[0]
+"(1) is that we augment the model with tree messages m̂αu,αv derived by running the tree encoder over the predicted tree T̂ .",2.5. Graph Decoder,[0],[0]
+"m̂αu,αv provides a tree dependent positional context for bond (u, v) (illustrated as subtree A in Figure 5).
+",2.5. Graph Decoder,[0],[0]
+"Learning The graph decoder parameters are learned to maximize the log-likelihood of predicting correct subgraphs Gi of the ground true graph G at each tree node:
+Lg(G)",2.5. Graph Decoder,[0],[0]
+= ∑ i fa(Gi)− log ∑ G′i∈Gi exp(fa(G′i))  ,2.5. Graph Decoder,[0],[0]
+"(16) where Gi is the set of possible candidate subgraphs at tree node i. During training, we again apply teacher forcing, i.e. we feed the graph decoder with ground truth trees as input.
+",2.5. Graph Decoder,[0],[0]
+Complexity,2.5. Graph Decoder,[0],[0]
+"By our tree decomposition, any two clusters share at most two atoms, so we only need to merge at most two atoms or one bond.",2.5. Graph Decoder,[0],[0]
+"By pruning chemically invalid subgraphs and merging isomorphic graphs, |Gi| ≈ 4 on average when tested on a standard ZINC drug dataset.",2.5. Graph Decoder,[0],[0]
+"The computational complexity of JT-VAE is therefore linear in the number of clusters, scaling nicely to large graphs.",2.5. Graph Decoder,[0],[0]
+Our evaluation efforts measure various aspects of molecular generation.,3. Experiments,[0],[0]
+"The first two evaluations follow previously proposed tasks (Kusner et al., 2017).",3. Experiments,[1.0],"['The first two evaluations follow previously proposed tasks (Kusner et al., 2017).']"
+"We also introduce a third task — constrained molecule optimization.
+",3. Experiments,[0],[0]
+"• Molecule reconstruction and validity We test the VAE models on the task of reconstructing input molecules from their latent representations, and decoding valid molecules when sampling from prior distribution.",3. Experiments,[0],[0]
+(Section 3.1) •,3. Experiments,[0],[0]
+"Bayesian optimization Moving beyond generating valid
+molecules, we test how the model can produce novel molecules with desired properties.",3. Experiments,[0],[0]
+"To this end, we perform Bayesian optimization in the latent space to search molecules with specified properties.",3. Experiments,[0],[0]
+"(Section 3.2)
+• Constrained molecule optimization The task is to modify given molecules to improve specified properties, while constraining the degree of deviation from the original molecule.",3. Experiments,[0],[0]
+"This is a more realistic scenario in drug discovery, where development of new drugs usually starts with known molecules such as existing drugs (Besnard et al., 2012).",3. Experiments,[0],[0]
+"Since it is a new task, we cannot compare to any existing baselines.",3. Experiments,[0],[0]
+"(Section 3.3)
+",3. Experiments,[0],[0]
+"Below we describe the data, baselines and model configuration that are shared across the tasks.",3. Experiments,[0],[0]
+"Additional setup details are provided in the task-specific sections.
+",3. Experiments,[0],[0]
+"Data We use the ZINC molecule dataset from Kusner et al. (2017) for our experiments, with the same training/testing split.",3. Experiments,[0],[0]
+"It contains about 250K drug molecules extracted from the ZINC database (Sterling & Irwin, 2015).
+",3. Experiments,[0],[0]
+"Baselines We compare our approach with SMILES-based baselines: 1) Character VAE (CVAE) (Gómez-Bombarelli et al., 2016) which generates SMILES strings character by character; 2) Grammar VAE (GVAE) (Kusner et al., 2017) that generates SMILES following syntactic constraints given
+by a context-free grammar; 3) Syntax-directed VAE (SDVAE) (Dai et al., 2018) that incorporates both syntactic and semantic constraints of SMILES via attribute grammar.",3. Experiments,[0],[0]
+"For molecule generation task, we also compare with GraphVAE (Simonovsky & Komodakis, 2018) that directly generates atom labels and adjacency matrices of graphs.
+",3. Experiments,[1.0000000126636601],"['For molecule generation task, we also compare with GraphVAE (Simonovsky & Komodakis, 2018) that directly generates atom labels and adjacency matrices of graphs.']"
+"Model Configuration To be comparable with the above baselines, we set the latent space dimension as 56, i.e., the tree and graph representation hT and hG have 28 dimensions each.",3. Experiments,[0],[0]
+Full training details and model configurations are provided in the appendix.,3. Experiments,[0],[0]
+Setup The first task is to reconstruct and sample molecules from latent space.,3.1. Molecule Reconstruction and Validity,[0],[0]
+"Since both encoding and decoding process are stochastic, we estimate reconstruction accuracy by Monte Carlo method used in (Kusner et al., 2017):",3.1. Molecule Reconstruction and Validity,[0],[0]
+Each molecule is encoded 10 times and each encoding is decoded 10 times.,3.1. Molecule Reconstruction and Validity,[0],[0]
+"We report the portion of the 100 decoded molecules that are identical to the input molecule.
+",3.1. Molecule Reconstruction and Validity,[0],[0]
+"To compute validity, we sample 1000 latent vectors from the prior distribution N (0, I), and decode each of these vectors 100 times.",3.1. Molecule Reconstruction and Validity,[0],[0]
+We report the percentage of decoded molecules that are chemically valid (checked by RDKit).,3.1. Molecule Reconstruction and Validity,[0],[0]
+"For ablation study, we also report the validity of our model without validity check in decoding phase.
+",3.1. Molecule Reconstruction and Validity,[0],[0]
+"Results Table 1 shows that JT-VAE outperforms previous models in molecule reconstruction, and always pro-
+duces valid molecules when sampled from prior distribution.",3.1. Molecule Reconstruction and Validity,[0],[0]
+"When validity check is removed, our model could still generates 93.5% valid molecules.",3.1. Molecule Reconstruction and Validity,[0],[0]
+This shows our method does not heavily rely on prior knowledge.,3.1. Molecule Reconstruction and Validity,[0],[0]
+"As shown in Figure 6, the sampled molecules have non-trivial structures such as simple chains.",3.1. Molecule Reconstruction and Validity,[0],[0]
+We further sampled 5000 molecules from prior and found they are all distinct from the training set.,3.1. Molecule Reconstruction and Validity,[0],[0]
+"Thus our model is not a simple memorization.
+",3.1. Molecule Reconstruction and Validity,[0],[0]
+Analysis We qualitatively examine the latent space of JTVAE by visualizing the neighborhood of molecules.,3.1. Molecule Reconstruction and Validity,[0],[0]
+"Given a molecule, we follow the method in Kusner et al. (2017) to construct a grid visualization of its neighborhood.",3.1. Molecule Reconstruction and Validity,[0],[0]
+Figure 6 shows the local neighborhood of the same molecule visualized in Dai et al. (2018).,3.1. Molecule Reconstruction and Validity,[0],[0]
+"In comparison, our neighborhood does not contain molecules with huge rings (with more than 7 atoms), which rarely occur in the dataset.",3.1. Molecule Reconstruction and Validity,[0],[0]
+We also highlight two groups of closely resembling molecules that have identical tree structures but vary only in how clusters are attached together.,3.1. Molecule Reconstruction and Validity,[0],[0]
+This demonstrates the smoothness of learned molecular embeddings.,3.1. Molecule Reconstruction and Validity,[0],[0]
+Setup The second task is to produce novel molecules with desired properties.,3.2. Bayesian Optimization,[0],[0]
+"Following (Kusner et al., 2017), our target chemical property y(·) is octanol-water partition coefficients (logP) penalized by the synthetic accessibility (SA) score and number of long cycles.2 To perform Bayesian optimization (BO), we first train a VAE and associate each molecule with a latent vector, given by the mean of the variational encoding distribution.",3.2. Bayesian Optimization,[0],[0]
+"After the VAE is learned, we train a sparse Gaussian process (SGP) to predict y(m) given its latent representation.",3.2. Bayesian Optimization,[0],[0]
+"Then we perform five iterations of batched BO using the expected improvement heuristic.
+",3.2. Bayesian Optimization,[0],[0]
+"For comparison, we report 1) the predictive performance of SGP trained on latent encodings learned by different VAEs, measured by log-likelihood (LL) and root mean square error (RMSE) with 10-fold cross validation.",3.2. Bayesian Optimization,[0],[0]
+"2) The top-3 molecules found by BO under different models.
+2y(m) = logP (m) − SA(m)",3.2. Bayesian Optimization,[0],[0]
+"− cycle(m) where cycle(m) counts the number of rings that have more than six atoms.
+",3.2. Bayesian Optimization,[0],[0]
+"Results As shown in Table 2, JT-VAE finds molecules with significantly better scores than previous methods.",3.2. Bayesian Optimization,[1.0],"['Results As shown in Table 2, JT-VAE finds molecules with significantly better scores than previous methods.']"
+Figure 7 lists the top-3 best molecules found by JT-VAE.,3.2. Bayesian Optimization,[0],[0]
+"In fact, JT-VAE finds over 50 molecules with scores over 3.50 (the second best molecule proposed by SD-VAE).",3.2. Bayesian Optimization,[0],[0]
+"Moreover, the SGP yields better predictive performance when trained on JT-VAE embeddings (Table 3).",3.2. Bayesian Optimization,[1.0],"['Moreover, the SGP yields better predictive performance when trained on JT-VAE embeddings (Table 3).']"
+Setup The third task is to perform molecule optimization in a constrained scenario.,3.3. Constrained Optimization,[0],[0]
+"Given a molecule m, the task is to find a different molecule m′ that has the highest property value with the molecular similarity sim(m,m′)",3.3. Constrained Optimization,[0],[0]
+≥ δ for some threshold δ.,3.3. Constrained Optimization,[0],[0]
+"We use Tanimoto similarity with Morgan fingerprint (Rogers & Hahn, 2010) as the similarity metric, and penalized logP coefficient as our target chemical property.",3.3. Constrained Optimization,[0],[0]
+"For this task, we jointly train a property predictor F (parameterized by a feed-forward network) with JT-VAE to predict y(m) from the latent embedding of m. To optimize a molecule m, we start from its latent representation, and apply gradient ascent in the latent space to improve the predicted score F (·), similar to (Mueller et al., 2017).",3.3. Constrained Optimization,[1.0],"['For this task, we jointly train a property predictor F (parameterized by a feed-forward network) with JT-VAE to predict y(m) from the latent embedding of m. To optimize a molecule m, we start from its latent representation, and apply gradient ascent in the latent space to improve the predicted score F (·), similar to (Mueller et al., 2017).']"
+"After applying K = 80 gradient steps, K molecules are decoded from resulting latent trajectories, and we report the molecule with the highest F (·) that satisfies the similarity constraint.",3.3. Constrained Optimization,[0],[0]
+"A modification succeeds if one of the decoded molecules satisfies the constraint and is distinct from the original.
+",3.3. Constrained Optimization,[0],[0]
+"To provide the greatest challenge, we selected 800 molecules with the lowest property score y(·) from the test set.",3.3. Constrained Optimization,[0],[0]
+"We report the success rate (how often a modification succeeds), and among success cases the average improvement y(m′)− y(m) and molecular similarity sim(m,m′) between the original and modified molecules m and m′.
+Results Our results are summarized in Table 4.",3.3. Constrained Optimization,[0],[0]
+"The unconstrained scenario (δ = 0) has the best average improvement, but often proposes dissimilar molecules.",3.3. Constrained Optimization,[0],[0]
+"When we tighten the constraint to δ = 0.4, about 80% of the time our model finds similar molecules, with an average improvement 0.84.",3.3. Constrained Optimization,[1.0],"['When we tighten the constraint to δ = 0.4, about 80% of the time our model finds similar molecules, with an average improvement 0.84.']"
+This also demonstrates the smoothness of the learned latent space.,3.3. Constrained Optimization,[0],[0]
+Figure 8 illustrates an effective modification resulting in a similar molecule with great improvement.,3.3. Constrained Optimization,[1.0],['Figure 8 illustrates an effective modification resulting in a similar molecule with great improvement.']
+Molecule Generation Previous work on molecule generation mostly operates on SMILES strings.,4. Related Work,[0],[0]
+GómezBombarelli,4. Related Work,[0],[0]
+et al. (2016); Segler et al. (2017) built generative models of SMILES strings with recurrent decoders.,4. Related Work,[0],[0]
+"Unfortunately, these models could generate invalid SMILES that do not result in any molecules.",4. Related Work,[0],[0]
+"To remedy this issue, Kusner et al. (2017); Dai et al. (2018) complemented the decoder with syntactic and semantic constraints of SMILES by context free and attribute grammars, but these grammars do not fully capture chemical validity.",4. Related Work,[0],[0]
+"Other techniques such as active learning (Janz et al., 2017) and reinforcement learning (Guimaraes et al., 2017) encourage the model to generate valid SMILES through additional training signal.",4. Related Work,[0],[0]
+"Very recently, Simonovsky & Komodakis (2018) proposed to generate molecular graphs by predicting their adjacency matrices, and Li et al. (2018) generated molecules node by node.",4. Related Work,[0],[0]
+"In comparison, our method enforces chemical validity and is more efficient due to the coarse-to-fine generation.
+",4. Related Work,[0],[0]
+Graph-structured Encoders,4. Related Work,[0],[0]
+"The neural network formulation on graphs was first proposed by Gori et al. (2005); Scarselli et al. (2009), and later enhanced by Li et al. (2015) with gated recurrent units.",4. Related Work,[0],[0]
+"For recurrent architectures over
+graphs, Lei et al. (2017) designed Weisfeiler-Lehman kernel network inspired by graph kernels.",4. Related Work,[0],[0]
+"Dai et al. (2016) considered a different architecture where graphs were viewed as latent variable graphical models, and derived their model from message passing algorithms.",4. Related Work,[0],[0]
+"Our tree and graph encoder are closely related to this graphical model perspective, and to neural message passing networks (Gilmer et al., 2017).",4. Related Work,[0],[0]
+"For convolutional architectures, Duvenaud et al. (2015) introduced a convolution-like propagation on molecular graphs, which was generalized to other domains by Niepert et al. (2016).",4. Related Work,[0],[0]
+Bruna et al. (2013); Henaff et al. (2015) developed graph convolution in spectral domain via graph Laplacian.,4. Related Work,[0],[0]
+"For applications, graph neural networks are used in semisupervised classification (Kipf & Welling, 2016), computer vision (Monti et al., 2016), and chemical domains (Kearnes et al., 2016; Schütt et al., 2017; Jin et al., 2017).
+",4. Related Work,[0],[0]
+Tree-structured Models,4. Related Work,[0],[0]
+"Our tree encoder is related to recursive neural networks and tree-LSTM (Socher et al., 2013; Tai et al., 2015; Zhu et al., 2015).",4. Related Work,[0],[0]
+These models encode tree structures where nodes in the tree are bottom-up transformed into vector representations.,4. Related Work,[0],[0]
+"In contrast, our model propagates information both bottom-up and top-down.
+",4. Related Work,[0],[0]
+"On the decoding side, tree generation naturally arises in natural language parsing (Dyer et al., 2016; Kiperwasser & Goldberg, 2016).",4. Related Work,[0],[0]
+"Different from our approach, natural language parsers have access to input words and only predict the topology of the tree.",4. Related Work,[0],[0]
+"For general purpose tree generation, Vinyals et al. (2015); Aharoni & Goldberg (2017) applied recurrent networks to generate linearized version of trees, but their architectures were entirely sequence-based.",4. Related Work,[0],[0]
+Dong & Lapata (2016); Alvarez-Melis & Jaakkola (2016) proposed tree-based architectures that construct trees top-down from the root.,4. Related Work,[0],[0]
+"Our model is most closely related to Alvarez-Melis & Jaakkola (2016) that disentangles topological prediction from label prediction, but we generate nodes in a depth-first order and have additional steps that propagate information bottom-up.",4. Related Work,[0],[0]
+"This forward-backward propagation also appears in Parisotto et al. (2016), but their model is node based whereas ours is based on message passing.",4. Related Work,[0],[0]
+In this paper we present a junction tree variational autoencoder for generating molecular graphs.,5. Conclusion,[0],[0]
+Our method significantly outperforms previous work in molecule generation and optimization.,5. Conclusion,[0],[0]
+"For future work, we attempt to generalize our method for general low-treewidth graphs.",5. Conclusion,[0],[0]
+"We thank Jonas Mueller, Chengtao Li, Tao Lei and MIT NLP Group for their helpful comments.",Acknowledgement,[0],[0]
+This work was supported by the DARPA Make-It program under contract ARO W911NF-16-2-0023.,Acknowledgement,[0],[0]
+We seek to automate the design of molecules based on specific chemical properties.,abstractText,[0],[0]
+"In computational terms, this task involves continuous embedding and generation of molecular graphs.",abstractText,[0],[0]
+"Our primary contribution is the direct realization of molecular graphs, a task previously approached by generating linear SMILES strings instead of graphs.",abstractText,[0],[0]
+"Our junction tree variational autoencoder generates molecular graphs in two phases, by first generating a tree-structured scaffold over chemical substructures, and then combining them into a molecule with a graph message passing network.",abstractText,[0],[0]
+This approach allows us to incrementally expand molecules while maintaining chemical validity at every step.,abstractText,[0],[0]
+We evaluate our model on multiple tasks ranging from molecular generation to optimization.,abstractText,[0],[0]
+"Across these tasks, our model outperforms previous state-of-the-art baselines by a significant margin.",abstractText,[0],[0]
+Junction Tree Variational Autoencoder for Molecular Graph Generation,title,[0],[0]

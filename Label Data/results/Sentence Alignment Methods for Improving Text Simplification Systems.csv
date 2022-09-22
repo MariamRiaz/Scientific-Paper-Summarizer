@@ -1,0 +1,646 @@
+0,1,label2,summary_sentences
+"Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing, pages 1914–1925 Brussels, Belgium, October 31 - November 4, 2018. c©2018 Association for Computational Linguistics
+1914",text,[0],[0]
+Deep learning models work best when trained on large amounts of labeled data.,1 Introduction,[0],[0]
+"However, acquiring labels is costly, motivating the need for effective semi-supervised learning techniques that leverage unlabeled examples.",1 Introduction,[0],[0]
+"A widely successful semi-supervised learning strategy for neural NLP is pre-training word vectors (Mikolov et al., 2013).",1 Introduction,[0],[0]
+"More recent work trains a Bi-LSTM sentence encoder to do language modeling and then incorporates its context-sensitive representations into supervised models (Dai and Le, 2015; Peters et al.,
+1Code will be made available at https: //github.com/tensorflow/models/tree/ master/research/cvt_text
+2018).",1 Introduction,[0],[0]
+"Such pre-training methods perform unsupervised representation learning on a large corpus of unlabeled data followed by supervised training.
+",1 Introduction,[0],[0]
+A key disadvantage of pre-training is that the first representation learning phase does not take advantage of labeled data – the model attempts to learn generally effective representations rather than ones that are targeted towards a particular task.,1 Introduction,[0],[0]
+Older semi-supervised learning algorithms like self-training do not suffer from this problem because they continually learn about a task on a mix of labeled and unlabeled data.,1 Introduction,[0],[0]
+"Selftraining has historically been effective for NLP (Yarowsky, 1995; McClosky et al., 2006), but is less commonly used with neural models.",1 Introduction,[0],[0]
+"This paper presents Cross-View Training (CVT), a new self-training algorithm that works well for neural sequence models.
+",1 Introduction,[0],[0]
+"In self-training, the model learns as normal on labeled examples.",1 Introduction,[0],[0]
+"On unlabeled examples, the model acts as both a teacher that makes predictions about the examples and a student that is trained on those predictions.",1 Introduction,[0],[0]
+"Although this process has shown value for some tasks, it is somewhat tautological: the model already produces the predictions it is being trained on.",1 Introduction,[0],[0]
+"Recent research on computer vision addresses this by adding noise to the student’s input, training the model so it is robust to input perturbations (Sajjadi et al., 2016; Wei et al., 2018).",1 Introduction,[0],[0]
+"However, applying noise is difficult for discrete inputs like text.
+",1 Introduction,[0],[0]
+"As a solution, we take inspiration from multiview learning (Blum and Mitchell, 1998; Xu et al., 2013) and train the model to produce consistent predictions across different views of the input.",1 Introduction,[0],[0]
+"Instead of only training the full model as a student, CVT adds auxiliary prediction modules – neural networks that transform vector representations into predictions – to the model and also trains them as students.",1 Introduction,[0],[0]
+"The input to each student prediction module is a subset of the model’s intermediate rep-
+resentations corresponding to a restricted view of the input example.",1 Introduction,[0],[0]
+"For example, one auxiliary prediction module for sequence tagging is attached to only the “forward” LSTM in the model’s first BiLSTM layer, so it makes predictions without seeing any tokens to the right of the current one.
+",1 Introduction,[0],[0]
+CVT works by improving the model’s representation learning.,1 Introduction,[0],[0]
+"The auxiliary prediction modules can learn from the full model’s predictions because the full model has a better, unrestricted view of the input.",1 Introduction,[0],[0]
+"As the auxiliary modules learn to make accurate predictions despite their restricted views of the input, they improve the quality of the representations they are built on top of.",1 Introduction,[0],[0]
+"This in turn improves the full model, which uses the same shared representations.",1 Introduction,[0],[0]
+"In short, our method combines the idea of representation learning on unlabeled data with classic self-training.
+",1 Introduction,[0],[0]
+"CVT can be applied to a variety of tasks and neural architectures, but we focus on sequence modeling tasks where the prediction modules are attached to a shared Bi-LSTM encoder.",1 Introduction,[0],[0]
+"We propose auxiliary prediction modules that work well for sequence taggers, graph-based dependency parsers, and sequence-to-sequence models.",1 Introduction,[0],[0]
+"We evaluate our approach on English dependency parsing, combinatory categorial grammar supertagging, named entity recognition, partof-speech tagging, and text chunking, as well as English to Vietnamese machine translation.",1 Introduction,[0],[0]
+CVT improves over previously published results on all these tasks.,1 Introduction,[0],[0]
+"Furthermore, CVT can easily and effectively be combined with multi-task learning: we just add additional prediction modules for the different tasks on top of the shared Bi-LSTM encoder.",1 Introduction,[0],[0]
+Training a unified model to jointly perform all of the tasks except machine translation improves results (outperforming a multi-task ELMo model) while decreasing the total training time.,1 Introduction,[0],[0]
+We first present Cross-View Training and describe how it can be combined effectively with multi-task learning.,2 Cross-View Training,[0],[0]
+See Figure 1 for an overview of the training method.,2 Cross-View Training,[0],[0]
+"Let Dl = {(x1, y1), (x2, y2), ..., (xN , yN )} represent a labeled dataset and Dul = {x1, x2, ..., xM} represent an unlabeled dataset We use pθ(y|xi) to denote the output distribution over classes pro-
+duced by the model with parameters θ on input xi.",2.1 Method,[0],[0]
+"During CVT, the model alternates learning on a minibatch of labeled examples and learning on a minibatch of unlabeled examples.",2.1 Method,[0],[0]
+"For labeled examples, CVT uses standard cross-entropy loss:
+Lsup(θ) = 1 |Dl| ∑
+xi,yi∈Dl
+CE(yi, pθ(y|xi))
+",2.1 Method,[0],[0]
+"CVT adds k auxiliary prediction modules to the model, which are used when learning on unlabeled examples.",2.1 Method,[0],[0]
+"A prediction module is usually a small neural network (e.g., a hidden layer followed by a softmax layer).",2.1 Method,[0],[0]
+"Each one takes as input an intermediate representation hj(xi) produced by the model (e.g., the outputs of one of the LSTMs in a Bi-LSTM model).",2.1 Method,[0],[0]
+It outputs a distribution over labels pjθ(y|xi).,2.1 Method,[0],[0]
+"Each h
+j is chosen such that it only uses a part of the input xi; the particular choice
+can depend on the task and model architecture.",2.1 Method,[0],[0]
+We propose variants for several tasks in Section 3.,2.1 Method,[0],[0]
+"The auxiliary prediction modules are only used during training; the test-time prediction come from the primary prediction module that produces pθ.
+",2.1 Method,[0],[0]
+"On an unlabeled example, the model first produces soft targets pθ(y|xi) by performing inference.",2.1 Method,[0],[0]
+"CVT trains the auxiliary prediction modules to match the primary prediction module on the unlabeled data by minimizing LCVT(θ) = 1|Dul| ∑ xi∈Dul ∑k j=1D(pθ(y|xi), p j θ(y|xi))
+where D is a distance function between probability distributions (we use KL divergence).",2.1 Method,[0],[0]
+"We hold the primary module’s prediction pθ(y|xi) fixed during training (i.e., we do not back-propagate through it) so the auxiliary modules learn to imitate the primary one, but not vice versa.",2.1 Method,[0],[0]
+CVT works by enhancing the model’s representation learning.,2.1 Method,[0],[0]
+"As the auxiliary modules train, the representations they take as input improve so they are useful for making predictions even when some of the model’s inputs are not available.",2.1 Method,[0],[0]
+"This in turn improves the primary prediction module, which is built on top of the same shared representations.
+",2.1 Method,[0],[0]
+"We combine the supervised and CVT losses into the total loss, L = Lsup + LCVT, and minimize it with stochastic gradient descent.",2.1 Method,[0],[0]
+"In particular, we alternate minimizing Lsup over a minibatch of labeled examples and minimizing LCVT over a minibatch of unlabeled examples.
+",2.1 Method,[0],[0]
+"For most neural networks, adding a few additional prediction modules is computationally cheap compared to the portion of the model building up representations (such as an RNN or CNN).",2.1 Method,[0],[0]
+Therefore our method contributes little overhead to training time over other self-training approaches for most tasks.,2.1 Method,[0],[0]
+CVT does not change inference time or the number of parameters in the fullytrained model because the auxiliary prediction modules are only used during training.,2.1 Method,[0],[0]
+CVT can easily be combined with multi-task learning by adding additional prediction modules for the other tasks on top of the shared Bi-LSTM encoder.,2.2 Combining CVT with Multi-Task Learning,[0],[0]
+"During supervised learning, we randomly select a task and then update Lsup using a minibatch of labeled data for that task.",2.2 Combining CVT with Multi-Task Learning,[0],[0]
+"When learning on the unlabeled data, we optimize LCVT
+jointly across all tasks at once, first running inference with all the primary prediction modules and then learning from the predictions with all the auxiliary prediction modules.",2.2 Combining CVT with Multi-Task Learning,[0],[0]
+"As before, the model alternates training on minibatches of labeled and unlabeled examples.
+",2.2 Combining CVT with Multi-Task Learning,[0],[0]
+"Examples labeled across many tasks are useful for multi-task systems to learn from, but most datasets are only labeled with one task.",2.2 Combining CVT with Multi-Task Learning,[0],[0]
+A benefit of multi-task CVT is that the model creates (artificial) all-tasks-labeled examples from unlabeled data.,2.2 Combining CVT with Multi-Task Learning,[0],[0]
+This significantly improves the model’s data efficiency and training time.,2.2 Combining CVT with Multi-Task Learning,[0],[0]
+"Since running prediction modules is computationally cheap, computing LCVT is not much slower for many tasks than it is for a single one.",2.2 Combining CVT with Multi-Task Learning,[0],[0]
+"However, we find the all-tasks-labeled examples substantially speed up model convergence.",2.2 Combining CVT with Multi-Task Learning,[0],[0]
+"For example, our model trained on six tasks takes about three times as long to converge as the average model trained on one task, a 2x decrease in total training time.",2.2 Combining CVT with Multi-Task Learning,[0],[0]
+CVT relies on auxiliary prediction modules that have restricted views of the input.,3 Cross-View Training Models,[0],[0]
+"In this section, we describe specific constructions of the auxiliary prediction modules that are effective for sequence tagging, dependency parsing, and sequence-tosequence learning.",3 Cross-View Training Models,[0],[0]
+"All of our models use a two-layer CNN-BiLSTM (Chiu and Nichols, 2016; Ma and Hovy, 2016) sentence encoder.",3.1 Bi-LSTM Sentence Encoder,[0],[0]
+It takes as input a sequence of words xi =,3.1 Bi-LSTM Sentence Encoder,[0],[0]
+"[x1i , x 2 i , ..., x T i ].",3.1 Bi-LSTM Sentence Encoder,[0],[0]
+"First, each word is represented as the sum of an embedding vector and the output of a character-level Convolutional Neural Network, resulting in a sequence of vectors v =",3.1 Bi-LSTM Sentence Encoder,[0],[0]
+"[v1, v2, ..., vT ].",3.1 Bi-LSTM Sentence Encoder,[0],[0]
+"The encoder applies a twolayer bidirectional LSTM (Graves and Schmidhuber, 2005) to these representations.",3.1 Bi-LSTM Sentence Encoder,[0],[0]
+"The first layer runs a Long Short-Term Memory unit (Hochreiter and Schmidhuber, 1997) in the forward direction (taking vt as input at each step t) and the backward direction (taking vT−t+1 at each step) to produce vector sequences [ −→ h 11, −→ h 21, ...",3.1 Bi-LSTM Sentence Encoder,[0],[0]
+"−→ h T1 ] and [ ←− h 11, ←− h 21, ...",3.1 Bi-LSTM Sentence Encoder,[0],[0]
+←− h T1 ].,3.1 Bi-LSTM Sentence Encoder,[0],[0]
+The output of the Bi-LSTM is the concatenation of these vectors: h1 =,3.1 Bi-LSTM Sentence Encoder,[0],[0]
+"[ −→ h 11 ⊕←−
+h 11, ..., −→ h T1 ⊕ ←−",3.1 Bi-LSTM Sentence Encoder,[0],[0]
+h T1 ].,3.1 Bi-LSTM Sentence Encoder,[0],[0]
+"The second Bi-LSTM layer
+works the same, producing outputs h2, except it takes h1 as input instead of v.",3.1 Bi-LSTM Sentence Encoder,[0],[0]
+"In sequence tagging, each token xti has a corresponding label yti .",3.2 CVT for Sequence Tagging,[0],[0]
+"The primary prediction module for sequence tagging produces a probability distribution over classes for the tth label using a onehidden-layer neural network applied to the corresponding encoder outputs:
+p(yt|xi) = NN(ht1 ⊕ ht2) = softmax(U · ReLU(W (ht1 ⊕ ht2))",3.2 CVT for Sequence Tagging,[0],[0]
+"+ b)
+",3.2 CVT for Sequence Tagging,[0],[0]
+"The auxiliary prediction modules take −→ h 1(xi) and ←− h 1(xi), the outputs of the forward and backward LSTMs in the first2 Bi-LSTM layer, as inputs.",3.2 CVT for Sequence Tagging,[0],[0]
+"We add the following four auxiliary prediction modules to the model (see Figure 2):
+pfwdθ (y t|xi)",3.2 CVT for Sequence Tagging,[0],[0]
+= NNfwd( −→ h t1(xi)),3.2 CVT for Sequence Tagging,[0],[0]
+pbwdθ (y t|xi) =,3.2 CVT for Sequence Tagging,[0],[0]
+"NNbwd( ←− h t1(xi))
+",3.2 CVT for Sequence Tagging,[0],[0]
+pfutureθ,3.2 CVT for Sequence Tagging,[0],[0]
+"(y t|xi) = NNfuture( −→ h t−11 (xi))
+",3.2 CVT for Sequence Tagging,[0],[0]
+p past θ (y t|xi) =,3.2 CVT for Sequence Tagging,[0],[0]
+NNpast( ←− h,3.2 CVT for Sequence Tagging,[0],[0]
+"t+11 (xi))
+The “forward” module makes each prediction without seeing the right context of the current token.",3.2 CVT for Sequence Tagging,[0],[0]
+The “future” module makes each prediction without the right context or the current token itself.,3.2 CVT for Sequence Tagging,[0],[0]
+"Therefore it works like a neural language model that, instead of predicting which token comes next in the sequence, predicts which class of token comes next.",3.2 CVT for Sequence Tagging,[0],[0]
+The “backward” and “past” modules are analogous.,3.2 CVT for Sequence Tagging,[0],[0]
+"In a dependency parse, words in a sentence are treated as nodes in a graph.",3.3 CVT for Dependency Parsing,[0],[0]
+"Typed directed edges connect the words, forming a tree structure describing the syntactic structure of the sentence.",3.3 CVT for Dependency Parsing,[0],[0]
+"In particular, each word xti in a sentence",3.3 CVT for Dependency Parsing,[0],[0]
+"xi = x 1 i , ..., x T i receives exactly one in-going edge (u, t, r) going from word xui (called the “head”) to it (the “dependent”) of type r (the “relation”).",3.3 CVT for Dependency Parsing,[0],[0]
+We use a graph-based dependency parser similar to the one from Dozat and Manning (2017).,3.3 CVT for Dependency Parsing,[0],[0]
+This treats dependency parsing as a classification task where the goal is to predict which in-going edge yti =,3.3 CVT for Dependency Parsing,[0],[0]
+"(u, t, r) connects to each word x t i.
+First, the representations produced by the encoder for the candidate head and dependent are
+2Modules taking inputs from the second Bi-LSTM layer would not have restricted views because information about the whole sentence gets propagated through the first layer.
+",3.3 CVT for Dependency Parsing,[0],[0]
+"LSTM LSTM ŷfuture  ŷfwd  ŷ   ŷbwd  ŷpast  Backward LSTM Forward LSTM Predict LSTM LSTM LSTM LSTM Auxiliary Prediction Modules Primary Prediction Module
+passed through separate hidden layers.",3.3 CVT for Dependency Parsing,[0],[0]
+A bilinear classifier applied to these representations produces a score for each candidate edge.,3.3 CVT for Dependency Parsing,[0],[0]
+"Lastly, these scores are passed through a softmax layer to produce probabilities.",3.3 CVT for Dependency Parsing,[0],[0]
+"Mathematically, the probability of an edge is given as:
+pθ((u, t, r)|xi) ∝",3.3 CVT for Dependency Parsing,[0],[0]
+"es(h u 1 (xi)⊕hu2 (xi),ht1(xi)⊕ht2(xi),r)
+where s is the scoring function:
+s(z1, z2, r) = ReLU(Wheadz1 + bhead)(Wr",3.3 CVT for Dependency Parsing,[0],[0]
+"+W )
+",3.3 CVT for Dependency Parsing,[0],[0]
+"ReLU(Wdepz2 + bdep)
+",3.3 CVT for Dependency Parsing,[0],[0]
+The bilinear classifier uses a weight matrix Wr specific to the candidate relation as well as a weight matrix W shared across all relations.,3.3 CVT for Dependency Parsing,[0],[0]
+"Note that unlike in most prior work, our dependency parser only takes words as inputs, not words and part-of-speech tags.
+",3.3 CVT for Dependency Parsing,[0],[0]
+"We add four auxiliary prediction modules to our model for cross-view training:
+pfwd-fwdθ ((u, t, r)|xi) ∝",3.3 CVT for Dependency Parsing,[0],[0]
+"es fwd-fwd(
+−→ h u1 (xi), −→ h t1(xi),r)
+pfwd-bwdθ ((u, t, r)|xi) ∝",3.3 CVT for Dependency Parsing,[0],[0]
+"es fwd-bwd(
+−→ h u1 (xi), ←− h t1(xi),r)
+pbwd-fwdθ ((u, t, r)|xi) ∝",3.3 CVT for Dependency Parsing,[0],[0]
+"es bwd-fwd(
+←− h u1 (xi), −→ h t1(xi),r)
+pbwd-bwdθ ((u, t, r)|xi) ∝",3.3 CVT for Dependency Parsing,[0],[0]
+"es bwd-bwd(
+←− h u1 (xi), ←− h t1(xi),r)
+",3.3 CVT for Dependency Parsing,[0],[0]
+Each one has some missing context (not seeing either the preceding or following words) for the candidate head and candidate dependent.,3.3 CVT for Dependency Parsing,[0],[0]
+"We use an encoder-decoder sequence-to-sequence model with attention (Sutskever et al., 2014; Bahdanau et al., 2015).",3.4 CVT for Sequence-to-Sequence Learning,[0],[0]
+"Each example consists of an input (source) sequence xi = x1i , ..., x T i and output (target) sequence yi = y1i , ..., y K i .",3.4 CVT for Sequence-to-Sequence Learning,[0],[0]
+"The encoder’s representations are passed into an LSTM decoder using a bilinear attention mechanism (Luong et al., 2015).",3.4 CVT for Sequence-to-Sequence Learning,[0],[0]
+"In particular, at each time step t the decoder computes an attention distribution over source sequence hidden states as αj ∝ eh
+jWαh̄t where h̄t is the decoder’s current hidden state.",3.4 CVT for Sequence-to-Sequence Learning,[0],[0]
+"The source hidden states weighted by the attention distribution form a context vector: ct = ∑ j αjh
+j .",3.4 CVT for Sequence-to-Sequence Learning,[0],[0]
+"Next, the context vector and current hidden state are combined into an attention vector at = tanh(Wa[ct, ht]).",3.4 CVT for Sequence-to-Sequence Learning,[0],[0]
+"Lastly, a softmax layer predicts the next token in the output sequence: p(yti |y<ti , xi) = softmax(Wsat).
+",3.4 CVT for Sequence-to-Sequence Learning,[0],[0]
+We add two auxiliary decoders when applying CVT.,3.4 CVT for Sequence-to-Sequence Learning,[0],[0]
+"The auxiliary decoders share embedding and LSTM parameters with the primary decoder, but have different parameters for the attention mechanisms and softmax layers.",3.4 CVT for Sequence-to-Sequence Learning,[0],[0]
+"For the first one, we restrict its view of the input by applying attention dropout, randomly zeroing out a fraction of its attention weights.",3.4 CVT for Sequence-to-Sequence Learning,[0],[0]
+"The second one is trained to predict the next word in the target sequence rather than the current one: pfutureθ (y t i |y<ti , xi) = softmax(W futures a future t−1 ).",3.4 CVT for Sequence-to-Sequence Learning,[0],[0]
+"Since there is no target sequence for unlabeled examples, we cannot apply teacher forcing to get an output distribution over the vocabulary from the primary decoder at each time step.",3.4 CVT for Sequence-to-Sequence Learning,[0],[0]
+"Instead, we produce hard targets for the auxiliary modules by running the primary decoder with beam search on the input sequence.",3.4 CVT for Sequence-to-Sequence Learning,[0],[0]
+This idea has previously been applied to sequence-level knowledge distillation by Kim and Rush (2016).,3.4 CVT for Sequence-to-Sequence Learning,[0],[0]
+"We compare Cross-View Training against several strong baselines on seven tasks:
+Combinatory Categorial Grammar (CCG)",4 Experiments,[0],[0]
+"Supertagging: We use data from CCGBank (Hockenmaier and Steedman, 2007).
+",4 Experiments,[0],[0]
+"Text Chunking: We use the CoNLL-2000 data (Tjong Kim Sang and Buchholz, 2000).
+",4 Experiments,[0],[0]
+"Named Entity Recognition (NER): We use the CoNLL-2003 data (Tjong Kim Sang and De Meulder, 2003).
+",4 Experiments,[0],[0]
+"Fine-Grained NER (FGN): We use the OntoNotes (Hovy et al., 2006) dataset.
+",4 Experiments,[0],[0]
+Part-of-Speech (POS),4 Experiments,[0],[0]
+"Tagging: We use the Wall Street Journal portion of the Penn Treebank (Marcus et al., 1993).
+",4 Experiments,[0],[0]
+"Dependency Parsing: We use the Penn Treebank converted to Stanford Dependencies version 3.3.0.
+Machine Translation: We use the EnglishVietnamese translation dataset from IWSLT 2015 (Cettolo et al., 2015).",4 Experiments,[0],[0]
+"We report (tokenized) BLEU scores on the tst2013 test set.
+",4 Experiments,[0],[0]
+"We use the 1 Billion Word Language Model Benchmark (Chelba et al., 2014) as a pool of unlabeled sentences for semi-supervised learning.",4 Experiments,[0],[0]
+"We apply dropout during training, but not when running the primary prediction module to produce soft targets on unlabeled examples.",4.1 Model Details and Baselines,[0],[0]
+"In addition to the auxiliary prediction modules listed in Section 3, we find it slightly improves results to add another one that sees the whole input rather than a subset (but unlike the primary prediction module, does have dropout applied to its representations).",4.1 Model Details and Baselines,[0],[0]
+"Unless indicated otherwise, our models have LSTMs with 1024-sized hidden states and 512-sized projection layers.",4.1 Model Details and Baselines,[0],[0]
+See the supplementary material for full training details and hyperparameters.,4.1 Model Details and Baselines,[0],[0]
+"We compare CVT with the following other semi-supervised learning algorithms:
+Word Dropout.",4.1 Model Details and Baselines,[0],[0]
+"In this method, we only train the primary prediction module.",4.1 Model Details and Baselines,[0],[0]
+"When acting as a teacher it is run as normal, but when acting as a student, we randomly replace some of the input words with a REMOVED token.",4.1 Model Details and Baselines,[0],[0]
+This is similar to CVT in that it exposes the model to a restricted view of the input.,4.1 Model Details and Baselines,[0],[0]
+"However, it is less data efficient.",4.1 Model Details and Baselines,[0],[0]
+"By carefully designing the auxiliary prediction modules, it is possible to train the auxiliary prediction modules to match the primary one across many different views of the input a once, rather than just one view at a time.
+",4.1 Model Details and Baselines,[0],[0]
+Virtual Adversarial Training (VAT).,4.1 Model Details and Baselines,[0],[0]
+"VAT (Miyato et al., 2016) works like word dropout, but adds noise to the word embeddings of the student instead of dropping out words.",4.1 Model Details and Baselines,[0],[0]
+"Notably, the noise is chosen adversarially so it most changes the model’s prediction.",4.1 Model Details and Baselines,[0],[0]
+"This method was applied successfully to semi-supervised text classification
+by Miyato et al. (2017).
+ELMo.",4.1 Model Details and Baselines,[0],[0]
+ELMo incorporates the representations from a large separately-trained language model into a task-specific model.,4.1 Model Details and Baselines,[0],[0]
+Our implementaiton follows Peters et al. (2018).,4.1 Model Details and Baselines,[0],[0]
+"When combining ELMo with multi-task learning, we allow each task to learn its own weights for the ELMo embeddings going into each prediction module.",4.1 Model Details and Baselines,[0],[0]
+We found applying dropout to the ELMo embeddings was crucial for achieving good performance.,4.1 Model Details and Baselines,[0],[0]
+Results are shown in Table 1.,4.2 Results,[0],[0]
+CVT on its own outperforms or is comparable to the best previously published results on all tasks.,4.2 Results,[0],[0]
+"Figure 3 shows an example win for CVT over supervised learning.
+",4.2 Results,[0],[0]
+"Of the prior results listed in Table 1, only TagLM and ELMo are semi-supervised.",4.2 Results,[0],[0]
+These methods first train an enormous language model on unlabeled data and incorporate the representations produced by the language model into a supervised classifier.,4.2 Results,[0],[0]
+"Our base models use 1024 hidden units in their LSTMs (compared to 4096 in ELMo), require fewer training steps (around one pass over the billion-word benchmark rather than
+many passes), and do not require a pipelined training procedure.",4.2 Results,[0],[0]
+"Therefore, although they perform on par with ELMo, they are faster and simpler to train.",4.2 Results,[0],[0]
+Increasing the size of our CVT+Multitask model so it has 4096 units in its LSTMs like ELMo improves results further so they are significantly better than the ELMo+Multi-task ones.,4.2 Results,[0],[0]
+"We suspect there could be further gains from combining our method with language model pre-training, which we leave for future work.
+",4.2 Results,[0],[0]
+CVT + Multi-Task.,4.2 Results,[0],[0]
+We train a single sharedencoder CVT model to perform all of the tasks except machine translation (as it is quite different and requires more training time than the other ones).,4.2 Results,[0],[0]
+"Multi-task learning improves results on all of the tasks except fine-grained NER, sometimes by large margins.",4.2 Results,[0],[0]
+Prior work on many-task NLP such as Hashimoto et al. (2017) uses complicated architectures and training algorithms.,4.2 Results,[0],[0]
+"Our result shows that simple parameter sharing can be enough for effective many-task learning when the model is big and trained on a large amount of data.
+",4.2 Results,[0],[0]
+"Interestingly, multi-task learning works better in conjunction with CVT than with ELMo.",4.2 Results,[0],[0]
+"We hypothesize that the ELMo models quickly fit to the data primarily using the ELMo vectors, which perhaps hinders the model from learning effective representations that transfer across tasks.",4.2 Results,[0],[0]
+"We also believe CVT alleviates the danger of the model “forgetting” one task while training on the other ones, a well-known problem in many-task learning (Kirkpatrick et al., 2017).",4.2 Results,[0],[0]
+"During multi-task CVT, the model makes predictions about unlabeled examples across all tasks, creating (artificial) all-tasks-labeled examples, so the model does not only see one task at a time.",4.2 Results,[0],[0]
+"In fact, multi-task learning plus self training is similar to the Learning without Forgetting algorithm (Li and Hoiem, 2016), which trains the model to keep its predictions on an old task unchanged when learning a new task.",4.2 Results,[0],[0]
+"To test the value of all-tasks-labeled examples, we trained a multi-task CVT model that only computes LCVT on one task at a time (chosen randomly for each unlabeled minibatch) instead of for all tasks in parallel.",4.2 Results,[0],[0]
+"The one-at-a-time model performs substantially worse (see Table 2).
+",4.2 Results,[0],[0]
+Model Generalization.,4.2 Results,[0],[0]
+"In order to evaluate how our models generalize to the dev set from the train set, we plot the dev vs. train accuracy for our different methods as they learn (see Figure 4).",4.2 Results,[0],[0]
+"Both CVT and multi-task learning improve model generalization: for the same train accuracy, the models get better dev accuracy than purely supervised learning.",4.2 Results,[0],[0]
+"Interestingly, CVT continues to improve
+in dev set accuracy while close to 100% train accuracy for CCG, Chunking, and NER, perhaps because the model is still learning from unlabeled data even when it has completely fit to the train set.",4.2 Results,[0],[0]
+We also show results for a smaller multi-task + CVT model.,4.2 Results,[0],[0]
+"Although it generalizes at least as well as the larger one, it halts making progress on the train set earlier.",4.2 Results,[0],[0]
+"This suggests it is important to use sufficiently large neural networks for multitask learning: otherwise the model does not have the capacity to fit to all the training data.
+",4.2 Results,[0],[0]
+Auxiliary Prediction Module Ablation.,4.2 Results,[0],[0]
+We briefly explore which auxiliary prediction modules are more important for the sequence tagging tasks in Table 3.,4.2 Results,[0],[0]
+"We find that both kinds of auxiliary prediction modules improve performance, but that the future and past modules improve results more than the forward and backward ones, perhaps because they see a more restricted and challenging view of the input.
+",4.2 Results,[0],[0]
+Training Models on Small Datasets.,4.2 Results,[0],[0]
+"We explore how CVT scales with dataset size by varying the amount of training data the model has ac-
+cess to.",4.2 Results,[0],[0]
+"Unsurprisingly, the improvement of CVT over purely supervised learning grows larger as the amount of labeled data decreases (see Figure 5, left).",4.2 Results,[0],[0]
+"Using only 25% of the labeled data, our approach already performs as well or better than a fully supervised model using 100% of the training data, demonstrating that CVT is particularly useful on small datasets.
+",4.2 Results,[0],[0]
+Training Larger Models.,4.2 Results,[0],[0]
+"Most sequence taggers and dependency parsers in prior work use small LSTMs (hidden state sizes of around 300) because larger models yield little to no gains in performance (Reimers and Gurevych, 2017).",4.2 Results,[0],[0]
+We found our own supervised approaches also do not benefit greatly from increasing the model size.,4.2 Results,[0],[0]
+"In contrast, when using CVT accuracy scales better with model size (see Figure 5, right).",4.2 Results,[0],[0]
+"This finding suggests the appropriate semi-supervised learning methods may enable the development of larger, more sophisticated models for NLP tasks with limited amounts of labeled data.
+",4.2 Results,[0],[0]
+Generalizable Representations.,4.2 Results,[0],[0]
+"Lastly, we explore training the CVT+multi-task model on five tasks, freezing the encoder, and then only training a prediction module on the sixth task.",4.2 Results,[0],[0]
+This tests whether the encoder’s representations generalize to a new task not seen during its training.,4.2 Results,[0],[0]
+Only training the prediction module is very fast because (1) the encoder (which is by far the slowest part of the model) has to be run over each example only once and (2) we do not back-propagate into the encoder.,4.2 Results,[0],[0]
+"Results are shown in Table 4.
+",4.2 Results,[0],[0]
+"Training only a prediction module on top of multi-task representations works remarkably well,
+outperforming ELMo embeddings and sometimes even a vanilla supervised model, showing the multi-task model is building up effective representations for language.",4.2 Results,[0],[0]
+"In particular, the representations could be used like skip-thought vectors (Kiros et al., 2015) to quickly train models on new tasks without slow representation learning.",4.2 Results,[0],[0]
+Unsupervised Representation Learning.,5 Related Work,[0],[0]
+"Early approaches to deep semi-supervised learning pretrain neural models on unlabeled data, which has been successful for applications in computer vision (Jarrett et al., 2009; LeCun et al., 2010) and NLP.",5 Related Work,[0],[0]
+"Particularly noteworthy for NLP are algorithms for learning effective word embeddings (Collobert et al., 2011; Mikolov et al., 2013; Pennington et al., 2014) and language model pretraining (Dai and Le, 2015; Ramachandran et al., 2017; Peters et al., 2018; Howard and Ruder, 2018; Radford et al., 2018).",5 Related Work,[0],[0]
+"Pre-training on other tasks such as machine translation has also been studied (McCann et al., 2017).",5 Related Work,[0],[0]
+"Other approaches train
+“thought vectors” representing sentences through unsupervised (Kiros et al., 2015; Hill et al., 2016) or supervised (Conneau et al., 2017) learning.
+",5 Related Work,[0],[0]
+Self-Training.,5 Related Work,[0],[0]
+"One of the earliest approaches to semi-supervised learning is self-training (Scudder, 1965), which has been successfully applied to NLP tasks such as word-sense disambiguation (Yarowsky, 1995) and parsing (McClosky et al., 2006).",5 Related Work,[0],[0]
+"In each round of training, the classifier, acting as a “teacher,” labels some of the unlabeled data and adds it to the training set.",5 Related Work,[0],[0]
+"Then, acting as a “student,” it is retrained on the new training set.",5 Related Work,[0],[0]
+"Many recent approaches (including the consistentency regularization methods discussed below and our own method) train the student with soft targets from the teacher’s output distribution rather than a hard label, making the procedure more akin to knowledge distillation (Hinton et al., 2015).",5 Related Work,[0.9516653996746329],"['We vary the training dataset and the corpus used to build language models (LMs), while keeping always the same 2,000 sentence pairs for tuning (Xu et al., 2016) and the first 70 sentence pairs of their test set8 for our human evaluation.']"
+"It is also possible to use multiple models or prediction modules for the teacher, such as in tri-training (Zhou and Li, 2005; Ruder and Plank, 2018).
+",5 Related Work,[0],[0]
+Consistency Regularization.,5 Related Work,[0],[0]
+"Recent works add noise (e.g., drawn from a Gaussian distribution) or apply stochastic transformations (e.g., horizontally flipping an image) to the student’s inputs.",5 Related Work,[0],[0]
+"This trains the model to give consistent predictions to nearby data points, encouraging distributional smoothness in the model.",5 Related Work,[0],[0]
+"Consistency regularization has been very successful for computer vision applications (Bachman et al., 2014; Laine and Aila, 2017; Tarvainen and Valpola, 2017).",5 Related Work,[0],[0]
+"However, stochastic input alterations are more difficult to apply to discrete data like text, making consistency regularization less used for natural language processing.",5 Related Work,[0],[0]
+"One solution is to add noise to the model’s word embeddings (Miyato et al., 2017); we compare against this approach in our experiments.",5 Related Work,[0],[0]
+"CVT is easily applicable to text because it does not require changing the student’s inputs.
+",5 Related Work,[0],[0]
+Multi-View Learning.,5 Related Work,[0],[0]
+"Multi-view learning on data where features can be separated into distinct subsets has been well studied (Xu et al., 2013).",5 Related Work,[0],[0]
+"Particularly relevant are co-training (Blum and Mitchell, 1998) and co-regularization (Sindhwani and Belkin, 2005), which trains two models with disjoint views of the input.",5 Related Work,[0],[0]
+"On unlabeled data, each one acts as a “teacher” for the other model.",5 Related Work,[0],[0]
+"In contrast to these methods, our approach trains a single unified model where auxiliary prediction modules see different, but not necessarily indepen-
+dent views of the input.
+",5 Related Work,[0],[0]
+Self Supervision.,5 Related Work,[0],[0]
+Self-supervised learning methods train auxiliary prediction modules on tasks where performance can be measured without human-provided labels.,5 Related Work,[0],[0]
+"Recent work has jointly trained image classifiers with tasks like relative position and colorization (Doersch and Zisserman, 2017), sequence taggers with language modeling (Rei, 2017), and reinforcement learning agents with predicting changes in the environment (Jaderberg et al., 2017).",5 Related Work,[0.9587963129549032],"['and for all levels – all) and Newsela sentence-alignments for neighboring levels obtained with HMM-method6 (Bott and Saggion, 2011) in the ATS task using standard PBSMT models7 in the Moses toolkit (Koehn et al., 2007).']"
+"Unlike these approaches, our auxiliary losses are based on self-labeling, not labels deterministically constructed from the input.
+",5 Related Work,[0],[0]
+Multi-Task Learning.,5 Related Work,[0],[0]
+"There has been extensive prior work on multi-task learning (Caruana, 1997; Ruder, 2017).",5 Related Work,[0],[0]
+"For NLP, most work has focused on a small number of closely related tasks (Luong et al., 2016; Zhang and Weiss, 2016; Søgaard and Goldberg, 2016; Peng et al., 2017).",5 Related Work,[0],[0]
+Manytask systems are less commonly developed.,5 Related Work,[0],[0]
+"Collobert and Weston (2008) propose a many-task system sharing word embeddings between the tasks, Hashimoto et al. (2017) train a many-task model where the tasks are arranged hierarchically according to their linguistic level, and Subramanian et al. (2018) train a shared-encoder many-task model for the purpose of learning better sentence representations for use in downstream tasks, not for improving results on the original tasks.",5 Related Work,[0],[0]
+"We propose Cross-View Training, a new method for semi-supervised learning.",6 Conclusion,[0],[0]
+"Our approach allows models to effectively leverage their own predictions on unlabeled data, training them to produce effective representations that yield accurate predictions even when some of the input is not available.",6 Conclusion,[0],[0]
+"We achieve excellent results across seven NLP tasks, especially when CVT is combined with multi-task learning.",6 Conclusion,[0],[0]
+"We thank Abi See, Christopher Clark, He He, Peng Qi, Reid Pryzant, Yuaho Zhang, and the anonymous reviewers for their thoughtful comments and suggestions.",Acknowledgements,[0],[0]
+We thank Takeru Miyato for help with his virtual adversarial training code and Emma Strubell for answering our questions about OntoNotes NER.,Acknowledgements,[0],[0]
+Kevin is supported by a Google PhD Fellowship.,Acknowledgements,[0],[0]
+"Unsupervised representation learning algorithms such as word2vec and ELMo improve the accuracy of many supervised NLP models, mainly because they can take advantage of large amounts of unlabeled text.",abstractText,[0],[0]
+"However, the supervised models only learn from taskspecific labeled data during the main training phase.",abstractText,[0],[0]
+"We therefore propose Cross-View Training (CVT), a semi-supervised learning algorithm that improves the representations of a Bi-LSTM sentence encoder using a mix of labeled and unlabeled data.",abstractText,[0],[0]
+"On labeled examples, standard supervised learning is used.",abstractText,[0],[0]
+"On unlabeled examples, CVT teaches auxiliary prediction modules that see restricted views of the input (e.g., only part of a sentence) to match the predictions of the full model seeing the whole input.",abstractText,[0.9518751306308558],"['While the correctness of changes takes into account the influence of each individual change on grammaticality, meaning and simplicity of a sentence, the Scores (G and M) and Rank (S) take into account the mutual influence of all changes within a sentence.']"
+"Since the auxiliary modules and the full model share intermediate representations, this in turn improves the full model.",abstractText,[0],[0]
+"Moreover, we show that CVT is particularly effective when combined with multitask learning.",abstractText,[0],[0]
+"We evaluate CVT on five sequence tagging tasks, machine translation, and dependency parsing, achieving state-of-the-art results.1",abstractText,[0],[0]
+Semi-Supervised Sequence Modeling with Cross-View Training,title,[0],[0]
+"Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics (Long Papers), pages 2009–2019 Melbourne, Australia, July 15 - 20, 2018. c©2018 Association for Computational Linguistics
+2009",text,[0],[0]
+"User geolocation, the task of identifying the “home” location of a user, is an integral component of many applications ranging from public health monitoring (Paul and Dredze, 2011; Chon et al., 2015; Yepes et al., 2015) and regional studies of sentiment, to real-time emergency awareness systems (De Longueville et al., 2009; Sakaki et al., 2010), which use social media as an implicit information resource about people.
+",1 Introduction,[0],[0]
+"Social media services such as Twitter rely on IP addresses, WiFi footprints, and GPS data to geolocate users.",1 Introduction,[0],[0]
+"Third-party service providers don’t have easy access to such information, and have to rely on public sources of geolocation information such as the profile location field, which is noisy and difficult to map to a location (Hecht et al., 2011), or geotagged tweets, which are publicly available for only 1% of tweets (Cheng et al., 2010; Morstatter et al., 2013).",1 Introduction,[0],[0]
+"The scarcity of publicly available
+location information motivates predictive user geolocation from information such as tweet text and social interaction data.
+",1 Introduction,[0],[0]
+"Most previous work on user geolocation takes the form of either supervised text-based approaches (Wing and Baldridge, 2011; Han et al., 2012) relying on the geographical variation of language use, or graph-based semi-supervised label propagation relying on location homophily in user–user interactions (Davis Jr et al., 2011; Jurgens, 2013).
+",1 Introduction,[0],[0]
+Both text and network views are critical in geolocating users.,1 Introduction,[0],[0]
+"Some users post a lot of local content, but their social network is lacking or is not representative of their location; for them, text is the dominant view for geolocation.",1 Introduction,[0],[0]
+"Other users have many local social interactions, and mostly use social media to read other people’s comments, and for interacting with friends.",1 Introduction,[0],[0]
+Single-view learning would fail to accurately geolocate these users if the more information-rich view is not present.,1 Introduction,[0],[0]
+"There has been some work that uses both the text and network views, but it either completely ignores unlabelled data (Li et al., 2012a; Miura et al., 2017), or just uses unlabelled data in the network view (Rahimi et al., 2015b; Do et al., 2017).",1 Introduction,[0],[0]
+"Given that the 1% of geotagged tweets is often used for supervision, it is crucial for geolocation models to be able to leverage unlabelled data, and to perform well under a minimal supervision scenario.
+",1 Introduction,[0],[0]
+"In this paper, we propose GCN, an end-to-end user geolocation model based on Graph Convolutional Networks (Kipf and Welling, 2017) that jointly learns from text and network information to classify a user timeline into a location.",1 Introduction,[0],[0]
+"Our contributions are: (1) we evaluate our model under a minimal supervision scenario which is close to real world applications and show that GCN outperforms two strong baselines; (2) given sufficient supervision, we show that GCN is competitive, although the much simpler MLP-TXT+NET outper-
+forms state-of-the-art models; and (3) we show that highway gates play a significant role in controlling the amount of useful neighbourhood smoothing in GCN.1",1 Introduction,[0],[0]
+"We propose a transductive multiview geolocation model, GCN, using Graph Convolutional Networks (“GCN”: Kipf and Welling (2017)).",2 Model,[0],[0]
+"We also introduce two multiview baselines: MLP-TXT+NET based on concatenation of text and network, and DCCA based on Deep Canonical Correlation Analysis (Andrew et al., 2013).",2 Model,[0],[0]
+"Let X ∈ R|U |×|V | be the text view, consisting of the bag of words for each user in U using vocabulary V , and A ∈ 1|U",2.1 Multivew Geolocation,[0],[0]
+"|×|U | be the network view, encoding user–user interactions.",2.1 Multivew Geolocation,[0],[0]
+"We partition U = US ∪ UH into a supervised and heldout (unlabelled) set, US and UH , respectively.",2.1 Multivew Geolocation,[0],[0]
+"The goal is to infer the location of unlabelled samples YU , given the location of labelled samples YS , where each location is encoded as a one-hot classification label, yi ∈ 1c with c being the number of target regions.
+2.2 GCN GCN defines a neural network model f(X,A) with each layer:
+Â = D̃− 1 2 (A+ λI)D̃− 1 2 H(l+1) = σ",2.1 Multivew Geolocation,[0],[0]
+"( ÂH(l)W (l) + b ) ,
+(1)
+where D̃ is the degree matrix of A + λI; hyperparameter λ controls the weight of a node against its neighbourhood, which is set to 1 in the original model (Kipf and Welling, 2017); H0 = X and the din × dout matrix W (l) and dout ×",2.1 Multivew Geolocation,[0],[0]
+1 matrix b are trainable layer parameters; and σ is an arbitrary nonlinearity.,2.1 Multivew Geolocation,[0],[0]
+"The first layer takes an average of each sample and its immediate neighbours (labelled and unlabelled) using weights in Â, and performs a linear transformation using W and b followed by a nonlinear activation function (σ).",2.1 Multivew Geolocation,[0],[0]
+"In other words, for user ui, the output of layer l is computed by:
+~hl+1i = σ",2.1 Multivew Geolocation,[0],[0]
+"(∑ j∈nhood(i) Âij~h l jW l + bl ) , (2)
+1Code and data available at https://github.com/ afshinrahimi/geographconv
+Highway GCN:
+Highway GCN: ,
+Output GCN:
+X = BoWtext
+Â
+Â
+Â tanh
+tanh
+softmax
+H0
+H1
+Hl−1
+Hl
+predict location: ŷ
+W l−1, bl−1, W l−1h , b l−1 h
+W 1, b1, W 1h , b 1 h
+W l, bl
+Figure 1: The architecture of GCN geolocation model with layer-wise highway gates (W ih, b i h).",2.1 Multivew Geolocation,[0],[0]
+"GCN is applied to a BoW model of user content over the @-mention graph to predict user location.
+where W l and bl are learnable layer parameters, and nhood(i) indicates the neighbours of user ui.",2.1 Multivew Geolocation,[0],[0]
+Each extra layer in GCN extends the neighbourhood over which a sample is smoothed.,2.1 Multivew Geolocation,[0],[0]
+"For example a GCN with 3 layers smooths each sample with its neighbours up to 3 hops away, which is beneficial if location homophily extends to a neighbourhood of this size.",2.1 Multivew Geolocation,[0],[0]
+"Expanding the neighbourhood for label propagation by adding multiple GCN layers can improve geolocation by accessing information from friends that are multiple hops away, but it might also lead to propagation of noisy information to users from an exponentially increasing number of expanded neighbourhood members.",2.2.1 Highway GCN,[0],[0]
+"To control the required balance of how much neighbourhood information should be passed to a node, we use layer-wise gates similar to highway networks.",2.2.1 Highway GCN,[0],[0]
+"In highway networks (Srivastava et al., 2015), the output of a layer is summed with its input with gating weights T (~hl):
+T (~hl) = σ",2.2.1 Highway GCN,[0],[0]
+( W lt ~hl + blt ) ~hl+1,2.2.1 Highway GCN,[0],[0]
+= ~hl+1 ◦,2.2.1 Highway GCN,[0],[0]
+T (~hl) +,2.2.1 Highway GCN,[0],[0]
+"~hl ◦ (1− T (~hl)) , (3)
+where ~hl is the incoming input to layer l + 1, (W lt , b l t) are gating weights and bias variables, ◦ is elementwise multiplication, and σ is the Sigmoid function.
+",2.2.1 Highway GCN,[0],[0]
+"2.3 DCCA Given two views X and Â (from Equation 1) of data samples, CCA (Hotelling, 1936), and its deep version (DCCA) (Andrew et al., 2013) learn functions f1(X) and f2(Â) such that the correlation between the output of the two functions is maximised:
+ρ = corr(f1(X), f2(Â)) .",2.2.1 Highway GCN,[0],[0]
+"(4)
+The resulting representations of f1(X) and f2(Â) are the compressed representations of the two views where the uncorrelated noise between them is reduced.",2.2.1 Highway GCN,[0],[0]
+"The new representations ideally represent user communities for the network view, and the language model of that community for the text view, and their concatenation is a multiview representation of data, which can be used as input for other tasks.
+",2.2.1 Highway GCN,[0],[0]
+"In DCCA, the two views are first projected to a lower dimensionality using a separate multilayer perceptron for each view (the f1 and f2 functions of Equation 4), the output of which is used to estimate the CCA cost:
+maximise: tr(W T1 Σ12W2) subject to: W T1 Σ11W1 = W T 2 Σ22W2 =",2.2.1 Highway GCN,[0],[0]
+"I (5)
+where Σ11 and Σ22 are the covariances of the two outputs, and Σ12 is the cross-covariance.",2.2.1 Highway GCN,[0],[0]
+"The weights W1 and W2 are the linear projections of the MLP outputs, which are used in estimating the CCA cost.",2.2.1 Highway GCN,[0],[0]
+"The optimisation problem is solved by SVD, and the error is backpropagated to train the parameters of the two MLPs and the final linear projections.",2.2.1 Highway GCN,[0],[0]
+"After training, the two networks are used to predict new projections for unseen data.",2.2.1 Highway GCN,[0],[0]
+"The two projections of unseen data — the outputs of the two networks — are then concatenated to form a multiview sample representation, as shown in Figure 2.",2.2.1 Highway GCN,[0],[0]
+"We use three existing Twitter user geolocation datasets: (1) GEOTEXT (Eisenstein et al., 2010), (2) TWITTER-US (Roller et al., 2012), and (3) TWITTER-WORLD (Han et al., 2012).",3.1 Data,[0],[0]
+These datasets have been used widely for training and evaluation of geolocation models.,3.1 Data,[0],[0]
+"They are all pre-partitioned into training, development and test
+sets.",3.1 Data,[0],[0]
+"Each user is represented by the concatenation of their tweets, and labelled with the latitude/longitude of the first collected geotagged tweet in the case of GEOTEXT and TWITTER-US, and the centre of the closest city in the case of TWITTER-WORLD.",3.1 Data,[0],[0]
+"GEOTEXT and TWITTER-US cover the continental US, and TWITTER-WORLD covers the whole world, with 9k, 449k and 1.3m users, respectively.",3.1 Data,[0],[0]
+"The labels are the discretised geographical coordinates of the training points using a k-d tree following Roller et al. (2012), with the number of labels equal to 129, 256, and 930 for GEOTEXT, TWITTER-US, and TWITTER-WORLD, respectively.",3.1 Data,[0],[0]
+"We build matrix Â as in Equation 1 using the collapsed @-mention graph between users, where two users are connected (Aij = 1) if one mentions the other, or they co-mention another user.",3.2 Constructing the Views,[0],[0]
+"The text view is a BoW model of user content with binary term frequency, inverse document frequency, and l2 normalisation of samples.",3.2 Constructing the Views,[0],[0]
+"For GCN, we use highway layers to control the amount of neighbourhood information passed to a node.",3.3 Model Selection,[0],[0]
+"We use 3 layers in GCN with size 300, 600, 900 for GEOTEXT, TWITTER-US and TWITTERWORLD respectively.",3.3 Model Selection,[0],[0]
+"Note that the final softmax layer is also graph convolutional, which sets the radius of the averaging neighbourhood to 4.",3.3 Model Selection,[0],[0]
+"The
+k-d tree bucket size hyperparameter which controls the maximum number of users in each cluster is set to 50, 2400, and 2400 for the respective datasets, based on tuning over the validation set.",3.3 Model Selection,[0],[0]
+"The architecture of GCN-LP is similar, with the difference that the text view is set to zero.",3.3 Model Selection,[0],[0]
+"In DCCA, for the unsupervised networks we use a single sigmoid hidden layer with size 1000 and a linear output layer with size 500 for the three datasets.",3.3 Model Selection,[0],[0]
+"The loss function is CCA loss, which maximises the output correlations.",3.3 Model Selection,[0],[0]
+"The supervised multilayer perceptron has one hidden layer with size 300, 600, 1000 for GEOTEXT, TWITTER-US, and TWITTER-WORLD, respectively, which we set by tuning over the development sets.",3.3 Model Selection,[0],[0]
+"We evaluate the models using Median error, Mean error, and Acc@161, accuracy of predicting a user within 161km or 100 miles from the known location.",3.3 Model Selection,[0],[0]
+"We also compare DCCA and GCN with two baselines:
+GCN-LP is based on GCN, but for input, instead of text-based features , we use one-hot encoding of a user’s neighbours, which are then convolved with their k-hop neighbours using the GCN.",3.4 Baselines,[0],[0]
+"This approach is similar to label propagation in smoothing the label distribution of a user with that of its neighbours, but uses graph convolutional networks which have extra layer parameters, and also a gating mechanism to control the smoothing neighbourhood radius.",3.4 Baselines,[0],[0]
+"Note that for unlabelled samples, the predicted labels are used for input after training accuracy reaches 0.2.
+",3.4 Baselines,[0],[0]
+"MLP-TXT+NET is a simple transductive supervised model based on a single layer multilayer perceptron where the input to the network is the concatenation of the text view X , the user content’s bag-of-words and Â (Equation 1), which represents the network view as a vector input.",3.4 Baselines,[0],[0]
+"For the hidden layer we use a ReLU nonlinearity, and sizes 300, 600, and 600 for GEOTEXT, TWITTER-US, and TWITTER-WORLD, respectively.",3.4 Baselines,[0],[0]
+"Deep CCA and GCN are able to provide an unsupervised data representation in different ways.
+",4.1 Representation,[0],[0]
+"Deep CCA takes the two text-based and networkbased views, and finds deep non-linear transformations that result in maximum correlation between the two views (Andrew et al., 2013).",4.1 Representation,[0],[0]
+"The representations can be visualised using t-SNE, where we hope that samples with the same label are clustered together.",4.1 Representation,[0],[0]
+"GCN, on the other hand, uses graph convolution.",4.1 Representation,[0],[0]
+The representations of 50 samples from each of 4 randomly chosen labels of GEOTEXT are shown in Figure 3.,4.1 Representation,[0],[0]
+"As shown, Deep CCA seems to slightly improve the representations from pure concatenation of the two views.",4.1 Representation,[0],[0]
+"GCN, on the other hand, substantially improves the representations.",4.1 Representation,[0],[0]
+"Further application of GCN results in more samples clumping together, which might be desirable when there is strong homophily.",4.1 Representation,[0],[0]
+"To achieve good performance in supervised tasks, often large amounts of labelled data are required, which is a big challenge for Twitter geolocation, where only a small fraction of the data is geotagged (about 1%).",4.2 Labelled Data Size,[0],[0]
+The scarcity of supervision indicates the importance of semi-supervised learning where unlabelled (e.g. non-geotagged) tweets are used for training.,4.2 Labelled Data Size,[0],[0]
+"The three models we propose (MLP-TXT+NET, DCCA, and GCN) are all transductive semi-supervised models that use unlabelled data, however, they are different in terms of how much labelled data they require to achieve acceptable performance.",4.2 Labelled Data Size,[0],[0]
+"Given that in a real-world scenario, only a small fraction of data is geotagged, we conduct an experiment to analyse the effect of labelled samples on the performance of the three geolocation models.",4.2 Labelled Data Size,[0],[0]
+"We provided the three models with different fractions of samples that are labelled (in terms of % of dataset samples) while using the remainder as unlabelled data, and analysed their Median error performance over the development set of GEOTEXT, TWITTER-US, and TWITTER-WORLD.",4.2 Labelled Data Size,[0],[0]
+"Note that the text and network view, and the development set, remain fixed for all the experiments.",4.2 Labelled Data Size,[0],[0]
+"As shown in Figure 4, when the fraction of labelled samples is less than 10% of all the samples, GCN and DCCA outperform MLP-TXT+NET, as a result of having fewer parameters, and therefore, lower supervision requirement to optimise them.",4.2 Labelled Data Size,[0],[0]
+"When enough training data is available (e.g. more than 20% of all the samples), GCN and MLP-TXT+NET clearly outperform DCCA, possibly as a result of directly modelling the
+interactions between network and text views.",4.2 Labelled Data Size,[0],[0]
+"When all the training samples of the two larger datasets (95% and 98% for TWITTER-US and TWITTERWORLD, respectively) are available to the models, MLP-TXT+NET outperforms GCN.",4.2 Labelled Data Size,[0],[0]
+Note that the number of parameters increases from DCCA to GCN and to MLP-TXT+NET.,4.2 Labelled Data Size,[0],[0]
+"In 1% for GEOTEXT, DCCA outperforms GCN as a result of having fewer parameters and just a few labelled samples, insufficient to train the parameters of GCN.",4.2 Labelled Data Size,[0],[0]
+"Adding more layers to GCN expands the graph neighbourhood within which the user features are averaged, and so might introduce noise, and consequently decrease accuracy as shown in Figure 5 when no gates are used.",4.3 Highway Gates,[0],[0]
+"We see that by adding highway network gates, the performance of GCN slightly improves until three layers are added, but then by adding more layers the performance doesn’t change that much as gates are allowing the layer inputs to pass through the network without
+much change.",4.3 Highway Gates,[0],[0]
+The performance peaks at 4 layers which is compatible with the distribution of shortest path lengths shown in Figure 6.,4.3 Highway Gates,[0],[0]
+"The performance of the three proposed models (MLP-TXT+NET, DCCA and GCN) is shown in Table 1.",4.4 Performance,[0],[0]
+"The models are also compared with supervised text-based methods (Wing and Baldridge, 2014; Cha et al., 2015; Rahimi et al., 2017b), a network-based method (Rahimi et al., 2015a) and GCN-LP, and also joint text and network models (Rahimi et al., 2017b; Do et al., 2017; Miura et al., 2017).",4.4 Performance,[0],[0]
+"MLP-TXT+NET and GCN outperform all the text- or network-only models, and also the hybrid model of Rahimi et al. (2017b), indicating that joint modelling of text and network features is important.",4.4 Performance,[0.9544952373258057],"['We compare: (1) the performance of the standard PBSMT model which uses only the already available EW–SEW dataset (Hwang et al., 2015) with the performances of the same PBSMT models but this time using the combination of the EW–SEW dataset and our newly-created Newsela datasets; (2) the latter PBSMT models (which use both EW–SEW and new Newsela datasets) against the state-of-the-art supervised ATS system (Xu et al., 2016), and one of the recently proposed unsupervised lexical simplification systems, the LightLS system (Glavaš and Štajner, 2015).9 We perform three types of human evaluation on the outputs of all systems.']"
+"MLP-TXT+NET is competitive with Do et al. (2017), outperforming it on larger datasets, and underperforming on GEO-
+TEXT.",4.4 Performance,[0],[0]
+"However, it’s difficult to make a fair comparison as they use timezone data in their feature set.",4.4 Performance,[0],[0]
+"MLP-TXT+NET outperforms GCN over TWITTERUS and TWITTER-WORLD, which are very large, and have large amounts of labelled data.",4.4 Performance,[0],[0]
+In a scenario with little supervision (1% of the total samples are labelled),4.4 Performance,[0],[0]
+"DCCA and GCN clearly outperform MLP-TXT+NET, as they have fewer pa-
+rameters.",4.4 Performance,[0],[0]
+"Except for Acc@161 over GEOTEXT where the number of labelled samples in the minimal supervision scenario is very low, GCN outperforms DCCA by a large margin, indicating that for a medium dataset where only 1% of samples are labelled (as happens in random samples of Twitter) GCN is superior to MLP-TXT+NET and DCCA, consistent with Section 4.2.",4.4 Performance,[0],[0]
+"Both MLP-TXT+NET and GCN achieve state of the art results compared
+to network-only, text-only, and hybrid models.",4.4 Performance,[0.9516011394105303],"['However, the state-of-the-art ATS systems still do not reach satisfying performances and require some human post-editing (Štajner and Popović, 2016).']"
+"The network-based GCN-LP model, which does label propagation using Graph Convolutional Networks, outperforms Rahimi et al. (2015a), which is based on location propagation using Modified Adsorption (Talukdar and Crammer, 2009), possibly because the label propagation in GCN is parametrised.",4.4 Performance,[0],[0]
+"Although the performance of MLP-TXT+NET is better than GCN and DCCA when a large amount of labelled data is available (Table 1), under a scenario where little labelled data is available (1% of data), DCCA and GCN outperform MLP-TXT+NET, mainly because the number of parameters in MLP-TXT+NET grows with the number of samples, and is much larger than GCN and DCCA.",4.5 Error Analysis,[0],[0]
+"GCN outperforms DCCA and MLP-TXT+NET using 1% of data, however, the distribution of errors in the development set of TWITTER-US indicates higher error for smaller states such as Rhode Island (RI), Iowa (IA), North Dakota (ND), and Idaho (ID), which is simply because the number of labelled samples in those states is insufficient.
+",4.5 Error Analysis,[0],[0]
+"Although we evaluate geolocation models with Median, Mean, and Acc@161, it doesn’t mean that the distribution of errors is uniform over all locations.",4.5 Error Analysis,[0],[0]
+"Big cities often attract more local online discussions, making the geolocation of users in those areas simpler.",4.5 Error Analysis,[0],[0]
+"For example users in LA are more likely to talk about LA-related issues such as their sport teams, Hollywood or local events than users in the state of Rhode Island (RI), which lacks large sport teams or major events.",4.5 Error Analysis,[0],[0]
+"It is also possible that people in less densely populated areas are further apart from each other, and therefore, as a result of discretisation fall in different clusters.",4.5 Error Analysis,[0],[0]
+The non,4.5 Error Analysis,[0],[0]
+"-uniformity in local discussions results in lower geolocation performance in less densely populated areas like Midwest U.S., and higher performance in densely populated areas such as NYC and LA as shown in Figure 7.",4.5 Error Analysis,[0],[0]
+"The geographical distribution of error for GCN, DCCA and MLP-TXT+NET under the minimal supervision scenario is shown in the supplementary material.
+",4.5 Error Analysis,[0],[0]
+"To get a better picture of misclassification between states, we built a confusion matrix based on known state and predicted state for development users of TWITTER-US using GCN using only 1% of labelled data.",4.5 Error Analysis,[0],[0]
+"There is a tendency for users to be wrongly predicted to be in CA, NY, TX, and surpris-
+ingly OH.",4.5 Error Analysis,[0],[0]
+"Particularly users from states such as TX, AZ, CO, and NV, which are located close to CA, are wrongly predicted to be in CA, and users from NJ, PA, and MA are misclassified as being in NY.",4.5 Error Analysis,[0],[0]
+The same goes for OH and TX where users from neighbouring smaller states are misclassified to be there.,4.5 Error Analysis,[0],[0]
+"Users from CA and NY are also misclassified between the two states, which might be the result of business and entertainment connections that exist between NYC and LA/SF.",4.5 Error Analysis,[0],[0]
+"Interestingly, there are a number of misclassifications to FL for users from CA, NY, and TX, which might be the effect of users vacationing or retiring to FL.",4.5 Error Analysis,[0],[0]
+The full confusion matrix between the U.S. states is provided in the supplementary material.,4.5 Error Analysis,[0],[0]
+"In Table 2, local terms of a few regions detected by GCN under minimal supervision are shown.",4.6 Local Terms,[0],[0]
+The terms that were present in the labelled data are excluded to show how graph convolutions over the social graph have extended the vocabulary.,4.6 Local Terms,[0],[0]
+"For example, in case of Seattle, #goseahawks is an important term not present in the 1% labelled data but present in the unlabelled data.",4.6 Local Terms,[0],[0]
+The convolution over the social graph is able to utilise such terms that don’t exist in the labelled data.,4.6 Local Terms,[0],[0]
+"Previous work on user geolocation can be broadly divided into text-based, network-based and multiview approaches.
+",5 Related Work,[0],[0]
+Text-based geolocation uses the geographical bias in language use to infer the location of users.,5 Related Work,[0],[0]
+"There are three main text-based approaches to geolocation: (1) gazetteer-based models which map geographical references in text to location, but ignore non-geographical references and vernacular uses of language (Rauch et al., 2003; Amitay et al., 2004; Lieberman et al., 2010); (2) geographical topic models that learn region-specific topics, but don’t scale to the magnitude of social media (Eisenstein et al., 2010; Hong et al., 2012; Ahmed et al., 2013); and (3) supervised models which are often framed as text classification (Serdyukov et al., 2009; Wing and Baldridge, 2011; Roller et al., 2012; Han et al., 2014) or text regression (Iso et al., 2017; Rahimi et al., 2017a).",5 Related Work,[0],[0]
+"Supervised models scale well and can achieve good performance with sufficient supervision, which is not available in a real world scenario.
+",5 Related Work,[0],[0]
+Network-based methods leverage the location homophily assumption: nearby users are more likely to befriend and interact with each other.,5 Related Work,[0],[0]
+"There are four main network-based geolocation approaches: distance-based, supervised classification, graph-based label propagation, and node embedding methods.",5 Related Work,[0],[0]
+"Distance-based methods model the probability of friendship given the distance (Backstrom et al., 2010; McGee et al., 2013; Gu et al., 2012; Kong et al., 2014), supervised models use neighbourhood features to classify a user into a location (Rout et al., 2013; Malmi et al., 2015), and graph-based label-propagation models propagate the location information through the user–user graph to estimate unknown labels (Davis Jr et al., 2011; Jurgens, 2013; Compton et al., 2014).",5 Related Work,[0],[0]
+"Node embedding methods build heterogeneous graphs between user–user, user–location and location– location, and learn an embedding space to minimise the distance of connected nodes, and maximise the distance of disconnected nodes.",5 Related Work,[0],[0]
+"The embeddings are then used in supervised models for geolocation (Wang et al., 2017).",5 Related Work,[0],[0]
+Network-based models fail to geolocate disconnected users: Jurgens et al. (2015) couldn’t geolocation 37% of users as a result of disconnectedness.,5 Related Work,[0],[0]
+"Previous work on hybrid text and network methods can be broadly categorised into three main approaches: (1) incorporating text-based information such as toponyms or locations predicted from a textbased model as auxiliary nodes into the user–user graph, which is then used in network-based models (Li et al., 2012a,b; Rahimi et al., 2015b,a); (2) ensembling separately trained text- and networkbased models (Gu et al., 2012; Ren et al., 2012; Jayasinghe et al., 2016; Ribeiro and Pappa, 2017); and (3) jointly learning geolocation from several information sources such as text and network information (Miura et al., 2017; Do et al., 2017), which can capture the complementary information in text and network views, and also model the interactions between the two.",5 Related Work,[0],[0]
+"None of the previous
+multiview approaches — with the exception of Li et al. (2012a) and Li et al. (2012b) that only use toponyms — effectively uses unlabelled data in the text view, and use only the unlabelled information of the network view via the user–user graph.
+",5 Related Work,[0],[0]
+"There are three main shortcomings in the previous work on user geolocation that we address in this paper: (1) with the exception of few recent works (Miura et al., 2017; Do et al., 2017), previous models don’t jointly exploit both text and network information, and therefore the interaction between text and network views is not modelled; (2) the unlabelled data in both text and network views is not effectively exploited, which is crucial given the small amounts of available supervision; and (3) previous models are rarely evaluated under a minimal supervision scenario, a scenario which reflects real world conditions.",5 Related Work,[0],[0]
+"We proposed GCN, DCCA and MLP-TXT+NET, three multiview, transductive, semi-supervised geolocation models, which use text and network information to infer user location in a joint setting.",6 Conclusion,[0],[0]
+"We showed that joint modelling of text and network information outperforms network-only, text-only, and hybrid geolocation models as a result of modelling the interaction between text and network information.",6 Conclusion,[0.9517424447261003],"['We provided several methods for paragraphand sentence-alignment from parallel TS corpora, made the software publicly available, and showed that the use of the new sentence-aligned (freely available) Newsela dataset leads to state-of-the-art ATS systems even in a basic PBSMT setup.']"
+We also showed that GCN and DCCA are able to perform well under a minimal supervision scenario similar to real world applications by effectively using unlabelled data.,6 Conclusion,[0],[0]
+"We ignored the context in which users interact with each other, and assumed all the connections to hold location homophily.",6 Conclusion,[0],[0]
+"In future work, we are interested in modelling the extent to which a social interaction is caused by geographical proximity (e.g. using user–user gates).",6 Conclusion,[0],[0]
+Social media user geolocation is vital to many applications such as event detection.,abstractText,[0],[0]
+"In this paper, we propose GCN, a multiview geolocation model based on Graph Convolutional Networks, that uses both text and network context.",abstractText,[0],[0]
+"We compare GCN to the state-of-the-art, and to two baselines we propose, and show that our model achieves or is competitive with the stateof-the-art over three benchmark geolocation datasets when sufficient supervision is available.",abstractText,[0],[0]
+"We also evaluate GCN under a minimal supervision scenario, and show it outperforms baselines.",abstractText,[0],[0]
+We find that highway network gates are essential for controlling the amount of useful neighbourhood expansion in GCN.,abstractText,[0],[0]
+Semi-supervised User Geolocation via Graph Convolutional Networks,title,[0],[0]
+"Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics (Short Papers), pages 97–102 Vancouver, Canada, July 30 - August 4, 2017. c©2017 Association for Computational Linguistics
+https://doi.org/10.18653/v1/P17-2016",text,[0],[0]
+"Automated text simplification (ATS) tries to automatically transform (syntactically, lexically and/or semantically) complex sentences into their simpler variants without significantly altering the original meaning.",1 Introduction,[1.0],"['Automated text simplification (ATS) tries to automatically transform (syntactically, lexically and/or semantically) complex sentences into their simpler variants without significantly altering the original meaning.']"
+"It has attracted much attention recently as it could make texts more accessible to wider audiences (Aluı́sio and Gasperin, 2010; Saggion et al., 2015), and used as a pre-processing step, improve performances of various NLP tasks and systems (Vickrey and Koller, 2008; Evans, 2011; Štajner and Popović, 2016).
+",1 Introduction,[0],[0]
+"However, the state-of-the-art ATS systems still do not reach satisfying performances and require some human post-editing (Štajner and Popović, 2016).",1 Introduction,[0],[0]
+"While the best supervised approaches generally lead to grammatical output with preserved original meaning, they are overcautious, making almost no changes to the input sentences (Specia, 2010; Štajner et al., 2015), probably due to the limited size or bad quality of parallel TS corpora used for training.",1 Introduction,[1.0],"['While the best supervised approaches generally lead to grammatical output with preserved original meaning, they are overcautious, making almost no changes to the input sentences (Specia, 2010; Štajner et al., 2015), probably due to the limited size or bad quality of parallel TS corpora used for training.']"
+"The largest existing sentence-aligned TS dataset for English is the English Wikipedia – Simple English Wikipedia
+(EW–SEW) dataset, which contains 160-280,000 sentence pairs, depending on whether we want to model only traditional sentence rewritings or also to model content reduction and stronger paraphrasing (Hwang et al., 2015).",1 Introduction,[0.9999998855194666],"['The largest existing sentence-aligned TS dataset for English is the English Wikipedia – Simple English Wikipedia (EW–SEW) dataset, which contains 160-280,000 sentence pairs, depending on whether we want to model only traditional sentence rewritings or also to model content reduction and stronger paraphrasing (Hwang et al., 2015).']"
+"For Spanish, the largest existing parallel TS corpus contains only 1,000 sentence pairs thus impeding the use of fully supervised approaches.",1 Introduction,[1.0],"['For Spanish, the largest existing parallel TS corpus contains only 1,000 sentence pairs thus impeding the use of fully supervised approaches.']"
+"The best unsupervised lexical simplification (LS) systems for English which leverage word-embeddings (Glavaš and Štajner, 2015; Paetzold and Specia, 2016) seem to perform more lexical substitutions but at the cost of having less grammatical output and more often changed meaning.",1 Introduction,[1.0],"['The best unsupervised lexical simplification (LS) systems for English which leverage word-embeddings (Glavaš and Štajner, 2015; Paetzold and Specia, 2016) seem to perform more lexical substitutions but at the cost of having less grammatical output and more often changed meaning.']"
+"However, there have been no direct comparisons of supervised and unsupervised state-of-the-art approaches so far.
+",1 Introduction,[0],[0]
+"The Newsela corpora1 offers over 2,000 original news articles in English and around 250 in Spanish, manually simplified to 3–4 different complexity levels following strict guidelines (Xu et al., 2015).",1 Introduction,[1.0],"['The Newsela corpora1 offers over 2,000 original news articles in English and around 250 in Spanish, manually simplified to 3–4 different complexity levels following strict guidelines (Xu et al., 2015).']"
+"Although it was suggested that it has better quality than the EW–SEW corpus (Xu et al., 2015), Newsela has not yet been used for training end-to-end ATS systems, due to the lack of its sentence (and paragraph) alignments.",1 Introduction,[1.0],"['Although it was suggested that it has better quality than the EW–SEW corpus (Xu et al., 2015), Newsela has not yet been used for training end-to-end ATS systems, due to the lack of its sentence (and paragraph) alignments.']"
+"Such alignments, between various text complexity levels, would offer large training datasets for modelling different levels of simplification, i.e. ‘mild’ simplifications (using the alignments from the neighbouring levels) and ‘heavy’ simplifications (using the alignments of level pairs: 0–3, 0–4, 1–4).
+Contributions.",1 Introduction,[0.9995028910297921],"['Such alignments, between various text complexity levels, would offer large training datasets for modelling different levels of simplification, i.e. ‘mild’ simplifications (using the alignments from the neighbouring levels) and ‘heavy’ simplifications (using the alignments of level pairs: 0–3, 0–4, 1–4).']"
+"We: (1) provide several methods for paragraph- and sentence alignment of parallel texts, and for assessing similarity level between pairs of text snippets, as freely avail-
+1Freely available: https://newsela.com/data/
+97
+able software;2 (2) compare the performances of lexically- and semantically-based alignment methods across various text complexity levels; (3) test the hypothesis that the original order of information is preserved during manual simplification (Bott and Saggion, 2011) by offering customized MST-LIS alignment strategy (Section 3.1); and (4) show that the new sentence-alignments lead to the state-of-the-art ATS systems even in a basic phrase-based statistical machine translation (PBSMT) approach to text simplifications.",1 Introduction,[0.9997151051783779],"['We: (1) provide several methods for paragraph- and sentence alignment of parallel texts, and for assessing similarity level between pairs of text snippets, as freely avail- 97 able software;2 (2) compare the performances of lexically- and semantically-based alignment methods across various text complexity levels; (3) test the hypothesis that the original order of information is preserved during manual simplification (Bott and Saggion, 2011) by offering customized MST-LIS alignment strategy (Section 3.1); and (4) show that the new sentence-alignments lead to the state-of-the-art ATS systems even in a basic phrase-based statistical machine translation (PBSMT) approach to text simplifications.']"
+"The current state-of-the-art systems for automatic sentence-alignment of original and manually simplified texts are the GSWN method (Hwang et al., 2015) used for sentence-alignment of original and simple English Wikipedia, and the HMMbased method (Bott and Saggion, 2011) used for sentence-alignment of the Spanish Simplext corpus (Saggion et al., 2015).
+",2 Related Work,[0],[0]
+The HMM-based method can be applied to any language as it does not require any languagespecific resources.,2 Related Work,[0],[0]
+"It is based on two hypotheses: (H1) that the original order of information is preserved, and (H2) that every ‘simple’ sentence has at least one corresponding ‘original’ sentence (it can have more than one in the case of ‘n-1’ or ‘nm’ alignments).
+",2 Related Work,[0],[0]
+"As Simple Wikipedia does not represent direct simplification of the ‘original’ Wikipedia articles (‘simple’ articles were written independently of the ‘original’ ones), GSWN method does not assume H1 or H2.",2 Related Work,[0],[0]
+"The main limitations of this method are that it only allows for ‘1-1’ sentence alignments – which is very restricting for TS as it does not allow for sentence splitting (‘1-n’), and summarisation and compression (‘n-1’ and ‘n-m’) alignments – and it is language-dependent as it requires English Wiktionary.
+",2 Related Work,[0],[0]
+"Unlike the GSWN method, all the methods we apply are language-independent, resource-light and allow for ‘1-n’, ‘n-1’, and ‘n-m’ alignments.",2 Related Work,[0],[0]
+"Similar to the HMM-method, our methods assume the hypothesis H2.",2 Related Work,[0],[0]
+"We provide them in both variants, using the hypothesis H1 and without it (Section 3.1).
+",2 Related Work,[0],[0]
+2https://github.com/neosyon/ SimpTextAlign,2 Related Work,[0],[0]
+"Having a set of ‘simple’ text snippets S and a set of ‘complex’ text snippets C, we offer two strategies (Section 3.1) to obtain the alignments (si, cj), where si ∈ S, cj ∈",3 Approach,[0.9744500117666857],"['Having a set of ‘simple’ text snippets S and a set of ‘complex’ text snippets C, we offer two strategies (Section 3.1) to obtain the alignments (si, cj), where si ∈ S, cj ∈ C. Each alignment strategy, in turn, can use one of the three methods (Section 3.2) to calculate similarity scores between text snippets (either paragraphs or sentences).']"
+C.,3 Approach,[0],[0]
+"Each alignment strategy, in turn, can use one of the three methods (Section 3.2) to calculate similarity scores between text snippets (either paragraphs or sentences).",3 Approach,[0],[0]
+"Most Similar Text (MST): Given one of the similarity methods (Section 3.2), MST compares similarity scores of all possible pairs (si, cj), and aligns each si ∈ S with the closest one in C. MST with Longest Increasing Sequence (MSTLIS): MST-LIS uses the hypothesis H1.",3.1 Alignment strategies,[1.0],"['Most Similar Text (MST): Given one of the similarity methods (Section 3.2), MST compares similarity scores of all possible pairs (si, cj), and aligns each si ∈ S with the closest one in C. MST with Longest Increasing Sequence (MSTLIS): MST-LIS uses the hypothesis H1.']"
+"It first uses the MST strategy, and then postprocess the output by extracting – from all obtained alignments – only those alignments li ∈ L, which contain the longest increasing sequence of offsets jk in C. In order to allow for ‘1–n’ alignments (i.e. sentence splitting), we allow for repeated offsets of C (‘complex’ text snippets) in L. The ‘simple’ text snippets not contained in L are included in the set U of unaligned snippets.",3.1 Alignment strategies,[1.0],"['It first uses the MST strategy, and then postprocess the output by extracting – from all obtained alignments – only those alignments li ∈ L, which contain the longest increasing sequence of offsets jk in C. In order to allow for ‘1–n’ alignments (i.e. sentence splitting), we allow for repeated offsets of C (‘complex’ text snippets) in L. The ‘simple’ text snippets not contained in L are included in the set U of unaligned snippets.']"
+"Finally, we align each um ∈ U by restricting the search space in C to those offsets of ‘complex’ text snippets that correspond to the previous and the next aligned ‘simple’ snippets.",3.1 Alignment strategies,[0],[0]
+"For instance, if L = {(s1, c4), (s3, c7)} and U = {s2}, then the search space for the alignments of s2 is reduced to {c4...c7}.",3.1 Alignment strategies,[0],[0]
+"We denote this strategy with an ‘*’ in the results (Table 2), e.g. C3G*.",3.1 Alignment strategies,[0],[0]
+C3G: We employ the Character N -Gram,3.2 Similarity Methods,[0],[0]
+"(CNG) (Mcnamee and Mayfield, 2004) similarity model (for n = 3) with log TF-IDF weighting (Salton and McGill, 1986) and compare vectors using the cosine similarity.",3.2 Similarity Methods,[0.9834284872177562],"['C3G: We employ the Character N -Gram (CNG) (Mcnamee and Mayfield, 2004) similarity model (for n = 3) with log TF-IDF weighting (Salton and McGill, 1986) and compare vectors using the cosine similarity.']"
+WAVG:,3.2 Similarity Methods,[0],[0]
+"We use the continuous skip-gram model (Mikolov et al., 2013b) of the TensorFlow toolkit3 to process the whole English Wikipedia and generate continuous representations of its words.4 For each text snippet, we average its word vectors to obtain a single representation of its content as this setting has shown good results
+3https://www.tensorflow.org/ 4We use 300-dimensional vectors, context windows of size 10, and 20 negative words for each sample, in all our continuous word-based models.
+",3.2 Similarity Methods,[0],[0]
+"in other NLP tasks (e.g. for selecting out-of-thelist words (Mikolov et al., 2013a)).",3.2 Similarity Methods,[0],[0]
+"Finally, the similarity between text snippets is estimated using the cosine similarity.",3.2 Similarity Methods,[0],[0]
+CWASA:,3.2 Similarity Methods,[0],[0]
+"We employ the Continuous Word Alignment-based Similarity Analysis (CWASA) model (Franco-Salvador et al., 2016), which finds the optimal word alignment by computing cosine similarity between continuous representations of all words (instead of averaging word vectors as in the case of WAVG).",3.2 Similarity Methods,[0],[0]
+"It was originally proposed for plagiarism detection with excellent results, especially for longer text snippets.",3.2 Similarity Methods,[0],[0]
+"To compare the performances of different alignment methods, we randomly selected 10 original texts (Level 0) and their corresponding simpler versions at Levels 1, 3 and 4.",4 Manual Evaluation,[1.0],"['To compare the performances of different alignment methods, we randomly selected 10 original texts (Level 0) and their corresponding simpler versions at Levels 1, 3 and 4.']"
+"Instead of creating a ‘gold standard’ and then automatically evaluating the performances, we asked two annotators to rate each pair of automatically aligned paragraphs and sentences – by each of the possible six alignment methods and the HMM-based method (Bott and Saggion, 2011) – for three pairs of text complexity levels (0–1, 0–4, and 3–4) on a 0–2 scale, where: 0 – no semantic overlap in the content; 1 – partial semantic overlap (partial matches); 2 – same semantic content (good matches).",4 Manual Evaluation,[1.0],"['Instead of creating a ‘gold standard’ and then automatically evaluating the performances, we asked two annotators to rate each pair of automatically aligned paragraphs and sentences – by each of the possible six alignment methods and the HMM-based method (Bott and Saggion, 2011) – for three pairs of text complexity levels (0–1, 0–4, and 3–4) on a 0–2 scale, where: 0 – no semantic overlap in the content; 1 – partial semantic overlap (partial matches); 2 – same semantic content (good matches).']"
+"This resulted in a total of 1526 paragraph- and 1086 sentence-alignments for the 0–1 pairs, and 1218 paragraph- and 1266 sentence-alignments for the 0–4 and 3–4 pairs.",4 Manual Evaluation,[0],[0]
+"In the context of TS, both good- and partial matches
+are important.",4 Manual Evaluation,[0],[0]
+"While full semantic overlap models full paraphrases (‘1-1’ alignments), partial overlap models sentence splitting (“1-n” alignments), deleting irrelevant sentence parts, adding explanations, or summarizing (‘n-m’ alignments).",4 Manual Evaluation,[0],[0]
+"Several examples of full and partial matches from the EW–SEW dataset (Hwang et al., 2015) are given in Table 1.
+",4 Manual Evaluation,[0],[0]
+"We expect that the automatic-alignment task is the easiest between the 0–1 text complexity levels, and much more difficult between the 0-4 levels (Level 4 is obtained after four stages of simplification and thus contains stronger paraphrases and less lexical overlap with Level 0 than Level 1 has).",4 Manual Evaluation,[1.0],"['We expect that the automatic-alignment task is the easiest between the 0–1 text complexity levels, and much more difficult between the 0-4 levels (Level 4 is obtained after four stages of simplification and thus contains stronger paraphrases and less lexical overlap with Level 0 than Level 1 has).']"
+"We also explore whether the task is equally difficult whenever we align two neighbouring levels, or the difficulty of the task depends on the level complexity (0–1 vs. 3–4).",4 Manual Evaluation,[1.0],"['We also explore whether the task is equally difficult whenever we align two neighbouring levels, or the difficulty of the task depends on the level complexity (0–1 vs. 3–4).']"
+"The obtained interannotator agreement, weighted Cohen’s κ (on 400 double-annotated instances) was between 0.71 and 0.74 depending on the task and levels.
+",4 Manual Evaluation,[0],[0]
+"The results of the manual analysis (Table 2) showed that: (1) all applied methods significantly (p < 0.001) outperformed the HMM method on both paragraph- and sentence-alignment tasks;5 (2) the methods which do not assume hypothesis H1 (C3G, CWASA, and WAVG) led to (not significantly) higher percentage of correct alignments than their counterparts which do assume
+5Although some of our methods share the same percentage of good+partial matches with the HMM method on the paragraph-alignment 0–1 task, there is still significant difference in the obtained scores (in some cases, our methods led to good matches whereas the HMM only led to partial matches).
+",4 Manual Evaluation,[0.9565299940754712],"['We mark as Correct those changes that preserve the original meaning and grammaticality of the sentence (assessed by two native English speakers) and, at the same time, make the sentence easier to understand (assessed by two non-native fluent English speakers).10 Second, three native English speakers rate the grammaticality (G) and meaning preservation (M) of each sentence with at least one change on a 1–5 Likert scale (1 – very bad; 5 – very good).']"
+"H1 (C3G*, CWASA*, WAVG*); (3) the difference in the performances of the lexical approach (C3G) and semantic approaches (CWASA and WAVG) was significant only in the 0–4 sentencealignment task, where CWASA performed significantly worse (p < 0.001) than the other two methods, and in the 0–4 paragraph-alignment task, where WAVG performed significantly worse than C3G; (4) the 2-step C3G alignment-method (C3G-2s), which first aligns paragraphs using the best paragraph-alignment method (C3G) and then within each paragraph align sentences with the best sentence-alignment method (C3G), led to more good+partial alignments than the ‘direct’ sentence-alignment C3G method.",4 Manual Evaluation,[0.9941595622800183],"['The results of the manual analysis (Table 2) showed that: (1) all applied methods significantly (p < 0.001) outperformed the HMM method on both paragraph- and sentence-alignment tasks;5 (2) the methods which do not assume hypothesis H1 (C3G, CWASA, and WAVG) led to (not significantly) higher percentage of correct alignments than their counterparts which do assume H1 (C3G*, CWASA*, WAVG*); (3) the difference in the performances of the lexical approach (C3G) and semantic approaches (CWASA and WAVG) was significant only in the 0–4 sentencealignment task, where CWASA performed significantly worse (p < 0.001) than the other two methods, and in the 0–4 paragraph-alignment task, where WAVG performed significantly worse than C3G; (4) the 2-step C3G alignment-method (C3G-2s), which first aligns paragraphs using the best paragraph-alignment method (C3G) and then within each paragraph align sentences with the best sentence-alignment method (C3G), led to more good+partial alignments than the ‘direct’ sentence-alignment C3G method.']"
+"Finally, we test our new English Newsela (C3G2s) sentence-alignments (both for the neighbouring levels – neighb.",5 Extrinsic Evaluation,[0],[0]
+"and for all levels – all) and Newsela sentence-alignments for neighboring levels obtained with HMM-method6 (Bott and Saggion, 2011) in the ATS task using standard PBSMT models7 in the Moses toolkit (Koehn et al., 2007).",5 Extrinsic Evaluation,[0],[0]
+"We vary the training dataset and the corpus used to build language models (LMs), while keeping always the same 2,000 sentence pairs for tuning (Xu et al., 2016) and the first 70 sentence
+6Given that the performance of the HMM-method was poor for non-neighboring levels (Table 2).
+",5 Extrinsic Evaluation,[0],[0]
+"7GIZA++ implementation of the IBM word alignment model 4 (Och and Ney, 2003), refinement and phraseextraction heuristics (Koehn et al., 2003), the minimum error rate training (Och, 2003) for tuning, and 5-gram LMs with Kneser-Ney smoothing trained with SRILM (Stolcke, 2002).
+pairs of their test set8 for our human evaluation.",5 Extrinsic Evaluation,[0],[0]
+"Using that particular test set allow us to compare our (PBSMT) systems with the output of the stateof-the-art syntax-based MT (SBMT) system for TS (Xu et al., 2016) which is not freely available.",5 Extrinsic Evaluation,[0],[0]
+"We compare: (1) the performance of the standard PBSMT model which uses only the already available EW–SEW dataset (Hwang et al., 2015) with the performances of the same PBSMT models but this time using the combination of the EW–SEW dataset and our newly-created Newsela datasets; (2) the latter PBSMT models (which use both EW–SEW and new Newsela datasets) against the state-of-the-art supervised ATS system (Xu et al., 2016), and one of the recently proposed unsupervised lexical simplification systems, the LightLS system (Glavaš and Štajner, 2015).9
+We perform three types of human evaluation on the outputs of all systems.",5 Extrinsic Evaluation,[0],[0]
+"First, we count the total number of changes made by each system (Total), counting the change of a whole phrase (e.g. “become defunct” → “was dissolved”) as one change.",5 Extrinsic Evaluation,[0],[0]
+"We mark as Correct those changes that preserve the original meaning and grammaticality of the sentence (assessed by two native English speakers) and, at the same time, make the sentence easier to understand (assessed by two non-native fluent English speakers).10 Second, three native English speakers rate the grammaticality (G) and meaning preservation (M) of each sentence with at least one change on a 1–5 Likert scale (1 – very bad; 5 – very good).",5 Extrinsic Evaluation,[0],[0]
+"Third, the three nonnative fluent English speakers were shown original (reference) sentences and target (output) sentences (one pair at the time) and asked whether the target sentence is: +2 – much simpler; +1 – somewhat simpler; 0 – equally difficult; -1 – somewhat more difficult; -2 – much more difficult, than the reference sentence.",5 Extrinsic Evaluation,[0],[0]
+"While the correctness of changes takes into account the influence of each individual change on grammaticality, meaning and simplicity of a sentence, the Scores (G and M) and Rank (S) take into account the mutual influence of all changes within a sentence.
+",5 Extrinsic Evaluation,[0],[0]
+"Adding our sentence-aligned Newsela corpus
+8Both freely available from: https://github.com/ cocoxu/simplification/
+9We use the output of the original SBMT (Xu et al., 2016) and LightLS (Glavaš and Štajner, 2015) systems, obtained from the authors.
+",5 Extrinsic Evaluation,[0],[0]
+"10Those cases in which the two annotators did not agree are additionally evaluated by a third annotator to obtain majority.
+",5 Extrinsic Evaluation,[0],[0]
+(either neighb.,5 Extrinsic Evaluation,[0],[0]
+"C3G-2l or all C3G-2l) to the currently best sentence-aligned Wiki corpus (Hwang et al., 2015) in a standard PBSMT setup significantly11 improves grammaticality (G) and meaning preservation (M), and increases the percentage of correct changes (Table 3).",5 Extrinsic Evaluation,[0.9529643890736282],"['It also significantly outperforms the state-of-the-art ATS systems by simplicity rankings (S), meaning preservation (M), and number of correct changes (Correct), while achieving almost equally good grammaticality (G).']"
+"It also significantly outperforms the state-of-the-art ATS systems by simplicity rankings (S), meaning preservation (M), and number of correct changes (Correct), while achieving almost equally good grammaticality (G).
+",5 Extrinsic Evaluation,[0],[0]
+The level of simplification applied in the training dataset (Newsela neighb.,5 Extrinsic Evaluation,[1.0],['The level of simplification applied in the training dataset (Newsela neighb.']
+"C3G-2s vs. Newsela all C3G-2s) significantly influences G and M scores.
+",5 Extrinsic Evaluation,[0.9999999104518108],['C3G-2s vs. Newsela all C3G-2s) significantly influences G and M scores.']
+"The use of the HMM-method for aligning Newsela (instead of ours) lead to significantly worse simplifications by all five criteria.
+",5 Extrinsic Evaluation,[0],[0]
+"11Wilcoxon’s signed rank test, p < 0.001.
+",5 Extrinsic Evaluation,[0],[0]
+An example of the outputs of different ATS systems is presented in Table 4.,5 Extrinsic Evaluation,[1.0],['An example of the outputs of different ATS systems is presented in Table 4.']
+"We provided several methods for paragraphand sentence-alignment from parallel TS corpora, made the software publicly available, and showed that the use of the new sentence-aligned (freely available) Newsela dataset leads to state-of-the-art ATS systems even in a basic PBSMT setup.",6 Conclusions,[0],[0]
+"We also showed that lexically-based C3G method is superior to semantically-based methods (CWASA and WAVG) in aligning paraphraphs and sentences with ‘heavy’ simplifications (0–4 alignments), and that 2-step sentence alignment (aligning first paragraphs and then sentences within the paragraphs) lead to more correct alignments than the ‘direct’ sentence alignment.",6 Conclusions,[1.0],"['We also showed that lexically-based C3G method is superior to semantically-based methods (CWASA and WAVG) in aligning paraphraphs and sentences with ‘heavy’ simplifications (0–4 alignments), and that 2-step sentence alignment (aligning first paragraphs and then sentences within the paragraphs) lead to more correct alignments than the ‘direct’ sentence alignment.']"
+"This work has been partially supported by the SFB 884 on the Political Economy of Reforms at the University of Mannheim (project C4), funded by the German Research Foundation (DFG), and also by the SomEMBED TIN2015-71147-C2-1-P MINECO research project.",Acknowledgments,[0],[0]
+We provide several methods for sentencealignment of texts with different complexity levels.,abstractText,[0],[0]
+"Using the best of them, we sentence-align the Newsela corpora, thus providing large training materials for automatic text simplification (ATS) systems.",abstractText,[0],[0]
+"We show that using this dataset, even the standard phrase-based statistical machine translation models for ATS can outperform the state-of-the-art ATS systems.",abstractText,[0],[0]
+Sentence Alignment Methods for Improving Text Simplification Systems,title,[0],[0]

@@ -1,0 +1,452 @@
+0,1,label2,summary_sentences
+"Dependency parsing is a longstanding natural language processing task, with its outputs crucial to various downstream tasks including relation extraction (Schmitz et al., 2012; Angeli et al., 2015), language modeling (Gubbins and Vlachos, 2013), and natural logic inference (Bowman et al., 2016).
+",1 Introduction,[0],[0]
+"Attractive for their linear time complexity and amenability to conventional classification methods, transition-based dependency parsers have sparked much research interest recently.",1 Introduction,[0],[0]
+"A transition-based parser makes sequential predictions of transitions between states under the restrictions of a transition system (Nivre, 2003).",1 Introduction,[0],[0]
+"Transition-based parsers have been shown to excel at parsing shorter-range dependency structures, as well as languages where non-projective parses are less pervasive (McDonald and Nivre, 2007).
+",1 Introduction,[0],[0]
+"However, the transition systems employed in state-of-the-art dependency parsers usually define very local transitions.",1 Introduction,[0],[0]
+"At each step, only one or two words are affected, with very local attachments made.",1 Introduction,[0],[0]
+"As a result, distant attachments require long and not immediately obvious transition sequences (e.g., ate→chopsticks in Figure 1, which requires two transitions).",1 Introduction,[0],[0]
+"This is further aggravated by the usually local lexical information leveraged to make transition predictions (Chen and Manning, 2014; Andor et al., 2016).
+",1 Introduction,[0],[0]
+"In this paper, we introduce a novel transition system, arc-swift, which defines non-local transitions that directly induce attachments of distance up to n (n = the number of tokens in the sentence).",1 Introduction,[0],[0]
+"Such an approach is connected to graph-based dependency parsing, in that it leverages pairwise scores between tokens in making parsing decisions (McDonald et al., 2005).
+",1 Introduction,[0],[0]
+We make two main contributions in this paper.,1 Introduction,[0],[0]
+"Firstly, we introduce a novel transition system for dependency parsing, which alleviates the difficulty of distant attachments in previous systems by allowing direct attachments anywhere in the stack.",1 Introduction,[0],[0]
+"Secondly, we compare parsers by the number of mistakes they make in common linguistic con-
+ar X
+iv :1
+70 5.
+04 43
+4v 1
+[ cs
+.C",1 Introduction,[0],[0]
+"L
+] 1
+2 M
+ay 2
+01 7
+structions.",1 Introduction,[0],[0]
+We show that arc-swift parsers reduce errors in attaching prepositional phrases and conjunctions compared to parsers using existing transition systems.,1 Introduction,[0],[0]
+Transition-based dependency parsing is performed by predicting transitions between states (see Figure 1 for an example).,2 Transition-based Dependency Parsing,[0],[0]
+"Parser states are usually written as (σ|i, j|β,A), where σ|i denotes the stack with token i on the top, j|β denotes the buffer with token j at its leftmost, and A the set of dependency arcs.",2 Transition-based Dependency Parsing,[0],[0]
+"Given a state, the goal of a dependency parser is to predict a transition to a new state that would lead to the correct parse.",2 Transition-based Dependency Parsing,[0],[0]
+"A transition system defines a set of transitions that are sound and complete for parsers, that is, every transition sequence would derive a well-formed parse tree, and every possible parse tree can also be derived from some transition sequence.1
+Arc-standard (Nivre, 2004) is one of the first transition systems proposed for dependency parsing.",2 Transition-based Dependency Parsing,[0],[0]
+"It defines three transitions: shift, left arc (LArc), and right arc (RArc) (see Figure 2 for definitions, same for the following transition systems), where all arc-inducing transitions operate on the stack.",2 Transition-based Dependency Parsing,[0],[0]
+"This system builds the parse bottom-up, i.e., a constituent is only attached to its head after it has received all of its dependents.",2 Transition-based Dependency Parsing,[0],[0]
+"A potential drawback is that during parsing, it is difficult to predict if a constituent has consumed all of its right dependents.",2 Transition-based Dependency Parsing,[0],[0]
+"Arc-eager (Nivre, 2003) remedies this drawback by defining arc-inducing transitions that operate between the stack and the buffer.",2 Transition-based Dependency Parsing,[0],[0]
+"As a result, a constituent no longer needs to be complete
+1We only focus on projective parses for the scope of this paper.
+",2 Transition-based Dependency Parsing,[0],[0]
+"before it can be attached to its head to the left, as a right arc doesn’t prevent the attached dependent from taking further dependents of its own.2 Kuhlmann et al. (2011) propose a hybrid system derived from a tabular parsing scheme, which they have shown both arc-standard and arc-eager can be derived from.",2 Transition-based Dependency Parsing,[0],[0]
+"Arc-hybrid combines LArc from arc-eager and RArc from arc-standard to build dependencies bottom-up.
+",2 Transition-based Dependency Parsing,[0],[0]
+"3 Non-local Transitions with arc-swift
+The traditional transition systems discussed in Section 2 only allow very local transitions affecting one or two words, which makes long-distance dependencies difficult to predict.",2 Transition-based Dependency Parsing,[0],[0]
+"To illustrate the limitation of local transitions, consider parsing the following sentences:
+I ate fish with ketchup.",2 Transition-based Dependency Parsing,[0],[0]
+"I ate fish with chopsticks.
+",2 Transition-based Dependency Parsing,[0],[0]
+"The two sentences have almost identical structures, with the notable difference that the prepositional phrase is complementing the direct object in the first case, and the main verb in the second.
+",2 Transition-based Dependency Parsing,[0],[0]
+"For arc-standard and arc-hybrid, the parser would have to decide between Shift and RArc when the parser state is as shown in Figure 3a, where ? stands for either “ketchup” or “chopsticks”.3 Similarly, an arc-eager parser would deal with the state shown in Figure 3b.",2 Transition-based Dependency Parsing,[0],[0]
+"Making the correct transition requires information about context words “ate” and “fish”, as well as “?”.
+",2 Transition-based Dependency Parsing,[0],[0]
+2A side-effect of arc-eager is that there is sometimes spurious ambiguity between Shift and Reduce transitions.,2 Transition-based Dependency Parsing,[0],[0]
+"For the example in Figure 1, the first Reduce can be inserted before the third Shift without changing the correctness of the resulting parse, i.e., both are feasible at that time.
+",2 Transition-based Dependency Parsing,[0],[0]
+"3For this example, we assume that the sentence is being parsed into Universal Dependencies.
+",2 Transition-based Dependency Parsing,[0],[0]
+"Parsers employing traditional transition systems would usually incorporate more features about the context in the transition decision, or employ beam search during parsing (Chen and Manning, 2014; Andor et al., 2016).
+",2 Transition-based Dependency Parsing,[0],[0]
+"In contrast, inspired by graph-based parsers, we propose arc-swift, which defines non-local transitions as shown in Figure 2.",2 Transition-based Dependency Parsing,[0],[0]
+"This allows direct comparison of different attachment points, and provides a direct solution to parsing the two example sentences.",2 Transition-based Dependency Parsing,[0],[0]
+"When the arc-swift parser encounters a state identical to Figure 3b, it could directly compare transitions RArc[1] and RArc[2] instead of evaluating between local transitions.",2 Transition-based Dependency Parsing,[0],[0]
+"This results in a direct attachment much like that in a graph-based parser, informed by lexical information about affinity of the pairs of words.
+",2 Transition-based Dependency Parsing,[0],[0]
+Arc-swift also bears much resemblance to arceager.,2 Transition-based Dependency Parsing,[0],[0]
+"In fact, an LArc[k] transition can be viewed as k− 1 Reduce operations followed by one LArc in arc-eager, and similarly for RArc[k].",2 Transition-based Dependency Parsing,[0],[0]
+"Reduce is no longer needed in arc-swift as it becomes part of LArc[k] and RArc[k], removing the ambiguity in derived transitions in arc-eager.",2 Transition-based Dependency Parsing,[0],[0]
+"arc-swift is also equivalent to arc-eager in terms of soundness and completeness.4 A caveat is that the worst-case time complexity of arc-swift is O(n2) instead of O(n), which existing transition-based parsers enjoy.",2 Transition-based Dependency Parsing,[0],[0]
+"However, in practice the runtime is nearly
+4This is easy to show because in arc-eager, all Reduce transitions can be viewed as preparing for a later LArc or RArc transition.",2 Transition-based Dependency Parsing,[0],[0]
+"We also note that similar to arc-eager transitions, arc-swift transitions must also satisfy certain pre-conditions.",2 Transition-based Dependency Parsing,[0],[0]
+"Specifically, an RArc[k] transition requires that the top k − 1 elements in the stack are already attached; LArc[k] additionally requires that the k-th element is unattached, resulting in no more than one feasible LArc candidate for any parser state.
+",2 Transition-based Dependency Parsing,[0],[0]
+"linear, thanks to the usually small number of reducible tokens in the stack.",2 Transition-based Dependency Parsing,[0],[0]
+"We use the Wall Street Journal portion of Penn Treebank with standard parsing splits (PTBSD), along with Universal Dependencies v1.3 (Nivre et al., 2016) (EN-UD).",4.1 Data and Model,[0],[0]
+"PTB-SD is converted to Stanford Dependencies (De Marneffe and Manning, 2008) with CoreNLP 3.3.0 (Manning et al., 2014) following previous work.",4.1 Data and Model,[0],[0]
+"We report labelled and unlabelled attachment scores (LAS/UAS), removing punctuation from all evaluations.
+",4.1 Data and Model,[0],[0]
+"Our model is very similar to that of (Kiperwasser and Goldberg, 2016), where features are extracted from tokens with bidirectional LSTMs, and concatenated for classification.",4.1 Data and Model,[0],[0]
+"For the three traditional transition systems, features of the top 3 tokens on the stack and the leftmost token in the buffer are concatenated as classifier input.",4.1 Data and Model,[0],[0]
+"For arc-swift, features of the head and dependent tokens for each arc-inducing transition are concatenated to compute scores for classification, and features of the leftmost buffer token is used for Shift.",4.1 Data and Model,[0],[0]
+For other details we defer to Appendix A.,4.1 Data and Model,[0],[0]
+The full specification of the model can also be found in our released code online at https://github.,4.1 Data and Model,[0],[0]
+com/qipeng/arc-swift.,4.1 Data and Model,[0],[0]
+"We use static oracles for all transition systems, and for arc-eager we implement oracles that always Shift/Reduce when ambiguity is present (arceager-S/R).",4.2 Results,[0],[0]
+"We evaluate our parsers with greedy parsing (i.e., beam size 1).",4.2 Results,[0],[0]
+"The results are shown in Table 1.5 Note that K&G 2016 is trained with a dynamic oracle (Goldberg and Nivre, 2012), Andor 2016 with a CRF-like loss, and both Andor 2016 and Weiss 2015 employed beam search (with sizes 32 and 8, respectively).
+",4.2 Results,[0],[0]
+"For each pair of the systems we implemented, we studied the statistical significance of their difference by performing a paired test with 10,000 bootstrap samples on PTB-SD.",4.2 Results,[0],[0]
+"The resulting pvalues are analyzed with a 10-group BonferroniHolm test, with results shown in Table 2.",4.2 Results,[0],[0]
+"We note
+5In the interest of space, we abbreviate all transition systems (TS) as follows in tables: asw for arc-swift, asd for arcstandard, aeS/R for arc-eager-S/R, and ah for arc-hybrid.
+",4.2 Results,[0],[0]
+"that with almost the same implementation, arcswift parsers significantly outperform those using traditional transition systems.",4.2 Results,[0],[0]
+We also analyzed the performance of parsers on attachments of different distances.,4.2 Results,[0],[0]
+"As shown in Figure 4, arc-swift is equally accurate as existing systems for short dependencies, but is more robust for longer ones.
+",4.2 Results,[0],[0]
+"While arc-swift introduces direct long-distance transitions, it also shortens the overall sequence necessary to induce the same parse.",4.2 Results,[0],[0]
+"A parser could potentially benefit from both factors: direct attachments could make an easier classification task, and shorter sequences limit the effect of error propagation.",4.2 Results,[0],[0]
+"However, since the two effects are correlated in a transition system, precise attribution of the gain is out of the scope of this paper.
+",4.2 Results,[0],[0]
+Computational efficiency.,4.2 Results,[0],[0]
+"We study the computational efficiency of the arc-swift parser by
+6https://github.com/tensorflow/models/ blob/master/syntaxnet/g3doc/universal.md
+comparing it to an arc-eager parser.",4.2 Results,[0],[0]
+"On the PTBSD development set, the average transition sequence length per sentence of arc-swift is 77.5% of that of arc-eager.",4.2 Results,[0],[0]
+"At each step of parsing, arc-swift needs to evaluate only about 1.24 times the number of transition candidates as arc-eager, which results in very similar runtime.",4.2 Results,[0],[0]
+"In contrast, beam search with beam size 2 for arc-eager requires evaluating 4 times the number of transition candidates compared to greedy parsing, which results in a UAS 0.14% worse and LAS 0.22% worse for arc-eager compared to greedily decoded arcswift.",4.2 Results,[0],[0]
+"We automatically extracted all labelled attachment errors by error type (incorrect attachment or relation), and categorized a few top parser errors by hand into linguistic constructions.",4.3 Linguistic Analysis,[0],[0]
+"Results on PTB-SD are shown in Table 3.7 We note that the arc-swift parser improves accuracy on prepositional phrase (PP) and conjunction attachments, while it remains comparable to other parsers on other common errors.",4.3 Linguistic Analysis,[0],[0]
+Analysis on EN-UD shows a similar trend.,4.3 Linguistic Analysis,[0],[0]
+"As shown in the table, there are still many parser errors unaccounted for in our analysis.",4.3 Linguistic Analysis,[0],[0]
+"We leave this to future work.
+",4.3 Linguistic Analysis,[0],[0]
+"7We notice that for some examples the parsers predicted a ccomp (complement clause) attachment to verbs “says” and “said”, where the CoreNLP output simply labelled the relation as dep (unspecified).",4.3 Linguistic Analysis,[0],[0]
+For other examples the relation between the prepositions in “out of” is labelled as prep (preposition) instead of pcomp (prepositional complement).,4.3 Linguistic Analysis,[0],[0]
+"We suspect this is due to the converter’s inability to handle certain corner cases, but further study is warranted.",4.3 Linguistic Analysis,[0],[0]
+Previous work has also explored augmenting transition systems to facilitate longer-range attachments.,5 Related Work,[0],[0]
+"Attardi (2006) extended the arcstandard system for non-projective parsing, with arc-inducing transitions that are very similar to those in arc-swift.",5 Related Work,[0],[0]
+A notable difference is that their transitions retain tokens between the head and dependent.,5 Related Work,[0],[0]
+"Fernández-González and GómezRodrı́guez (2012) augmented the arc-eager system with transitions that operate on the buffer, which shorten the transition sequence by reducing the number of Shift transitions needed.",5 Related Work,[0],[0]
+"However, limited by the sparse feature-based classifiers used, both of these parsers just mentioned only allow direct attachments of distance up to 3 and 2, respectively.",5 Related Work,[0],[0]
+"More recently, Sartorio et al. (2013) extended arc-standard with transitions that directly attach to left and right “spines” of the top two nodes in the stack.",5 Related Work,[0],[0]
+"While this work shares very similar motivations as arc-swift, it requires additional data structures to keep track of the left and right spines of nodes.",5 Related Work,[0],[0]
+"This transition system also introduces spurious ambiguity where multiple transition sequences could lead to the same correct parse, which necessitates easy-first training to achieve a more noticeable improvement over arcstandard.",5 Related Work,[0],[0]
+"In contrast, arc-swift can be easily implemented given the parser state alone, and does not give rise to spurious ambiguity.
+",5 Related Work,[0],[0]
+"For a comprehensive study of transition systems for dependency parsing, we refer the reader to (Bohnet et al., 2016), which proposed a generalized framework that could derive all of the traditional transition systems we described by configuring the size of the active token set and the maximum arc length, among other control parameters.",5 Related Work,[0],[0]
+"However, this framework does not cover
+arc-swift in its original form, as the authors limit each of their transitions to reduce at most one token from the active token set (the buffer).",5 Related Work,[0],[0]
+"On the other hand, the framework presented in (GómezRodrı́guez and Nivre, 2013) does not explicitly make this constraint, and therefore generalizes to arc-swift.",5 Related Work,[0],[0]
+"However, we note that arc-swift still falls out of the scope of existing discussions in that work, by introducing multiple Reduces in a single transition.",5 Related Work,[0],[0]
+"In this paper, we introduced arc-swift, a novel transition system for dependency parsing.",6 Conclusion,[0],[0]
+We also performed linguistic analyses on parser outputs and showed arc-swift parsers reduce errors in conjunction and adverbial attachments compared to parsers using traditional transition systems.,6 Conclusion,[0],[0]
+"We thank Timothy Dozat, Arun Chaganty, Danqi Chen, and the anonymous reviewers for helpful discussions.",Acknowledgments,[0],[0]
+Stanford University gratefully acknowledges the support of the Defense Advanced Research Projects Agency (DARPA) Deep Exploration and Filtering of Text (DEFT) Program under Air Force Research Laboratory (AFRL) contract,Acknowledgments,[0],[0]
+No. FA8750-13-2-0040.,Acknowledgments,[0],[0]
+"Any opinions, findings, and conclusion or recommendations expressed in this material are those of the authors and do not necessarily reflect the view of the DARPA, AFRL, or the US government.",Acknowledgments,[0],[0]
+"Our model setup is similar to that of (Kiperwasser and Goldberg, 2016)",A Model and Training Details,[0],[0]
+(See Figure 5).,A Model and Training Details,[0],[0]
+"We employ two blocks of bidirectional long short-term memory (BiLSTM) networks (Hochreiter and Schmidhuber, 1997) that share very similar structures, one for part-of-speech (POS) tagging, the other for parsing.",A Model and Training Details,[0],[0]
+"Both BiLSTMs have 400 hidden units in each direction, and the output of both are concatenated and fed into a dense layer of rectified linear units (ReLU) before 32-dimensional representations are derived as classification features.",A Model and Training Details,[0],[0]
+"As the input to the tagger BiLSTM, we represent words with 100-dimensional word embeddings, initialized with GloVe vectors (Pennington et al., 2014).8",A Model and Training Details,[0],[0]
+"The output distribution of the tagger classifier is used to compute a weighted sum of 32- dimensional POS embeddings, which is then concatenated with the output of the tagger BiLSTM",A Model and Training Details,[0],[0]
+(800-dimensional per token) as the input to the parser BiLSTM.,A Model and Training Details,[0],[0]
+"For the parser BiLSTM, we use two separate sets of dense layers to derive a “head” and a “dependent” representation for each token.",A Model and Training Details,[0],[0]
+"These representations are later merged according to the parser state to make transition predictions.
+",A Model and Training Details,[0],[0]
+"For traditional transition systems, we follow (Kiperwasser and Goldberg, 2016) by featurizing the top 3 tokens on the stack and the leftmost token in the buffer.",A Model and Training Details,[0],[0]
+"To derive features for each token, we take its head representation vhead and dependent representation vdep, and perform the following biaffine combination
+vfeat,i =",A Model and Training Details,[0],[0]
+"[f(vhead, vdep)]i = ReLU ( v>headWivdep +",A Model and Training Details,[0],[0]
+b,A Model and Training Details,[0],[0]
+>,A Model and Training Details,[0],[0]
+"i vhead
++ c",A Model and Training Details,[0],[0]
+">i vdep + di ) (1)
+where Wi ∈ R32×32, bi, ci ∈ R32, and di is a scalar for i = 1, . . .",A Model and Training Details,[0],[0]
+", 32.",A Model and Training Details,[0],[0]
+"The resulting 32- dimensional features are concatenated as the input
+8We also kept the vectors of the top 400k words trained on Wikipedia and English Gigaword for a broader coverage of unseen words.
+to a fixed-dimensional softmax classifier for transition decisions.
+",A Model and Training Details,[0],[0]
+"For arc-swift, we featurize for each arcinducing transition with the same composition function in Equation (1) with vhead of the head token and vdep of the dependent token of the arc to be induced.",A Model and Training Details,[0],[0]
+"For Shift, we simply combine vhead and vdep of the leftmost token in the buffer with the biaffine combination, and obtain its score by computing the inner-product of the feature and a vector.",A Model and Training Details,[0],[0]
+"At each step, the scores of all feasible transitions are normalized to a probability distribution by a softmax function.
+",A Model and Training Details,[0],[0]
+"In all of our experiments, the parsers are trained to maximize the log likelihood of the desired transition sequence, along with the tagger being trained to maximize the log likelihood of the correct POS tag for each token.
+",A Model and Training Details,[0],[0]
+"To train the parsers, we use the ADAM optimizer (Kingma and Ba, 2014), with β2 = 0.9, an initial learning rate of 0.001, and minibatches of size 32 sentences.",A Model and Training Details,[0],[0]
+Parsers are trained for 10 passes through the dataset on PTB-SD.,A Model and Training Details,[0],[0]
+We also find that annealing the learning rate by a factor of 0.5 for every pass after the 5th helped improve performance.,A Model and Training Details,[0],[0]
+"For EN-UD, we train for 30 passes, and anneal the learning rate for every 3 passes after the 15th due to the smaller size of the dataset.",A Model and Training Details,[0],[0]
+"For all of the biaffine combination layers and dense layers, we dropout their units with a small probability of 5%.",A Model and Training Details,[0],[0]
+"Also during training time, we randomly replace 10% of the input words by an artificial 〈UNK〉 token, which is then used to replace
+all unseen words in the development and test sets.",A Model and Training Details,[0],[0]
+"Finally, we repeat each experiment with 3 independent random initializations, and use the average result for reporting and statistical significance tests.
+",A Model and Training Details,[0],[0]
+The code for the full specification of our models and aforementioned training details are available at https://github.com/qipeng/ arc-swift.,A Model and Training Details,[0],[0]
+Transition-based dependency parsers often need sequences of local shift and reduce operations to produce certain attachments.,abstractText,[0],[0]
+Correct individual decisions hence require global information about the sentence context and mistakes cause error propagation.,abstractText,[0],[0]
+"This paper proposes a novel transition system, arc-swift, that enables direct attachments between tokens farther apart with a single transition.",abstractText,[0],[0]
+This allows the parser to leverage lexical information more directly in transition decisions.,abstractText,[0],[0]
+"Hence, arc-swift can achieve significantly better performance with a very small beam size.",abstractText,[0],[0]
+Our parsers reduce error by 3.7–7.6% relative to those using existing transition systems on the Penn Treebank dependency parsing task and English Universal Dependencies.,abstractText,[0],[0]
+Arc-swift: A Novel Transition System for Dependency Parsing,title,[0],[0]
+"1 Are BLEU and Meaning Representation in Opposition?
+One of possible ways of obtaining continuous-space sentence representations is by training neural machine translation (NMT) systems. The recent attention mechanism however removes the single point in the neural network from which the source sentence representation can be extracted. We propose several variations of the attentive NMT architecture bringing this meeting point back. Empirical evaluation suggests that the better the translation quality, the worse the learned sentence representations serve in a wide range of classification and similarity tasks.",text,[0],[0]
+Deep learning has brought the possibility of automatically learning continuous representations of sentences.,1 Introduction,[1.0],['Deep learning has brought the possibility of automatically learning continuous representations of sentences.']
+"On the one hand, such representations can be geared towards particular tasks such as classifying the sentence in various aspects (e.g. sentiment, register, question type) or relating the sentence to other sentences (e.g. semantic similarity, paraphrasing, entailment).",1 Introduction,[0],[0]
+"On the other hand, we can aim at “universal” sentence representations, that is representations performing reasonably well in a range of such tasks.
+",1 Introduction,[0],[0]
+"Regardless the evaluation criterion, the representations can be learned either in an unsupervised way (from simple, unannotated texts) or supervised, relying on manually constructed training sets of sentences equipped with annotations of the appropriate type.",1 Introduction,[0],[0]
+"A different approach is to obtain sentence representations from training neural machine translation models (Hill et al., 2016).
+",1 Introduction,[1.0000000520956895],"['A different approach is to obtain sentence representations from training neural machine translation models (Hill et al., 2016).']"
+"Since Hill et al. (2016), NMT has seen substantial advances in translation quality and it is thus
+natural to ask how these improvements affect the learned representations.
+",1 Introduction,[0],[0]
+"One of the key technological changes was the introduction of “attention” (Bahdanau et al., 2014), making it even the very central component in the network (Vaswani et al., 2017).",1 Introduction,[0],[0]
+Attention allows the NMT system to dynamically choose which parts of the source are most important when deciding on the current output token.,1 Introduction,[0],[0]
+"As a consequence, there is no longer a static vector representation of the sentence available in the system.
+",1 Introduction,[0],[0]
+"In this paper, we remove this limitation by proposing a novel encoder-decoder architecture with a structured fixed-size representation of the input that still allows the decoder to explicitly focus on different parts of the input.",1 Introduction,[0],[0]
+"In other words, our NMT system has both the capacity to attend to various parts of the input and to produce static representations of input sentences.
+",1 Introduction,[0],[0]
+"We train this architecture on English-to-German and English-to-Czech translation and evaluate the learned representations of English on a wide range of tasks in order to assess its performance in learning “universal” meaning representations.
+",1 Introduction,[0],[0]
+"In Section 2, we briefly review recent efforts in obtaining sentence representations.",1 Introduction,[0],[0]
+"In Section 3, we introduce a number of variants of our novel architecture.",1 Introduction,[0],[0]
+Section 4 describes some standard and our own methods for evaluating sentence representations.,1 Introduction,[0],[0]
+Section 5 then provides experimental results: translation and representation quality.,1 Introduction,[0],[0]
+The relation between the two is discussed in Section 6.,1 Introduction,[0],[0]
+The properties of continuous sentence representations have always been of interest to researchers working on neural machine translation.,2 Related Work,[0],[0]
+"In the first works on RNN sequence-to-sequence models, Cho et al. (2014) and Sutskever et al. (2014)
+ar X
+iv :1
+80 5.
+06 53
+6v 1
+[ cs
+.C",2 Related Work,[0],[0]
+"L
+] 1
+6 M
+ay 2
+01 8
+2
+provided visualizations of the phrase and sentence embedding spaces and observed that they reflect semantic and syntactic structure to some extent.",2 Related Work,[0],[0]
+"Hill et al. (2016) perform a systematic evaluation of sentence representation in different models, including NMT, by applying them to various sentence classification tasks and by relating semantic similarity to closeness in the representation space.",2 Related Work,[0],[0]
+"Shi et al. (2016) investigate the syntactic properties of representations learned by NMT systems by predicting sentence- and word-level syntactic labels (e.g. tense, part of speech) and by generating syntax trees from these representations.",2 Related Work,[0],[0]
+Schwenk and Douze (2017) aim to learn language-independent sentence representations using NMT systems with multiple source and target languages.,2 Related Work,[0],[0]
+They do not consider the attention mechanism and evaluate primarily by similarity scores of the learned representations for similar sentences (within or across languages).,2 Related Work,[0],[0]
+"Our proposed model architectures differ in (a) which encoder states are considered in subsequent processing, (b) how they are combined, and (c) how they are used in the decoder.",3 Model Architectures,[0],[0]
+Table 1 summarizes all the examined configurations of RNN-based models.,3 Model Architectures,[0],[0]
+"The first three (ATTN, FINAL, FINAL-CTX) correspond roughly to the standard sequence-to-sequence models, Bahdanau et al. (2014), Sutskever et al. (2014) and Cho et al. (2014), respectively.",3 Model Architectures,[0],[0]
+"The last column (ATTN-ATTN) is our main proposed architecture: compound attention, described here in Section 3.1.",3 Model Architectures,[0],[0]
+"In addition to RNN-based models, we experiment with the Transformer model, see Section 3.3.",3 Model Architectures,[0],[0]
+Our compound attention model incorporates attention in both the encoder and the decoder.,3.1 Compound Attention,[0],[0]
+Its architecture is shown in Fig. 1.,3.1 Compound Attention,[0],[0]
+Encoder with inner attention.,3.1 Compound Attention,[0],[0]
+"First, we process the input sequence x1, x2, . . .",3.1 Compound Attention,[0],[0]
+", xT using a bidirectional recurrent network with gated recurrent units (GRU, Cho et al., 2014):",3.1 Compound Attention,[0],[0]
+"−→ ht = −−→ GRU(xt, −−→ ht−1), ←− ht = ←−− GRU(xt, ←−− ht+1), ht =",3.1 Compound Attention,[0],[0]
+"[ −→ ht , ←− ht ].
+",3.1 Compound Attention,[0],[0]
+3,3.1 Compound Attention,[0],[0]
+"We denote by u the combined number of units in the two RNNs, i.e. the dimensionality of ht.",3.1 Compound Attention,[0],[0]
+"Next, our goal is to combine the states (h1, h2, . . .",3.1 Compound Attention,[0],[0]
+", hT )",3.1 Compound Attention,[0],[0]
+= H of the encoder into a vector of fixed dimensionality that represents the entire sentence.,3.1 Compound Attention,[0],[0]
+Traditional seq2seq models concatenate the final states of both encoder RNNs ( −→ hT and ←− h1) to obtain the sentence representation (denoted as FINAL in Table 1).,3.1 Compound Attention,[1.0],['Traditional seq2seq models concatenate the final states of both encoder RNNs ( −→ hT and ←− h1) to obtain the sentence representation (denoted as FINAL in Table 1).']
+"Another option is to combine all encoder states using the average or maximum over time (Collobert and Weston, 2008; Schwenk and Douze, 2017) (AVGPOOL and MAXPOOL in Table 1 and following).",3.1 Compound Attention,[1.0],"['Another option is to combine all encoder states using the average or maximum over time (Collobert and Weston, 2008; Schwenk and Douze, 2017) (AVGPOOL and MAXPOOL in Table 1 and following).']"
+"We adopt an alternative approach, which is to use inner attention1 (Liu et al., 2016; Li et al., 2016) to compute several weighted averages of the encoder states (Lin et al., 2017).",3.1 Compound Attention,[1.0],"['We adopt an alternative approach, which is to use inner attention1 (Liu et al., 2016; Li et al., 2016) to compute several weighted averages of the encoder states (Lin et al., 2017).']"
+"The main motivation for incorporating these multiple “views” of the state sequence is that it removes the need for the RNN cell to accumulate the representation of the whole sentence as it processes the input, and therefore it should have more capacity for modeling local dependencies.",3.1 Compound Attention,[0],[0]
+"Specifically, we fix a number r, the number of attention heads, and compute an r×T matrixA of attention weights αjt, representing the importance of position t in the input for the jth attention head.",3.1 Compound Attention,[0],[0]
+"We then use this matrix to compute r weighted sums of the encoder states, which become the rows of a new matrix M : M = AH.",3.1 Compound Attention,[0],[0]
+(1) A vector representation of the source sentence (the “sentence embedding”) can be obtained by flattening the matrix M .,3.1 Compound Attention,[0.991951228832668],['(1) A vector representation of the source sentence (the “sentence embedding”) can be obtained by flattening the matrixM .']
+"In our experiments, we project the encoder states h1, h2, . . .",3.1 Compound Attention,[0],[0]
+", hT down to a given dimensionality before applying Eq.",3.1 Compound Attention,[0],[0]
+"(1), so that we can control the size of the representation.",3.1 Compound Attention,[0],[0]
+"Following Lin et al. (2017), we compute the attention matrix by feeding the encoder states to a two-layer feed-forward network: A = softmax(U tanh(WH>)), (2) where W and U are weight matrices of dimensions d× u and r × d, respectively (d is the number of hidden units); the softmax function is applied along the second dimension, i.e. across the encoder states.",3.1 Compound Attention,[0],[0]
+1Some papers call the same or similar approach selfattention or single-time attention.,3.1 Compound Attention,[0],[0]
+Attentive decoder.,3.1 Compound Attention,[0],[0]
+"In vanilla seq2seq models with a fixed-size sentence representation, the decoder is usually conditioned on this representation via the initial RNN state.",3.1 Compound Attention,[0],[0]
+We propose to instead leverage the structured sentence embedding by applying attention to its components.,3.1 Compound Attention,[0],[0]
+"This is no different from the classical attention mechanism used in NMT (Bahdanau et al., 2014), except that it acts on this fixed-size representation instead of the sequence of encoder states.",3.1 Compound Attention,[0],[0]
+"In the ith decoding step, the attention mechanism computes a distribution {βij}rj=1 over the r components of the structured representation.",3.1 Compound Attention,[0],[0]
+"This is then used to weight these components to obtain the context vector ci, which in turn is used to update the decoder state.",3.1 Compound Attention,[0],[0]
+"Again, we can write this in matrix form as C = BM, (3) where B = (βij) T ′,r i=1,j=1 is the attention matrix and C = (ci, c2, . . .",3.1 Compound Attention,[0],[0]
+", cT ′) are the context vectors.",3.1 Compound Attention,[0],[0]
+Note that by combining Eqs.,3.1 Compound Attention,[0],[0]
+"(1) and (3), we get C = (BA)H. (4) Hence, the composition of the encoder and decoder attentions (the “compound attention”) defines an implicit alignment between the source and the target sequence.",3.1 Compound Attention,[0],[0]
+"From this viewpoint, our model can be regarded as a restriction of the conventional attention model.",3.1 Compound Attention,[0],[0]
+"The decoder uses a conditional GRU cell (cGRUatt; Sennrich et al., 2017), which consists of two consecutively applied GRU blocks.",3.1 Compound Attention,[0],[0]
+"The first block processes the previous target token yi−1, while the second block receives the context vector ci and predicts the next target token yi.",3.1 Compound Attention,[0],[0]
+"Compared to the FINAL model, the compound attention architecture described in the previous section undoubtedly benefits from the fact that the decoder is presented with information from the encoder (i.e. the context vectors ci) in every decoding step.",3.2 Constant Context,[0],[0]
+"To investigate this effect, we include baseline models where we replace all context vectors ci with the entire sentence embedding (indicated by the suffix “-CTX” in Table 1).",3.2 Constant Context,[0],[0]
+"Specifically, we provide either the flattened matrixM (for models with inner attention; ATTN or ATTN-CTX), the final state of the encoder (FINAL-CTX), or the
+4
+result of mean- or max-pooling (*POOL-CTX) as a constant input to the decoder cell.",3.2 Constant Context,[0],[0]
+"The Transformer (Vaswani et al., 2017) is a recently proposed model based entirely on feedforward layers and attention.",3.3 Transformer with Inner Attention,[1.0],"['The Transformer (Vaswani et al., 2017) is a recently proposed model based entirely on feedforward layers and attention.']"
+"It consists of an encoder and a decoder, each with 6 layers, consisting of multi-head attention on the previous layer and a position-wise feed-forward network.",3.3 Transformer with Inner Attention,[0],[0]
+"In order to introduce a fixed-size sentence representation into the model, we modify it by adding inner attention after the last encoder layer.",3.3 Transformer with Inner Attention,[0],[0]
+The attention in the decoder then operates on the components of this representation (i.e. the rows of the matrix M ).,3.3 Transformer with Inner Attention,[0],[0]
+This variation on the Transformer model corresponds to the ATTN-ATTN column in Table 1 and is therefore denoted TRF-ATTN-ATTN.,3.3 Transformer with Inner Attention,[0],[0]
+"Continuous sentence representations can be evaluated in many ways, see e.g. Kiros et al. (2015), Conneau et al. (2017) or the RepEval workshops.2 We evaluate our learned representations with classification and similarity tasks from SentEval (Section 4.1) and by examining clusters of sentence paraphrase representations (Section 4.2).",4 Representation Evaluation,[1.0],"['Continuous sentence representations can be evaluated in many ways, see e.g. Kiros et al. (2015), Conneau et al. (2017) or the RepEval workshops.2 We evaluate our learned representations with classification and similarity tasks from SentEval (Section 4.1) and by examining clusters of sentence paraphrase representations (Section 4.2).']"
+"We perform evaluation on 10 classification and 7 similarity tasks using the SentEval3 (Conneau et al., 2017) evaluation tool.",4.1 SentEval,[0],[0]
+This is a superset of the tasks from Kiros et al. (2015).,4.1 SentEval,[0],[0]
+"2https://repeval2017.github.io/ 3https://github.com/facebookresearch/ SentEval/
+Table 2 describes the classification tasks (number of classes, data size, task type and an example) and Table 3 lists the similarity tasks.",4.1 SentEval,[1.0000000699436356],"['Table 2 describes the classification tasks (number of classes, data size, task type and an example) and Table 3 lists the similarity tasks.']"
+The similarity (relatedness) datasets contain pairs of sentences labeled with a real-valued similarity score.,4.1 SentEval,[1.0],['The similarity (relatedness) datasets contain pairs of sentences labeled with a real-valued similarity score.']
+"A given sentence representation model is evaluated either by learning to directly predict this score given the respective sentence embeddings (“regression”), or by computing the cosine similarity of the embeddings (“similarity”) without the need of any training.",4.1 SentEval,[0],[0]
+"In both cases, Pearson and Spearman correlation of the predictions with the gold ratings is reported.",4.1 SentEval,[0],[0]
+See Dolan et al. (2004) for details on MRPC and Hill et al. (2016) for the remaining tasks.,4.1 SentEval,[0],[0]
+We also evaluate the representation of paraphrases.,4.2 Paraphrases,[0],[0]
+We use two paraphrase sources for this purpose: COCO and HyTER Networks.,4.2 Paraphrases,[0],[0]
+"COCO (Common Objects in Context; Lin et al., 2014) is an object recognition and image captioning dataset, containing 5 captions for each image.",4.2 Paraphrases,[1.0],"['COCO (Common Objects in Context; Lin et al., 2014) is an object recognition and image captioning dataset, containing 5 captions for each image.']"
+We extracted the captions from its validation set to form a set of 5 × 5k = 25k sentences grouped by the source image.,4.2 Paraphrases,[0],[0]
+The average sentence length is 11 tokens and the vocabulary size is 9k types.,4.2 Paraphrases,[0],[0]
+"HyTER Networks (Dreyer and Marcu, 2014)
+5 are large finite-state networks representing a subset of all possible English translations of 102 Arabic and 102 Chinese sentences.",4.2 Paraphrases,[0],[0]
+"The networks were built by manually based on reference sentences in Arabic, Chinese and English.",4.2 Paraphrases,[0],[0]
+Each network contains up to hundreds of thousands of possible translations of the given source sentence.,4.2 Paraphrases,[0],[0]
+"We randomly generated 500 translations for each source sentence, obtaining a corpus of 102k sentences grouped into 204 clusters, each containing 500 paraphrases.",4.2 Paraphrases,[0],[0]
+The average length of the 102k English sentences is 28 tokens and the vocabulary size is 11k token types.,4.2 Paraphrases,[0],[0]
+"For every model, we encode each dataset to obtain a set of sentence embeddings with cluster labels.",4.2 Paraphrases,[0],[0]
+We then compute the following metrics: Cluster classification accuracy (denoted “Cl”).,4.2 Paraphrases,[0],[0]
+"We remove 1 point (COCO) or half of the points (HyTER) from each cluster, and fit an LDA classifier on the rest.",4.2 Paraphrases,[0],[0]
+We then compute the accuracy of the classifier on the removed points.,4.2 Paraphrases,[0],[0]
+Nearest-neighbor paraphrase retrieval accuracy (NN).,4.2 Paraphrases,[0],[0]
+"For each point, we find its nearest neighbor according to cosine or L2 distance, and count how often the neighbor lies in the same cluster as the original point.",4.2 Paraphrases,[1.0],"['For each point, we find its nearest neighbor according to cosine or L2 distance, and count how often the neighbor lies in the same cluster as the original point.']"
+Inverse Davies-Bouldin index (iDB).,4.2 Paraphrases,[0],[0]
+"The Davies-Bouldin index (Davies and Bouldin, 1979) measures cluster separation.",4.2 Paraphrases,[1.0],"['The Davies-Bouldin index (Davies and Bouldin, 1979) measures cluster separation.']"
+"For every pair of clusters, we compute the ratio Rij of their combined scatter (average L2 distance to the centroid) Si + Sj and the L2 distance of their centroids dij , then average the maximum values for all clusters: Rij = Si + Sj dij (5) DB = 1 N N∑ i=1",4.2 Paraphrases,[0],[0]
+"max j 6=i Rij (6) The lower the DB index, the better the separation.",4.2 Paraphrases,[0],[0]
+"To match with the rest of our metrics, we take its inverse: iDB = 1DB .",4.2 Paraphrases,[0],[0]
+"We trained English-to-German and English-toCzech NMT models using Neural Monkey4 (Helcl and Libovický, 2017a).",5 Experimental Results,[0],[0]
+"In the following, we distinguish these models using the code of the target language, i.e. de or cs. 4https://github.com/ufal/neuralmonkey",5 Experimental Results,[0],[0]
+"The de models were trained on the Multi30K multilingual image caption dataset (Elliott et al., 2016), extended by Helcl and Libovický (2017b), who acquired additional parallel data using backtranslation (Sennrich et al., 2016) and perplexitybased selection (Yasuda et al., 2008).",5 Experimental Results,[0],[0]
+"This extended dataset contains 410k sentence pairs, with the average sentence length of 12 ± 4 tokens in English.",5 Experimental Results,[0],[0]
+We train each model for 20 epochs with the batch size of 32.,5 Experimental Results,[0],[0]
+We truecased the training data as well as all data we evaluate on.,5 Experimental Results,[0],[0]
+"For German, we employed Neural Monkey’s reversible pre-processing scheme, which expands contractions and performs morphological segmentation of determiners.",5 Experimental Results,[0],[0]
+We used a vocabulary of at most 30k tokens for each language (no subword units).,5 Experimental Results,[0],[0]
+"The cs models were trained on CzEng 1.7 (Bojar et al.,",5 Experimental Results,[0],[0]
+"2016).5 We used byte-pair encoding (BPE) with a vocabulary of 30k sub-word units, shared for both languages.",5 Experimental Results,[0],[0]
+"For English, the average sentence length is 15±19 BPE tokens and the original vocabulary size is 1.9M. We performed 1 training epoch with the batch size of 128 on the entire training section (57M sentence pairs).",5 Experimental Results,[0],[0]
+"The datasets for both de and cs models come with their respective development and test sets of sentence pairs, which we use for the evaluation of translation quality.",5 Experimental Results,[0],[0]
+(We use 1k randomly selected sentence pairs from CzEng 1.7 dtest as a development set.,5 Experimental Results,[0],[0]
+"For evaluation, we use the entire etest.)",5 Experimental Results,[0],[0]
+"We also evaluate the InferSent model6 (Conneau et al., 2017) as pre-trained on the natural language inference (NLI) task.",5 Experimental Results,[0],[0]
+InferSent has been shown to achieve state-of-the-art results on the SentEval tasks.,5 Experimental Results,[0],[0]
+"We also include a bag-ofwords baseline (GloVe-BOW) obtained by averaging GloVe7 word vectors (Pennington et al., 2014).",5 Experimental Results,[0],[0]
+"We estimate translation quality of the various models using single-reference case-sensitive BLEU (Papineni et al., 2002) as implemented in Neural Monkey (the reference implementation is mteval-v13a.pl from NIST or Moses).",5.1 Translation Quality,[1.0],"['We estimate translation quality of the various models using single-reference case-sensitive BLEU (Papineni et al., 2002) as implemented in Neural Monkey (the reference implementation is mteval-v13a.pl from NIST or Moses).']"
+Tables 4 and 5 provide the results on the two datasets.,5.1 Translation Quality,[0],[0]
+The cs dataset is much larger and the training takes much longer.,5.1 Translation Quality,[0],[0]
+"We were thus able 5http://ufal.mff.cuni.cz/czeng/czeng17 6https://github.com/facebookresearch/ InferSent 7https://nlp.stanford.edu/projects/ glove/
+6
+to experiment with only a subset of the possible model configurations.",5.1 Translation Quality,[0],[0]
+The columns “Size” and “Heads” specify the total size of sentence representation and the number of heads of encoder inner attention.,5.1 Translation Quality,[0],[0]
+"In both cases, the best performing is the ATTN Bahdanau et al. model, followed by Transformer (de only) and our ATTN-ATTN (compound attention).",5.1 Translation Quality,[1.0],"['In both cases, the best performing is the ATTN Bahdanau et al. model, followed by Transformer (de only) and our ATTN-ATTN (compound attention).']"
+"The non-attentive FINAL Cho et al. is the worst, except cs-MAXPOOL.",5.1 Translation Quality,[0],[0]
+"For 5 selected cs models, we also performed the WMT-style 5-way manual ranking on 200 sentence pairs.",5.1 Translation Quality,[0],[0]
+The annotations are interpreted as simulated pairwise comparisons.,5.1 Translation Quality,[0],[0]
+"For each model, the final score is the number of times the model was judged better than the other model in the pair.",5.1 Translation Quality,[0],[0]
+Tied pairs are excluded.,5.1 Translation Quality,[0],[0]
+"The results, shown in Table 5, confirm the automatic evaluation results.",5.1 Translation Quality,[0],[0]
+"We also checked the relation between BLEU
+and the number of heads and representation size.",5.1 Translation Quality,[0],[0]
+"While there are many exceptions, the general tendency is that the larger the representation or the more heads, the higher the BLEU score.",5.1 Translation Quality,[0],[0]
+The Pearson correlation between BLEU and the number of heads is 0.87 for cs and 0.31 for de.,5.1 Translation Quality,[0],[0]
+"Due to the large number of SentEval tasks, we present the results abridged in two different ways: by reporting averages (Table 6) and by showing only the best models in comparison with other methods (Table 7).",5.2 SentEval,[0],[0]
+The full results can be found in the supplementary material.,5.2 SentEval,[0],[0]
+"Table 6 provides averages of the classification and similarity results, along with the results of selected tasks (SNLI, SICK-E).",5.2 SentEval,[0],[0]
+"As the baseline for classifications tasks, we assign the most frequent class to all test examples.8",5.2 SentEval,[0],[0]
+"The de models are generally worse, most likely due to the higher OOV rate and overall simplicity of the training sentences.",5.2 SentEval,[0],[0]
+"On cs, we see a clear pattern that more heads hurt the performance.",5.2 SentEval,[0],[0]
+The de set has more variations to consider but the results are less conclusive.,5.2 SentEval,[0],[0]
+"For the similarity results, it is worth noting that cs-ATTN-ATTN performs very well with 1 attention head but fails miserably with more heads.",5.2 SentEval,[0],[0]
+"Otherwise, the relation to the number of heads is less clear.",5.2 SentEval,[0],[0]
+Table 7 compares our strongest models with other approaches on all tasks.,5.2 SentEval,[0],[0]
+"Besides InferSent and GloVe-BOW, we include SkipThought as evaluated by Conneau et al. (2017), and the NMTbased embeddings by Hill et al. (2016) trained on the English-French WMT15 dataset (this is the best result reported by Hill et al. for NMT).",5.2 SentEval,[0],[0]
+We see that the supervised InferSent clearly outperforms all other models in all tasks except for MRPC and TREC.,5.2 SentEval,[0],[0]
+"Results by Hill et al. are always lower than our best setups, except MRPC.",5.2 SentEval,[0],[0]
+"On classification tasks, our models are outperformed even by GloVe-BOW, except for the NLI tasks (SICK-E and SNLI) where cs-FINAL-CTX is better.",5.2 SentEval,[0],[0]
+Table 6 also provides our measurements based on sentence paraphrases.,5.3 Paraphrase Scores,[0],[0]
+"For paraphrase retrieval 8For MR, CR, SUBJ, and MPQA, where there is no distinct test set, the class is established on the whole collection.",5.3 Paraphrase Scores,[0],[0]
+"For other tasks, the class is learned from the training set.
+7
+8
+B L
+E U
+M R C R S U
+B J
+M P
+Q A
+S S
+T 2
+S S
+T 5
+T R
+E C
+M R
+P C
+S IC
+K -E
+S N
+L I",5.3 Paraphrase Scores,[0],[0]
+A v g,5.3 Paraphrase Scores,[0],[0]
+A cc S IC K -R S T S B S T S 1 2 S T S 1 3 S T S 1 4 S T S 1 5 S T S 1 6 A v g S,5.3 Paraphrase Scores,[0],[0]
+im H y -C l H y -N N H y -i D B C O -C,5.3 Paraphrase Scores,[0],[0]
+l C O -N N C,5.3 Paraphrase Scores,[0],[0]
+"O -i D B
+BLEU MR CR
+SUBJ MPQA
+SST2 SST5 TREC MRPC
+SICK-E SNLI AvgAcc SICK-R
+STSB STS12 STS13",5.3 Paraphrase Scores,[0],[0]
+"STS14 STS15 STS16 AvgSim Hy-Cl Hy-NN Hy-iDB CO-Cl CO-NN CO-iDB
+−1.00 −0.75 −0.50 −0.25 0.00 0.25 0.50 0.75 1.00
+Figure 2: Pearson correlations.",5.3 Paraphrase Scores,[0],[0]
+"Upper triangle: de models, lower triangle: cs models.",5.3 Paraphrase Scores,[0],[0]
+Positive values shown in shades of green.,5.3 Paraphrase Scores,[0],[0]
+"For similarity tasks, only the Pearson (not Spearman) coefficient is represented.
+",5.3 Paraphrase Scores,[0],[0]
+"(NN), we found cosine distance to work better than L2 distance.",5.3 Paraphrase Scores,[0],[0]
+"We therefore do not list or further consider L2-based results (except in the supplementary material).
+",5.3 Paraphrase Scores,[0],[0]
+"This evaluation seems less stable and discerning than the previous two, but we can again confirm the victory of InferSent followed by our nonattentive cs models.",5.3 Paraphrase Scores,[0],[0]
+cs and de models are no longer clearly separated.,5.3 Paraphrase Scores,[0],[0]
+"To assess the relation between the various measures of sentence representations and translation quality as estimated by BLEU, we plot a heatmap of Pearson correlations in Fig. 2.",6 Discussion,[0],[0]
+"As one example, Fig. 3 details the cs models’ BLEU scores and AvgAcc (average of SentEval accuracies).
+",6 Discussion,[0],[0]
+"A good sign is that on the cs dataset, most metrics of representation are positively correlated (the pairwise Pearson correlation is 0.78± 0.32 on average), the outlier being TREC (−0.16±0.16 correlation with the other metrics on average)
+",6 Discussion,[0],[0]
+"On the other hand, most representation metrics correlate with BLEU negatively (−0.57±0.31) on cs.",6 Discussion,[0],[0]
+"The pattern is less pronounced but still clear also on the de dataset.
+",6 Discussion,[0],[0]
+"A detailed understanding of what the learned
+representations contain is difficult.",6 Discussion,[0],[0]
+"We can only speculate that if the NMT model has some capability for following the source sentence superficially, it will use it and spend its capacity on closely matching the target sentences rather than on deriving some representation of meaning which would reflect e.g. semantic similarity.",6 Discussion,[0],[0]
+We assume that this can be a direct consequence of NMT being trained for cross entropy: putting the exact word forms in exact positions as the target sentence requires.,6 Discussion,[0],[0]
+"Performing well in single-reference BLEU is not an indication that the system understands the meaning but rather that it can maximize the chance of producing the n-grams required by the reference.
+",6 Discussion,[0],[0]
+"The negative correlation between the number of attention heads and the representation metrics from Fig. 3 (−0.81±0.12 for cs and−0.18±0.19 for de, on average) can be partly explained by the following observation.",6 Discussion,[0],[0]
+We plotted the induced alignments (e.g. Fig. 4) and noticed that the heads tend to “divide” the sentence into segments.,6 Discussion,[0],[0]
+"While one would hope that the segments correspond to some meaningful units of the sentence (e.g. subject, predicate, object), we failed to find any such interpretation for ATTN-ATTN and for cs models in general.",6 Discussion,[0.999182277269012],"['While one would hope that the segments correspond to some meaningful units of the sentence (e.g. subject, predicate, object), we failed to find any such interpretation for ATTN-ATTN and for csmodels in general.']"
+"Instead, the heads divide the source sentence more or less equidistantly, as documented by Fig. 5.",6 Discussion,[0],[0]
+"Such a multi-headed sentence representation is then less fit for representing e.g. paraphrases where the subject and object swap their position due to passivization, because their representations are then accessed by different heads, and thus end up in different parts of the sentence embedding vector.
+9
+For de-ATTN-CTX models, we observed a much flatter distribution of attention weights for each head and, unlike in the other models, we were often able to identify a head focusing on the main verb.",6 Discussion,[0],[0]
+"This difference between ATTN-ATTN and some ATTN-CTX models could be explained by the fact that in the former, the decoder is oblivious to the ordering of the heads (because of decoder attention), and hence it may not be useful for a given head to look for a specific syntactic or semantic role.",6 Discussion,[1.0],"['This difference between ATTN-ATTN and some ATTN-CTX models could be explained by the fact that in the former, the decoder is oblivious to the ordering of the heads (because of decoder attention), and hence it may not be useful for a given head to look for a specific syntactic or semantic role.']"
+"We presented a novel variation of attentive NMT models (Bahdanau et al., 2014; Vaswani et al., 2017) that again provides a single meeting point with a continuous representation of the source sen-
+tence.",7 Conclusion,[0.9996415781570834],"['We presented a novel variation of attentive NMT models (Bahdanau et al., 2014; Vaswani et al., 2017) that again provides a single meeting point with a continuous representation of the source sentence.']"
+We evaluated these representations with a number of measures reflecting how well the meaning of the source sentence is captured.,7 Conclusion,[1.0],['We evaluated these representations with a number of measures reflecting how well the meaning of the source sentence is captured.']
+"While our proposed “compound attention” leads to translation quality not much worse than the fully attentive model, it generally does not perform well in the meaning representation.",7 Conclusion,[1.0],"['While our proposed “compound attention” leads to translation quality not much worse than the fully attentive model, it generally does not perform well in the meaning representation.']"
+"Quite on the contrary, the better the BLEU score, the worse the meaning representation.",7 Conclusion,[1.0],"['Quite on the contrary, the better the BLEU score, the worse the meaning representation.']"
+"We believe that this observation is important for representation learning where bilingual MT now seems less likely to provide useful data, but perhaps more so for MT itself, where the struggle towards a high single-reference BLEU score (or even worse, cross entropy) leads to systems that refuse to consider the meaning of the sentence.",7 Conclusion,[1.0],"['We believe that this observation is important for representation learning where bilingual MT now seems less likely to provide useful data, but perhaps more so for MT itself, where the struggle towards a high single-reference BLEU score (or even worse, cross entropy) leads to systems that refuse to consider the meaning of the sentence.']"
+"This work has been supported by the grants 18-24210S of the Czech Science Foundation, SVV 260 453 and “Progress” Q18+Q48 of Charles University, and using language resources distributed by the LINDAT/CLARIN project of the Ministry of Education, Youth and Sports of the Czech Republic (projects LM2015071 and OP VVV VI CZ.02.1.01/0.0/0.0/16 013/0001781).
+",Acknowledgement,[0],[0]
+10,Acknowledgement,[0],[0]
+One of possible ways of obtaining continuous-space sentence representations is by training neural machine translation (NMT) systems.,abstractText,[0],[0]
+The recent attention mechanism however removes the single point in the neural network from which the source sentence representation can be extracted.,abstractText,[0],[0]
+We propose several variations of the attentive NMT architecture bringing this meeting point back.,abstractText,[0],[0]
+"Empirical evaluation suggests that the better the translation quality, the worse the learned sentence representations serve in a wide range of classification and similarity tasks.",abstractText,[0],[0]
+Are BLEU and Meaning Representation in Opposition?,title,[0],[0]

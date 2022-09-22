@@ -1,0 +1,440 @@
+0,1,label2,summary_sentences
+"Recently, deep learning has emerged as a powerful and popular class of machine learning algorithms.",1. Introduction,[1.0],"['Recently, deep learning has emerged as a powerful and popular class of machine learning algorithms.']"
+"Well-known examples include the convolutional neural network (LeCun et al., 1998), long short term memory (Hochreiter & Schmidhuber, 1997), memory network (Weston et al., 2014), and deep Q-network (Mnih et al., 2015).",1. Introduction,[1.0],"['Well-known examples include the convolutional neural network (LeCun et al., 1998), long short term memory (Hochreiter & Schmidhuber, 1997), memory network (Weston et al., 2014), and deep Q-network (Mnih et al., 2015).']"
+"These models have achieved remarkable performance on various difficult tasks such as image classification (He et al., 2016), speech recognition (Graves et al., 2013), natural language understanding (Bahdanau et al., 2015; Sukhbaatar et al., 2015), and game playing (Silver et al., 2016).
+",1. Introduction,[1.0000001055552257],"['These models have achieved remarkable performance on various difficult tasks such as image classification (He et al., 2016), speech recognition (Graves et al., 2013), natural language understanding (Bahdanau et al., 2015; Sukhbaatar et al., 2015), and game playing (Silver et al., 2016).']"
+"Deep network is a highly nonlinear model with typically millions of parameters (Hinton et al., 2006).",1. Introduction,[0],[0]
+"Thus, it is imperative to design scalable and effective solvers.",1. Introduction,[0],[0]
+"How-
+",1. Introduction,[0],[0]
+"1Department of Computer Science and Engineering, Hong Kong University of Science and Technology, Clear Water Bay, Hong Kong.",1. Introduction,[0],[0]
+"Correspondence to: Shuai Zheng <szhengac@cse.ust.hk>, James T. Kwok <jamesk@cse.ust.hk>.
+",1. Introduction,[0],[0]
+"Proceedings of the 34 th International Conference on Machine Learning, Sydney, Australia, PMLR 70, 2017.",1. Introduction,[0],[0]
+"Copyright 2017 by the author(s).
+ever, training deep networks is difficult as the optimization can suffer from pathological curvature and get stuck in local minima (Martens, 2010).",1. Introduction,[0],[0]
+"Moreover, every critical point that is not a global minimum is a saddle point (Kawaguchi, 2016), which can significantly slow down training.",1. Introduction,[0],[0]
+Second-order information is useful in that it reflects local curvature of the error surface.,1. Introduction,[0],[0]
+"However, a direct computation of the Hessian is computationally infeasible.",1. Introduction,[0],[0]
+"Martens (2010) introduced Hessian-free optimization, a variant of truncated-Newton methods that relies on using the linear conjugate gradient to avoid computing the Hessian.",1. Introduction,[0],[0]
+Dauphin et al. (2014) proposed to use the absolute Hessian to escape from saddle points.,1. Introduction,[0],[0]
+"However, these methods still require higher computational costs.
+",1. Introduction,[0],[0]
+"Recent advances in deep learning optimization focus mainly on stochastic gradient descent (SGD) (Bottou, 1998) and its variants (Sutskever et al., 2013).",1. Introduction,[0],[0]
+"However, SGD requires careful stepsize tuning, which is difficult as different weights have vastly different gradients (in terms of both magnitude and direction).",1. Introduction,[1.0],"['However, SGD requires careful stepsize tuning, which is difficult as different weights have vastly different gradients (in terms of both magnitude and direction).']"
+"On the other hand, online learning (Zinkevich, 2003), which is closely related to stochastic optimization, has been extensively studied in the past decade.",1. Introduction,[0],[0]
+"Well-known algorithms include follow the regularized leader (FTRL) (Kalai & Vempala, 2005), follow the proximally-regularized leader (FTPRL) (McMahan & Streeter, 2010) and their variants (Duchi & Singer, 2009; Duchi et al., 2011; Shalev-Shwartz, 2012; Xiao, 2010).",1. Introduction,[0],[0]
+"In particular, adaptive gradient descent (Adagrad) (Duchi et al., 2011) uses an adaptive per-coordinate stepsize.",1. Introduction,[0],[0]
+"On convex problems, it has been shown both theoretically and empirically that Adagrad is especially efficient on highdimensional data (Duchi et al., 2011; McMahan et al., 2013).",1. Introduction,[0],[0]
+"When used on deep networks, Adagrad also demonstrates significantly better performance than SGD (Dean et al., 2012).",1. Introduction,[1.0],"['When used on deep networks, Adagrad also demonstrates significantly better performance than SGD (Dean et al., 2012).']"
+"However, in Adagrad, the variance estimate underlying the adaptive stepsize is based on accumulating all past (squared) gradients.",1. Introduction,[0],[0]
+This becomes infinitesimally small as training proceeds.,1. Introduction,[0],[0]
+"In more recent algorithms, such as RMSprop (Tieleman & Hinton, 2012) and Adam (Kingma & Ba, 2015), the variance is estimated by an exponentially decaying average of the squared gradients.
+",1. Introduction,[0],[0]
+"Another problem with the FTRL family of algorithms is that in each round, the learner has to solve an optimization problem that considers the sum of all previous gradients.
+",1. Introduction,[0],[0]
+"For highly nonconvex models such as the deep network, the parameter iterate may move from one local basin to another.",1. Introduction,[0.9947919129647889],"['However, for highly nonconvex models such as the deep network, the parameter iterate may move from one local basin to another.']"
+Gradients that are due to samples in the distant past are less informative than those from the recent ones.,1. Introduction,[0],[0]
+"In applications where the data distribution is changing (as in deep reinforcement learning), this may impede parameter adaptation to the environment.
+",1. Introduction,[0],[0]
+"To alleviate this problem, we propose a FTPRL variant that reweighs the learning subproblems in each iteration.",1. Introduction,[0],[0]
+"The proposed algorithm, which will be called follow the moving leader (FTML), shows strong connections with popular deep learning optimizers such as RMSprop and Adam.",1. Introduction,[0],[0]
+"Experiments on various deep learning models demonstrate that FTML outperforms or at least has comparable convergence performance with state-of-the-art solvers.
+",1. Introduction,[0],[0]
+The rest of this paper is organized as follows.,1. Introduction,[0],[0]
+Section 2 first gives a brief review on FTRL and other solvers for deep learning.,1. Introduction,[1.0],['Section 2 first gives a brief review on FTRL and other solvers for deep learning.']
+Section 3 presents the proposed FTML.,1. Introduction,[0],[0]
+"Experimental results are shown in Section 4, and the last section gives some concluding remarks.
+Notation.",1. Introduction,[0],[0]
+"For a vector x ∈ Rd, ‖x‖ = √∑d
+i=1",1. Introduction,[0],[0]
+"x 2 i ,
+diag(x) is a diagonal matrix with x on its diagonal, √ x is the element-wise square root of x, x2 denotes the Hadamard (elementwise) product x x, and ‖x‖2Q = xTQx, whereQ is a symmetric matrix.",1. Introduction,[0],[0]
+"For any two vectors x and y, x/y, and 〈x, y〉 denote the elementwise division and dot product, respectively.",1. Introduction,[0],[0]
+"For a matrix X , X2 = XX , and diag(X) is a vector with the diagonal of X as its elements.",1. Introduction,[1.0],"['For a matrix X , X2 = XX , and diag(X) is a vector with the diagonal of X as its elements.']"
+"For t vectors {x1, . . .",1. Introduction,[0],[0]
+", xt}, x1:",1. Introduction,[0],[0]
+t = ∑t i=1,1. Introduction,[0],[0]
+"xi, and
+x21:",1. Introduction,[0],[0]
+t = ∑t i=1,1. Introduction,[0],[0]
+"x
+2 i .",1. Introduction,[0],[0]
+"For t matrices {X1, . . .",1. Introduction,[0],[0]
+", Xt}, X1:t =∑t
+i=1Xi.",1. Introduction,[0],[0]
+"In online learning, the learner observes a sequence of functions fi’s, which can be deterministic, stochastic, or even adversarially chosen.",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+Let Θ ⊆ Rd be a convex compact set.,2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"At round t, the learner picks a predictor θt−1 ∈ Θ, and the adversary picks a loss ft.",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+The learner then suffers a loss ft(θt−1).,2.1. Follow the Regularized Leader and its Variants,[0],[0]
+The goal of the learner is to minimize the cumulative loss suffered over the course of T rounds.,2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"In online convex learning, ft is assumed to be convex.
+",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"Two popular online learning algorithms are the follow the regularized leader (FTRL) (Kalai & Vempala, 2005; Shalev-Shwartz, 2012), and its variant follow the proximally-regularized leader (FTPRL) (McMahan & Streeter, 2010).",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"Both achieve the optimal O( √ T ) regret, where T is the number of rounds (Shalev-Shwartz, 2012).",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"Other FTRL-like algorithms include regularized dual aver-
+aging (RDA) (Xiao, 2010) as well as its adaptive variant presented in (Duchi et al., 2011).",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"Gradient descent style algorithms like online forward and backward splitting (FOBOS) (Duchi & Singer, 2009) and adaptive gradient descent (Adagrad) (Duchi et al., 2011) can also be expressed as special cases of the FTRL family (McMahan, 2011).
+",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"At round t, FTRL generates the next iterate θt by solving the optimization problem:
+θt = arg min θ∈Θ t∑ i=1",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"( 〈gi, θ〉+ αt 2 ‖θ‖2 ) ,
+where gt is a subgradient of ft at θt−1 (usually, θ0 = 0), and αt is the regularization parameter at round t. Note that the regularization is centered at the origin.",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"McMahan & Streeter (2010) generalizes this to FTPRL by centering regularization at each iterate θi−1 as in online gradient descent and online mirror descent (Cesa-Bianchi & Lugosi, 2006),
+θt = arg min θ∈Θ t∑ i=1",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"( 〈gi, θ〉+ 1 2 ‖θ − θi−1‖2Qi ) , (1)
+where Qi is a full or diagonal positive semidefinite matrix, and ‖θ",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+− θi−1‖Qi is the corresponding Mahalanobis distance between θ and θi−1.,2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"When Qi is diagonal, each of its entries controls the learning rate in the corresponding dimension.",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"When Θ = Rd, θt can be obtained in closedform (McMahan, 2011):
+θt = θt−1 −Q−11:t gt.",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"(2)
+",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"When
+Qt = 1
+η diag
+(√ g21:t − √ g21:t−1 ) , (3)
+where η > 0 is the stepsize, (2) becomes the update rule of Adagrad (Duchi et al., 2011)
+θt = θt−1 − diag
+( η√
+g21:t + 1
+) gt.",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"(4)
+Here, > 0 (usually a very small number) is used to avoid division by zero, and 1 is the vector of all 1’s.
+",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"In general, all these algorithms satisfy (McMahan & Streeter, 2010):
+Q1:t = diag ( 1
+η
+(√ g21:t + 1 )) .",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"(5)
+It can be shown that this setting is optimal within a factor of √ 2 of the best possible regret bound for any nonincreasing per-coordinate learning rate schedule (McMahan & Streeter, 2010).",2.1. Follow the Regularized Leader and its Variants,[0],[0]
+"In training deep networks, different weights may have vastly different gradients (in terms of both magnitude and direction).",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"Hence, using a per-coordinate learning rate as in Adagrad can significantly improve performance over standard SGD (Dean et al., 2012).",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"However, a caveat is that Adagrad suffers from diminishing stepsize.",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"As optimization proceeds, the accumulated squared gradient g21:t in (5) becomes larger and larger, making training difficult.
+",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"To alleviate this problem, a number of algorithms have been proposed (Zeiler, 2012; Tieleman & Hinton, 2012; Kingma & Ba, 2015).",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"Typically, they employ an average of the past squared gradients (i.e., vt = ∑t i=1",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"αi,tg 2",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"i , where αi,t ∈",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"[0, 1]), which is exponentially decaying.",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"For example, RMSprop (Tieleman & Hinton, 2012) uses
+vi = βvi−1 + (1− β)g2i , (6)
+where β is close to 1, and the corresponding αi,t is (1 − β)βt−i.",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"This vt can then be used to replace g21:t, and the update in (4) becomes
+θt = θt−1 − diag (
+η √ vt + 1
+) gt.",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"(7)
+Zeiler (2012) further argues that the parameter and update should have the same unit, and modifies (7) to the Adadelta update rule:
+θt = θt−1 − diag (√
+ut−1 + 1√ vt + 1
+) gt,
+where ut−1 = ∑t−1 i=0 αi,t−1(4θi)2, and 4θt = θt − θt−1 with4θ0 = 0.
+",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"As v0 in (6) is often initialized to 0, the bias has to be corrected.",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"Adam (Kingma & Ba, 2015) uses the variance estimate vt/(1 − βt) (which corresponds to αi,t = (1− β)βt−i/(1− βt)).
+",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"Another recent proposal is the equilibrated stochastic gradient descent (Dauphin et al., 2015).",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"It uses the variance estimate vt = vt−1 +(Htζt)2, whereHt is the Hessian and ζt ∼ N (0, 1).",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"It is shown that (Htζt)2 is an unbiased estimator of √ diag(H2t ), which serves as the Jacobi preconditioner of the absolute Hessian.",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"Computation of the Hessian can be avoided by using the R-operator (Schraudolph, 2002), though it still costs roughly twice that of standard backpropagation.",2.2. Adaptive Learning Rate in Deep Learning,[0],[0]
+"Recall that at round t, FTRL generates the next iterate θt as
+θt = arg min θ∈Θ t∑ i=1",3. Follow the Moving Leader,[0],[0]
+"Pi(θ), (8)
+where Pi(θ) = 〈gi, θ〉 + 12‖θ",3. Follow the Moving Leader,[0],[0]
+− θi−1‖ 2 Qi .,3. Follow the Moving Leader,[0],[0]
+Note that all Pi’s have the same weight.,3. Follow the Moving Leader,[0],[0]
+"However, for highly nonconvex models such as the deep network, the parameter iterate may move from one local basin to another.",3. Follow the Moving Leader,[0],[0]
+Pi’s that are due to samples in the distant past are less informative than those from the recent ones.,3. Follow the Moving Leader,[1.0],['Pi’s that are due to samples in the distant past are less informative than those from the recent ones.']
+"To alleviate this problem, one may consider only Pi’s in a recent window.",3.1. Weighting the Components,[1.0],"['To alleviate this problem, one may consider only Pi’s in a recent window.']"
+"However, a large memory is needed for its implementation.",3.1. Weighting the Components,[0],[0]
+"A simpler alternative is by using an exponential moving average of the Pi’s: Si = β1Si−1 + (1 − β1)Pi, where β1 ∈",3.1. Weighting the Components,[0],[0]
+"[0, 1) and S0 = 0.",3.1. Weighting the Components,[0],[0]
+This can be easily rewritten as St = (1− β1) ∑t i=1,3.1. Weighting the Components,[0],[0]
+β t−i 1 Pi.,3.1. Weighting the Components,[0],[0]
+"Instead of minimizing (8), we have
+θt = arg min θ∈Θ t∑ i=1",3.1. Weighting the Components,[0],[0]
+"wi,tPi(θ), (9)
+where the weights
+wi,t = (1− β1)βt−i1
+1− βt1 (10)
+are normalized to sum to 1.",3.1. Weighting the Components,[0],[0]
+The denominator 1− βt1 plays a similar role as bias correction in Adam.,3.1. Weighting the Components,[1.0],['The denominator 1− βt1 plays a similar role as bias correction in Adam.']
+"When β1 = 0, wi,t = 0 for i < t, and wt,t = 1.",3.1. Weighting the Components,[0],[0]
+"Thus, (9) reduces to minθ∈Θ Pt(θ).",3.1. Weighting the Components,[0],[0]
+"When β1 → 1, the following Lemma shows that all Pi’s are weighted equally, and (8) is recovered.",3.1. Weighting the Components,[0],[0]
+Lemma 1.,3.1. Weighting the Components,[0],[0]
+"limβ1→1 wi,t = 1/t.
+Note that the Hessian of the objective in (8) is Q1:t. This becomes ∑t i=1",3.1. Weighting the Components,[0],[0]
+"wi,tQi in (9).",3.1. Weighting the Components,[0],[0]
+"Recall that Q1:t depends on the accumulated past gradients in (5), which is then refined by an exponential moving average in (6).",3.1. Weighting the Components,[0],[0]
+"As in Adam, we define vi = β2vi−1 + (1 − β2)g2i , where β2 ∈",3.1. Weighting the Components,[0],[0]
+"[0, 1) and v0 = 0, and then correct its bias by dividing by 1 − βt2.",3.1. Weighting the Components,[0],[0]
+"Thus, (5) is changed to
+t∑ i=1",3.1. Weighting the Components,[0],[0]
+"wi,tQi = diag ( 1 ηt (√ vt 1− βt2 + t1 )) , (11)
+where ηt and t are the stepsize and value at time t, respectively.",3.1. Weighting the Components,[0],[0]
+"When β2 = 0, (11) reduces to ∑t i=1",3.1. Weighting the Components,[0],[0]
+"wi,tQi =
+diag (
+1 ηt ( √ g2t + t1) ) .",3.1. Weighting the Components,[0],[0]
+"When β2 → 1, all g2i ’s are
+weighted equally and (11) reduces to ∑t i=1",3.1. Weighting the Components,[0],[0]
+"wi,tQi =
+diag (
+1 ηt (√ g21:",3.1. Weighting the Components,[0],[0]
+t t + t1 )) .,3.1. Weighting the Components,[0],[0]
+"Using ηt = η/ √ t and t =
+/ √ t, this is further reduced to (5).",3.1. Weighting the Components,[0],[0]
+"The following shows
+that Qt in (11) has a closed-form expression.
+",3.1. Weighting the Components,[0],[0]
+Proposition 1.,3.1. Weighting the Components,[0],[0]
+"Define dt = 1−βt1 ηt
+(√ vt
+1−βt2 + t1
+) .",3.1. Weighting the Components,[0],[0]
+"Then,
+Qt = diag ( dt − β1dt−1
+1− β1
+) .",3.1. Weighting the Components,[0],[0]
+"(12)
+Algorithm 1 Follow the Moving Leader (FTML).",3.1. Weighting the Components,[0],[0]
+"1: Input: ηt > 0, β1, β2 ∈",3.1. Weighting the Components,[0],[0]
+"[0, 1), t > 0. 2: initialize θ0 ∈ Θ; d0 ← 0; v0 ← 0; z0 ← 0; 3: for t = 1, 2, . . .",3.1. Weighting the Components,[0],[0]
+", T do 4: fetch function ft; 5: gt ← ∂θft(θt−1); 6: vt ← β2vt−1",3.1. Weighting the Components,[0],[0]
+"+ (1− β2)g2t ;
+7: dt ← 1−β t 1
+ηt
+(√ vt
+1−βt2 + t1
+) ;
+8: σt ← dt − β1dt−1; 9: zt ← β1zt−1 + (1− β1)gt − σtθt−1;
+10: θt ← Π diag(dt/(1−βt1))",3.1. Weighting the Components,[0],[0]
+"Θ (−zt/dt); 11: end for 12: Output: θT .
+",3.1. Weighting the Components,[0],[0]
+"Substituting this back into (9), θt is then equal to
+arg min θ∈Θ t∑ i=1",3.1. Weighting the Components,[0],[0]
+"wi,t ( 〈gi, θ〉+ 1 2 ‖θ",3.1. Weighting the Components,[0],[0]
+"− θi−1‖2diag ( σi 1−β1 )) , (13) where σi ≡",3.1. Weighting the Components,[0],[0]
+di − β1di−1.,3.1. Weighting the Components,[0],[0]
+"Note that some entries of σi may be negative, and ‖θ− θi−1‖2diag(σi/(1−β1)) is then not a regularizer in the usual sense.",3.1. Weighting the Components,[0],[0]
+"Instead, the negative entries of σi encourage the corresponding entries of θ to move away from those of θi−1.",3.1. Weighting the Components,[1.0],"['Instead, the negative entries of σi encourage the corresponding entries of θ to move away from those of θi−1.']"
+"Nevertheless, from the definitions of dt, σt and (11), we have ∑t i=1",3.1. Weighting the Components,[0],[0]
+"wi,tdiag(σi/(1 − β1))",3.1. Weighting the Components,[0],[0]
+"=∑t
+i=1",3.1. Weighting the Components,[0],[0]
+"wi,tQi = diag(dt/(1−βt1)), and thus the following: Lemma 2. ∑t i=1",3.1. Weighting the Components,[0],[0]
+"wi,tdiag(σi/(1− β1)) 0.
+",3.1. Weighting the Components,[0],[0]
+"Hence, the objective in (13) is still strongly convex.",3.1. Weighting the Components,[1.0],"['Hence, the objective in (13) is still strongly convex.']"
+"Moreover, the following Proposition shows that θt in (13) has a simple closed-form solution.
+",3.1. Weighting the Components,[1.000000085720158],"['Moreover, the following Proposition shows that θt in (13) has a simple closed-form solution.']"
+Proposition 2.,3.1. Weighting the Components,[0],[0]
+"In (13),
+θt = Π diag(dt/(1−βt1))",3.1. Weighting the Components,[0],[0]
+"Θ (−zt/dt),
+where zt = β1zt−1 + (1 − β1)gt − σtθt−1, and ΠAΘ(x) ≡ arg minu∈Θ 1 2‖u−x‖ 2",3.1. Weighting the Components,[0],[0]
+"A is the projection onto Θ for a given positive semidefinite matrix A.
+The proposed procedure, which will be called follow the moving leader (FTML), is shown in Algorithm 1.",3.1. Weighting the Components,[0],[0]
+"Note that though {P1, . . .",3.1. Weighting the Components,[0],[0]
+", Pt} are considered in each round, the update depends only the current gradient gt and parameter θt−1.",3.1. Weighting the Components,[1.0],"[', Pt} are considered in each round, the update depends only the current gradient gt and parameter θt−1.']"
+"It can be easily seen that FTML is easy to implement, memory-efficient and has low per-iteration complexity.",3.1. Weighting the Components,[1.0],"['It can be easily seen that FTML is easy to implement, memory-efficient and has low per-iteration complexity.']"
+"The following Propositions show that we can recover Adagrad in two extreme cases: (i) β1 = 0 with decreasing stepsize; and (ii) β1 → 1 with increasing stepsize.
+",3.2.1. RELATIONSHIP WITH ADAGRAD,[0],[0]
+Proposition 3.,3.2.1. RELATIONSHIP WITH ADAGRAD,[0],[0]
+"With β1 = 0, β2 → 1, ηt = η/ √ t, and
+t = / √ t, θt in (13) reduces to:
+Π diag(( √ g21:t+ 1)/η)
+",3.2.1. RELATIONSHIP WITH ADAGRAD,[0],[0]
+"Θ
+( θt−1 − diag ( η√
+g21:t + 1
+) gt ) ,
+which recovers Adagrad in (4).",3.2.1. RELATIONSHIP WITH ADAGRAD,[0],[0]
+Proposition 4.,3.2.1. RELATIONSHIP WITH ADAGRAD,[0],[0]
+"With β1 → 1, β2 → 1, ηt = η √ t, and
+t = / √ t, we recover (1) with Qi in (3).",3.2.1. RELATIONSHIP WITH ADAGRAD,[0],[0]
+"If Θ = Rd, it
+generates identical updates as Adagrad in (4).",3.2.1. RELATIONSHIP WITH ADAGRAD,[0],[0]
+"When Θ = Rd, McMahan (2011) showed that (1) and (2) generate the same updates.",3.2.2. RELATIONSHIP WITH RMSPROP,[0],[0]
+The following Theorem shows that FTML also has a similar gradient descent update.,3.2.2. RELATIONSHIP WITH RMSPROP,[1.0],['The following Theorem shows that FTML also has a similar gradient descent update.']
+Theorem 1.,3.2.2. RELATIONSHIP WITH RMSPROP,[0],[0]
+"With Θ = Rd, FTML generates the same updates as:
+θt = θt−1 − diag ( 1− β1 1− βt1 ηt√ vt/(1− βt2) + t1 ) gt.",3.2.2. RELATIONSHIP WITH RMSPROP,[0],[0]
+"(14)
+When β1 = 0 and bias correction for the variance is not used, (14) reduces to RMSprop in (7).",3.2.2. RELATIONSHIP WITH RMSPROP,[1.0000000125408544],"['(14) When β1 = 0 and bias correction for the variance is not used, (14) reduces to RMSprop in (7).']"
+"However, recall from Section 3.1 that when β1 = 0, we have wi,t = 0 for i < t, and wt,t = 1.",3.2.2. RELATIONSHIP WITH RMSPROP,[0],[0]
+"Hence, only the current loss component Pt is taken into account, and this may be sensitive to the noise in Pt.",3.2.2. RELATIONSHIP WITH RMSPROP,[0],[0]
+"Moreover, as demonstrated in Adam, bias correction of the variance can be very important.",3.2.2. RELATIONSHIP WITH RMSPROP,[1.0],"['Moreover, as demonstrated in Adam, bias correction of the variance can be very important.']"
+"When β2 → 1, the variance estimate of RMSprop,∑t i=1(1−β2)β t−i 2 g 2 i , becomes zero and blows up the stepsize, leading to divergence.",3.2.2. RELATIONSHIP WITH RMSPROP,[0],[0]
+"In contrast, FTML’s Qi in (12) recovers that of Adagrad in this case (Proposition 4).",3.2.2. RELATIONSHIP WITH RMSPROP,[0],[0]
+"In practice, a smaller β2 has to be used for RMSprop.",3.2.2. RELATIONSHIP WITH RMSPROP,[0],[0]
+"However, a larger β2 enables the algorithm to be more robust to the gradient noise in general.",3.2.2. RELATIONSHIP WITH RMSPROP,[0],[0]
+"At iteration t, instead of centering regularization at each θi−1 in (13), consider centering all the proximal regularization terms at the last iterate θt−1. θt then becomes:
+arg min θ∈Θ t∑ i=1",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"wi,t ( 〈gi, θ〉+ 1 2 ‖θ − θt−1‖2diag ( σi 1−β1 )) .",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"(15) Compared with (13), the regularization in (15) is more aggressive as it encourages θt to be close only to the last iterate θt−1.",3.2.3. RELATIONSHIP WITH ADAM,[1.0],"['(15) Compared with (13), the regularization in (15) is more aggressive as it encourages θt to be close only to the last iterate θt−1.']"
+The following Proposition shows that (15) generates the same updates as Adam.,3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+Proposition 5.,3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"In (15),
+θt = Π At Θ ( θt−1 −A−1t t∑ i=1",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"wi,tgi ) , (16)
+where At = diag(( √ vt/(1− βt2) + t1)/ηt).
+",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"As in Adam, ∑t i=1",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"wi,tgi in (16) can be obtained as mt/(1−βt1), wheremt is computed as an exponential moving average of gt’s: mt = β1mt−1 +",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"(1− β1)gt.
+Note that the θt updates of Adagrad (4), RMSprop (7), and FTML (14) depend only on the current gradient gt.",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"On the other hand, the Adam update in (16) involves ∑t i=1",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"wi,tgi, which contains all the past gradients (evaluated at past parameter estimates θi−1’s).",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"This is similar to the use of momentum, which is sometimes helpful in escaping from local minimum.",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"However, when the data distribution is changing (as in deep reinforcement learning), the past gradients may not be very informative, and can even impede parameter adaptation to the environment.",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"Recently, it is also reported that the use of momentum can make training unstable when the loss is nonstationary (Arjovsky et al., 2017).",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"Indeed, Theorem 4.1 in (Kingma & Ba, 2015) shows that Adam has low regret only when β1 is decreasing w.r.t.",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+t.,3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"When β1 → 0, ∑t i=1 wi,tgi → gt and so only the current gradient is used.
+",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+Remark 1.,3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+(Summary) RMSprop and Adam are improvements over Adagrad in training deep networks.,3.2.3. RELATIONSHIP WITH ADAM,[1.0],['(Summary) RMSprop and Adam are improvements over Adagrad in training deep networks.']
+"However, RMSprop uses β1 = 0 (and thus relies only on the current sample), does not correct the bias of the variance estimate, but centers the regularization at the current iterates θi−1’s.",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+"On the other hand, Adam uses β1 > 0, bias-corrected variance, but centers all regularization terms at the last iterate θt−1.",3.2.3. RELATIONSHIP WITH ADAM,[0],[0]
+The proposed FTML combines the nice properties of the two.,3.2.3. RELATIONSHIP WITH ADAM,[1.0],['The proposed FTML combines the nice properties of the two.']
+"In this section, experiments are performed on a number of deep learning models, including convolutional neural networks (Section 4.1), deep residual networks (Section 4.2), memory networks (Section 4.3), neural conversational model (Section 4.4), deep Q-network (Section 4.5), and long short-term memory (LSTM) (Section 4.6).",4. Experiments,[1.0],"['In this section, experiments are performed on a number of deep learning models, including convolutional neural networks (Section 4.1), deep residual networks (Section 4.2), memory networks (Section 4.3), neural conversational model (Section 4.4), deep Q-network (Section 4.5), and long short-term memory (LSTM) (Section 4.6).']"
+"A summary of the empirical performance of the various deep learning optimizers is presented in Section 4.7.
+",4. Experiments,[1.0000000853735338],['A summary of the empirical performance of the various deep learning optimizers is presented in Section 4.7.']
+"The following state-of-the-art optimizers for deep learning models will be compared: (i) Adam (Kingma & Ba, 2015); (ii) RMSprop (Tieleman & Hinton, 2012); (iii) Adadelta (Zeiler, 2012); and (iv)",4. Experiments,[0.9948514919097443],"['The following state-of-the-art optimizers for deep learning models will be compared: (i) Adam (Kingma & Ba, 2015); (ii) RMSprop (Tieleman & Hinton, 2012); (iii) Adadelta (Zeiler, 2012); and (iv) Nesterov accelerated gradient (NAG) (Sutskever et al., 2013).']"
+"Nesterov accelerated gradient (NAG) (Sutskever et al., 2013).",4. Experiments,[0],[0]
+"For FTML, we set β1 = 0.6, β2 = 0.999, and a constant t = = 10−8 for all t. For FTML, Adam, RMSprop, and NAG, η is selected by monitoring performance on the training set (note that Adadelta does not need to set η).",4. Experiments,[1.0],"['For FTML, we set β1 = 0.6, β2 = 0.999, and a constant t = = 10−8 for all t. For FTML, Adam, RMSprop, and NAG, η is selected by monitoring performance on the training set (note that Adadelta does not need to set η).']"
+"The learning rate is chosen from {0.5, 0.25, 0.1, . . .",4. Experiments,[0],[0]
+", 0.00005, 0.000025, 0.00001}.",4. Experiments,[0],[0]
+Significantly underperforming learning rates are removed after running the model for 5− 20 epochs.,4. Experiments,[0],[0]
+We then pick the rate that leads to the smallest final training loss.,4. Experiments,[1.0],['We then pick the rate that leads to the smallest final training loss.']
+"In the section, we perform experiments with the convolutional neural network (CNN) (LeCun et al., 1998).",4.1. Convolutional Neural Networks,[0],[0]
+We use the example models on the MNIST and CIFAR-10 data sets from the Keras library1.,4.1. Convolutional Neural Networks,[0],[0]
+"For MNIST, the CNN has two alternating stages of 3 × 3 convolution filters (using ReLU activation), followed by a 2 × 2 max-pooling layer and a dropout layer (with a dropout rate of 0.25).",4.1. Convolutional Neural Networks,[0],[0]
+"Finally, there is a fully-connected layer with ReLU activation and a dropout rate of 0.5.",4.1. Convolutional Neural Networks,[1.0],"['Finally, there is a fully-connected layer with ReLU activation and a dropout rate of 0.5.']"
+"For CIFAR-10, the CNN has four alternating stages of 3× 3 convolution filters (using ReLU activation).",4.1. Convolutional Neural Networks,[0],[0]
+Every two convolutional layers is followed by a 2×2 maxpooling layer and a dropout layer (with a dropout rate of 0.25).,4.1. Convolutional Neural Networks,[0],[0]
+The last stage has a fully-connected layer with ReLU activation and a dropout rate of 0.5.,4.1. Convolutional Neural Networks,[0],[0]
+"Features in both data sets are normalized to [0, 1].",4.1. Convolutional Neural Networks,[0],[0]
+"Minibatches of sizes 128 and 32 are used for MNIST and CIFAR-10, respectively.
+",4.1. Convolutional Neural Networks,[0],[0]
+"As the iteration complexities of the various algorithms are comparable and the total cost is dominated by backpropagation, we report convergence of the training cross entropy loss versus the number of epochs.",4.1. Convolutional Neural Networks,[0],[0]
+"This setup is also used in (Zeiler, 2012; Kingma & Ba, 2015).
+",4.1. Convolutional Neural Networks,[0],[0]
+Figure 1 shows the convergence results.,4.1. Convolutional Neural Networks,[0],[0]
+"As can be seen, FTML performs best on both data sets.",4.1. Convolutional Neural Networks,[0],[0]
+"Adam has comparable performance with FTML on MNIST, but does not perform as well on CIFAR-10.",4.1. Convolutional Neural Networks,[0],[0]
+The other methods are much inferior.,4.1. Convolutional Neural Networks,[0],[0]
+"In particular, RMSprop is slow on both MNIST and CIFAR-10, and Adadelta tends to diverge on CIFAR-10.",4.1. Convolutional Neural Networks,[0],[0]
+"Recently, substantially deeper networks have been popularly used, particularly in computer vision.",4.2. Deep Residual Networks,[0],[0]
+"For example, a 152-layer deep residual network (He et al., 2016) achieves state-of-the-art performance on ImageNet classification, and won the first place on the ILSVRC 2015 classification task.
+",4.2. Deep Residual Networks,[0],[0]
+"In this section, we perform experiments with a 110-layer deep residual network on the CIFAR-10 and CIFAR-100 data sets.",4.2. Deep Residual Networks,[0],[0]
+The code is based on its Torch implementation2.,4.2. Deep Residual Networks,[0],[0]
+"We leave the architecture and related settings intact, and use the same learning rate schedule.",4.2. Deep Residual Networks,[0],[0]
+The default optimizer in the Torch code is NAG.,4.2. Deep Residual Networks,[0],[0]
+"Here, we also experiment with Adadelta, RMSprop, Adam and the proposed FTML.",4.2. Deep Residual Networks,[0],[0]
+"A minibatch size of 32 is used.
+",4.2. Deep Residual Networks,[0],[0]
+Convergence of the training cross entropy loss is shown in Figure 2.,4.2. Deep Residual Networks,[0],[0]
+"As can been seen, all optimizers, except Adadelta, are very competitive and have comparable per-
+1https://github.com/fchollet/keras.",4.2. Deep Residual Networks,[0],[0]
+"2https://github.com/facebook/fb.resnet.
+torch.
+",4.2. Deep Residual Networks,[0],[0]
+formance on these two data sets.,4.2. Deep Residual Networks,[0],[0]
+"NAG shows slower initial convergence, while FTML converges slightly faster than the others on the CIFAR-10 data set.",4.2. Deep Residual Networks,[0],[0]
+"Recently, there has been a lot of attention on combining inference, attention and memory for various machine learning tasks.",4.3. Memory Networks,[0],[0]
+"In particular, the memory network (Weston et al., 2014; Sukhbaatar et al., 2015) has been popularly used for natural language understanding.
+",4.3. Memory Networks,[0],[0]
+"In this section, we use the example model of the end-toend memory network (with LSTM) from the Keras library.",4.3. Memory Networks,[0],[0]
+"We consider the question answering task (Sukhbaatar et al., 2015; Weston et al., 2016), and perform experiments on the “single supporting fact” task in the bAbI data set (Weston et al., 2016).",4.3. Memory Networks,[0],[0]
+This task consists of questions in which a previously given single sentence provides the answer.,4.3. Memory Networks,[0],[0]
+"An
+example is shown below.",4.3. Memory Networks,[0],[0]
+"We use a single supporting memory, and a minibatch size of 32.
+",4.3. Memory Networks,[0],[0]
+Single Supporting Fact:,4.3. Memory Networks,[0],[0]
+Mary moved to the bathroom.,4.3. Memory Networks,[0],[0]
+John went to the hallway.,4.3. Memory Networks,[0],[0]
+Where is Mary?,4.3. Memory Networks,[0],[0]
+"A: bathroom
+Convergence of the training cross entropy loss is shown in Figure 3.",4.3. Memory Networks,[0],[0]
+"As can be seen, FTML and RMSprop perform best on this data set.",4.3. Memory Networks,[0],[0]
+"Adam is slower, while NAG and Adadelta perform poorly.",4.3. Memory Networks,[0],[0]
+"The neural conversational model (Vinyals & Le, 2015) is a sequence-to-sequence model (Sutskever et al., 2014) that is capable of predicting the next sequence given the last or previous sequences in a conversation.",4.4. Neural Conversational Model,[0],[0]
+"A LSTM layer en-
+codes the input sentence to a thought vector, and a second LSTM layer decodes the thought vector to the response.",4.4. Neural Conversational Model,[0],[0]
+"It has been shown that this model can often produce fluent and natural conversations.
+",4.4. Neural Conversational Model,[0],[0]
+"In this experiment, we use the publicly available Torch implementation3 with a constant stepsize, and its default data set Cornell Movie-Dialogs Corpus (with 50, 000 samples) (Danescu-Niculescu-Mizil & Lee, 2011).",4.4. Neural Conversational Model,[0],[0]
+"The number of hidden units is set to 1000, and the minibatch size is 10.
+",4.4. Neural Conversational Model,[0],[0]
+Convergence of the training cross entropy loss is shown in Figure 4.,4.4. Neural Conversational Model,[0],[0]
+"Adadelta is not reported here, since it performs poorly (as in previous experiments).",4.4. Neural Conversational Model,[0],[0]
+"As can be seen, FTML outperforms Adam and RMSprop.",4.4. Neural Conversational Model,[0],[0]
+"In particular, RMSprop is much inferior.",4.4. Neural Conversational Model,[0],[0]
+"NAG is slower than FTML and Adam in the first 21 epochs, but becomes faster towards the end of training.",4.4. Neural Conversational Model,[0],[0]
+"In this section, we use the Deep Q-network (DQN) (Mnih et al., 2015) for deep reinforcement learning.",4.5. Deep Q-Network,[0],[0]
+Experiments are performed on two computer games on the Atari 2600 platform: Breakout and Asterix.,4.5. Deep Q-Network,[0],[0]
+"We use the publicly available Torch implementation with the default network setup4, and a minibatch size of 32.",4.5. Deep Q-Network,[0],[0]
+"We only compare FTML with RMSprop and Adam for optimization, as NAG and Adadelta are rarely used in training the DQN.",4.5. Deep Q-Network,[0],[0]
+"As in (Mnih et al., 2015), we use = 10−2 for all methods, and performance evaluation is based on the average score per episode.",4.5. Deep Q-Network,[0],[0]
+"The higher the score, the better the performance.
+",4.5. Deep Q-Network,[0],[0]
+Convergence is shown in Figure 5.,4.5. Deep Q-Network,[0],[0]
+"On Breakout, RM-
+3https://github.com/macournoyer/ neuralconvo.
+",4.5. Deep Q-Network,[0],[0]
+"4https://github.com/Kaixhin/Atari.
+",4.5. Deep Q-Network,[0],[0]
+Sprop and FTML are comparable and yield higher scores than Adam.,4.5. Deep Q-Network,[0],[0]
+"On Asterix, FTML outperforms all the others.",4.5. Deep Q-Network,[0],[0]
+"In particular, the DQN trained with RMSprop fails to learn the task, and its score begins to drop after about 100 epochs.",4.5. Deep Q-Network,[0],[0]
+"A similar problem has also been observed in (Hasselt et al., 2016).",4.5. Deep Q-Network,[0],[0]
+"Experience replay (Mnih et al., 2015) has been commonly used in deep reinforcement learning to smooth over changes in the data distribution, and avoid oscillations or divergence of the parameters.",4.5. Deep Q-Network,[0],[0]
+"However, results here show that Adam still has inferior performance because of its use of all past gradients, many of these are not informative when the data distribution has changed.",4.5. Deep Q-Network,[0],[0]
+"To illustrate the problem of Adam in Section 4.5 more clearly, we perform the following timeseries prediction experiment with the LSTM.",4.6. Long Short-Term Memory (LSTM),[0],[0]
+We construct a synthetic timeseries of length 1000.,4.6. Long Short-Term Memory (LSTM),[0],[0]
+"This is divided into 20 segments, each of length 50.",4.6. Long Short-Term Memory (LSTM),[0],[0]
+"At each time point, the sample is 10- dimensional.",4.6. Long Short-Term Memory (LSTM),[0],[0]
+"In segment i, samples are generated from a normal distribution with mean ([i, i, . . .",4.6. Long Short-Term Memory (LSTM),[0],[0]
+", i] + ζi) ∈ R10 and identity covariance matrix, where the components of ζi are independent standard normal random variables.",4.6. Long Short-Term Memory (LSTM),[0],[0]
+Noise from the standard normal distribution is added to corrupt the data.,4.6. Long Short-Term Memory (LSTM),[0],[0]
+"The task is to predict the data sample at the next time point t.
+We use a one-layer LSTM implemented in (Léonard et al., 2015).",4.6. Long Short-Term Memory (LSTM),[0],[0]
+100 hidden units are used.,4.6. Long Short-Term Memory (LSTM),[0],[0]
+"We truncate backpropagation through time (BPTT) to 5 timesteps, and input 5 samples to the LSTM in each iteration.",4.6. Long Short-Term Memory (LSTM),[0],[0]
+"Thus, the data distribution changes every 10 iterations, as a different normal distribution is then used for data generation.",4.6. Long Short-Term Memory (LSTM),[0],[0]
+"Performance evaluation is based on the squared loss ft(θt−1) at time t.
+Convergence of the loss is shown in Figure 6(a).",4.6. Long Short-Term Memory (LSTM),[0],[0]
+"As can be
+seen, Adam has difficulty in adapting to the data.",4.6. Long Short-Term Memory (LSTM),[0],[0]
+"In contrast, FTML and RMSprop can adapt more quickly, yielding better and more stable performance.
+",4.6. Long Short-Term Memory (LSTM),[0],[0]
+"As a baseline, we consider the case where the data distribution does not change (the means of all the segments are fixed to the vector of ones)",4.6. Long Short-Term Memory (LSTM),[0],[0]
+Figure 6(b) shows the results.,4.6. Long Short-Term Memory (LSTM),[0],[0]
+"As can be seen, Adam now performs comparably to FTML and RMSprop.",4.6. Long Short-Term Memory (LSTM),[0],[0]
+The main problem with RMSprop is that its performance is not stable.,4.7. Summary of Results,[0],[0]
+"Sometimes, it performs well, but sometimes it can have significantly inferior performance (e.g., as can be seen from Figures 1, 4 and 5(b)).",4.7. Summary of Results,[0],[0]
+"The performance of Adam is more stable, though it often lags behind the best optimizer (e.g., Figures 1(b), 3, and 4).",4.7. Summary of Results,[0],[0]
+"It is particularly problematic when learning in a changing environment (Fig-
+ures 5 and 6(a)).",4.7. Summary of Results,[0],[0]
+"In contrast, the proposed FTML shows stable performance on various models and tasks.",4.7. Summary of Results,[0],[0]
+"It converges quickly, and is always the best (or at least among the best) in all our experiments.",4.7. Summary of Results,[0],[0]
+"In this paper, we proposed a FTPRL variant called FTML, in which the recent samples are weighted more heavily in each iteration.",5. Conclusion,[0],[0]
+"Hence, it is able to adapt more quickly when the parameter moves to another local basin, or when the data distribution changes.",5. Conclusion,[0],[0]
+FTML is closely related to RMSprop and Adam.,5. Conclusion,[0],[0]
+"In particular, it enjoys their nice properties, but avoids their pitfalls.",5. Conclusion,[0],[0]
+"Experimental results on a number of deep learning models and tasks demonstrate that FTML converges quickly, and is always the best (or among the best) of the various optimizers.",5. Conclusion,[0],[0]
+This research was supported in part by ITF/391/15FX.,Acknowledgments,[0],[0]
+Deep networks are highly nonlinear and difficult to optimize.,abstractText,[0],[0]
+"During training, the parameter iterate may move from one local basin to another, or the data distribution may even change.",abstractText,[0],[0]
+"Inspired by the close connection between stochastic optimization and online learning, we propose a variant of the follow the regularized leader (FTRL) algorithm called follow the moving leader (FTML).",abstractText,[0],[0]
+"Unlike the FTRL family of algorithms, the recent samples are weighted more heavily in each iteration and so FTML can adapt more quickly to changes.",abstractText,[0],[0]
+"We show that FTML enjoys the nice properties of RMSprop and Adam, while avoiding their pitfalls.",abstractText,[0],[0]
+"Experimental results on a number of deep learning models and tasks demonstrate that FTML converges quickly, and outperforms other state-ofthe-art optimizers.",abstractText,[0],[0]
+Follow the Moving Leader in Deep Learning,title,[0],[0]

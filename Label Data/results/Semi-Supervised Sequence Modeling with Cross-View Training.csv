@@ -1,0 +1,337 @@
+0,1,label2,summary_sentences
+"Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing, pages 1914–1925 Brussels, Belgium, October 31 - November 4, 2018. c©2018 Association for Computational Linguistics
+1914",text,[0],[0]
+Deep learning models work best when trained on large amounts of labeled data.,1 Introduction,[0],[0]
+"However, acquiring labels is costly, motivating the need for effective semi-supervised learning techniques that leverage unlabeled examples.",1 Introduction,[0],[0]
+"A widely successful semi-supervised learning strategy for neural NLP is pre-training word vectors (Mikolov et al., 2013).",1 Introduction,[0],[0]
+"More recent work trains a Bi-LSTM sentence encoder to do language modeling and then incorporates its context-sensitive representations into supervised models (Dai and Le, 2015; Peters et al.,
+1Code will be made available at https: //github.com/tensorflow/models/tree/ master/research/cvt_text
+2018).",1 Introduction,[0],[0]
+"Such pre-training methods perform unsupervised representation learning on a large corpus of unlabeled data followed by supervised training.
+",1 Introduction,[0.9999999319114031],['Such pre-training methods perform unsupervised representation learning on a large corpus of unlabeled data followed by supervised training.']
+A key disadvantage of pre-training is that the first representation learning phase does not take advantage of labeled data – the model attempts to learn generally effective representations rather than ones that are targeted towards a particular task.,1 Introduction,[0],[0]
+Older semi-supervised learning algorithms like self-training do not suffer from this problem because they continually learn about a task on a mix of labeled and unlabeled data.,1 Introduction,[0],[0]
+"Selftraining has historically been effective for NLP (Yarowsky, 1995; McClosky et al., 2006), but is less commonly used with neural models.",1 Introduction,[0],[0]
+"This paper presents Cross-View Training (CVT), a new self-training algorithm that works well for neural sequence models.
+",1 Introduction,[0.9999999458875054],"['This paper presents Cross-View Training (CVT), a new self-training algorithm that works well for neural sequence models.']"
+"In self-training, the model learns as normal on labeled examples.",1 Introduction,[1.0],"['In self-training, the model learns as normal on labeled examples.']"
+"On unlabeled examples, the model acts as both a teacher that makes predictions about the examples and a student that is trained on those predictions.",1 Introduction,[0],[0]
+"Although this process has shown value for some tasks, it is somewhat tautological: the model already produces the predictions it is being trained on.",1 Introduction,[0],[0]
+"Recent research on computer vision addresses this by adding noise to the student’s input, training the model so it is robust to input perturbations (Sajjadi et al., 2016; Wei et al., 2018).",1 Introduction,[1.0],"['Recent research on computer vision addresses this by adding noise to the student’s input, training the model so it is robust to input perturbations (Sajjadi et al., 2016; Wei et al., 2018).']"
+"However, applying noise is difficult for discrete inputs like text.
+",1 Introduction,[1.0000000279868952],"['However, applying noise is difficult for discrete inputs like text.']"
+"As a solution, we take inspiration from multiview learning (Blum and Mitchell, 1998; Xu et al., 2013) and train the model to produce consistent predictions across different views of the input.",1 Introduction,[1.0],"['As a solution, we take inspiration from multiview learning (Blum and Mitchell, 1998; Xu et al., 2013) and train the model to produce consistent predictions across different views of the input.']"
+"Instead of only training the full model as a student, CVT adds auxiliary prediction modules – neural networks that transform vector representations into predictions – to the model and also trains them as students.",1 Introduction,[1.0],"['Instead of only training the full model as a student, CVT adds auxiliary prediction modules – neural networks that transform vector representations into predictions – to the model and also trains them as students.']"
+"The input to each student prediction module is a subset of the model’s intermediate rep-
+resentations corresponding to a restricted view of the input example.",1 Introduction,[0.9999999287580718],['The input to each student prediction module is a subset of the model’s intermediate rep- resentations corresponding to a restricted view of the input example.']
+"For example, one auxiliary prediction module for sequence tagging is attached to only the “forward” LSTM in the model’s first BiLSTM layer, so it makes predictions without seeing any tokens to the right of the current one.
+",1 Introduction,[0.9999999008511332],"['For example, one auxiliary prediction module for sequence tagging is attached to only the “forward” LSTM in the model’s first BiLSTM layer, so it makes predictions without seeing any tokens to the right of the current one.']"
+CVT works by improving the model’s representation learning.,1 Introduction,[1.0],['CVT works by improving the model’s representation learning.']
+"The auxiliary prediction modules can learn from the full model’s predictions because the full model has a better, unrestricted view of the input.",1 Introduction,[0],[0]
+"As the auxiliary modules learn to make accurate predictions despite their restricted views of the input, they improve the quality of the representations they are built on top of.",1 Introduction,[1.0],"['As the auxiliary modules learn to make accurate predictions despite their restricted views of the input, they improve the quality of the representations they are built on top of.']"
+"This in turn improves the full model, which uses the same shared representations.",1 Introduction,[1.0],"['This in turn improves the full model, which uses the same shared representations.']"
+"In short, our method combines the idea of representation learning on unlabeled data with classic self-training.
+",1 Introduction,[0],[0]
+"CVT can be applied to a variety of tasks and neural architectures, but we focus on sequence modeling tasks where the prediction modules are attached to a shared Bi-LSTM encoder.",1 Introduction,[0],[0]
+"We propose auxiliary prediction modules that work well for sequence taggers, graph-based dependency parsers, and sequence-to-sequence models.",1 Introduction,[0],[0]
+"We evaluate our approach on English dependency parsing, combinatory categorial grammar supertagging, named entity recognition, partof-speech tagging, and text chunking, as well as English to Vietnamese machine translation.",1 Introduction,[1.0],"['We evaluate our approach on English dependency parsing, combinatory categorial grammar supertagging, named entity recognition, partof-speech tagging, and text chunking, as well as English to Vietnamese machine translation.']"
+CVT improves over previously published results on all these tasks.,1 Introduction,[0],[0]
+"Furthermore, CVT can easily and effectively be combined with multi-task learning: we just add additional prediction modules for the different tasks on top of the shared Bi-LSTM encoder.",1 Introduction,[1.0],"['Furthermore, CVT can easily and effectively be combined with multi-task learning: we just add additional prediction modules for the different tasks on top of the shared Bi-LSTM encoder.']"
+Training a unified model to jointly perform all of the tasks except machine translation improves results (outperforming a multi-task ELMo model) while decreasing the total training time.,1 Introduction,[1.0],['Training a unified model to jointly perform all of the tasks except machine translation improves results (outperforming a multi-task ELMo model) while decreasing the total training time.']
+We first present Cross-View Training and describe how it can be combined effectively with multi-task learning.,2 Cross-View Training,[0],[0]
+See Figure 1 for an overview of the training method.,2 Cross-View Training,[0],[0]
+"Let Dl = {(x1, y1), (x2, y2), ..., (xN , yN )} represent a labeled dataset and Dul = {x1, x2, ..., xM} represent an unlabeled dataset We use pθ(y|xi) to denote the output distribution over classes pro-
+duced by the model with parameters θ on input xi.",2.1 Method,[0],[0]
+"During CVT, the model alternates learning on a minibatch of labeled examples and learning on a minibatch of unlabeled examples.",2.1 Method,[1.0],"['During CVT, the model alternates learning on a minibatch of labeled examples and learning on a minibatch of unlabeled examples.']"
+"For labeled examples, CVT uses standard cross-entropy loss:
+Lsup(θ) = 1 |Dl| ∑
+xi,yi∈Dl
+CE(yi, pθ(y|xi))
+",2.1 Method,[0],[0]
+"CVT adds k auxiliary prediction modules to the model, which are used when learning on unlabeled examples.",2.1 Method,[0],[0]
+"A prediction module is usually a small neural network (e.g., a hidden layer followed by a softmax layer).",2.1 Method,[0],[0]
+"Each one takes as input an intermediate representation hj(xi) produced by the model (e.g., the outputs of one of the LSTMs in a Bi-LSTM model).",2.1 Method,[0],[0]
+It outputs a distribution over labels pjθ(y|xi).,2.1 Method,[0],[0]
+"Each h
+j is chosen such that it only uses a part of the input xi; the particular choice
+can depend on the task and model architecture.",2.1 Method,[0],[0]
+We propose variants for several tasks in Section 3.,2.1 Method,[0],[0]
+"The auxiliary prediction modules are only used during training; the test-time prediction come from the primary prediction module that produces pθ.
+",2.1 Method,[0],[0]
+"On an unlabeled example, the model first produces soft targets pθ(y|xi) by performing inference.",2.1 Method,[0],[0]
+"CVT trains the auxiliary prediction modules to match the primary prediction module on the unlabeled data by minimizing LCVT(θ) = 1|Dul| ∑ xi∈Dul ∑k j=1D(pθ(y|xi), p j θ(y|xi))
+where D is a distance function between probability distributions (we use KL divergence).",2.1 Method,[0],[0]
+"We hold the primary module’s prediction pθ(y|xi) fixed during training (i.e., we do not back-propagate through it) so the auxiliary modules learn to imitate the primary one, but not vice versa.",2.1 Method,[0],[0]
+CVT works by enhancing the model’s representation learning.,2.1 Method,[0],[0]
+"As the auxiliary modules train, the representations they take as input improve so they are useful for making predictions even when some of the model’s inputs are not available.",2.1 Method,[0],[0]
+"This in turn improves the primary prediction module, which is built on top of the same shared representations.
+",2.1 Method,[0],[0]
+"We combine the supervised and CVT losses into the total loss, L = Lsup + LCVT, and minimize it with stochastic gradient descent.",2.1 Method,[0],[0]
+"In particular, we alternate minimizing Lsup over a minibatch of labeled examples and minimizing LCVT over a minibatch of unlabeled examples.
+",2.1 Method,[0],[0]
+"For most neural networks, adding a few additional prediction modules is computationally cheap compared to the portion of the model building up representations (such as an RNN or CNN).",2.1 Method,[0],[0]
+Therefore our method contributes little overhead to training time over other self-training approaches for most tasks.,2.1 Method,[0],[0]
+CVT does not change inference time or the number of parameters in the fullytrained model because the auxiliary prediction modules are only used during training.,2.1 Method,[0],[0]
+CVT can easily be combined with multi-task learning by adding additional prediction modules for the other tasks on top of the shared Bi-LSTM encoder.,2.2 Combining CVT with Multi-Task Learning,[0],[0]
+"During supervised learning, we randomly select a task and then update Lsup using a minibatch of labeled data for that task.",2.2 Combining CVT with Multi-Task Learning,[1.0],"['During supervised learning, we randomly select a task and then update Lsup using a minibatch of labeled data for that task.']"
+"When learning on the unlabeled data, we optimize LCVT
+jointly across all tasks at once, first running inference with all the primary prediction modules and then learning from the predictions with all the auxiliary prediction modules.",2.2 Combining CVT with Multi-Task Learning,[0],[0]
+"As before, the model alternates training on minibatches of labeled and unlabeled examples.
+",2.2 Combining CVT with Multi-Task Learning,[0.9999999461956696],"['As before, the model alternates training on minibatches of labeled and unlabeled examples.']"
+"Examples labeled across many tasks are useful for multi-task systems to learn from, but most datasets are only labeled with one task.",2.2 Combining CVT with Multi-Task Learning,[1.0],"['Examples labeled across many tasks are useful for multi-task systems to learn from, but most datasets are only labeled with one task.']"
+A benefit of multi-task CVT is that the model creates (artificial) all-tasks-labeled examples from unlabeled data.,2.2 Combining CVT with Multi-Task Learning,[0],[0]
+This significantly improves the model’s data efficiency and training time.,2.2 Combining CVT with Multi-Task Learning,[0],[0]
+"Since running prediction modules is computationally cheap, computing LCVT is not much slower for many tasks than it is for a single one.",2.2 Combining CVT with Multi-Task Learning,[0],[0]
+"However, we find the all-tasks-labeled examples substantially speed up model convergence.",2.2 Combining CVT with Multi-Task Learning,[0],[0]
+"For example, our model trained on six tasks takes about three times as long to converge as the average model trained on one task, a 2x decrease in total training time.",2.2 Combining CVT with Multi-Task Learning,[1.0],"['For example, our model trained on six tasks takes about three times as long to converge as the average model trained on one task, a 2x decrease in total training time.']"
+CVT relies on auxiliary prediction modules that have restricted views of the input.,3 Cross-View Training Models,[0],[0]
+"In this section, we describe specific constructions of the auxiliary prediction modules that are effective for sequence tagging, dependency parsing, and sequence-tosequence learning.",3 Cross-View Training Models,[0],[0]
+"All of our models use a two-layer CNN-BiLSTM (Chiu and Nichols, 2016; Ma and Hovy, 2016) sentence encoder.",3.1 Bi-LSTM Sentence Encoder,[0],[0]
+It takes as input a sequence of words xi =,3.1 Bi-LSTM Sentence Encoder,[0],[0]
+"[x1i , x 2 i , ..., x T i ].",3.1 Bi-LSTM Sentence Encoder,[0],[0]
+"First, each word is represented as the sum of an embedding vector and the output of a character-level Convolutional Neural Network, resulting in a sequence of vectors v =",3.1 Bi-LSTM Sentence Encoder,[0],[0]
+"[v1, v2, ..., vT ].",3.1 Bi-LSTM Sentence Encoder,[0],[0]
+"The encoder applies a twolayer bidirectional LSTM (Graves and Schmidhuber, 2005) to these representations.",3.1 Bi-LSTM Sentence Encoder,[0],[0]
+"The first layer runs a Long Short-Term Memory unit (Hochreiter and Schmidhuber, 1997) in the forward direction (taking vt as input at each step t) and the backward direction (taking vT−t+1 at each step) to produce vector sequences [ −→ h 11, −→ h 21, ...",3.1 Bi-LSTM Sentence Encoder,[0],[0]
+"−→ h T1 ] and [ ←− h 11, ←− h 21, ...",3.1 Bi-LSTM Sentence Encoder,[0],[0]
+←− h T1 ].,3.1 Bi-LSTM Sentence Encoder,[0],[0]
+The output of the Bi-LSTM is the concatenation of these vectors: h1 =,3.1 Bi-LSTM Sentence Encoder,[0],[0]
+"[ −→ h 11 ⊕←−
+h 11, ..., −→ h T1 ⊕ ←−",3.1 Bi-LSTM Sentence Encoder,[0],[0]
+h T1 ].,3.1 Bi-LSTM Sentence Encoder,[0],[0]
+"The second Bi-LSTM layer
+works the same, producing outputs h2, except it takes h1 as input instead of v.",3.1 Bi-LSTM Sentence Encoder,[0],[0]
+"In sequence tagging, each token xti has a corresponding label yti .",3.2 CVT for Sequence Tagging,[0],[0]
+"The primary prediction module for sequence tagging produces a probability distribution over classes for the tth label using a onehidden-layer neural network applied to the corresponding encoder outputs:
+p(yt|xi) = NN(ht1 ⊕ ht2) = softmax(U · ReLU(W (ht1 ⊕ ht2))",3.2 CVT for Sequence Tagging,[0],[0]
+"+ b)
+",3.2 CVT for Sequence Tagging,[0],[0]
+"The auxiliary prediction modules take −→ h 1(xi) and ←− h 1(xi), the outputs of the forward and backward LSTMs in the first2 Bi-LSTM layer, as inputs.",3.2 CVT for Sequence Tagging,[0],[0]
+"We add the following four auxiliary prediction modules to the model (see Figure 2):
+pfwdθ (y t|xi)",3.2 CVT for Sequence Tagging,[0],[0]
+= NNfwd( −→ h t1(xi)),3.2 CVT for Sequence Tagging,[0],[0]
+pbwdθ (y t|xi) =,3.2 CVT for Sequence Tagging,[0],[0]
+"NNbwd( ←− h t1(xi))
+",3.2 CVT for Sequence Tagging,[0],[0]
+pfutureθ,3.2 CVT for Sequence Tagging,[0],[0]
+"(y t|xi) = NNfuture( −→ h t−11 (xi))
+",3.2 CVT for Sequence Tagging,[0],[0]
+p past θ (y t|xi) =,3.2 CVT for Sequence Tagging,[0],[0]
+NNpast( ←− h,3.2 CVT for Sequence Tagging,[0],[0]
+"t+11 (xi))
+The “forward” module makes each prediction without seeing the right context of the current token.",3.2 CVT for Sequence Tagging,[0],[0]
+The “future” module makes each prediction without the right context or the current token itself.,3.2 CVT for Sequence Tagging,[0],[0]
+"Therefore it works like a neural language model that, instead of predicting which token comes next in the sequence, predicts which class of token comes next.",3.2 CVT for Sequence Tagging,[0],[0]
+The “backward” and “past” modules are analogous.,3.2 CVT for Sequence Tagging,[0],[0]
+"In a dependency parse, words in a sentence are treated as nodes in a graph.",3.3 CVT for Dependency Parsing,[0],[0]
+"Typed directed edges connect the words, forming a tree structure describing the syntactic structure of the sentence.",3.3 CVT for Dependency Parsing,[0],[0]
+"In particular, each word xti in a sentence",3.3 CVT for Dependency Parsing,[0],[0]
+"xi = x 1 i , ..., x T i receives exactly one in-going edge (u, t, r) going from word xui (called the “head”) to it (the “dependent”) of type r (the “relation”).",3.3 CVT for Dependency Parsing,[0],[0]
+We use a graph-based dependency parser similar to the one from Dozat and Manning (2017).,3.3 CVT for Dependency Parsing,[0],[0]
+This treats dependency parsing as a classification task where the goal is to predict which in-going edge yti =,3.3 CVT for Dependency Parsing,[0],[0]
+"(u, t, r) connects to each word x t i.
+First, the representations produced by the encoder for the candidate head and dependent are
+2Modules taking inputs from the second Bi-LSTM layer would not have restricted views because information about the whole sentence gets propagated through the first layer.
+",3.3 CVT for Dependency Parsing,[0],[0]
+"LSTM LSTM ŷfuture  ŷfwd  ŷ   ŷbwd  ŷpast  Backward LSTM Forward LSTM Predict LSTM LSTM LSTM LSTM Auxiliary Prediction Modules Primary Prediction Module
+passed through separate hidden layers.",3.3 CVT for Dependency Parsing,[0],[0]
+A bilinear classifier applied to these representations produces a score for each candidate edge.,3.3 CVT for Dependency Parsing,[0],[0]
+"Lastly, these scores are passed through a softmax layer to produce probabilities.",3.3 CVT for Dependency Parsing,[0],[0]
+"Mathematically, the probability of an edge is given as:
+pθ((u, t, r)|xi) ∝",3.3 CVT for Dependency Parsing,[0],[0]
+"es(h u 1 (xi)⊕hu2 (xi),ht1(xi)⊕ht2(xi),r)
+where s is the scoring function:
+s(z1, z2, r) = ReLU(Wheadz1 + bhead)(Wr",3.3 CVT for Dependency Parsing,[0],[0]
+"+W )
+",3.3 CVT for Dependency Parsing,[0],[0]
+"ReLU(Wdepz2 + bdep)
+",3.3 CVT for Dependency Parsing,[0],[0]
+The bilinear classifier uses a weight matrix Wr specific to the candidate relation as well as a weight matrix W shared across all relations.,3.3 CVT for Dependency Parsing,[0],[0]
+"Note that unlike in most prior work, our dependency parser only takes words as inputs, not words and part-of-speech tags.
+",3.3 CVT for Dependency Parsing,[0],[0]
+"We add four auxiliary prediction modules to our model for cross-view training:
+pfwd-fwdθ ((u, t, r)|xi) ∝",3.3 CVT for Dependency Parsing,[0],[0]
+"es fwd-fwd(
+−→ h u1 (xi), −→ h t1(xi),r)
+pfwd-bwdθ ((u, t, r)|xi) ∝",3.3 CVT for Dependency Parsing,[0],[0]
+"es fwd-bwd(
+−→ h u1 (xi), ←− h t1(xi),r)
+pbwd-fwdθ ((u, t, r)|xi) ∝",3.3 CVT for Dependency Parsing,[0],[0]
+"es bwd-fwd(
+←− h u1 (xi), −→ h t1(xi),r)
+pbwd-bwdθ ((u, t, r)|xi) ∝",3.3 CVT for Dependency Parsing,[0],[0]
+"es bwd-bwd(
+←− h u1 (xi), ←− h t1(xi),r)
+",3.3 CVT for Dependency Parsing,[0],[0]
+Each one has some missing context (not seeing either the preceding or following words) for the candidate head and candidate dependent.,3.3 CVT for Dependency Parsing,[0],[0]
+"We use an encoder-decoder sequence-to-sequence model with attention (Sutskever et al., 2014; Bahdanau et al., 2015).",3.4 CVT for Sequence-to-Sequence Learning,[0],[0]
+"Each example consists of an input (source) sequence xi = x1i , ..., x T i and output (target) sequence yi = y1i , ..., y K i .",3.4 CVT for Sequence-to-Sequence Learning,[0],[0]
+"The encoder’s representations are passed into an LSTM decoder using a bilinear attention mechanism (Luong et al., 2015).",3.4 CVT for Sequence-to-Sequence Learning,[0],[0]
+"In particular, at each time step t the decoder computes an attention distribution over source sequence hidden states as αj ∝ eh
+jWαh̄t where h̄t is the decoder’s current hidden state.",3.4 CVT for Sequence-to-Sequence Learning,[0],[0]
+"The source hidden states weighted by the attention distribution form a context vector: ct = ∑ j αjh
+j .",3.4 CVT for Sequence-to-Sequence Learning,[0],[0]
+"Next, the context vector and current hidden state are combined into an attention vector at = tanh(Wa[ct, ht]).",3.4 CVT for Sequence-to-Sequence Learning,[0],[0]
+"Lastly, a softmax layer predicts the next token in the output sequence: p(yti |y<ti , xi) = softmax(Wsat).
+",3.4 CVT for Sequence-to-Sequence Learning,[0],[0]
+We add two auxiliary decoders when applying CVT.,3.4 CVT for Sequence-to-Sequence Learning,[0],[0]
+"The auxiliary decoders share embedding and LSTM parameters with the primary decoder, but have different parameters for the attention mechanisms and softmax layers.",3.4 CVT for Sequence-to-Sequence Learning,[0],[0]
+"For the first one, we restrict its view of the input by applying attention dropout, randomly zeroing out a fraction of its attention weights.",3.4 CVT for Sequence-to-Sequence Learning,[0],[0]
+"The second one is trained to predict the next word in the target sequence rather than the current one: pfutureθ (y t i |y<ti , xi) = softmax(W futures a future t−1 ).",3.4 CVT for Sequence-to-Sequence Learning,[0],[0]
+"Since there is no target sequence for unlabeled examples, we cannot apply teacher forcing to get an output distribution over the vocabulary from the primary decoder at each time step.",3.4 CVT for Sequence-to-Sequence Learning,[0],[0]
+"Instead, we produce hard targets for the auxiliary modules by running the primary decoder with beam search on the input sequence.",3.4 CVT for Sequence-to-Sequence Learning,[0],[0]
+This idea has previously been applied to sequence-level knowledge distillation by Kim and Rush (2016).,3.4 CVT for Sequence-to-Sequence Learning,[0],[0]
+"We compare Cross-View Training against several strong baselines on seven tasks:
+Combinatory Categorial Grammar (CCG)",4 Experiments,[0],[0]
+"Supertagging: We use data from CCGBank (Hockenmaier and Steedman, 2007).
+",4 Experiments,[0],[0]
+"Text Chunking: We use the CoNLL-2000 data (Tjong Kim Sang and Buchholz, 2000).
+",4 Experiments,[0],[0]
+"Named Entity Recognition (NER): We use the CoNLL-2003 data (Tjong Kim Sang and De Meulder, 2003).
+",4 Experiments,[0],[0]
+"Fine-Grained NER (FGN): We use the OntoNotes (Hovy et al., 2006) dataset.
+",4 Experiments,[0],[0]
+Part-of-Speech (POS),4 Experiments,[0],[0]
+"Tagging: We use the Wall Street Journal portion of the Penn Treebank (Marcus et al., 1993).
+",4 Experiments,[0],[0]
+"Dependency Parsing: We use the Penn Treebank converted to Stanford Dependencies version 3.3.0.
+Machine Translation: We use the EnglishVietnamese translation dataset from IWSLT 2015 (Cettolo et al., 2015).",4 Experiments,[0],[0]
+"We report (tokenized) BLEU scores on the tst2013 test set.
+",4 Experiments,[0],[0]
+"We use the 1 Billion Word Language Model Benchmark (Chelba et al., 2014) as a pool of unlabeled sentences for semi-supervised learning.",4 Experiments,[0],[0]
+"We apply dropout during training, but not when running the primary prediction module to produce soft targets on unlabeled examples.",4.1 Model Details and Baselines,[0],[0]
+"In addition to the auxiliary prediction modules listed in Section 3, we find it slightly improves results to add another one that sees the whole input rather than a subset (but unlike the primary prediction module, does have dropout applied to its representations).",4.1 Model Details and Baselines,[0],[0]
+"Unless indicated otherwise, our models have LSTMs with 1024-sized hidden states and 512-sized projection layers.",4.1 Model Details and Baselines,[0],[0]
+See the supplementary material for full training details and hyperparameters.,4.1 Model Details and Baselines,[0],[0]
+"We compare CVT with the following other semi-supervised learning algorithms:
+Word Dropout.",4.1 Model Details and Baselines,[0],[0]
+"In this method, we only train the primary prediction module.",4.1 Model Details and Baselines,[0],[0]
+"When acting as a teacher it is run as normal, but when acting as a student, we randomly replace some of the input words with a REMOVED token.",4.1 Model Details and Baselines,[0],[0]
+This is similar to CVT in that it exposes the model to a restricted view of the input.,4.1 Model Details and Baselines,[0],[0]
+"However, it is less data efficient.",4.1 Model Details and Baselines,[0],[0]
+"By carefully designing the auxiliary prediction modules, it is possible to train the auxiliary prediction modules to match the primary one across many different views of the input a once, rather than just one view at a time.
+",4.1 Model Details and Baselines,[0],[0]
+Virtual Adversarial Training (VAT).,4.1 Model Details and Baselines,[1.0],['Virtual Adversarial Training (VAT).']
+"VAT (Miyato et al., 2016) works like word dropout, but adds noise to the word embeddings of the student instead of dropping out words.",4.1 Model Details and Baselines,[0],[0]
+"Notably, the noise is chosen adversarially so it most changes the model’s prediction.",4.1 Model Details and Baselines,[0],[0]
+"This method was applied successfully to semi-supervised text classification
+by Miyato et al. (2017).
+ELMo.",4.1 Model Details and Baselines,[0],[0]
+ELMo incorporates the representations from a large separately-trained language model into a task-specific model.,4.1 Model Details and Baselines,[0],[0]
+Our implementaiton follows Peters et al. (2018).,4.1 Model Details and Baselines,[0],[0]
+"When combining ELMo with multi-task learning, we allow each task to learn its own weights for the ELMo embeddings going into each prediction module.",4.1 Model Details and Baselines,[0],[0]
+We found applying dropout to the ELMo embeddings was crucial for achieving good performance.,4.1 Model Details and Baselines,[0],[0]
+Results are shown in Table 1.,4.2 Results,[0],[0]
+CVT on its own outperforms or is comparable to the best previously published results on all tasks.,4.2 Results,[0],[0]
+"Figure 3 shows an example win for CVT over supervised learning.
+",4.2 Results,[0],[0]
+"Of the prior results listed in Table 1, only TagLM and ELMo are semi-supervised.",4.2 Results,[0],[0]
+These methods first train an enormous language model on unlabeled data and incorporate the representations produced by the language model into a supervised classifier.,4.2 Results,[0],[0]
+"Our base models use 1024 hidden units in their LSTMs (compared to 4096 in ELMo), require fewer training steps (around one pass over the billion-word benchmark rather than
+many passes), and do not require a pipelined training procedure.",4.2 Results,[0],[0]
+"Therefore, although they perform on par with ELMo, they are faster and simpler to train.",4.2 Results,[0],[0]
+Increasing the size of our CVT+Multitask model so it has 4096 units in its LSTMs like ELMo improves results further so they are significantly better than the ELMo+Multi-task ones.,4.2 Results,[0],[0]
+"We suspect there could be further gains from combining our method with language model pre-training, which we leave for future work.
+",4.2 Results,[1.000000047835722],"['We suspect there could be further gains from combining our method with language model pre-training, which we leave for future work.']"
+CVT + Multi-Task.,4.2 Results,[0],[0]
+We train a single sharedencoder CVT model to perform all of the tasks except machine translation (as it is quite different and requires more training time than the other ones).,4.2 Results,[1.0],['We train a single sharedencoder CVT model to perform all of the tasks except machine translation (as it is quite different and requires more training time than the other ones).']
+"Multi-task learning improves results on all of the tasks except fine-grained NER, sometimes by large margins.",4.2 Results,[0],[0]
+Prior work on many-task NLP such as Hashimoto et al. (2017) uses complicated architectures and training algorithms.,4.2 Results,[0],[0]
+"Our result shows that simple parameter sharing can be enough for effective many-task learning when the model is big and trained on a large amount of data.
+",4.2 Results,[1.0000000367162358],['Our result shows that simple parameter sharing can be enough for effective many-task learning when the model is big and trained on a large amount of data.']
+"Interestingly, multi-task learning works better in conjunction with CVT than with ELMo.",4.2 Results,[0],[0]
+"We hypothesize that the ELMo models quickly fit to the data primarily using the ELMo vectors, which perhaps hinders the model from learning effective representations that transfer across tasks.",4.2 Results,[1.0],"['We hypothesize that the ELMo models quickly fit to the data primarily using the ELMo vectors, which perhaps hinders the model from learning effective representations that transfer across tasks.']"
+"We also believe CVT alleviates the danger of the model “forgetting” one task while training on the other ones, a well-known problem in many-task learning (Kirkpatrick et al., 2017).",4.2 Results,[1.0],"['We also believe CVT alleviates the danger of the model “forgetting” one task while training on the other ones, a well-known problem in many-task learning (Kirkpatrick et al., 2017).']"
+"During multi-task CVT, the model makes predictions about unlabeled examples across all tasks, creating (artificial) all-tasks-labeled examples, so the model does not only see one task at a time.",4.2 Results,[0],[0]
+"In fact, multi-task learning plus self training is similar to the Learning without Forgetting algorithm (Li and Hoiem, 2016), which trains the model to keep its predictions on an old task unchanged when learning a new task.",4.2 Results,[0],[0]
+"To test the value of all-tasks-labeled examples, we trained a multi-task CVT model that only computes LCVT on one task at a time (chosen randomly for each unlabeled minibatch) instead of for all tasks in parallel.",4.2 Results,[0],[0]
+"The one-at-a-time model performs substantially worse (see Table 2).
+",4.2 Results,[1.0000000142275078],['The one-at-a-time model performs substantially worse (see Table 2).']
+Model Generalization.,4.2 Results,[0],[0]
+"In order to evaluate how our models generalize to the dev set from the train set, we plot the dev vs. train accuracy for our different methods as they learn (see Figure 4).",4.2 Results,[0],[0]
+"Both CVT and multi-task learning improve model generalization: for the same train accuracy, the models get better dev accuracy than purely supervised learning.",4.2 Results,[1.0],"['Both CVT and multi-task learning improve model generalization: for the same train accuracy, the models get better dev accuracy than purely supervised learning.']"
+"Interestingly, CVT continues to improve
+in dev set accuracy while close to 100% train accuracy for CCG, Chunking, and NER, perhaps because the model is still learning from unlabeled data even when it has completely fit to the train set.",4.2 Results,[0],[0]
+We also show results for a smaller multi-task + CVT model.,4.2 Results,[0],[0]
+"Although it generalizes at least as well as the larger one, it halts making progress on the train set earlier.",4.2 Results,[0],[0]
+"This suggests it is important to use sufficiently large neural networks for multitask learning: otherwise the model does not have the capacity to fit to all the training data.
+",4.2 Results,[0],[0]
+Auxiliary Prediction Module Ablation.,4.2 Results,[0],[0]
+We briefly explore which auxiliary prediction modules are more important for the sequence tagging tasks in Table 3.,4.2 Results,[0],[0]
+"We find that both kinds of auxiliary prediction modules improve performance, but that the future and past modules improve results more than the forward and backward ones, perhaps because they see a more restricted and challenging view of the input.
+",4.2 Results,[0],[0]
+Training Models on Small Datasets.,4.2 Results,[0],[0]
+"We explore how CVT scales with dataset size by varying the amount of training data the model has ac-
+cess to.",4.2 Results,[1.0000000283306882],['We explore how CVT scales with dataset size by varying the amount of training data the model has ac- cess to.']
+"Unsurprisingly, the improvement of CVT over purely supervised learning grows larger as the amount of labeled data decreases (see Figure 5, left).",4.2 Results,[0],[0]
+"Using only 25% of the labeled data, our approach already performs as well or better than a fully supervised model using 100% of the training data, demonstrating that CVT is particularly useful on small datasets.
+",4.2 Results,[1.000000001444763],"['Using only 25% of the labeled data, our approach already performs as well or better than a fully supervised model using 100% of the training data, demonstrating that CVT is particularly useful on small datasets.']"
+Training Larger Models.,4.2 Results,[0],[0]
+"Most sequence taggers and dependency parsers in prior work use small LSTMs (hidden state sizes of around 300) because larger models yield little to no gains in performance (Reimers and Gurevych, 2017).",4.2 Results,[0],[0]
+We found our own supervised approaches also do not benefit greatly from increasing the model size.,4.2 Results,[0],[0]
+"In contrast, when using CVT accuracy scales better with model size (see Figure 5, right).",4.2 Results,[0],[0]
+"This finding suggests the appropriate semi-supervised learning methods may enable the development of larger, more sophisticated models for NLP tasks with limited amounts of labeled data.
+",4.2 Results,[0],[0]
+Generalizable Representations.,4.2 Results,[0],[0]
+"Lastly, we explore training the CVT+multi-task model on five tasks, freezing the encoder, and then only training a prediction module on the sixth task.",4.2 Results,[0],[0]
+This tests whether the encoder’s representations generalize to a new task not seen during its training.,4.2 Results,[0],[0]
+Only training the prediction module is very fast because (1) the encoder (which is by far the slowest part of the model) has to be run over each example only once and (2) we do not back-propagate into the encoder.,4.2 Results,[0],[0]
+"Results are shown in Table 4.
+",4.2 Results,[0],[0]
+"Training only a prediction module on top of multi-task representations works remarkably well,
+outperforming ELMo embeddings and sometimes even a vanilla supervised model, showing the multi-task model is building up effective representations for language.",4.2 Results,[0],[0]
+"In particular, the representations could be used like skip-thought vectors (Kiros et al., 2015) to quickly train models on new tasks without slow representation learning.",4.2 Results,[0],[0]
+Unsupervised Representation Learning.,5 Related Work,[0],[0]
+"Early approaches to deep semi-supervised learning pretrain neural models on unlabeled data, which has been successful for applications in computer vision (Jarrett et al., 2009; LeCun et al., 2010) and NLP.",5 Related Work,[0],[0]
+"Particularly noteworthy for NLP are algorithms for learning effective word embeddings (Collobert et al., 2011; Mikolov et al., 2013; Pennington et al., 2014) and language model pretraining (Dai and Le, 2015; Ramachandran et al., 2017; Peters et al., 2018; Howard and Ruder, 2018; Radford et al., 2018).",5 Related Work,[0],[0]
+"Pre-training on other tasks such as machine translation has also been studied (McCann et al., 2017).",5 Related Work,[0],[0]
+"Other approaches train
+“thought vectors” representing sentences through unsupervised (Kiros et al., 2015; Hill et al., 2016) or supervised (Conneau et al., 2017) learning.
+",5 Related Work,[0],[0]
+Self-Training.,5 Related Work,[0],[0]
+"One of the earliest approaches to semi-supervised learning is self-training (Scudder, 1965), which has been successfully applied to NLP tasks such as word-sense disambiguation (Yarowsky, 1995) and parsing (McClosky et al., 2006).",5 Related Work,[0],[0]
+"In each round of training, the classifier, acting as a “teacher,” labels some of the unlabeled data and adds it to the training set.",5 Related Work,[0],[0]
+"Then, acting as a “student,” it is retrained on the new training set.",5 Related Work,[0],[0]
+"Many recent approaches (including the consistentency regularization methods discussed below and our own method) train the student with soft targets from the teacher’s output distribution rather than a hard label, making the procedure more akin to knowledge distillation (Hinton et al., 2015).",5 Related Work,[0],[0]
+"It is also possible to use multiple models or prediction modules for the teacher, such as in tri-training (Zhou and Li, 2005; Ruder and Plank, 2018).
+",5 Related Work,[0],[0]
+Consistency Regularization.,5 Related Work,[0],[0]
+"Recent works add noise (e.g., drawn from a Gaussian distribution) or apply stochastic transformations (e.g., horizontally flipping an image) to the student’s inputs.",5 Related Work,[0],[0]
+"This trains the model to give consistent predictions to nearby data points, encouraging distributional smoothness in the model.",5 Related Work,[0],[0]
+"Consistency regularization has been very successful for computer vision applications (Bachman et al., 2014; Laine and Aila, 2017; Tarvainen and Valpola, 2017).",5 Related Work,[0],[0]
+"However, stochastic input alterations are more difficult to apply to discrete data like text, making consistency regularization less used for natural language processing.",5 Related Work,[0],[0]
+"One solution is to add noise to the model’s word embeddings (Miyato et al., 2017); we compare against this approach in our experiments.",5 Related Work,[0],[0]
+"CVT is easily applicable to text because it does not require changing the student’s inputs.
+",5 Related Work,[0],[0]
+Multi-View Learning.,5 Related Work,[0],[0]
+"Multi-view learning on data where features can be separated into distinct subsets has been well studied (Xu et al., 2013).",5 Related Work,[0],[0]
+"Particularly relevant are co-training (Blum and Mitchell, 1998) and co-regularization (Sindhwani and Belkin, 2005), which trains two models with disjoint views of the input.",5 Related Work,[0],[0]
+"On unlabeled data, each one acts as a “teacher” for the other model.",5 Related Work,[0],[0]
+"In contrast to these methods, our approach trains a single unified model where auxiliary prediction modules see different, but not necessarily indepen-
+dent views of the input.
+",5 Related Work,[0],[0]
+Self Supervision.,5 Related Work,[0],[0]
+Self-supervised learning methods train auxiliary prediction modules on tasks where performance can be measured without human-provided labels.,5 Related Work,[0],[0]
+"Recent work has jointly trained image classifiers with tasks like relative position and colorization (Doersch and Zisserman, 2017), sequence taggers with language modeling (Rei, 2017), and reinforcement learning agents with predicting changes in the environment (Jaderberg et al., 2017).",5 Related Work,[0],[0]
+"Unlike these approaches, our auxiliary losses are based on self-labeling, not labels deterministically constructed from the input.
+",5 Related Work,[0],[0]
+Multi-Task Learning.,5 Related Work,[0],[0]
+"There has been extensive prior work on multi-task learning (Caruana, 1997; Ruder, 2017).",5 Related Work,[0],[0]
+"For NLP, most work has focused on a small number of closely related tasks (Luong et al., 2016; Zhang and Weiss, 2016; Søgaard and Goldberg, 2016; Peng et al., 2017).",5 Related Work,[0],[0]
+Manytask systems are less commonly developed.,5 Related Work,[0],[0]
+"Collobert and Weston (2008) propose a many-task system sharing word embeddings between the tasks, Hashimoto et al. (2017) train a many-task model where the tasks are arranged hierarchically according to their linguistic level, and Subramanian et al. (2018) train a shared-encoder many-task model for the purpose of learning better sentence representations for use in downstream tasks, not for improving results on the original tasks.",5 Related Work,[0],[0]
+"We propose Cross-View Training, a new method for semi-supervised learning.",6 Conclusion,[0],[0]
+"Our approach allows models to effectively leverage their own predictions on unlabeled data, training them to produce effective representations that yield accurate predictions even when some of the input is not available.",6 Conclusion,[0],[0]
+"We achieve excellent results across seven NLP tasks, especially when CVT is combined with multi-task learning.",6 Conclusion,[0],[0]
+"We thank Abi See, Christopher Clark, He He, Peng Qi, Reid Pryzant, Yuaho Zhang, and the anonymous reviewers for their thoughtful comments and suggestions.",Acknowledgements,[0],[0]
+We thank Takeru Miyato for help with his virtual adversarial training code and Emma Strubell for answering our questions about OntoNotes NER.,Acknowledgements,[0],[0]
+Kevin is supported by a Google PhD Fellowship.,Acknowledgements,[0],[0]
+"Unsupervised representation learning algorithms such as word2vec and ELMo improve the accuracy of many supervised NLP models, mainly because they can take advantage of large amounts of unlabeled text.",abstractText,[0],[0]
+"However, the supervised models only learn from taskspecific labeled data during the main training phase.",abstractText,[0],[0]
+"We therefore propose Cross-View Training (CVT), a semi-supervised learning algorithm that improves the representations of a Bi-LSTM sentence encoder using a mix of labeled and unlabeled data.",abstractText,[0],[0]
+"On labeled examples, standard supervised learning is used.",abstractText,[0],[0]
+"On unlabeled examples, CVT teaches auxiliary prediction modules that see restricted views of the input (e.g., only part of a sentence) to match the predictions of the full model seeing the whole input.",abstractText,[0],[0]
+"Since the auxiliary modules and the full model share intermediate representations, this in turn improves the full model.",abstractText,[0],[0]
+"Moreover, we show that CVT is particularly effective when combined with multitask learning.",abstractText,[0],[0]
+"We evaluate CVT on five sequence tagging tasks, machine translation, and dependency parsing, achieving state-of-the-art results.1",abstractText,[0],[0]
+Semi-Supervised Sequence Modeling with Cross-View Training,title,[0],[0]

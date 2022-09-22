@@ -1,0 +1,1272 @@
+0,1,label2,summary_sentences
+"Given a dataset, similarity relationship between examples can be represented by a graph in which each example is represented by a vertex.",1. Introduction,[0],[0]
+"While pairwise relationship between two vertices can be represented by an edge in a normal graph, a higher order relationship involving multiple vertices can be captured by a hyperedge, which means that all the corresponding examples are similar to one another.",1. Introduction,[0],[0]
+"Hypergraphs have been used in several learning applications such as clustering of categorical data (Gibson et al., 1998), multi-label classification (Sun et al., 2008), Laplacian sparse coding (Gao et al., 2013), image classification (Yu et al., 2012), image retrieval (Huang et al., 2010), mapping users across different social networks (Tan et al., 2014) and predicting edge labels in hypernode graphs (Ricatte et al., 2014).
+",1. Introduction,[0],[0]
+"*Equal contribution 1University of Hong Kong, Hong Kong.",1. Introduction,[0],[0]
+2This research was partially supported by the Hong Kong RGC under the grant 17200214.,1. Introduction,[0],[0]
+"Correspondence to: T-H. Hubert Chan <hubert@cs.hku.hk>.
+",1. Introduction,[0],[0]
+"Proceedings of the 34 th International Conference on Machine Learning, Sydney, Australia, PMLR 70, 2017.",1. Introduction,[0],[0]
+"Copyright 2017 by the author(s).
+",1. Introduction,[0],[0]
+"In this paper, we consider semi-supervised learning on an edge-weighted hypergraph H = (V,E,w), with a set L of labeled vertices, whose labels are given by f∗L ∈ {−1,+1}L. The task is to predict the labels of the unlabeled vertices N , with the working principle that vertices contained in a hyperedge e ∈ E are more similar to one another if the edge weight we is larger.",1. Introduction,[0],[0]
+"This problem is also known as transductive inference and has been studied in (Zhou et al., 2006) and (Hein et al., 2013).
+",1. Introduction,[0],[0]
+"However, the methods in (Zhou et al., 2006) have been criticized by (Agarwal et al., 2006), because essentially a hypergraph is converted into a normal graph.",1. Introduction,[0],[0]
+"For instance, given a hyperedge e containing vertices S, either (i) a clique is added between the vertices in S, or (ii) a star is formed by adding a new vertex ve connecting every vertex in S to ve.",1. Introduction,[0],[0]
+"Then, a standard convex program using a regularization potential function for normal graphs can be applied (Zhu et al., 2003).",1. Introduction,[0],[0]
+"By choosing appropriate edge weights, it was shown in (Agarwal et al., 2006) that the two approaches are equivalent to the following convex program relaxation:
+min Φold(f) := 1
+2 ∑ e∈E we ∑
+{u,v}∈(e2)
+(fu − fv)2
+subject to fu ∈",1. Introduction,[0],[0]
+"[−1, 1], ∀u ∈ V fu = f ∗ u , ∀u ∈",1. Introduction,[0],[0]
+"L.
+On the other hand, it was proposed in (Hein et al., 2013) that the following regularization function is more suitable to capture hyperedge expansion:
+Φnew(f) := 1
+2 ∑ e∈E we · (max u∈e fu −min v∈e fv) 2.
+",1. Introduction,[0],[0]
+"Indeed, it was shown in (Hein et al., 2013) that their approach outperforms (Zhou et al., 2006) on several datasets from the UCI Machine Learning Repository (Lichman, 2013).
+",1. Introduction,[0],[0]
+Loss Function.,1. Introduction,[0],[0]
+"In (Hein et al., 2013), a squared loss function was added by considering the convex program with objective function Φnew(f) + µ ‖f − f∗‖22 on f ∈",1. Introduction,[0],[0]
+"[−1, 1]V , where µ > 0 is a parameter to be tuned, f∗L is given by the labeled vertices L, and for the unlabeled vertices f∗N = 0.
+",1. Introduction,[0],[0]
+"The loss function allows errors in the labeled vertices, and also ensures that the minimizer is unique.",1. Introduction,[0],[0]
+"However, as a result, unlabeled vertices have a tendency to acquire f values close to 0.",1. Introduction,[0],[0]
+"This might remove useful information as illustrated in the following example.
+",1. Introduction,[0],[0]
+Example.,1. Introduction,[0],[0]
+"In Figure 1.1, vertices a, b ∈ L are labeled as +1 and c ∈ L is labeled as −1.",1. Introduction,[0],[0]
+"Vertices x, y ∈ N are unlabeled.",1. Introduction,[0],[0]
+"There are three (undirected) edges: {a, x}, {b, x} and {x, y, c}, each with unit weight.
+",1. Introduction,[0],[0]
+"By choosing µ = 12 for squared loss function, the unique minimizer gives fx = 15 and fy = 0.",1. Introduction,[0],[0]
+"Hence, this solution gives no useful information regarding the label for vertex y.
+On the other hand, if we just use the objective function Φnew(f) with the constraints fL = f∗L, then in an optimal solution, fx = 13 , but fy could be anywhere in the confidence interval",1. Introduction,[0],[0]
+"[−1, 13 ].",1. Introduction,[0],[0]
+"Hence, in this case, we could use the average value − 13 to predict −1 for vertex y.
+Our Contributions.",1. Introduction,[0],[0]
+"In this paper, we revisit the approach used in (Hein et al., 2013) and consider several extensions and simplifications.",1. Introduction,[0],[0]
+"We summarize our results and give an outline of the paper as follows.
+1.",1. Introduction,[0],[0]
+Unified Framework for Directed Hypergraphs.,1. Introduction,[0],[0]
+"Inspired also from the recent result on Laplacians for directed normal graphs (Yoshida, 2016), we introduce a semisupervised learning framework using directed hypergraphs that can capture higher order causal relationships.",1. Introduction,[0],[0]
+"This notion of directed hypergraph was first introduced in (Gallo et al., 1993), who considered applications in propositional logic, analyzing dependency in relational database, and traffic analysis.",1. Introduction,[0],[0]
+"On a high level, a directed hyperedge e consists of a tail set Te pointing to a head set He such that a vertex in Te labeled +1 implies that a vertex in He is more likely to be labeled +1.",1. Introduction,[0],[0]
+"(Equivalently in terms of its contrapositive, a vertex in He labeled −1 implies that a vertex in Te is more likely to be labeled −1.)",1. Introduction,[0],[0]
+"In Section 2, we formally define the model and the corresponding potential function Φ. An additional advantage of our potential function is that there is no need to tune any parameters.
+2.",1. Introduction,[0],[0]
+Confidence Interval for Unlabeled Vertices.,1. Introduction,[0],[0]
+Observe that the minimizer for our convex program might not be unique.,1. Introduction,[0],[0]
+"In Section 3, we introduce the concept of confidence interval for each unlabeled vertex that can be useful for predicting its label.",1. Introduction,[0],[0]
+"Furthermore, we provide an algorithm to calculate the confidence interval given an optimal solution.
+3.",1. Introduction,[0],[0]
+Simpler Subgradient Method.,1. Introduction,[0],[0]
+"Since the new potential function is not everywhere differentiable but still convex, we use the subgradient method (Shor et al., 1985) to obtain an estimated minimizer for label prediction.",1. Introduction,[0],[0]
+"Inspired by the diffusion processes used for defining Laplacians in hypergraphs (Louis, 2015) and directed graphs (Yoshida, 2016), in Section 4, we define a simple Markov operator that returns a subgradient for Φ, which is used to solve the underlying convex program.",1. Introduction,[0],[0]
+"We remark that our framework is very easy to understand, because it is a variation on the well-known gradient descent.
+",1. Introduction,[0],[0]
+"In contrast, the primal-dual approach in (Hein et al., 2013) considers the convex conjugate of the primal objective and involves complicated update operations on the primal and dual variables.",1. Introduction,[0],[0]
+"The subgradient used in our approach gives the update direction, and we can actually solve exactly the same convex program with a much simpler method.",1. Introduction,[0],[0]
+"Section 5, we revisit some datasets in the UCI Machine Learning Repository (Lichman, 2013), and experiments confirm that our prediction model based on confidence interval gives better accuracy than that in (Hein et al., 2013).",4. Experimental Results on Real-World Datasets. In,[0],[0]
+"Our simpler subgradient method takes more iterations than the primal-dual method (Hein et al., 2013), but each iteration is much faster.",4. Experimental Results on Real-World Datasets. In,[0],[0]
+"Experiments show that overall both methods have similar running times, and the subgradient method has an advantage when the number of vertices is much larger than the number of edges.
+",4. Experimental Results on Real-World Datasets. In,[0.9560317891457113],"['The only strange result here is that rule-based preordering obtains a lower score than no preordering, which might be an artifact of the Enju parser changing the tokenization of its input, so the Kendall τ of this system might not really reflect the real quality of the preordering.']"
+"Moreover, using the DBLP dataset (Ley, 2009), our experiments also support that using directed hypergraphs to capture causal relationships can improve the prediction accuracy.",4. Experimental Results on Real-World Datasets. In,[0],[0]
+The experiments for directed hypergraphs are described in the full version.,4. Experimental Results on Real-World Datasets. In,[0],[0]
+"We consider an edge-weighted directed hypergraph H = (V,E,w) with vertex set V (with n = |V |), edge set E and weight function",2. Preliminaries,[0],[0]
+w : E → R+.,2. Preliminaries,[0],[0]
+Each hyperedge e ∈ E consists of a tail set Te ⊆ V and a head set He ⊆ V (which are not necessarily disjoint); we use the convention that the direction is from tail to head.,2. Preliminaries,[0],[0]
+"For x ∈ R, we denote [x]+ := max{x, 0}.
+",2. Preliminaries,[0],[0]
+"In our application, each vertex v ∈ V is supposed to have a label in {−1,+1}.",2. Preliminaries,[0],[0]
+"Intuitively, the directed hypergraph attempts to capture the rule that for each edge e ∈ E, if there is a vertex in Te having label +1, then it is more likely for vertices in He to receive label +1.",2. Preliminaries,[0],[0]
+"In terms of its contrapositive, if there is a vertex in He having label −1, then it is more likely for vertices in Te to receive label −1.
+",2. Preliminaries,[0],[0]
+"We use f ∈ RV to denote a vector, where the coordi-
+nates are labeled by vertices in V .",2. Preliminaries,[0],[0]
+"For U ⊆ V , we use fU ∈ RU to denote the vector restricting f to coordinates inU .",2. Preliminaries,[0],[0]
+"In semi-supervised learning, we consider a setL ⊆ V of labeled vertices, which have labels f∗L ∈",2. Preliminaries,[0],[0]
+"{−1,+1}L. Typically, |L| |V | and the task is to assign a label in {−1,+1} to each unlabeled vertex in N := V \ L, using information from the directed hypergraph H .
+",2. Preliminaries,[0],[0]
+"By relaxing labels to be in the interval [−1, 1], we consider the following regularization potential function Φ : RV → R:
+Φ(f)",2. Preliminaries,[0],[0]
+"= 1
+2 ∑ e∈E we · ([∆e(f)]+)2,
+where ∆e(f) := max(u,v)∈Te×He(fu − fv) = maxu∈Te fu −minv∈He fv .
+",2. Preliminaries,[0],[0]
+"In particular, there is a penalty due to edge e only if some vertex in Te receives a label larger than that of some vertex in He.",2. Preliminaries,[0],[0]
+"The convexity of Φ is proved in the full version.
+",2. Preliminaries,[0],[0]
+Our approach is to consider the following convex program to obtain an estimated minimizer f ∈,2. Preliminaries,[0],[0]
+"[−1, 1]V , which can be rounded to an integer solution for labeling all vertices.
+min Φ(f) (CP1) subject to fu ∈",2. Preliminaries,[0],[0]
+"[−1, 1], ∀u ∈ V
+fu = f ∗ u , ∀u",2. Preliminaries,[0],[0]
+"∈ L
+Since the f values for the labeled vertices L are fixed in (CP1), we also view Φ : RN → R as a function on the f values of unlabeled vertices N .",2. Preliminaries,[0],[0]
+"We use OPT ⊂ RV to denote the set of optimal solutions to (CP1).
+",2. Preliminaries,[0],[0]
+Trivial Edges.,2. Preliminaries,[0],[0]
+An edge e ∈ E is trivial if there exist vertices u ∈ Te ∩ L and v ∈,2. Preliminaries,[0],[0]
+He ∩ L such that f∗u = +1 and f∗v = −1.,2. Preliminaries,[0],[0]
+"As trivial edges contribute constant towards the objective function Φ, we shall assume that there are no trivial edges in the convex program (CP1).
+",2. Preliminaries,[0],[0]
+Special Cases.,2. Preliminaries,[0],[0]
+"Our directed hypergraph model can capture other graph models as follows.
+1.",2. Preliminaries,[0],[0]
+Undirected Hypergraphs.,2. Preliminaries,[0],[0]
+"For each hyperedge e, we can set Te = He to the corresponding subset of vertices.",2. Preliminaries,[0],[0]
+2.,2. Preliminaries,[0],[0]
+Undirected Normal Graphs.,2. Preliminaries,[0],[0]
+"For each edge e = {u, v}, we can set Te = He = e. Observe that in this case, the potential function becomes Φ(f) =∑
+(u,v)∈E wuv(fu− fv)2, which is differentiable, and hence, (CP1) can be solved by standard techniques like gradient descent.
+",2. Preliminaries,[0],[0]
+Soft Constraints.,2. Preliminaries,[0],[0]
+"In (Hein et al., 2013), each labeled vertex u ∈ L can also have some weight µu ∈ R+, which can, for instance, indicate how trustworthy the label
+f∗u ∈ {−1,+1} is.",2. Preliminaries,[0],[0]
+"The following relaxation is considered.
+",2. Preliminaries,[0],[0]
+"min Φ̂(f) := Φ(f) + 1
+2 ∑ u∈L µu(fu",2. Preliminaries,[0],[0]
+"− f∗u)2 (CP2)
+subject to fu ∈",2. Preliminaries,[0],[0]
+"[−1, 1],∀u ∈ V.
+Observe that (CP2) can also be expressed in the framework of (CP1).",2. Preliminaries,[0],[0]
+"We simply consider an augmented hypergraph Ĥ such that all vertices V are treated as unlabeled, and for each u ∈ L, we add a new vertex û with label f∗u and a new undirected edge {u, û} with weight µu.",2. Preliminaries,[0],[0]
+"Then, it follows that the convex program (CP1) for the augmented instance for Ĥ is exactly the same as (CP2).
+",2. Preliminaries,[0],[0]
+Challenges Ahead.,2. Preliminaries,[0],[0]
+"We next outline how we resolve the encountered challenges when we use (CP1) for semisupervised learning.
+",2. Preliminaries,[0],[0]
+"• Unlike the case for normal graphs, the set OPT can contain more than one optimal solution for (CP1).",2. Preliminaries,[0],[0]
+"In Section 3, we prove some structural properties of the convex program, and illustrate that each u ∈ N has some confidence interval from which we can predict its label.",2. Preliminaries,[0],[0]
+• The function Φ is not everywhere differentiable.,2. Preliminaries,[0],[0]
+"Hence, we use the subgradient method (Shor et al., 1985).",2. Preliminaries,[0],[0]
+"In Section 4, we give a method to generate a subgradient, which is inspired by the continuous diffusion processes for hypergraphs (Louis, 2015) and directed graphs (Yoshida, 2016), and our method can in fact be viewed as a discretized version.",2. Preliminaries,[0],[0]
+"In general, a minimizer for (CP1) might not be unique.",3. Confidence Interval for Semi-supervised Learning,[0],[0]
+"Hence, we introduce the concept of confidence interval.
+",3. Confidence Interval for Semi-supervised Learning,[0],[0]
+Definition 3.1 (Confidence Interval),3. Confidence Interval for Semi-supervised Learning,[0],[0]
+"For each u ∈ V , we define its confidence interval to be [mu,Mu], where mu := minf∈OPT fu and Mu := maxf∈OPT fu.",3. Confidence Interval for Semi-supervised Learning,[0],[0]
+"The confidence intervals induce the lower and the upper confidence vectors, ~m and ~M ∈ RV , respectively.
+",3. Confidence Interval for Semi-supervised Learning,[0],[0]
+"In Section 3.1, we give the proof of the following lemma, which states that the confidence vectors ~m and ~M are optimal solutions, and so are their convex combinations.
+",3. Confidence Interval for Semi-supervised Learning,[0],[0]
+Lemma 3.1 (Confidence Vectors Give Optimal Solutions),3. Confidence Interval for Semi-supervised Learning,[0],[0]
+For any λ ∈,3. Confidence Interval for Semi-supervised Learning,[0],[0]
+"[0, 1], the convex combination λ~m + (1− λ) ~M",3. Confidence Interval for Semi-supervised Learning,[0],[0]
+"∈ OPT is optimal for (CP1).
+",3. Confidence Interval for Semi-supervised Learning,[0],[0]
+Semi-supervised Learning via Confidence Interval.,3. Confidence Interval for Semi-supervised Learning,[0],[0]
+Lemma 3.1 suggests what one can do when (CP1) has more than one optimal solution.,3. Confidence Interval for Semi-supervised Learning,[0],[0]
+"Specifically, in Algorithm 1, the
+average vector 12 (~m + ~M) ∈ OPT can be used for label prediction.",3. Confidence Interval for Semi-supervised Learning,[0],[0]
+"We show that the confidence vectors ~m and ~M can be recovered from any optimal solution f ∈ OPT, which in turn can be estimated by the subgradient method described in Section 4.",3. Confidence Interval for Semi-supervised Learning,[0],[0]
+"Algorithm 1 Semi-Supervised Learning
+1: Input: Directed hypergraph H = (V,E,w), labels f∗L for labeled vertices L 2: Compute (estimated) confidence vectors (~m, ~M) ∈",3. Confidence Interval for Semi-supervised Learning,[0],[0]
+"RN × RN , either by Algorithm 2 or 3.",3. Confidence Interval for Semi-supervised Learning,[0],[0]
+3: Compute average vector fN ← 12 (~m+ ~M).,3. Confidence Interval for Semi-supervised Learning,[0],[0]
+4: Compute threshold θ ← 1|N | ∑ u∈N fu.,3. Confidence Interval for Semi-supervised Learning,[0],[0]
+"5: for each u ∈ N do 6: if fu ≥ θ then 7: f̂u ← +1; 8: else 9: f̂u ← −1;
+10: end if 11: end for 12: return f̂N
+Fine-Tuning Parameters.",3. Confidence Interval for Semi-supervised Learning,[0],[0]
+"In view of Lemma 3.1, one could further optimize the choice of λ ∈",3. Confidence Interval for Semi-supervised Learning,[0],[0]
+"[0, 1] in defining fN ← λ~m+ (1−λ) ~M in Line 3.",3. Confidence Interval for Semi-supervised Learning,[0],[0]
+"Similarly, one could pick the threshold θ to be the ϑ-percentile of the sorted coordinates of fN , for some choice of ϑ ∈",3. Confidence Interval for Semi-supervised Learning,[0],[0]
+"[0, 1].",3. Confidence Interval for Semi-supervised Learning,[0],[0]
+The parameters λ and ϑ can be tuned using standard techniques like cross-validation.,3. Confidence Interval for Semi-supervised Learning,[0],[0]
+"However, to illustrate our concepts, we keep the description simple without introducing too many free parameters.",3. Confidence Interval for Semi-supervised Learning,[0],[0]
+We derive some properties of the confidence vectors to prove Lemma 3.1.,3.1. Properties of Confidence Vectors,[0],[0]
+"The full proofs of Lemma 3.2 and 3.3 are given in the full version.
+",3.1. Properties of Confidence Vectors,[0],[0]
+"Given a feasible solution f ∈ RV to (CP1), we define the following:
+1. Se(f) := arg maxu∈Te fu ⊆ Te and Ie(f) := arg minv∈He fv ⊆ He.",3.1. Properties of Confidence Vectors,[0],[0]
+2. f(Se),3.1. Properties of Confidence Vectors,[0],[0]
+:= maxu∈Te fu and f(Ie) := minv∈He fv .,3.1. Properties of Confidence Vectors,[0],[0]
+"Hence, we have ∆e(f) = f(Se)− f(Ie).",3.1. Properties of Confidence Vectors,[0],[0]
+3.,3.1. Properties of Confidence Vectors,[0],[0]
+"The set of active edges with respect to f is E(f) := {e ∈ E : ∆e(f) > 0}.
+",3.1. Properties of Confidence Vectors,[0],[0]
+"The following lemma states even though a minimizer for (CP1) might not be unique, there are still some structural properties for any optimal solution.
+",3.1. Properties of Confidence Vectors,[0],[0]
+Lemma 3.2 (Active Edges in an Optimal Solution) Suppose f and g are optimal solutions to (CP1).,3.1. Properties of Confidence Vectors,[0],[0]
+"Then, for all e ∈ E, [∆e(f)]+ = [∆e(g)]+.",3.1. Properties of Confidence Vectors,[0],[0]
+"In particular, this implies that the set of active edges E∗",3.1. Properties of Confidence Vectors,[0],[0]
+":= E(f) = E(g) in any op-
+timal solution is uniquely determined.",3.1. Properties of Confidence Vectors,[0],[0]
+"Hence, for e ∈ E∗, we can define the corresponding ∆∗e = ∆e(f).
+",3.1. Properties of Confidence Vectors,[0],[0]
+"Definition 3.2 (Pinned Vertex) An unlabeled vertex u is pinned in a solution f ∈ RV if there exist active edges e and e′ ∈ E(f) such that u ∈ Se(f)∩ Ie′(f), in which case we say that the edges e and e′ pin the vertex u under f .
+",3.1. Properties of Confidence Vectors,[0],[0]
+Lemma 3.3 (Extending an Active Edge),3.1. Properties of Confidence Vectors,[0],[0]
+Suppose edge e ∈ E(f) is active in an optimal solution f .,3.1. Properties of Confidence Vectors,[0],[0]
+"If He does not contain a vertex labeled with −1, then there exist u ∈ Ie(f) and another active edge e′ ∈ E(f) such that the following holds.
+",3.1. Properties of Confidence Vectors,[0],[0]
+(a) The edges e and e′,3.1. Properties of Confidence Vectors,[0],[0]
+"pin u under f , i.e., u ∈ Se′(f).",3.1. Properties of Confidence Vectors,[0],[0]
+(b),3.1. Properties of Confidence Vectors,[0],[0]
+"If g is an optimal solution, then Ie(f) ∩ Se′(f) =
+Ie(g) ∩ Se′(g) and fu = gu.",3.1. Properties of Confidence Vectors,[0],[0]
+vertex labeled with +1.,An analogous result holds when Te does not contain any,[0],[0]
+∗(Ie),"In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+":= minu∈He fu are uniquely determined by any optimal solution f .
+","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+Corollary 3.1 (Pinned Vertices),"In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"In any optimal solution, the set of pinned vertices is uniquely determined.","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+We use L∗ to denote the set of labeled or pinned vertices in an optimal solution.,"In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"Then, for each u ∈ L∗, its value f∗u in any optimal solution is also uniquely determined.
+","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"From Corollary 3.1, the confidence interval for any u ∈ L∗ contains exactly one value, namely the unique value f∗u in any optimal solution.","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"The following lemma gives a characterization of an optimal solution.
+","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+Lemma 3.4 Characterization of Optimal Solutions,"In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"A solution f to (CP1) is optimal iff the following conditions hold.
+","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"(a) For each u ∈ L∗, fu = f∗u .","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"(b) For each active edge e ∈ E∗, both the maximum
+maxu∈Te fu and the minimum minv∈He fv are attained by vertices in L∗. (c) For each inactive edge e /∈","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"E∗,","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+for all u ∈ Te and v ∈,"In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"He, fu ≤ fv .
+","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+Proof: We first observe that Corollary 3.1 states that the values of the vertices in L∗ are uniquely determined in any optimal solution.,"In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"Hence, any optimal solution must satisfy the three conditions.","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"We next show that the three conditions implies that the objective value is optimal.
+","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"Once the values for vertices in L∗ are fixed, Lemma 3.3 and condition (b) implies that the contribution of all active edges E∗ are determined and are the same as any optimal solution.
+","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"Finally, condition (c) implies that edges not in E∗ do not have any contribution towards the objective function.","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"Hence, any solution satisfying the three conditions must be optimal.
+","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+Deriving Confidence Vectors.,"In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"To prove Lemma 3.5, we define a procedure that returns a vector ~m ∈ V R such that for any optimal f ∈ OPT, we have f ≥ ~m.","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"Moreover, we shall show that ~m ∈ OPT and hence ~m is the lower confidence vector.","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+The argument for the upper confidence vector ~M is similar.,"In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"For the special case of undirected hypergraphs, the procedure can be simplified to Algorithm 2 in Section 3.2.
+","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+Lemma 3.5 (Confidence Vectors are Optimal: Proof of Lemma 3.1),"In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+The confidence vectors ~m and ~M defined in Definition 3.1 are optimal solutions to (CP1).,"In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"This implies that any of their convex combination is also optimal.
+","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"Proof: We give a procedure that returns a vector ~m such that at any moment during the procedure, the following invariant is maintained: for any f ∈ OPT, f ≥ ~m.
+","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"The following steps correspond to maintaining the conditions in Lemma 3.4.
+","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+(a) Initialization.,"In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"For v ∈ L∗, set mv := f∗v ; for v /∈ L∗, set mv := −1.","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"This satisfies the invariant, because for any f ∈ OPT and any v ∈ L∗, fv = f∗v .
+","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+(b) Preserving Active Edges.,"In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"For each v /∈ L∗, set mv ← max{mv,maxe∈E∗:v∈He f∗(Ie)}.","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"Observe that Lemma 3.4(b) implies that for any optimal f ∈ OPT, any e ∈ E∗ and any v ∈","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"He, fv ≥ f∗(Ie).","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"Hence, the invariant is maintained.
+","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+(c) Preserving Inactive Edges.,"In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+While there is an inactive edge e /∈ E∗,"In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"such that u ∈ Te, v ∈","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"He and mu > mv , set mv ← mu.","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+We argue why each such update preserves the invariant.,"In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+Consider any optimal f ∈ OPT.,"In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"Before this update, the invariant holds.","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"Hence, we have mu ≤ fu.","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"Moreover, Lemma 3.4 implies that fu ≤ fv .","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"Therefore, after setting mv ← mu, we still have mv ≤ fv .
+","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"Finally, observe that after step (b), the coordinates of ~m can take at most n distinct values.","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"Moreover, after each update in step (c), one coordinate of ~m must increase strictly.","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"Hence, this procedure will terminate.
+","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"We next argue that ~m is an optimal solution by checking that it satisfies the conditions in Lemma 3.4.
+","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+Condition (a).,"In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"Observe that for each v ∈ L∗, mv is initialized to f∗v .","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+Afterwards the value mv could only be increased.,"In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"However, because the invariant holds when the procedure terminates, it must be the case that mv = f∗v at the end.
+","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+Condition (b).,"In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"The procedure makes sure that at the end of
+step (b), for every active edge e ∈ E∗, minv∈He mv can be attained by some vertex in L∗. Since only mv for v /∈ L∗ can be increased in step (c), it follows that in the end, the minimum can still be attained by some vertex in L∗.
+Next, consider u ∈ Te, where e ∈ E∗. For any optimal solution f , Lemma 3.3 implies that fu ≤ f∗(Se).","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"Hence, the invariant implies thatmu ≤ fu ≤ f∗(Se).","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"Since condition (a) holds, this means that maxv∈Te mv can be attained by some vertex in L∗.
+Condition (c).","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"This is clearly satisfied because of the while-termination condition.
+","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"Therefore, we have ~m ∈ OPT, as required.
+","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+The proof for the upper confidence vector ~M is similar.,"In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"We omit the detailed proof and just give the corresponding procedure to return ~M .
+","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+(a) Initialization.,"In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"For v ∈ L∗, set Mv := f∗v ; for v /∈ L∗, set Mv := +1.
+","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+(b) Preserving Active Edges.,"In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"For each v /∈ L∗, set Mv ← min{Mv,mine∈E∗:v∈Te f∗(Se)}.
+","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+(c) Preserving Inactive Edges.,"In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+While there is an inactive edge e /∈ E∗,"In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"such that u ∈ Te, v ∈","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"He and Mu > Mv , set Mu ←Mv .
+","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"The same argument can show that for any optimal f ∈ OPT, we have f ≤ ~M .","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"Moreover, we also have ~M ∈ OPT.","In particular, for any active edge e ∈ E∗, the extremal values f∗(Se) := maxu∈Te fu and f",[0],[0]
+"As mentioned before, the proof of Lemma 3.5 implicitly gives a procedure to compute the confidence vectors from any optimal solution.",3.2. Computing the Confidence Interval,[0],[0]
+"For the special case of undirected hypergraphs, a simplified version of the procedure is given in Algorithm 2.
+",3.2. Computing the Confidence Interval,[0],[0]
+"Alternatively, we can try to solve the convex program (CP1), for example using Algorithm 5 in Section 4, from two initial feasible solutions to heuristically estimate the confidence vectors.",3.2. Computing the Confidence Interval,[0],[0]
+"In Algorithm 3, one instance approaches an optimal solution from high f values and the other from low f values.",3.2. Computing the Confidence Interval,[0],[0]
+Resolving Ties.,4. Subgradient Method via Markov Operator,[0],[0]
+Observe that Φ : RN → R is differentiable at fN ∈ RN that has distinct coordinates.,4. Subgradient Method via Markov Operator,[0],[0]
+"For the purpose of computing a subgradient, we assume that there is some global ordering π on V to resolve ties among coordinates with the same value.",4. Subgradient Method via Markov Operator,[0],[0]
+"In particular, the vertices in L having label +1 are the highest, and those in L labeled −1 are the lowest.",4. Subgradient Method via Markov Operator,[0],[0]
+"Hence, in this section, we may assume that any arg max or arg min operator over a subset of vertices
+Algorithm 2 Confidence Intervals for Undirected Hypergraphs
+1: Input: Undirected hypergraph H = (V,E,w), label vector f∗L and tolerance ≥ 0.",4. Subgradient Method via Markov Operator,[0],[0]
+"2: Let f be a solution of (CP1), either by Algorithm 5 or by PDHG method (Hein et al., 2013) 3: For all v ∈ V , set p(v)← v, mv ← −1, Mv ← +1.",4. Subgradient Method via Markov Operator,[0],[0]
+"4: Ê := {e ∈ E : ∆e(f) ≤ } 5: while ∃e1 6= e2 ∈ Ê, e1 ∩ e2 6= ∅",4. Subgradient Method via Markov Operator,[0],[0]
+"do 6: Ê ← (Ê \ {e1, e2}) ∪ {e1 ∪ e2} 7: end while 8: for each e ∈ Ê do 9: x← an arbitrary vertex in e
+10: for each vertex v ∈ e do 11: p(v)← p(x) 12: end for 13: end for 14: for each vertex v ∈ L do 15: mp(v) ← f∗v , Mp(v) ← f∗v 16: end for 17: for each edge e ∈ E such that ∆e(f) >",4. Subgradient Method via Markov Operator,[0],[0]
+do 18: for each vertex v ∈,4. Subgradient Method via Markov Operator,[0],[0]
+e,4. Subgradient Method via Markov Operator,[0],[0]
+"do 19: mp(v) ← max{mp(v), f(Ie)} 20: Mp(v) ← min{Mp(v), f(Se)} 21: end for 22: end for 23: for each vertex v ∈ V do 24: mv ← mp(v), Mv ←Mp(v) 25: end for 26: return vectors (~m, ~M)
+will return a unique vertex.
+",4. Subgradient Method via Markov Operator,[0],[0]
+"We next define a Markov operator that is inspired from the diffusion processes on hypergraphs (Louis, 2015) and directed graphs (Yoshida, 2016) in the context of defining Laplacians.",4. Subgradient Method via Markov Operator,[0],[0]
+"We denote the projection operator ΠN : RV → RN that takes f ∈ RV and returns the restricted vector fN ∈ RN .
+",4. Subgradient Method via Markov Operator,[0],[0]
+Lemma 4.1 For f ∈,4. Subgradient Method via Markov Operator,[0],[0]
+"[−1, 1]V that is feasible in (CP1), the Markov operator Mf given in Algorithm 4 returns a subgradient of Φ : RN → R at fN .
+",4. Subgradient Method via Markov Operator,[0],[0]
+"Proof: (Sketch) Observe that if fN ∈ RN has distinct coordinates, then Φ is differentiable at fN , and Mf gives exactly the gradient (which is the only possible subgradient in this case).",4. Subgradient Method via Markov Operator,[0],[0]
+"Observe that in our subgradient method application, we could imagine that at every iteration, infinitesimal perturbation is performed on the current solution to ensure that all coordinates are distinct, and ties are resolved according to our global ordering π.
+",4. Subgradient Method via Markov Operator,[0],[0]
+"Algorithm 3 Estimate confidence interval 1: Input: Directed hypergraph H = (V,E,w), labels f∗L
+for labeled vertices L 2: Construct feasible f (0,+)N ← +1 ∈ RN with all entries
+being +1; 3: Construct feasible f (0,−)N ← −1 ∈",4. Subgradient Method via Markov Operator,[0],[0]
+"RN with all entries
+being −1; 4: ~M ← SGM(f (0,+)N ); 5: ~m← SGM(f (0,−)N ); 6: return the vectors (~m, ~M)
+",4. Subgradient Method via Markov Operator,[0],[0]
+"Algorithm 4 Markov Operator M : RV → RN
+1: Input: Directed hypergraph H = (V,E,w), feasible f ∈ RV for (CP1) 2: Construct symmetric matrix A ∈ RV×V ; set A← 0.",4. Subgradient Method via Markov Operator,[0],[0]
+3: for each e ∈ E such that ∆e(f) > 0,4. Subgradient Method via Markov Operator,[0],[0]
+do 4: u← arg maxu∈Te fu; 5: v ← arg minv∈He fv; 6: Auv ← Auv + we; 7: (The same is done forAvu becauseA is symmetric.),4. Subgradient Method via Markov Operator,[0],[0]
+"8: end for 9: Construct diagonal matrix W ∈ RN×N ; set W ← 0.
+10: for each u ∈ N",4. Subgradient Method via Markov Operator,[0],[0]
+do 11:,4. Subgradient Method via Markov Operator,[0],[0]
+"Wuu ← ∑ v∈V Auv; 12: end for 13: return (WΠN −ΠNA)f
+Hence, as the magnitude of the perturbation tends to zero, if the global ordering π is preserved, then the gradient remains the same, which implies that the gradient is also the subgradient when the perturbation reaches 0.
+",4. Subgradient Method via Markov Operator,[0],[0]
+"Using the Markov operator M as a subroutine to generate a subgradient, we have the following subgradient method (SGM) (Shor et al., 1985).
+",4. Subgradient Method via Markov Operator,[0],[0]
+"Algorithm 5 Subgradient Method SGM(f (0)N ∈ RN ) 1: Input: Directed hypergraph H = (V,E,w) with la-
+bels f∗L for labeled vertices L, initial feasible solution f (0) N ∈",4. Subgradient Method via Markov Operator,[0],[0]
+"RN , step size {ηt := 1 t }t≥1
+2: t← 1; 3: (Throughout the algorithm, f (t)L = f ∗ L is given by the
+labeled vertices.)",4. Subgradient Method via Markov Operator,[0],[0]
+4: while Solution f (t)N has not “stabilized” do 5: g(t)N ← Mf (t−1) ∈ RN ; 6: f (t)N = f (t−1) N,4. Subgradient Method via Markov Operator,[0],[0]
+"− ηt ·
+g (t)",4. Subgradient Method via Markov Operator,[0],[0]
+"N∥∥∥g(t)N ∥∥∥
+2
+;
+7: t← t+ 1; 8: end while 9: return f (t)
+",4. Subgradient Method via Markov Operator,[0],[0]
+Stabilizing Condition.,4. Subgradient Method via Markov Operator,[0],[0]
+"Our experiments in Section 5 suggest that it suffices to run the solver for a short time, after which a better feasible solution f does not improve the prediction accuracy.",4. Subgradient Method via Markov Operator,[0],[0]
+Our experiments are run on a standard PC.,5. Experimental Results,[0],[0]
+"In our graphs, each point refers to a sample mean, and the height of the vertical bar is the standard error of the mean.",5. Experimental Results,[0],[0]
+"We show that our treatment of hypergraphs performs better than the previously best method in (Hein et al., 2013).
+",5.1. Undirected Hypergraph: Comparing Accuracy of Prediction Methods,[0],[0]
+Hypergraph Model.,5.1. Undirected Hypergraph: Comparing Accuracy of Prediction Methods,[0],[0]
+"We use three datasets from the UCI Machine Learning Repository (Lichman, 2013): mushroom, covertype45 and covertype67.",5.1. Undirected Hypergraph: Comparing Accuracy of Prediction Methods,[0],[0]
+"As in (Hein et al., 2013), each dataset fits into the hypergraph learning model in the following way.",5.1. Undirected Hypergraph: Comparing Accuracy of Prediction Methods,[0],[0]
+"Each entry in the dataset corresponds to a vertex, which is labeled either +1 or −1.",5.1. Undirected Hypergraph: Comparing Accuracy of Prediction Methods,[0],[0]
+"Moreover, each entry has some categorical attributes.",5.1. Undirected Hypergraph: Comparing Accuracy of Prediction Methods,[0],[0]
+"For each attribute and each realized value for that attribute, we form a unit-weight hyperedge containing all the vertices corresponding to entries having that attribute value.",5.1. Undirected Hypergraph: Comparing Accuracy of Prediction Methods,[0],[0]
+"To summarize, below are the properties of the resulting hypergraphs.
+",5.1. Undirected Hypergraph: Comparing Accuracy of Prediction Methods,[0],[0]
+"Dataset mushroom covertype45 covertype67
+n = |V",5.1. Undirected Hypergraph: Comparing Accuracy of Prediction Methods,[0],[0]
+"| 8124 12240 37877 m = |E| 112 104 123 k =∑
+e∈E |e| m
+1523 1412 3695
+Semi-supervised Learning Framework.",5.1. Undirected Hypergraph: Comparing Accuracy of Prediction Methods,[0],[0]
+"We compare our semi-supervised learning framework with that in (Hein et al., 2013), which was previously the best (compared to (Zhou et al., 2006), for instance).",5.1. Undirected Hypergraph: Comparing Accuracy of Prediction Methods,[0],[0]
+"Specifically, we compare the prediction accuracy of the following two prediction algorithms.
+1.",5.1. Undirected Hypergraph: Comparing Accuracy of Prediction Methods,[0],[0]
+Confidence Interval (CI).,5.1. Undirected Hypergraph: Comparing Accuracy of Prediction Methods,[0],[0]
+"We use hard constraints (CP1) and confidence intervals for prediction, as described in Algorithm 1 in Section 3. 2.",5.1. Undirected Hypergraph: Comparing Accuracy of Prediction Methods,[0],[0]
+"Hein et al. We implement the method described in (Hein et al., 2013), which uses soft constraints (regularized version), plus 5-fold cross validation to determine the regularization parameter.
+",5.1. Undirected Hypergraph: Comparing Accuracy of Prediction Methods,[0],[0]
+Testing Methodology.,5.1. Undirected Hypergraph: Comparing Accuracy of Prediction Methods,[0],[0]
+"Since we focus on prediction accuracy, using either subgradient method or PDHG (Hein et al., 2013) for solving the underlying convex programs in each algorithm produces the same results.",5.1. Undirected Hypergraph: Comparing Accuracy of Prediction Methods,[0],[0]
+"For each algorithm candidate, we try different sizes of labeled vertices L, where l = |L| ranges from 20 to 200.",5.1. Undirected Hypergraph: Comparing Accuracy of Prediction Methods,[0],[0]
+"For each size l
+of labeled vertices, we randomly pick l vertices from the dataset to form the set L and treat the rest as unlabeled vertices; we re-sample if only one label (+1 or −1) appears in L. For each size",5.1. Undirected Hypergraph: Comparing Accuracy of Prediction Methods,[0],[0]
+"l, we perform 100 trials to report the average error rate together with its standard error.
+Results.",5.1. Undirected Hypergraph: Comparing Accuracy of Prediction Methods,[0],[0]
+"Our experiment can recover the results reported in (Hein et al., 2013).",5.1. Undirected Hypergraph: Comparing Accuracy of Prediction Methods,[0],[0]
+"The test error for the two algorithms on the three datasets is presented in Figure 5.1, which shows that our CI method consistently has lower test error than the one in (Hein et al., 2013).",5.1. Undirected Hypergraph: Comparing Accuracy of Prediction Methods,[0],[0]
+Different Solvers.,5.2. Comparing Running Times of Solvers,[0],[0]
+"We compare the running times of the following two convex program solvers:
+• Subgradient Method (SG), proposed by us.",5.2. Comparing Running Times of Solvers,[0],[0]
+"Empirically, the step size ηt := 1
+(t+1) min( 0.16t 105 ,1)
+gives good
+performance.",5.2. Comparing Running Times of Solvers,[0],[0]
+"For large t, ηt grows like 1t and so the method converges; however, for small t, we would like a larger step size to speed up convergence.",5.2. Comparing Running Times of Solvers,[0],[0]
+"• Primal-Dual Hybrid Gradient (PDHG), proposed in (Hein et al., 2013).",5.2. Comparing Running Times of Solvers,[0],[0]
+"We choose σ = τ = 1√
+1+d ,
+where d is the maximum degree.
+",5.2. Comparing Running Times of Solvers,[0],[0]
+Theoretical Analysis.,5.2. Comparing Running Times of Solvers,[0],[0]
+"Given a hypergraph with n vertices and m edges, where the average size of an edge is k, each vertex on average appears in mkn edges.",5.2. Comparing Running Times of Solvers,[0],[0]
+"For SG, we use a heap-based data structure to maintain the vertices within a hyperedge.",5.2. Comparing Running Times of Solvers,[0],[0]
+"Vertices attaining the maximum and the minimum value within a hyperedge can be retrieved in O(1) time, and a value update takes O(log k) time.",5.2. Comparing Running Times of Solvers,[0],[0]
+"In each iteration, at most 2m vertices will have their values updated.",5.2. Comparing Running Times of Solvers,[0],[0]
+"Hence, in each iteration, SG takes time 2m·mkn ·O(log k) = O(m
+2k n log k).",5.2. Comparing Running Times of Solvers,[0],[0]
+"In the description of PDHG in (Hein et al., 2013), each iteration takesO(mk log k) time.",5.2. Comparing Running Times of Solvers,[0],[0]
+"Hence, when n m, each iteration of SG will be significantly faster, although in general, the number of iterations required by the subgradient method can be larger than that for PDHG.
+",5.2. Comparing Running Times of Solvers,[0],[0]
+Testing Methodology.,5.2. Comparing Running Times of Solvers,[0],[0]
+"In each experiment, we consider the hypergraph from one of the above three datasets.",5.2. Comparing Running Times of Solvers,[0],[0]
+"We pick l = 160 vertices at random as the labeled vertices L, and form the corresponding convex program (CP1) for the two solvers, where the initial values for unlabeled vertices are chosen independently to be uniformly at random from [−1, 1].",5.2. Comparing Running Times of Solvers,[0],[0]
+"To compare the performance, we run the two solvers on the same convex program, and record each trajectory of the objective value versus the time duration.",5.2. Comparing Running Times of Solvers,[0],[0]
+"According to experience, 100 seconds is good enough for either solver to reach an almost optimal solution, and we use the minimum value achieved by the two solvers after 100 seconds as an estimate for the true optimal value OPT.",5.2. Comparing Running Times of Solvers,[0],[0]
+"Then, we scan each trajectory, and for each relative gap
+∈ {10−i : i = 1, 2, . . .",5.2. Comparing Running Times of Solvers,[0],[0]
+", 6}, we find the smallest time T ( ) after which the objective value is at most OPT away from the estimate OPT.",5.2. Comparing Running Times of Solvers,[0],[0]
+Each instance of the experiment is repeated 100 times (with different sets of labeled vertices) to obtain an average of those T ( )’s and their standard error.,5.2. Comparing Running Times of Solvers,[0],[0]
+"For each relative gap , we also report the test error for using a feasible solution that is OPT away from the presumed optimal value OPT.
+Results.",5.2. Comparing Running Times of Solvers,[0],[0]
+Both solvers have similar performance.,5.2. Comparing Running Times of Solvers,[0],[0]
+"As predicted by our theoretical analysis, we see in Figure 5.2 that SG has an advantage when the number n of vertices is much larger than the number m of edges, which is the case for the the last dataset covertype67.",5.2. Comparing Running Times of Solvers,[0],[0]
+"Moreover, in Figure 5.3, we see that achieving a relative gap smaller than 10−4 has almost no effect on improving the prediction accuracy.",5.2. Comparing Running Times of Solvers,[0],[0]
+"Hence, we can conclude that for either solver, it takes roughly 10 to 20 seconds to produce a solution for the underlying convex program that can give good predic-
+tion accuracy.",5.2. Comparing Running Times of Solvers,[0],[0]
+DBLP Dataset.,5.3. Directed Hypergraph: More Powerful,[0],[0]
+"We use the DBLP (Ley, 2009) dataset.",5.3. Directed Hypergraph: More Powerful,[0],[0]
+Each paper is represented by a vertex.,5.3. Directed Hypergraph: More Powerful,[0],[0]
+"We include papers from year 2000 to 2015 from conferences belonging to the following research areas to conduct our experiments:
+• 7049 papers from machine learning (ML): NIPS, ICML • 2539 papers from theoretical computer science (TCS): STOC, FOCS • 3374 papers from database (DB): VLDB, SIGMOD
+We perform the following prediction tasks: (a) ML (+1) vs TCS (-1), and (b) ML (+1) vs DB (-1).
+",5.3. Directed Hypergraph: More Powerful,[0],[0]
+The details of the experiment setup and the results are given in the full version.,5.3. Directed Hypergraph: More Powerful,[0],[0]
+We revisit semi-supervised learning on hypergraphs.,abstractText,[0],[0]
+"Same as previous approaches, our method uses a convex program whose objective function is not everywhere differentiable.",abstractText,[0],[0]
+"We exploit the non-uniqueness of the optimal solutions, and consider confidence intervals which give the exact ranges that unlabeled vertices take in any optimal solution.",abstractText,[0.9572566782468299],['We do not extract non-contiguous or non-minimal phrases because reordering them often involves complicated transductions which could hamper the performance of our learning algorithm.3 Unaligned words Next we describe the use of the factorization of permutations into PET forests for training a PCFG model.']
+"Moreover, we give a much simpler approach for solving the convex program based on the subgradient method.",abstractText,[0],[0]
+"Our experiments on real-world datasets confirm that our confidence interval approach on hypergraphs outperforms existing methods, and our sub-gradient method gives faster running times when the number of vertices is much larger than the number of edges.",abstractText,[0],[0]
+Re-revisiting Learning on Hypergraphs:  Confidence Interval and Subgradient Method,title,[0],[0]
+"The Fisher Information Metric (FIM) I(Θ) = (Iij) of a statistical parametric model p(x |Θ) of order D is defined by a D×D positive semidefinite (psd) matrix (I(Θ) 0) with coefficients Iij = Ep [ ∂l ∂Θi ∂l ∂Θj ] , where l(Θ) denotes the log-density function log p(x |Θ).",1. Fisher Information Metric,[0],[0]
+"Under light regularity conditions, FIM can be rewritten equivalently as
+Iij = −Ep",1. Fisher Information Metric,[0],[0]
+"[ ∂2l
+∂Θi∂Θj
+] = 4 ∫ ∂ √ p(x |Θ) ∂Θi ∂ √ p(x |Θ) ∂Θj dx.
+",1. Fisher Information Metric,[0],[0]
+"As its empirical counterpart, the observed FIM (Efron & Hinkley, 1978) with respect to (wrt) a sample set Xn = {xk}nk=1 is Î(Θ |Xn) = −∇2l(Θ",1. Fisher Information Metric,[0],[0]
+"|Xn), which is often evaluated at the maximum likelihood estimate Θ = Θ̂(Xn).",1. Fisher Information Metric,[0],[0]
+"By the law of large numbers, Î(Θ) converges to the (expected) FIM I(Θ) as n→∞.
+1King Abdullah University of Science and Technology (KAUST), Saudi Arabia 2École Polytechnique, France 3Sony Computer Science Laboratories Inc., Japan.",1. Fisher Information Metric,[0],[0]
+"Correspondence to: Ke Sun <sunk@ieee.org>, Frank Nielsen <Frank.Nielsen@acm.org>.
+",1. Fisher Information Metric,[0],[0]
+"Proceedings of the 34 th International Conference on Machine Learning, Sydney, Australia, PMLR 70, 2017.",1. Fisher Information Metric,[0],[0]
+"Copyright 2017 by the author(s).
+",1. Fisher Information Metric,[0],[0]
+The FIM is not invariant and depends on the parameterization.,1. Fisher Information Metric,[0],[0]
+We can optionally write I(Θ) as IΘ(Θ) to emphasize the coordinate system.,1. Fisher Information Metric,[0],[0]
+"By definition, IΘ(Θ) = JᵀIΛ(Λ)J where J = (Jij), Jij = ∂Λi∂Θj is the Jacobian matrix.",1. Fisher Information Metric,[0],[0]
+"For example, the FIM of regular natural exponential families (NEFs) l(Θ) = Θᵀt(x)",1. Fisher Information Metric,[0],[0]
+− F (Θ) (loglinear models with sufficient statistics t(x)) is I(Θ),1. Fisher Information Metric,[0],[0]
+"= ∇2F (Θ) 0, the Hessian of the log-normalizer function F (Θ).",1. Fisher Information Metric,[0],[0]
+"Although exponential families can approximate arbitrarily any smooth density (Cobb et al., 1983), the lognormalizer function may not be available in closed-form nor computationally tractable (Montanari, 2015).
+",1. Fisher Information Metric,[0],[0]
+The FIM is an important concept for statistical machine learning.,1. Fisher Information Metric,[0],[0]
+"It gives a Riemannian metric (Hotelling, 1929; Rao, 1945) of the learning parameter space which is unique (Čencov, 1982; Dowty, 2017).",1. Fisher Information Metric,[0],[0]
+"Hence any learning is in a space that is intrinsically curved based on the FIM, regardless of the choice of the coordinate system.",1. Fisher Information Metric,[0],[0]
+"It also gives a bound (Fréchet, 1943; Cramér, 1946; Nielsen, 2013) of learning efficiency saying that the variance of any unbiased learning of Θ is at least I−1(Θ)/n, where n is the i.i.d. sample size.",1. Fisher Information Metric,[0],[0]
+"The FIM is applied to neural network optimization (Amari, 1997), metric learning (Lebanon, 2005), reinforcement learning (Thomas, 2014) and manifold learning (Sun & Marchand-Maillet, 2014).
+",1. Fisher Information Metric,[0],[0]
+However computing the FIM is expensive.,1. Fisher Information Metric,[0],[0]
+"Besides the fact that learning machines have often singularities (Watanabe, 2009) (|I(Θ)| = 0, not full rank) characterized by plateaux in gradient learning, computing/estimating the FIM of a large neuron system (e.g. one with millions of parameters, Szegedy, Christian et al. 2015) is very challenging due to the finiteness of data, and the huge number D(D+1)2 of matrix coefficients to evaluate.",1. Fisher Information Metric,[0],[0]
+"Furthermore, gradient descent techniques require inverting this large matrix and tuning the learning rate.
+",1. Fisher Information Metric,[0],[0]
+"To tackle this problem, past works mainly focus on how to approximate the FIM with a block diagonal form (Kurita, 1994; Le Roux et al., 2008; Martens, 2010; Pascanu & Bengio, 2014; Martens & Grosse, 2015) or quasi-diagonal form (Ollivier, 2013; Marceau-Caron & Ollivier, 2016).",1. Fisher Information Metric,[0],[0]
+"This global approach faces increasing approximation error and increasing computational cost as the system scales up
+and as complex and dynamic structures (Looks et al., 2017) emerge.
+",1. Fisher Information Metric,[0],[0]
+This work aims at a different local approach.,1. Fisher Information Metric,[0],[0]
+"The idea is to accurately describe the information geometry (IG) in a subsystem of the large learning system, which is invariant to the scaling up and structural change of the global system, so that the local machinery, including optimization, can be discussed regardless of the other parts.
+",1. Fisher Information Metric,[0],[0]
+"For this purpose, a novel concept, the Relative Fisher Information Metric (RFIM), is defined.",1. Fisher Information Metric,[0],[0]
+"Unlike the traditional geometric view of a high-dimensional parameter manifold, RFIMs defines multiple projected low-dimensional geometries of subsystems.",1. Fisher Information Metric,[0],[0]
+This geometry is correlated to the parameters beyond the subsystem and is therefore considered dynamic.,1. Fisher Information Metric,[0],[0]
+It can be used to characterize the efficiency of a local learning process.,1. Fisher Information Metric,[0],[0]
+Taking this stance has potential in deep learning because a deep neural network can be decomposed into many local components such as neurons or layers.,1. Fisher Information Metric,[0],[0]
+The RFIM is well suited to the compositional block structures of neural networks.,1. Fisher Information Metric,[0],[0]
+"The RFIM can be used for out-of-core learning.
+",1. Fisher Information Metric,[0],[0]
+The paper is organized as follows.,1. Fisher Information Metric,[0],[0]
+Sec. 2 reviews natural gradient within the context of Multi-Layer Perceptrons (MLPs).,1. Fisher Information Metric,[0],[0]
+"Sec. 3 formally defines the RFIM, and gives a table of RFIMs of several commonly used subsystems.",1. Fisher Information Metric,[0],[0]
+Sec. 4 discusses the advantages of using the RFIM as compared to the FIM. Sec. 5 gives an algorithmic framework and proof-of-concept experiments on neural network optimization.,1. Fisher Information Metric,[0],[0]
+Sec. 6 presents related works on parameter diagonalization.,1. Fisher Information Metric,[0],[0]
+Sec. 7 concludes this work and further hints at perspectives.,1. Fisher Information Metric,[0],[0]
+"Consider a MLP x θ1−→ h1 · · ·hL−1 θL−−→ y, whose statistical model is the following conditional distribution
+p(y |x,Θ) = ∑
+h1,··· ,hL−1
+p(h1 |x,θ1) · · · p(y |hL−1,θL).
+",2. Natural Gradient: Review and Insights,[0],[0]
+"The often intractable sum over h1, · · · ,hL−1 can be get rid off by deteriorating p(h1 |x,θ1), · · · , p(hL−1 |hL−2,θL−1) to Dirac’s deltas δ, and letting merely the last layer p(y |hL−1,θL) be stochastic.",2. Natural Gradient: Review and Insights,[0],[0]
+"Other models such as restricted Boltzmann machines (Nair & Hinton, 2010; Montavon & Müller, 2012), deep belief networks (Hinton et al., 2006), dropout (Wager et al., 2013), and variational autoencoders (Kingma & Welling, 2014) do consider the hi’s to be stochastic.
+",2. Natural Gradient: Review and Insights,[0],[0]
+"The tensor metric of the neuromanifold (Amari, 1995) M, consisting of all MLPs with the same architecture but different parameter values, is locally defined by the FIM.",2. Natural Gradient: Review and Insights,[0],[0]
+"Because a MLP corresponds to a con-
+ditional distribution, its FIM is a function of the input x. By taking an empirical average over the input samples {xk}nk=1, the FIM of a MLP can be expressed as IΘ(Θ) = 1n",2. Natural Gradient: Review and Insights,[0],[0]
+"∑n k=1Ep(y |xk,Θ) [ ∂lk ∂Θ ∂lk ∂Θᵀ ] , where lk(Θ) = log p(y |xk, Θ) denotes the conditional log-likelihood function wrt xk.
+",2. Natural Gradient: Review and Insights,[0],[0]
+"To understand the meaning of the Riemannian metric IΘ(Θ), it measures the intrinsic difference between two nearby neural networks around Θ ∈ M. A learning step can be regarded as a tiny displacement δΘ",2. Natural Gradient: Review and Insights,[0],[0]
+onM.,2. Natural Gradient: Review and Insights,[0],[0]
+"According to the FIM, the infinitesimal square distance
+〈δΘ, δΘ〉IΘ(Θ) = 1
+n n∑ k=1 Ep(y |xk,Θ)
+[( δΘᵀ
+∂lk ∂Θ )",2. Natural Gradient: Review and Insights,[0],[0]
+"2] (1)
+measures how much δΘ",2. Natural Gradient: Review and Insights,[0],[0]
+"(with a radius constraint) is statistically along ∂l∂Θ , or equivalently how much δΘ affects intrinsically the conditional distribution p(y |x, Θ).
+",2. Natural Gradient: Review and Insights,[0],[0]
+Consider the negative log-likelihood function L(Θ) =,2. Natural Gradient: Review and Insights,[0],[0]
+"− ∑n k=1 log p(yk |xk,Θ) wrt the observed pairs {(xk,yk)}nk=1, we try to minimize the loss while maintaining a small learning step size 〈δΘ, δΘ〉IΘ(Θ) on M. At Θt ∈ M, the target is to minimize wrt δΘ",2. Natural Gradient: Review and Insights,[0],[0]
+"the Lagrange function
+L(Θt + δΘ)",2. Natural Gradient: Review and Insights,[0],[0]
+"+ 1
+2γ 〈δΘ, δΘ〉IΘ(Θt)
+",2. Natural Gradient: Review and Insights,[0],[0]
+"≈ L(Θt) + δΘᵀ 5Θ L(Θt) + 1
+2γ δΘᵀIΘ(Θt)δΘ,
+where γ > 0 is a learning rate.",2. Natural Gradient: Review and Insights,[0],[0]
+"The optimal solution of the above quadratic optimization gives a learning step
+δΘt = −γI−1Θ (Θt)5Θ L(Θt).
+",2. Natural Gradient: Review and Insights,[0],[0]
+"In this update procedure, ∇̃ΘL(Θ) = I−1Θ (Θ)5Θ L(Θ) replaces the role of the usual gradient ∇ΘL(Θ) and is called the natural gradient (Amari, 1997).
+",2. Natural Gradient: Review and Insights,[0],[0]
+"Although the FIM depends on the chosen parameterization, the natural gradient is invariant to reparameterization.",2. Natural Gradient: Review and Insights,[0],[0]
+Let Λ be another coordinate system and J be the Jacobian matrix of the mapping,2. Natural Gradient: Review and Insights,[0],[0]
+"Θ→ Λ. Then we have
+I−1Θ (Θ)5Θ L(Θ) =",2. Natural Gradient: Review and Insights,[0],[0]
+"(J ᵀIΛ(Λ)J)−1 Jᵀ 5Λ L(Λ)
+",2. Natural Gradient: Review and Insights,[0],[0]
+"= J−1I−1Λ (Λ)5Λ L(Λ),
+showing that ∇̃ΘL(Θ) and ∇̃ΛL(Λ) are the same dynamic up to coordinate transformation.",2. Natural Gradient: Review and Insights,[0],[0]
+"As the learning rate γ is not infinitesimal in practice, natural gradient descent actually depends on the coordinate system (see e.g. Martens 2014).",2. Natural Gradient: Review and Insights,[0],[0]
+"Other intriguing properties of natural gradient optimization lie in being free from getting trapped in plateaux of the error surface, and attaining Fisher efficiency in online learning (see Sec. 4 Amari 1998).
+",2. Natural Gradient: Review and Insights,[0],[0]
+"MΘ
+Θ yx
+Mθ1
+x
+x+ ∆x
+θ1x
+Mθ2h1
+h1 + ∆h1
+θ2h1
+Mθ3
+h2
+h2 + ∆h2
+θ3h2",2. Natural Gradient: Review and Insights,[0],[0]
+"y
+Model:
+Manifold:
+Computational graph:
+Metric:
+Θ
+Θ I(Θ)
+θ3 h2
+θ3
+h2
+gy(θ3)
+",2. Natural Gradient: Review and Insights,[0],[0]
+"θ2 h1
+θ2
+h1
+gh2(θ2)
+θ1
+θ1 gh1(θ1)
+p(y |Θ,x) =",2. Natural Gradient: Review and Insights,[0],[0]
+"∑ h1 ∑ h2 p(h1 |θ1,x) p(h2 |θ2,h1) p(y |θ3,h2)
+",2. Natural Gradient: Review and Insights,[0],[0]
+Figure 1.,2. Natural Gradient: Review and Insights,[0],[0]
+(left),2. Natural Gradient: Review and Insights,[0],[0]
+The traditional global geometry of a MLP; (right) information geometry of subsystems.,2. Natural Gradient: Review and Insights,[0],[0]
+The gray and blue meshes show that the subsystem geometry is dynamic when the reference variable makes a tiny move.,2. Natural Gradient: Review and Insights,[0],[0]
+"The square under the (sub-)system means the (R-)FIM is computed by (i) computing the FIM in the traditional way wrt all free parameters that affect the system output; (ii) choosing a sub-block that contains only the internal parameters of the (sub-)system and regarding the remaining variables as the reference.
+",2. Natural Gradient: Review and Insights,[0],[0]
+"For the sake of simplicity, we do not discuss singular FIMs with a subset of parameters having zero metric.",2. Natural Gradient: Review and Insights,[0],[0]
+"This set of parameters forms an analytic variety (Watanabe, 2009), and technically the MLP as a statistical model is said to be non-regular (and the parameter Θ is not identifiable).",2. Natural Gradient: Review and Insights,[0],[0]
+"The natural gradient has been extended (Thomas, 2014) to cope with singular FIMs having positive semi-definite matrices by taking the Moore-Penrose pseudo-inverse (that coincides with the inverse matrix for full rank matrices).
+",2. Natural Gradient: Review and Insights,[0],[0]
+"In the family of 2nd-order optimization methods, a fuzzy line can be drawn from the natural gradient and alternative methods such as the Hessian-free optimization (Martens, 2010).",2. Natural Gradient: Review and Insights,[0],[0]
+"By definition, the FIM is a property of the parameter space which is independent or weakly dependent on the input samples.",2. Natural Gradient: Review and Insights,[0],[0]
+"For example, the FIM of a MLP is independent of {yi}.",2. Natural Gradient: Review and Insights,[0],[0]
+"In contrast, the Hessian (or related concepts such as the Gauss-Newton matrix, Martens 2014) is a property of the learning cost function wrt the input samples.
+",2. Natural Gradient: Review and Insights,[0],[0]
+"Bonnabel (Bonnabel, 2013) proposed to use the Riemannian exponential map to define a gradient descent step, thus ensuring to stay on the manifold for any chosen learning rate.",2. Natural Gradient: Review and Insights,[0],[0]
+Convergence is proven for Hadamard manifolds (of negative curvatures).,2. Natural Gradient: Review and Insights,[0],[0]
+"However, it is not mathematically tractable to express the exponential map of hierarchical model manifolds like the neuromanifold.",2. Natural Gradient: Review and Insights,[0],[0]
+"In general, for large parametric systems, it is impossible to diagonalize or decorrelate all the parameters, so that we split instead all random variables into three parts θf , θ and h.",3. RFIM: Definition and Expressions,[0],[0]
+We examine their intuitive meanings before giving the formal definition.,3. RFIM: Definition and Expressions,[0],[0]
+"The reference, θf , consists of the majority of the random variables that are considered fixed (therefore allowing us to simplify the analysis).",3. RFIM: Definition and Expressions,[0],[0]
+This is in analogy to the notion of a reference frame in physics.,3. RFIM: Definition and Expressions,[0],[0]
+"θ is the
+subsystem parameters, resembling the long-term memory adapting slowly to the observations (e.g. neural network weights).",3. RFIM: Definition and Expressions,[0],[0]
+The response h is a random variable that reacts to the variations of θ.,3. RFIM: Definition and Expressions,[0],[0]
+"Usually, h is the output of the subsystem that is connected to neighbour subsystems (e.g. hidden layer outputs).",3. RFIM: Definition and Expressions,[0],[0]
+"Formally, a subsystem which factorizes the learning machine is characterized by the conditional distribution p(h |θ,θf ), where θ can be estimated based on h and θf .",3. RFIM: Definition and Expressions,[0],[0]
+We make the following definition.,3. RFIM: Definition and Expressions,[0],[0]
+Definition 1 (RFIM).,3. RFIM: Definition and Expressions,[0],[0]
+"Given θf , the RFIM 1 of θ wrt h is
+gh (θ |θf )",3. RFIM: Definition and Expressions,[0],[0]
+"def = Ep(h | θ, θf ) [ ∂
+∂θ log p(h |θ, θf )
+∂
+∂θᵀ log p(h |θ, θf )
+] ,
+or simply gh (θ), corresponding to the estimation of θ based on observations of h given θf .
+",3. RFIM: Definition and Expressions,[0],[0]
+"For example, consider a MLP.",3. RFIM: Definition and Expressions,[0],[0]
+"If we choose θf to be the input features x, choose h to be the final output y, and choose θ to be all the network weights Θ, then the RFIM becomes the FIM: I(Θ) = gy(Θ |x).
+",3. RFIM: Definition and Expressions,[0],[0]
+"More generally, we can choose the response h to be other than the observables to compute the Fisher information of subsystems, especially dynamically during the learning of the global machine.",3. RFIM: Definition and Expressions,[0],[0]
+"To see the meaning of the RFIM, similar to eq.",3. RFIM: Definition and Expressions,[0],[0]
+"(1), the infinitesimal square distance 〈δθ, δθ〉gh(θ) =",3. RFIM: Definition and Expressions,[0],[0]
+"Ep(h | θ, θf ) [( δθᵀ ∂∂θ log p(h |θ, θf )
+)2] measures how much δθ impacts intrinsically the stochastic mapping θ → h which features the subsystem.",3. RFIM: Definition and Expressions,[0],[0]
+"We have the following proposition following definition 1.
+",3. RFIM: Definition and Expressions,[0],[0]
+Proposition 2 (Relative Geometry Consistency).,3. RFIM: Definition and Expressions,[0],[0]
+"If θ1 consists of a subset of θ2 so that θ2 = (θ1, θ̃1), then ∀θ̃1, Mθ1 with the metric gh(θ1 | θ̃1) has exactly the same Rie-
+1We use the same term “relative FIM” (Zegers, 2015) with a different definition.
+",3. RFIM: Definition and Expressions,[0],[0]
+"mannian metric with the sub-manifold {θ2 ∈ Mθ2 : θ̃1 is fixed} induced by the ambient metric gh (θ2).
+",3. RFIM: Definition and Expressions,[0],[0]
+"When the response h is chosen, then different splits of (θ,θf ) are consistent with the same ambient geometry.
+",3. RFIM: Definition and Expressions,[0],[0]
+"Figure 1 shows the traditional global geometry of a learning system, where the curvature is defined by the learner’s parameter sensitivity to the external environment (x and y), as compared to the information geometry of subsystems, where the curvature is defined by the parameter sensitivity wrt hidden interface variables h.",3. RFIM: Definition and Expressions,[0],[0]
+"The two-colored meshes show that the geometry structure is dynamic and varies with the reference variable θf .
+",3. RFIM: Definition and Expressions,[0],[0]
+"One should not confuse the RFIM with the diagonal blocks of the FIM (Kurita, 1994).",3. RFIM: Definition and Expressions,[0],[0]
+Both their meanings and expressions are different.,3. RFIM: Definition and Expressions,[0],[0]
+The RFIM is computed by integrating out the hidden response variables h.,3. RFIM: Definition and Expressions,[0],[0]
+The FIM is always computed by integrating out the observables x and y.,3. RFIM: Definition and Expressions,[0],[0]
+Hence the RFIM is a more general concept and includes the FIM as a special case.,3. RFIM: Definition and Expressions,[0],[0]
+"This highlights a main difference with the backpropagated metric (Ollivier, 2013), which essentially considers parameter sensitivity wrt the final output.",3. RFIM: Definition and Expressions,[0],[0]
+"Despite the fact that the FIMs of small parametric structures such as single neurons was studied (Amari, 1997), we are not looking at a small single-component system but a component embedded in a large system, targeting at improving the large system.
+",3. RFIM: Definition and Expressions,[0],[0]
+"In the following we provide a short table of commonly used RFIMs for future reference (the RFIMs listed are mostly straightforward from definition 1, with detailed derivations given in the supplementary material).",3. RFIM: Definition and Expressions,[0],[0]
+This is meaningful since the RFIM is a new concept.,3. RFIM: Definition and Expressions,[0],[0]
+We also want to demonstrate these simple closed form expressions without any approximations.,3. RFIM: Definition and Expressions,[0],[0]
+We start from the RFIM of single neuron models.,3.1. RFIMs of One Neuron,[0],[0]
+"Consider a stochastic neuron with input x and weights w. After a nonlinear activation function f , the output y is randomized surrounding the mean f(wᵀx̃) with a variance.",3.1. RFIMs of One Neuron,[0],[0]
+"Throughout this paper x̃ = (xᵀ, 1)ᵀ denotes the augmented vector of x (homogeneous coordinates) so that wᵀx̃ contains a bias term, and a general linear transformation can be written simply asAx̃.
+Using x as the reference, the RFIM of w with respect to y has a common form gy(w |x)",3.1. RFIMs of One Neuron,[0],[0]
+"= νf (w,x)x̃x̃ᵀ, where νf (w,x) is a positive coefficient with large values in the linear region, or the effective learning zone of the neuron.",3.1. RFIMs of One Neuron,[0],[0]
+"This agrees with early studies on single neuron FIMs (Amari, 1997; Kurita, 1994).
+",3.1. RFIMs of One Neuron,[0],[0]
+"If f(t) = tanh(t) is the hyperbolic tangent func-
+tion, then νf (w,x) = sech2(wᵀx̃), where sech(t) = 2 exp(t)+exp(−t) is the hyperbolic secant function.",3.1. RFIMs of One Neuron,[0],[0]
+"Similarly, if f(t) = sigm(t) is the sigmoid function, then νf (w,x) = sigm (w ᵀx̃)",3.1. RFIMs of One Neuron,[0],[0]
+"[ 1− sigm (wᵀx̃) ] .
+",3.1. RFIMs of One Neuron,[0],[0]
+"If f is defined by Parametric Rectified Linear Unit (PReLU) (He et al., 2015), which includes Rectified Linear Unit (ReLU) (Nair & Hinton, 2010) as a special case, so that f(t) = t (t ≥ 0), f(t) = ιt (t < 0), 0 ≤ ι < 1, then under certain approximations (see supplementary material)
+",3.1. RFIMs of One Neuron,[0],[0]
+"νf (w,x) =
+[ ι+ (1− ι)sigm",3.1. RFIMs of One Neuron,[0],[0]
+"( 1− ι ω wᵀx̃ )]2 ,
+where ω > 0 is a hyper-parameter (e.g. ω = 1).
+",3.1. RFIMs of One Neuron,[0],[0]
+"For the exponential linear unit (ELU) (Clevert et al., 2015), f(t) = t (t ≥ 0), f(t) = α (exp(t)− 1) (t < 0), where α > 0 is a hyper-parameter.",3.1. RFIMs of One Neuron,[0],[0]
+"We get
+νf (w,x) =",3.1. RFIMs of One Neuron,[0],[0]
+{ 1 if wᵀx̃ ≥ 0 α2 exp (2wᵀx̃),3.1. RFIMs of One Neuron,[0],[0]
+if wᵀx̃ < 0.,3.1. RFIMs of One Neuron,[0],[0]
+Let D denote the dimensionality of the corresponding variable.,3.2. RFIM of One Layer,[0],[0]
+"A linear layer with input x, connection weights W =",3.2. RFIM of One Layer,[0],[0]
+"[ w1, · · · ,wDy ] , and stochastic output y can be represented by y ∼ G(W ᵀx̃, σ2I), where I is the identity matrix, and σ is the scale of the observation noise, and G(µ,Σ) is a multivariate Gaussian distribution with mean µ and covariance matrix Σ. We vectorize W by stacking its columns {wi}.",3.2. RFIM of One Layer,[0],[0]
+"Then gy(W |x) is a tensor of size (Dx + 1)Dy× (Dx + 1)Dy , given by gy(W |x)",3.2. RFIM of One Layer,[0],[0]
+"= diag [x̃x̃ᵀ, · · · , x̃x̃ᵀ], where diag(·) means the (block) diagonal matrix constructed by the given matrix entries.
+",3.2. RFIM of One Layer,[0],[0]
+"A nonlinear layer increments a linear layer by adding an element-wise activation function applied on W ᵀx̃, and then randomized wrt the choice of the neuron.",3.2. RFIM of One Layer,[0],[0]
+"By definition 1, its RFIM is given by
+gy (",3.2. RFIM of One Layer,[0],[0]
+W |x) =,3.2. RFIM of One Layer,[0],[0]
+"diag [ νf (w1,x)x̃x̃ ᵀ, · · · , νf (wm,x)x̃x̃ᵀ ] , (2)
+where νf (wi,x) is given in Subsec.",3.2. RFIM of One Layer,[0],[0]
+"3.1.
+",3.2. RFIM of One Layer,[0],[0]
+"A softmax layer, which often appears as the last layer of a MLP, is given by y ∈ {1, . . .",3.2. RFIM of One Layer,[0],[0]
+",m}, where p(y) = ηy = exp(wyx̃)∑m i=1 exp(wix̃) .",3.2. RFIM of One Layer,[0],[0]
+"Its RFIM is a dense matrix given by
+gy(W )",3.2. RFIM of One Layer,[0],[0]
+=  (η1 − η21)x̃x̃ᵀ · · · −η1ηmx̃x̃ᵀ −η2η1x̃x̃ᵀ · · · −η2ηmx̃x̃ᵀ ... . .,3.2. RFIM of One Layer,[0],[0]
+".
+...",3.2. RFIM of One Layer,[0],[0]
+−ηmη1x̃x̃ᵀ · · · (ηm − η2m)x̃x̃ᵀ  .,3.2. RFIM of One Layer,[0],[0]
+Notice that its i’th diagonal block (ηi − η2i ),3.2. RFIM of One Layer,[0],[0]
+x̃x̃ᵀ resembles the RFIM of a single sigm neuron.,3.2. RFIM of One Layer,[0],[0]
+"By eq. (2), the one-layer RFIM is a product metric (Jost, 2011) and does not consider the inter-neuron correlations, which must be obtained by looking at a larger subsystem.",3.3. RFIM of Two Layers,[0],[0]
+"Consider a two-layer model with stochastic output y around the mean vector f(Cᵀh̃), where h = f (W ᵀx̃).",3.3. RFIM of Two Layers,[0],[0]
+"For simplicity, we ignore inter-layer correlations between the first layer and the second layer and focus on the interneuron correlations within the first layer.",3.3. RFIM of Two Layers,[0],[0]
+"To do this, both x and C are considered as references to compute the RFIM of W .",3.3. RFIM of Two Layers,[0],[0]
+"By definition 1, gy(W |x,C) =",3.3. RFIM of Two Layers,[0],[0]
+"[Gij ]Dh×Dh and each block has the form
+Gij = Dy∑ l=1 cilcjlνf (cl,h)νf (wi,x)νf (wj ,x)x̃x̃ ᵀ.
+Now that we have the one-layer and two-layer RFIMs, we can either split a given feed-forward neural network into one-layer subsystems or into two-layer subsystems.",3.3. RFIM of Two Layers,[0],[0]
+"A trade-off is that using a larger subsystem entails greater analytical and computational difficulty, although it could more accurately model the global system dynamics.",3.3. RFIM of Two Layers,[0],[0]
+"In the extreme case, the FIM is obtained if the whole system is considered as one single subsystem.",3.3. RFIM of Two Layers,[0],[0]
+This section discusses the theoretical advantages of the RFIM over the FIM.,4. RFIM: Key Advantages,[0],[0]
+"Consider wlog a MLP with Bernoulli outputs y ∈ {0, 1}m, whose mean µ is a deterministic function depending on the input x and the network parameters Θ. By Sec. 2, the FIM of the MLP can be computed as (see supplementary for proof)
+I(Θ)",4. RFIM: Key Advantages,[0],[0]
+= 1 n n∑ i=1,4. RFIM: Key Advantages,[0],[0]
+"m∑ j=1
+1 µj(xi)(1− µj(xi))",4. RFIM: Key Advantages,[0],[0]
+"∂µj(xi) ∂Θ ∂µj(xi) ∂Θᵀ .
+",4. RFIM: Key Advantages,[0],[0]
+(3) Therefore rank(I(Θ)),4. RFIM: Key Advantages,[0],[0]
+≤,4. RFIM: Key Advantages,[0],[0]
+nm.,4. RFIM: Key Advantages,[0],[0]
+The rank of a diagonal block of I(Θ) corresponding to one layer is even smaller.,4. RFIM: Key Advantages,[0],[0]
+"In a deep neural network (e.g. Szegedy, Christian et al. 2015), if the sample size n < dim(Θ)/m, then I(Θ) is doomed to be singular.",4. RFIM: Key Advantages,[0],[0]
+All methods trying to approximate the FIM suffer from this problem and therefore rely on proper regularizations.,4. RFIM: Key Advantages,[0],[0]
+"If the network is decomposed into layers, the RFIM of each subsystem (layer) is given by eq.",4. RFIM: Key Advantages,[0],[0]
+(2).,4. RFIM: Key Advantages,[0],[0]
+Each sample can contribute maximally 1 to the rank of the neuron-RFIM and can contribute maximally Dy to the rank of the layer-RFIM.,4. RFIM: Key Advantages,[0],[0]
+"It only requires maxi{dim(wi)} (the maximum layer width) observations to have a full rank RFIM, where wi is the weight vector of the i’th neuron.",4. RFIM: Key Advantages,[0],[0]
+The RFIM is expected to have a much higher rank than the FIM.,4. RFIM: Key Advantages,[0],[0]
+Higher rank means less singularity and more information is captured.,4. RFIM: Key Advantages,[0],[0]
+"Models that can
+be distinguished by the RFIM may be identical in the sense of the FIM.",4. RFIM: Key Advantages,[0],[0]
+"Essentially, the RFIM integrates the internal randomness (Bengio, 2013) of the neural system by considering the output of each layer as a random variable.",4. RFIM: Key Advantages,[0],[0]
+"In theory, the FIM should also consider stochastic neurons.",4. RFIM: Key Advantages,[0],[0]
+"However it requires marginalizing the joint distribution of h1, h2, · · · , y. This makes the already infeasible computation even more challenging.
+",4. RFIM: Key Advantages,[0],[0]
+"The RFIM is not an approximation of the FIM but is an accurate metric, defining the geometry of θ wrt to its direct response h in the system, or adjacent nodes in a graphical model.",4. RFIM: Key Advantages,[0],[0]
+By the example in fig.,4. RFIM: Key Advantages,[0],[0]
+"1, gy(θL) of the last layer is exactly the corresponding block in I(Θ): they both characterize how θL affects the mapping hL−1",4. RFIM: Key Advantages,[0],[0]
+→ y. They start to diverge from the second to last layer.,4. RFIM: Key Advantages,[0],[0]
+"To compute the geometry of θL−1, the RFIM looks at how θL−1 affects the local mapping hL−2 → hL−1, which can be measured reliably regardless of the rest of the system (think of a “debugging” process to separate and measure a single component).",4. RFIM: Key Advantages,[0],[0]
+"In contrast, the FIM examines how θL−1 affects the non-local mapping hL−2 → y.",4. RFIM: Key Advantages,[0],[0]
+This is a difficult task because it must consider the correlation between different layers.,4. RFIM: Key Advantages,[0],[0]
+"As an approximation, the block diagonalized version of the FIM ignores such correlations and therefore faces the loss of accuracy.
+",4. RFIM: Key Advantages,[0],[0]
+The RFIM makes it possible to maintain global system stability so that the intrinsic variations of different subsystems are balanced during learning.,4. RFIM: Key Advantages,[0],[0]
+Consider a set of interconnected subsystems with internal parameters {θl} and the corresponding response variables {hl}.,4. RFIM: Key Advantages,[0],[0]
+The RFIM ghl(θl) measures how much the likelihood surface of hl is curved wrt a small learning step δθl.,4. RFIM: Key Advantages,[0],[0]
+"By constraining the squared Riemannian distance δθᵀl g
+hl(θl)δθl having similar scales, different subsystems will present similar variations during learning.",4. RFIM: Key Advantages,[0],[0]
+"Within one subsystem, the learning along sensitive parameter directions is penalized.",4. RFIM: Key Advantages,[0],[0]
+"Among different subsystems, the learning of sensitive subsystems is penalized.",4. RFIM: Key Advantages,[0],[0]
+"Globally, the inter-subsystem stochastic connections have similar variance, maintaining a stable reference system and achieving efficient learning.",4. RFIM: Key Advantages,[0],[0]
+"This is similar to the idea of batch normalization (BN) (Ioffe & Szegedy, 2015) but has a deeper theoretical foundation.
+",4. RFIM: Key Advantages,[0],[0]
+"Formally, we have the following theorem.
+",4. RFIM: Key Advantages,[0],[0]
+Theorem 3.,4. RFIM: Key Advantages,[0],[0]
+"Consider a learning system represented by a joint distribution p(x,h) of x (observables) and h (hidden variables which connect subsystems).",4. RFIM: Key Advantages,[0],[0]
+"The joint FIM J (Θ) = Ep ( log p(x,h |Θ) ∂Θ",4. RFIM: Key Advantages,[0],[0]
+"log p(x,h |Θ) ∂Θᵀ ) has a block diagonal form.",4. RFIM: Key Advantages,[0],[0]
+"Each block isEp(gh(θ)), where θ is the parameters within a subsystem and h is its response variables to neighour subsystems.
+",4. RFIM: Key Advantages,[0],[0]
+"The global correspondence of the local RFIM is the joint
+FIM.",4. RFIM: Key Advantages,[0],[0]
+"By theorem 3, the square distance dΘᵀJ (Θ)dΘ = Ep( ∑ l dθ ᵀ l g hl(θl)dθl) measures the system variance, including both the observables x and the hidden variables h.",4. RFIM: Key Advantages,[0],[0]
+An intrinsic trade-off between the RFIM and the FIM is learning system stability versus efficiency.,4. RFIM: Key Advantages,[0],[0]
+"Normalizing the FIM is more efficient because it helps to achieve Fisher efficiency (Amari, 1998).",4. RFIM: Key Advantages,[0],[0]
+"Normalizing the RFIM is more stable since the hidden variations are bounded, which only guarantees subsystem Fisher efficiency characterized by the Cramér-Rao lower bound of local parameters.",4. RFIM: Key Advantages,[0],[0]
+The traditional non-parametric way of applying natural gradient requires re-calculating the FIM and solving a large linear system in each learning step.,5. Relative Natural Gradient Descent,[0],[0]
+"Besides the huge computational cost, it has a large approximation error.",5. Relative Natural Gradient Descent,[0],[0]
+"For example during online learning, a mini-batch of samples cannot faithfully reflect the “true” geometry, which has to integrate the risk of sample variations.",5. Relative Natural Gradient Descent,[0],[0]
+"That is, the FIM of a mini-batch is likely to be singular or poorly conditioned.
+",5. Relative Natural Gradient Descent,[0],[0]
+"A recent series of efforts (Montavon & Müller, 2012; Raiko et al., 2012; Desjardins et al., 2015) are gearing towards a parametric approach to applying natural gradient, which memorizes and learns a geometry.",5. Relative Natural Gradient Descent,[0],[0]
+"For example, natural neural networks (Desjardins et al., 2015) augment each layer with a redundant linear layer, and let these linear layers parametrize the geometry of the neural manifold.
+",5. Relative Natural Gradient Descent,[0],[0]
+"By dividing the learning system into subsystems, the RFIM potentially gives a systematical implementation of parametric natural gradient descent.",5. Relative Natural Gradient Descent,[0],[0]
+"The memory complexity of storing the Riemannian metric has been reduced from O(D2) to O( ∑ iD 2 i ), where Di = dim(wi) is the size of the i’th neuron.",5. Relative Natural Gradient Descent,[0],[0]
+"Consider there are M neurons in total, then the memory cost is reduced by a factor of M .",5. Relative Natural Gradient Descent,[0],[0]
+"The computational complexity has been reduced from O(D%) (% ≈ 2.373, Williams 2012) to O( ∑ iD % i ).",5. Relative Natural Gradient Descent,[0],[0]
+"Optimization based on RFIM is called Relative Natural Gradient Descent (RNGD).
+",5. Relative Natural Gradient Descent,[0],[0]
+"The good performance of batch normalization (Ioffe & Szegedy, 2015) provides an empirical support for the RFIM.",5. Relative Natural Gradient Descent,[0],[0]
+"Basically, BN uses an inter-sample normalization layer to transform the layer input x to z with zero mean and unit variance and thus reduces “internal covariate shift”.",5. Relative Natural Gradient Descent,[0],[0]
+"In a typical case, above this normalization layer is a linear layer given by y = W ᵀz̃.",5. Relative Natural Gradient Descent,[0],[0]
+"If each dimension of z is normalized, then the diagonal blocks of the linear layer RFIM gy(W )",5. Relative Natural Gradient Descent,[0],[0]
+"= diag[z̃z̃ᵀ, · · · , z̃z̃ᵀ] become a covariance matrix with identity diagonal entries (after taking an empirical average).",5. Relative Natural Gradient Descent,[0],[0]
+"This gives the coordinate system W a well conditioned RFIM for efficient learning.
+5.1.",5. Relative Natural Gradient Descent,[0],[0]
+"RNGD with a relu MLP
+",5. Relative Natural Gradient Descent,[0],[0]
+This subsection builds a proof-of-concept experiment on MLP optimization.,5. Relative Natural Gradient Descent,[0],[0]
+We partition the MLP into layers (one layer consists of a linear layer plus an element-wise nonlinear activation function) as the subsystems.,5. Relative Natural Gradient Descent,[0],[0]
+"By eq. (2), the RFIM of layer l (l = 1, · · · , L) with input hl−1 (h0 = x) and weights {wl1, · · · ,wlml} is
+diag [ νf (wl1,hl−1)h̃l−1h̃ ᵀ l−1, · · · , νf (wlml ,hl−l)h̃l−1h̃ ᵀ l−1 ] .
+",5. Relative Natural Gradient Descent,[0],[0]
+The subsystem stability during one learning step δw can be measured geometrically by∑L l=1 ∑ml i=1,5. Relative Natural Gradient Descent,[0],[0]
+"νf (wli,hl−1)(δw ᵀ lih̃l−1)
+2.",5. Relative Natural Gradient Descent,[0],[0]
+"Using this term as the geometric cost (the Lagrange term) in the trust region approach in Sec. 2, we get the following RNGD method.",5. Relative Natural Gradient Descent,[0],[0]
+"In a stochastic gradient descent scenario, each neuron i in layer l is updated by
+wnewli ← woldli −G−1li ∂E
+∂wli ,
+where E is the cost function and Gli is a learned metric.",5. Relative Natural Gradient Descent,[0],[0]
+"The consideration is that a mini-batch of samples do not contain enough information to compute the RFIM, which should be averaged over all training samples.",5. Relative Natural Gradient Descent,[0],[0]
+"Therefore, for the i’th neuron in layer l, Gli is initialized to identity, and is updated based on
+Gnewli ← (1− λ)Goldli + λνf (wli,hl−1)h̃l−1h̃ ᵀ",5. Relative Natural Gradient Descent,[0],[0]
+l−1,5. Relative Natural Gradient Descent,[0],[0]
++,5. Relative Natural Gradient Descent,[0],[0]
+"I,
+where > 0 is a hyper-parameter to avoid singularity caused by small sample size, and the average is taken over all samples in a mini-batch, and λ is a learning rate.",5. Relative Natural Gradient Descent,[0],[0]
+"In theory, λ should be gradually reduced to zero to guarantee the convergence of this geometry learning.",5. Relative Natural Gradient Descent,[0],[0]
+"To avoid solving a linear system in each iteration, every T iterations we recompute and store G−1li based on the most updated Gli.",5. Relative Natural Gradient Descent,[0],[0]
+"In the next T iterations, this G−1li will be used as an approximation of the inverse RFIM.",5. Relative Natural Gradient Descent,[0],[0]
+"For the input layer which scales with the number of input features, and the final softmax layer, we apply instead the RFIM of the corresponding linear layer to improve the computational efficiency.
+",5. Relative Natural Gradient Descent,[0],[0]
+We compare different optimizers on classifying MNIST digits.,5. Relative Natural Gradient Descent,[0],[0]
+"The network has shape 784-80-80-80-10, with relu activation units, a final soft-max layer, and uses the persample average cross-entropy with L2-regularization as the learning cost function.",5. Relative Natural Gradient Descent,[0],[0]
+"We experiment on two different architectures: one is a plain MLP (PLAIN); the other has a batch normalization layer after each hidden layer (BNA), where a rescaling parameter is applied to ensure enough flexibility of the parametric structure (Ioffe & Szegedy, 2015).",5. Relative Natural Gradient Descent,[0],[0]
+"For simplicity, the architecture, mini-batch size (50), and L2 regularization strength (10−3) are fixed to be the same for all compared methods.",5. Relative Natural Gradient Descent,[0],[0]
+"The observations are consistent when these configurations vary.
+",5. Relative Natural Gradient Descent,[0],[0]
+Figure 2 shows the learning curves of different methods.,5. Relative Natural Gradient Descent,[0],[0]
+SGD is stochastic gradient descent.,5. Relative Natural Gradient Descent,[0],[0]
+"ADAM is the Adam optimizer (Kingma & Ba, 2014) with β1 = 0.9, β2 = 0.999 and = 10−8.",5. Relative Natural Gradient Descent,[0],[0]
+"Our RNGD is implemented by modifying TensorFlow’s (Abadi, Martı́n",5. Relative Natural Gradient Descent,[0],[0]
+"et al., 2015) SGD optimizer.",5. Relative Natural Gradient Descent,[0],[0]
+"We set empirically T = 100, λ = 0.005 and ω = 1.
+RNGD presents a sharper learning curve and better generalization, especially when it is combined with BN.",5. Relative Natural Gradient Descent,[0],[0]
+"In this case, the final tranining error of RNGD is slightly larger than ADAM because by validation it favors a larger learning rate, which is applied on the neural network weights (based on RNGD) and BN parameters (based on SGD).",5. Relative Natural Gradient Descent,[0],[0]
+"For the ReLU activation, νf (wi,x) is approximately binary, emphasizing such informative samples with wᵀi x̃ > 0, which are the ones contributing to the learning of wi with non-zero gradient values.",5. Relative Natural Gradient Descent,[0],[0]
+Each output neuron has a different subset of informative samples.,5. Relative Natural Gradient Descent,[0],[0]
+"RNGD normalizes x differently wrt different output neurons, so that the in-
+formative samples for each output neuron are centered and decorrelated.
+",5. Relative Natural Gradient Descent,[0],[0]
+"In the above experiment, RNGD’s computational time per each epoch is roughly 4 ∼ 10 times more than SGD and ADAM on a modern graphic card.",5. Relative Natural Gradient Descent,[0],[0]
+Therefore in terms of wall clock time RNGD does not show advantages.,5. Relative Natural Gradient Descent,[0],[0]
+This can be improved by more efficient implementations with low rank approximation techniques and early stopping.,5. Relative Natural Gradient Descent,[0],[0]
+Our RNGD prototype hints at a promising direction to develop scalable 2nd-order deep learning optimizers based on the RFIM.,5. Relative Natural Gradient Descent,[0],[0]
+One may ponder whether we can always find a suitable parameterization that yields a diagonal FIM that is straightforward to invert.,6. Related Works on FIM Diagonalization,[0],[0]
+This fundamental problem of parameter orthogonalization was first investigated by Jeffreys (1998) for decorrelating the parameters of interest from the nuisance parameters.,6. Related Works on FIM Diagonalization,[0],[0]
+"Fisher diagonalization yields parameter orthogonalization (Cox & Reid, 1987), and is proved useful when estimating Θ̂ using a maximum likelihood estimator (MLE) that is asymptotically normally distributed, Θ̂n ∼ G(Θ, I−1(Θ)/n), and efficient since the variance of the estimator matches the Cramér-Rao lower bound.",6. Related Works on FIM Diagonalization,[0],[0]
+"Using the chain rule, this amounts to find a suitable parameterization Ω = Ω(Θ) satisfying∑
+",6. Related Works on FIM Diagonalization,[0],[0]
+"i,j
+E
+[ ∂2l
+∂Θi∂Θj ] ∂Θi",6. Related Works on FIM Diagonalization,[0],[0]
+"∂Ωk ∂Θj ∂Ωl = 0, ∀k 6=",6. Related Works on FIM Diagonalization,[0],[0]
+"l.
+Thus in general, we end up with ( D 2 ) = D(D−1)2 (nonlinear) partial differential equations to satisfy (Huzurbazar, 1950).",6. Related Works on FIM Diagonalization,[0],[0]
+"Therefore, in general there is no solution when( D 2 )",6. Related Works on FIM Diagonalization,[0],[0]
+"> D, that is when D > 3.",6. Related Works on FIM Diagonalization,[0],[0]
+"When D = 2, the single differential equation is usually solvable and tractable, and the solution may not be unique: For example, Huzurbazar (1950) reports two orthogonalization schemes for the location-scale families { 1σp0( x−µ σ )} that include the Gaussian family and the Cauchy family.",6. Related Works on FIM Diagonalization,[0],[0]
+"Sometimes, the structure of the differential equation system yields a solution: For example, Jeffreys (1998) reported a parameter orthogonalization for Pearson’s distributions of type I which is of orderD = 4.",6. Related Works on FIM Diagonalization,[0],[0]
+"Cox and Reid (1987) further investigated this topic with application to conditional inference, and provide examples (including the Weibull distribution).
+",6. Related Works on FIM Diagonalization,[0],[0]
+"From the viewpoint of geometry, the FIM induces a Riemannian manifold with metric tensor g(Θ) = I(Θ).",6. Related Works on FIM Diagonalization,[0],[0]
+"When the FIM may be degenerate, this yields a pseudoRiemannian manifold (Thomas, 2014).",6. Related Works on FIM Diagonalization,[0],[0]
+"In differential geometry, orthogonalization amounts to transforming the square length infinitesimal element gijdΘiΘj of a Riemannian geometry into an orthogonal system ω with match-
+ing square length infinitesimal element ΩiidΩ2i .",6. Related Works on FIM Diagonalization,[0],[0]
+"However, such a global orthogonal metric does not exist (Huzurbazar, 1950)",6. Related Works on FIM Diagonalization,[0],[0]
+"when D > 3 for an arbitrary metric tensor, although interesting Riemannian parameterization structures may be derived in Riemannian 4D geometry (Grant & Vickers, 2009).
+",6. Related Works on FIM Diagonalization,[0],[0]
+"For NEFs, the FIM can be made block-diagonal easily by using the mixed coordinate system (Amari, 2016) (Θ1:k,Hk+1:D), where H = Ep[t(x)] = ∇F (Θ) is the moment parameter, for any k ∈ {1, ..., D − 1}, where vb:e denotes the subvector (vb, ..., ve)ᵀ of v. The geometry of NEFs is a dually flat structure (Amari, 2016) induced by the convex mgf, the potential function.",6. Related Works on FIM Diagonalization,[0.95811735515679],"['This demands summing over all PETs ∆ in the forest PEF (πm), and for every PET also over all its label splits, which are given by the grammar derivations d: P (sm, πm) = ∑ ∆∈PEF (πm) ∑ d∈∆ P (d, sm) (1) The probability of a derivation d is a product of probabilities of all the rules r that build it: P (sm, πm) = ∑ ∆∈PEF (πm) ∑ d∈∆ ∏ r∈d P (r) (2) As usual, the parameters of this model are the PCFG rule probabilities which are estimated from the latent treebank using EM as explained next.']"
+"It defines a dual affine coordinate systems ei = ∂i = ∂∂Hi and ej = ∂
+j = ∂∂Θj that are orthogonal: 〈ei, ej〉 = δij , where δij = 1 iff i = j and δij = 0 otherwise.",6. Related Works on FIM Diagonalization,[0],[0]
+Hence the FIM has two diagonal blocks.,6. Related Works on FIM Diagonalization,[0],[0]
+"Those dual affine coordinate systems are defined up to an affine invertible transformation: Θ̃ = AΘ + b, H̃ = A−1H + c.",6. Related Works on FIM Diagonalization,[0],[0]
+"In particular, for any order-2 NEF (D = 2), we can always obtain two mixed parameterizations (Θ1, H2) or (H1,Θ2).
+",6. Related Works on FIM Diagonalization,[0],[0]
+The RFIM contributes another line of thought in parameter diagonalization.,6. Related Works on FIM Diagonalization,[0],[0]
+"We investigate the Fisher information of hidden variables, or internal interfaces in the learning machine.",6. Related Works on FIM Diagonalization,[0],[0]
+"This is novel since the majority of previous works concentrate on the FIM of the observables, or the external interface of the machine.",6. Related Works on FIM Diagonalization,[0],[0]
+"From a causality perspective, we factor out the main cause (parameters within the subsystem) of the response variable with a direct action-reaction relationship, and regard the remaining parameters as a reference that can be easily estimated by the empirical distribution.",6. Related Works on FIM Diagonalization,[0],[0]
+"This simplification may lead to broader applications of Fisher information in machine learning.
+",6. Related Works on FIM Diagonalization,[0],[0]
+"The particular case of a mixed coordinate system (that is not an affine coordinate system) induces in information geometry (Amari, 2016) a dual pair of orthogonal e- and morthogonal foliations.",6. Related Works on FIM Diagonalization,[0],[0]
+"Our splits in RFIMs consider general non-orthogonal foliations that provide the factorization decompositions of the whole manifold into submanifolds, that are the leaves of the foliation (see section 3.7 of Amari & Nagaoka 2000).",6. Related Works on FIM Diagonalization,[0],[0]
+We investigate local structures of large learning systems using the new concept of Relative Fisher Information Metric.,7. Conclusion and Discussions,[0],[0]
+The key advantage of this approach is that the local learning dynamics can be analyzed in an accurate way without approximation.,7. Conclusion and Discussions,[0],[0]
+"We present a core list of such local structures in neural networks, and give their corresponding RFIMs.",7. Conclusion and Discussions,[0],[0]
+"This list of recipes can be used to provide guiding principles to design new optimizers for deep learning.
+",7. Conclusion and Discussions,[0],[0]
+"Our work applies to mirror descent as well since natural gradient is related to mirror descent (Raskutti & Mukherjee, 2015) as follows:",7. Conclusion and Discussions,[0],[0]
+"In mirror descent to minimize a cost function E(Θ), given a strictly convex distance function D(·, ·) in the first argument (playing the role of the proximity function), we express the gradient descent step as:
+Θt+1 = arg min Θ
+{ Θ>∇E(Θt) + 1
+γ D(Θ,Θt)
+} .
+",7. Conclusion and Discussions,[0],[0]
+"When D(Θ,Θ′) is chosen as a Bregman divergence BF (Θ,Θ
+′) = F (Θ)− F (Θ′)− (Θ−Θ′)>∇F (Θ′) wrt to a convex function F , it has been proved that the mirror descent on the Θ-parameterization is equivalent (Raskutti & Mukherjee, 2015) to the natural gradient optimization on the induced Riemannian manifold with metric tensor (∇2F (Θ)) parameterized by the dual coordinate system H = ∇F (Θ).
+",7. Conclusion and Discussions,[0],[0]
+"In general, to perform a Riemannian gradient descent for minimizing a real-valued function f(Θ) on the manifold, one needs to choose a proper metric tensor given in matrix form G(Θ).",7. Conclusion and Discussions,[0],[0]
+Thomas (2014) constructed a toy example showing that the natural gradient may diverge while the ordinary gradient (for G = I) converges.,7. Conclusion and Discussions,[0],[0]
+"Recently, Thomas et al. (2016) proposed a new kind of descent method based on what they called the Energetic Natural Gradient that generalizes the natural gradient.",7. Conclusion and Discussions,[0],[0]
+"The energy distance DE(p(Θ1), p(Θ2))2 = E[2dp(Θ1)(X,Y )",7. Conclusion and Discussions,[0],[0]
+"− dp(Θ1)(X,X
+′)",7. Conclusion and Discussions,[0],[0]
+"− dp(Θ1)(Y, Y ′)] where X,X ′ ∼ p(Θ1) and Y, Y ′ ∼ p(Θ2), where dp(Θ1)(·, ·) is a distance metric over the support.",7. Conclusion and Discussions,[0],[0]
+"Using a Taylor’s expansion on their energy distance, they get the Energy Information Matrix (in a way similar to recovering the FIM from a Taylor’s expansion of any f -divergence like the Kullback-Leibler divergence).",7. Conclusion and Discussions,[0],[0]
+Their idea is to incorporate prior knowledge on the structure of the support (observation space) to define energy distance.,7. Conclusion and Discussions,[0],[0]
+"Twisting the geometry of the support (say, Wasserstein’s optimal transport) with the geometry of the parametric distributions (Fisher-Rao geodesic distances) is indeed important (Chizat et al., 2015).",7. Conclusion and Discussions,[0],[0]
+"In information geometry, invariance on the support is provided by a Markov morphism that is a probabilistic mapping of the support to itself (Čencov, 1982).",7. Conclusion and Discussions,[0],[0]
+There is no neighbourhood structure on the support in IG.,7. Conclusion and Discussions,[0],[0]
+Markov morphism includes deterministic transformation of a random variable by a statistic.,7. Conclusion and Discussions,[0],[0]
+It is well-known that IT (Θ) IX(Θ) with equality iff.,7. Conclusion and Discussions,[0],[0]
+T = T (X) is a sufficient statistic of X .,7. Conclusion and Discussions,[0],[0]
+"Thus to get the same invariance for the energy distance (Thomas et al., 2016), one shall further require dp(Θ)(T (X), T (Y ))",7. Conclusion and Discussions,[0],[0]
+"= dp(Θ)(X,Y ).
+",7. Conclusion and Discussions,[0],[0]
+We believe that RFIMs will provide a sound methodology to build further efficient systems for deep learning.,7. Conclusion and Discussions,[0],[0]
+The full source codes to reproduce the experimental results are available at https://www.lix.polytechnique.,7. Conclusion and Discussions,[0],[0]
+fr/˜nielsen/RFIM.,7. Conclusion and Discussions,[0],[0]
+The authors would like to thank the anonymous reviewers and Yann Ollivier for the helpful comments.,Acknowledgements,[0],[0]
+This work was mainly conducted when the first author was a postdoctoral researcher at École Polytechnique.,Acknowledgements,[0],[0]
+Fisher information and natural gradient provided deep insights and powerful tools to artificial neural networks.,abstractText,[0],[0]
+However related analysis becomes more and more difficult as the learner’s structure turns large and complex.,abstractText,[0],[0]
+This paper makes a preliminary step towards a new direction.,abstractText,[0],[0]
+"We extract a local component from a large neural system, and define its relative Fisher information metric that describes accurately this small component, and is invariant to the other parts of the system.",abstractText,[0],[0]
+This concept is important because the geometry structure is much simplified and it can be easily applied to guide the learning of neural networks.,abstractText,[0],[0]
+"We provide an analysis on a list of commonly used components, and demonstrate how to use this concept to further improve optimization.",abstractText,[0],[0]
+1.,abstractText,[0],[0]
+Fisher Information Metric The Fisher Information Metric (FIM) I(Θ) =,abstractText,[0],[0]
+"(Iij) of a statistical parametric model p(x |Θ) of order D is defined by a D×D positive semidefinite (psd) matrix (I(Θ) 0) with coefficients Iij = Ep [ ∂l ∂Θi ∂l ∂Θj ] , where l(Θ) denotes the log-density function log p(x |Θ).",abstractText,[0],[0]
+"Under light regularity conditions, FIM can be rewritten equivalently as Iij = −Ep [ ∂l ∂Θi∂Θj ]",abstractText,[0],[0]
+Relative Fisher Information and Natural Gradient for Learning Large Modular Models,title,[0],[0]
+"Proceedings of the 2015 Conference on Empirical Methods in Natural Language Processing, pages 44–54, Lisbon, Portugal, 17-21 September 2015. c©2015 Association for Computational Linguistics.
+Our model is evaluated both for accuracy in predicting target order, and for its impact on translation quality. We report significant performance gains over phrase reordering, and over two known preordering baselines for English-Japanese.",text,[0],[0]
+"Preordering (Collins et al., 2005) aims at permuting the words of a source sentence s into a new order ś, hopefully close to a plausible target word order.",1 Introduction,[1.0],"['Preordering (Collins et al., 2005) aims at permuting the words of a source sentence s into a new order ś, hopefully close to a plausible target word order.']"
+"Preordering is often used to bridge long distance reorderings (e.g., in Japanese- or GermanEnglish), before applying phrase-based models (Koehn et al., 2007).",1 Introduction,[0],[0]
+"Preordering is often broken down into two steps: finding a suitable tree structure, and then finding a transduction function over it.",1 Introduction,[1.0],"['Preordering is often broken down into two steps: finding a suitable tree structure, and then finding a transduction function over it.']"
+"A common approach is to use monolingual syntactic trees and focus on finding a transduction function of the sibling subtrees under the nodes (Lerner and Petrov, 2013; Xia and Mccord, 2004).",1 Introduction,[0],[0]
+"The (direct correspondence) assumption
+underlying this approach is that permuting the siblings of nodes in a source syntactic tree can produce a plausible target order.",1 Introduction,[1.0000000562308327],['The (direct correspondence) assumption underlying this approach is that permuting the siblings of nodes in a source syntactic tree can produce a plausible target order.']
+"An alternative approach creates reordering rules manually and then learns the right structure for applying these rules (Katz-Brown et al., 2011).",1 Introduction,[1.0],"['An alternative approach creates reordering rules manually and then learns the right structure for applying these rules (Katz-Brown et al., 2011).']"
+"Others attempt learning the transduction structure and the transduction function in two separate, consecutive steps (DeNero and Uszkoreit, 2011).",1 Introduction,[0],[0]
+"Here we address the challenge of learning both the trees and the transduction functions jointly, in one fell swoop, from word-aligned parallel corpora.
+",1 Introduction,[0],[0]
+Learning both trees and transductions jointly raises two questions.,1 Introduction,[0],[0]
+How to obtain suitable trees for the source sentence and how to learn a distribution over random variables specifically aimed at reordering in a hierarchical model?,1 Introduction,[0],[0]
+"In this work we solve both challenges by using the factorizations of permutations into Permutation Trees (PETs) (Zhang and Gildea, 2007).",1 Introduction,[0],[0]
+"As we explain next, PETs can be crucial for exposing the hierarchical reordering patterns found in wordalignments.
+",1 Introduction,[0],[0]
+We obtain permutations in the training data by segmenting every word-aligned source-target pair into minimal phrase pairs; the resulting alignment between minimal phrases is written as a permutation (1:1 and onto) on the source side.,1 Introduction,[1.0],['We obtain permutations in the training data by segmenting every word-aligned source-target pair into minimal phrase pairs; the resulting alignment between minimal phrases is written as a permutation (1:1 and onto) on the source side.']
+"Every permutation can be factorized into a forest of PETs (over the source sentences) which we use as a latent treebank for training a Probabilistic ContextFree Grammar (PCFG) tailor made for preordering as we explain next.
+",1 Introduction,[0],[0]
+Figure 1 shows two alternative PETs for the same permutation over minimal phrases.,1 Introduction,[0],[0]
+"The nodes have labels (like P3142) which stand for local permutations (called prime permutation) over the child nodes; for example, the root label P3142 stands for prime permutation 〈3, 1, 4, 2〉, which says that the first child of the root becomes 3rd on the target side, the second becomes 1st, the third
+44
+becomes 4th and the fourth becomes 2nd.",1 Introduction,[0],[0]
+"The prime permutations are non-factorizable permutations like 〈1, 2〉, 〈2, 1〉 and 〈2, 4, 1, 3〉.
+",1 Introduction,[0],[0]
+We think PETs are suitable for learning preordering for two reasons.,1 Introduction,[0],[0]
+"Firstly, PETs specify exactly the phrase pairs defined by the permutation.",1 Introduction,[0],[0]
+"Secondly, every permutation is factorizable into prime permutations only (Albert and Atkinson, 2005).",1 Introduction,[0],[0]
+"Therefore, PETs expose maximal sharing between different permutations in terms of both phrases and their reordering.",1 Introduction,[0],[0]
+"We expect this to be advantageous for learning hierarchical reordering.
+",1 Introduction,[0],[0]
+"For learning preordering, we first extract an initial PCFG from the latent treebank of PETs over the source sentences only.",1 Introduction,[0],[0]
+We initialize the nonterminal set of this PCFG to the prime permutations decorating the PET nodes.,1 Introduction,[0],[0]
+"Subsequently we split these coarse labels in the same way as latent variable splitting is learned for treebank parsing (Matsuzaki et al., 2005; Prescher, 2005; Petrov et al., 2006; Saluja et al., 2014).",1 Introduction,[0],[0]
+"Unlike treebank parsing, however, our training treebank is latent because it consists of a whole forest of PETs per training instance (s).
+",1 Introduction,[0],[0]
+"Learning the splits on a latent treebank of PETs results in a Reordering PCFG which we use to parse input source sentences into split-decorated trees, i.e., the labels are the splits of prime permutations.",1 Introduction,[0],[0]
+"After parsing s, we map the splits back on their initial prime permutations, and then retrieve a reordered version ś of s.",1 Introduction,[0],[0]
+"In this sense, our latent splits are dedicated to reordering.
+",1 Introduction,[0],[0]
+We face two technical difficulties alien to work on latent PCFGs in treebank parsing.,1 Introduction,[0],[0]
+"Firstly, as mentioned above, permutations may factorize into more than one PET (a forest) leading to a latent training treebank.1",1 Introduction,[0],[0]
+"And secondly, after we parse a source string s, we are interested in ś, the permuted version of s, not in the best derivation/PET.",1 Introduction,[0],[0]
+"Exact computation is a known NP-Complete problem (Sima’an, 2002).",1 Introduction,[0],[0]
+"We solve this by a new Minimum-Bayes Risk decoding approach using Kendall reordering score as loss function, which is an efficient measure over permutations (Birch and Osborne, 2011; Isozaki et al., 2010a).
+",1 Introduction,[0],[0]
+"In summary, this paper contributes: • A novel latent hierarchical source reordering
+model working over all derivations of PETs
+1All PETs for the same permutation share the same set of prime permutations but differ only in bracketing structure (Zhang and Gildea, 2007).
+•",1 Introduction,[0],[0]
+"A label splitting approach based on PCFGs over minimal phrases as terminals, learned from an ambiguous treebank, where the label splits start out from prime permutations.",1 Introduction,[0],[0]
+•,1 Introduction,[0],[0]
+"A fast Minimum Bayes Risk decoding over
+Kendall τ reordering score for selecting ś. We report results for extensive experiments on English-Japanese showing that our Reordering PCFG gives substantial improvements when used as preordering for phrase-based models, outperforming two existing baselines for this task.",1 Introduction,[0],[0]
+"We aim at learning a PCFG which we will use for parsing source sentences s into synchronous trees, from which we can obtain a reordered source version ś. Since PCFGs are non-synchronous grammars, we will use the nonterminal labels to encode reordering transductions, i.e., this PCFG is implicitly an SCFG.",2 PETs and the Hidden Treebank,[0],[0]
+"We can do this because s and ś are over the same alphabet.
+",2 PETs and the Hidden Treebank,[0],[0]
+"Here, we have access only to a word-aligned parallel corpus, not a treebank.",2 PETs and the Hidden Treebank,[0],[0]
+"The following steps summarize our approach for acquiring a latent treebank and how it is used for learning a Reordering PCFG:
+1.",2 PETs and the Hidden Treebank,[0],[0]
+Obtain a permutation over minimal phrases from every word-alignment.,2 PETs and the Hidden Treebank,[0],[0]
+2.,2 PETs and the Hidden Treebank,[0],[0]
+Obtain a latent treebank of PETs by factorizing the permutations.,2 PETs and the Hidden Treebank,[0],[0]
+3. Extract a PCFG from the PETs with initial nonterminals taken from the PETs.,2 PETs and the Hidden Treebank,[0],[0]
+4.,2 PETs and the Hidden Treebank,[0],[0]
+"Learn to split the initial nonterminals and estimate rule probabilities.
+",2 PETs and the Hidden Treebank,[0],[0]
+"These steps are detailed in the next section, but we will start out with an intuitive exposition of PETs, the latent treebank and the Reordering Grammar.
+",2 PETs and the Hidden Treebank,[0],[0]
+"Figure 1 shows examples of how PETs look like – see (Zhang and Gildea, 2007) for algorithmic details.",2 PETs and the Hidden Treebank,[0],[0]
+Here we label the nodes with nonterminals which stand for prime permutations from the operators on the PETs.,2 PETs and the Hidden Treebank,[0],[0]
+"For example, nonterminals P12, P21 and P3142 correspond respectively to reordering transducers 〈1, 2〉, 〈2, 1〉 and 〈3, 1, 4, 2〉.",2 PETs and the Hidden Treebank,[0],[0]
+"A prime permutation on a source node µ is a transduction dictating how the children of µ are reordered at the target side, e.g., P21 inverts the child order.",2 PETs and the Hidden Treebank,[0],[0]
+"We must stress that any similarity with ITG (Wu, 1997) is restricted to the fact that the straight and inverted operators of ITG are the binary case of prime permutations
+in PETs (P12 and P21).",2 PETs and the Hidden Treebank,[0],[0]
+"ITGs recognize only the binarizable permutations, which is a major restriction when used on the data: there are many nonbinarizable permutations in actual data (Wellington et al., 2006).",2 PETs and the Hidden Treebank,[0],[0]
+"In contrast, our PETs are obtained by factorizing permutations obtained from the data, i.e., they exactly fit the range of prime permutations in the parallel corpus.",2 PETs and the Hidden Treebank,[0],[0]
+"In practice we limit them to maximum arity 5.
+",2 PETs and the Hidden Treebank,[0],[0]
+"We can extract PCFG rules from the PETs, e.g., P21 → P12 P2413.",2 PETs and the Hidden Treebank,[0],[0]
+"However, these rules are decorated with too coarse labels.",2 PETs and the Hidden Treebank,[0],[0]
+"A similar problem was encountered in non-lexicalized monolingual parsing, and one solution was to lexicalize the productions (Collins, 2003) using head words.",2 PETs and the Hidden Treebank,[1.0],"['A similar problem was encountered in non-lexicalized monolingual parsing, and one solution was to lexicalize the productions (Collins, 2003) using head words.']"
+"But linguistic heads do not make sense for PETs, so we opt for the alternative approach (Matsuzaki et al., 2005), which splits the nonterminals and softly percolates the splits through the trees gradually fitting them to the training data.",2 PETs and the Hidden Treebank,[1.0],"['But linguistic heads do not make sense for PETs, so we opt for the alternative approach (Matsuzaki et al., 2005), which splits the nonterminals and softly percolates the splits through the trees gradually fitting them to the training data.']"
+"Splitting has a shadow side, however, because it leads to combinatorial explosion in grammar size.
+",2 PETs and the Hidden Treebank,[0],[0]
+Suppose for example node P21 could split into P211 and P212 and similarly P2413 splits into P24131 and 24132.,2 PETs and the Hidden Treebank,[1.0],['Suppose for example node P21 could split into P211 and P212 and similarly P2413 splits into P24131 and 24132.']
+"This means that rule P21 → P12 P2413 will form eight new rules:
+P211 → P121 P24131",2 PETs and the Hidden Treebank,[0],[0]
+P211 → P121 P24132 P211,2 PETs and the Hidden Treebank,[0],[0]
+→ P122 P24131,2 PETs and the Hidden Treebank,[0],[0]
+P211 → P122 P24132 P212 → P121 P24131,2 PETs and the Hidden Treebank,[0],[0]
+P212 → P121 P24132 P212 → P122 P24131,2 PETs and the Hidden Treebank,[0],[0]
+"P212 → P122 P24132
+Should we want to split each nonterminal into 30 subcategories, then an n-ary rule will split into 30n+1 new rules, which is prohibitively large.",2 PETs and the Hidden Treebank,[0],[0]
+Here we use the “unary trick” as in Figure 2.,2 PETs and the Hidden Treebank,[0],[0]
+The superscript on the nonterminals denotes the child position from left to right.,2 PETs and the Hidden Treebank,[1.0],['The superscript on the nonterminals denotes the child position from left to right.']
+"For example P2121 means that this node is a second child, and the
+mother nonterminal label is P211.",2 PETs and the Hidden Treebank,[1.0000000217197218],"['For example P2121 means that this node is a second child, and the mother nonterminal label is P211.']"
+"For the running example rule, this gives the following rules:
+P211 → P2111 P2121 P212",2 PETs and the Hidden Treebank,[0],[0]
+→ P2112 P2122,2 PETs and the Hidden Treebank,[0],[0]
+P2111,2 PETs and the Hidden Treebank,[0],[0]
+→ P121 P2121 → P24131,2 PETs and the Hidden Treebank,[0],[0]
+P2111,2 PETs and the Hidden Treebank,[0],[0]
+→ P122 P2121 → P24132 P2112 → P121 P2122 → P24131,2 PETs and the Hidden Treebank,[0],[0]
+P2112 → P122 P2122,2 PETs and the Hidden Treebank,[0],[0]
+"→ P24132
+",2 PETs and the Hidden Treebank,[0],[0]
+"The unary trick leads to substantial reduction in grammar size, e.g., for arity 5 rules and 30 splits we could have had 306 = 729000000 split-rules, but with the unary trick we only have 30+302∗5 = 4530 split rules.",2 PETs and the Hidden Treebank,[0],[0]
+"The unary trick was used in early lexicalized parsing work (Carroll and Rooth, 1998).2 This split PCFG constitutes a latent PCFG because the splits cannot be read of a treebank.",2 PETs and the Hidden Treebank,[0],[0]
+"It must be learned from the latent treebank of PETs, as described next.",2 PETs and the Hidden Treebank,[0],[0]
+"Obtaining permutations Given a source sentence s and its alignment a to a target sentence
+2After applying the unary trick, we add a constraint on splitting: all nonterminals on an n-ary branching rule must be split simultaneously.
+",3 Details of Latent Reordering PCFG,[0],[0]
+"t in the training corpus, we segment 〈s,a, t〉 into a sequence of minimal phrases sm (maximal sequence) such that the reordering between these minimal phrases constitutes a permutation πm.",3 Details of Latent Reordering PCFG,[0.9835749713536166],"['Obtaining permutations Given a source sentence s and its alignment a to a target sentence t in the training corpus, we segment 〈s,a, t〉 into a sequence of minimal phrases sm (maximal sequence) such that the reordering between these minimal phrases constitutes a permutation πm.']"
+"We do not extract non-contiguous or non-minimal phrases because reordering them often involves complicated transductions which could hamper the performance of our learning algorithm.3
+Unaligned words Next we describe the use of the factorization of permutations into PET forests for training a PCFG model.",3 Details of Latent Reordering PCFG,[0],[0]
+But first we need to extend the PETs to allow for unaligned words.,3 Details of Latent Reordering PCFG,[0],[0]
+"An unaligned word is joined with a neighboring phrase to the left or the right, depending on the source language properties (e.g., whether the language is head-initial or -final (Chomsky, 1970)).",3 Details of Latent Reordering PCFG,[1.0],"['An unaligned word is joined with a neighboring phrase to the left or the right, depending on the source language properties (e.g., whether the language is head-initial or -final (Chomsky, 1970)).']"
+"Our experiments use English as source language (head-initial), so the unaligned words are joined to phrases to their right.",3 Details of Latent Reordering PCFG,[0],[0]
+This modifies a PET by adding a new binary branching node µ (dominating the unaligned word and the phrase it is joined to) which is labeled with a dedicated nonterminal: P01 if the unaligned word joins to the right and P10 if it joins to the left.,3 Details of Latent Reordering PCFG,[1.0],['This modifies a PET by adding a new binary branching node µ (dominating the unaligned word and the phrase it is joined to) which is labeled with a dedicated nonterminal: P01 if the unaligned word joins to the right and P10 if it joins to the left.']
+"We decompose the permutation πm into a forest of permutation trees PEF (πm) in O(n3), following algorithms in (Zhang et al., 2008; Zhang and Gildea, 2007) with trivial modifications.",3.1 Probability model,[1.0],"['We decompose the permutation πm into a forest of permutation trees PEF (πm) in O(n3), following algorithms in (Zhang et al., 2008; Zhang and Gildea, 2007) with trivial modifications.']"
+Each PET ∆ ∈ PEF (πm) is a different bracketing (differing in binary branching structure only).,3.1 Probability model,[1.0],['Each PET ∆ ∈ PEF (πm) is a different bracketing (differing in binary branching structure only).']
+"We consider the bracketing hidden in the latent treebank, and apply unsupervised learning to induce a distribution over possible bracketings.",3.1 Probability model,[1.0],"['We consider the bracketing hidden in the latent treebank, and apply unsupervised learning to induce a distribution over possible bracketings.']"
+Our probability model starts from the joint probability of a sequence of minimal phrases sm and a permutation πm over it.,3.1 Probability model,[0],[0]
+"This demands summing over all PETs ∆ in the forest PEF (πm), and for every PET also over all its label splits, which are given by the grammar derivations",3.1 Probability model,[0],[0]
+"d:
+P (sm, πm) = ∑
+∆∈PEF (πm) ∑ d∈∆ P (d, sm) (1)
+",3.1 Probability model,[0],[0]
+"The probability of a derivation d is a product of probabilities of all the rules r that build it:
+P (sm, πm) = ∑
+∆∈PEF (πm) ∑ d∈∆ ∏ r∈d P (r) (2)
+3Which differs from (Quirk and Menezes, 2006).
+",3.1 Probability model,[0],[0]
+"As usual, the parameters of this model are the PCFG rule probabilities which are estimated from the latent treebank using EM as explained next.",3.1 Probability model,[0],[0]
+"For training the latent PCFG over the latent treebank, we resort to EM (Dempster et al., 1977) which estimates PCFG rule probabilities to maximize the likelihood of the parallel corpus instances.",3.2 Learning Splits on Latent Treebank,[0],[0]
+"Computing expectations for EM is done efficiently using Inside-Outside (Lari and Young, 1990).",3.2 Learning Splits on Latent Treebank,[0],[0]
+"As in other state splitting models (Matsuzaki et al., 2005), after splitting the nonterminals, we distribute the probability uniformly over the new rules, and we add to each new rule some random noise to break the symmetry.",3.2 Learning Splits on Latent Treebank,[0],[0]
+"We split the non-terminals only once as in (Matsuzaki et al., 2005) (unlike (Petrov et al., 2006)).",3.2 Learning Splits on Latent Treebank,[0],[0]
+For estimating the distribution for unknown words we replace all words that appear ≤ 3 times with the “UNKNOWN” token.,3.2 Learning Splits on Latent Treebank,[0],[0]
+"We use CKY+ (Chappelier and Rajman, 1998) to parse a source sentence s into a forest using the learned split PCFG.",3.3 Inference,[0],[0]
+"Unfortunately, computing the most-likely permutation (or alternatively ś) as in
+argmax π∈Π ∑ ∆∈PEF (π) ∑ d∈∆ P (d, πm)
+from a lattice of permutations Π using a PCFG is NP-complete (Sima’an, 2002).",3.3 Inference,[0],[0]
+"Existing techniques, like variational decoding or MinimumBayes Risk (MBR), used for minimizing loss over trees as in (Petrov and Klein, 2007), are not directly applicable here.",3.3 Inference,[0],[0]
+"Hence, we opt for minimizing the risk of making an error under a loss function over permutations using the MBR decision rule (Kumar and Byrne, 2004):
+π̂ = argmin π ∑ πr Loss(π, πr)P (πr) (3)
+",3.3 Inference,[0],[0]
+The loss function we minimize is Kendall τ,3.3 Inference,[0],[0]
+"(Birch and Osborne, 2011; Isozaki et al., 2010a) which is a ratio of wrongly ordered pairs of words (including gapped pairs) to the total number of pairs.",3.3 Inference,[0],[0]
+We do Monte Carlo sampling of 10000 derivations from the chart of the s and then find the least risky permutation in terms of this loss.,3.3 Inference,[1.0],['We do Monte Carlo sampling of 10000 derivations from the chart of the s and then find the least risky permutation in terms of this loss.']
+"We sample from the true distribution by sampling edges recursively
+using their inside probabilities.",3.3 Inference,[0],[0]
+"An empirical distribution over permutations P (π) is given by the relative frequency of π in the sample.
+",3.3 Inference,[0],[0]
+With large samples it is hard to efficiently compute expected Kendall τ loss for each sampled hypothesis.,3.3 Inference,[0],[0]
+For sentence of length k and sample of size n the complexity of a naive algorithm is O(n2k2).,3.3 Inference,[0],[0]
+Computing Kendall τ alone takes O(k2).,3.3 Inference,[0],[0]
+"We use the fact that Kendall τ decomposes as a linear function over all skip-bigrams b that could be built for any permutation of length k:
+Kendall(π, πr) = ∑ b 1− δ(π, b) k(k−1) 2 δ(πr, b) (4)
+",3.3 Inference,[0.9823212306091446],"['We use the fact that Kendall τ decomposes as a linear function over all skip-bigrams b that could be built for any permutation of length k: Kendall(π, πr) = ∑ b 1− δ(π, b) k(k−1) 2 δ(πr, b) (4) Here δ returns 1 if permutation π contains the skip bigram b, otherwise it returns 0.']"
+"Here δ returns 1 if permutation π contains the skip bigram b, otherwise it returns 0.",3.3 Inference,[0],[0]
+"With this decomposition we can use the method from (DeNero et al., 2009) to efficiently compute the MBR hypothesis.",3.3 Inference,[1.0],"['With this decomposition we can use the method from (DeNero et al., 2009) to efficiently compute the MBR hypothesis.']"
+"Combining Equations 3 and 4 we get:
+π̂ = argmin π ∑ πr ∑ b 1− δ(π, b) k(k−1) 2 δ(πr, b)P (πr) (5)
+",3.3 Inference,[0],[0]
+"We can move the summation inside and reformulate the expected Kendall τ loss as expectation over the skip-bigrams of the permutation.
+",3.3 Inference,[0],[0]
+= argmin π ∑ b,3.3 Inference,[0],[0]
+"(1− δ(π, b))",3.3 Inference,[0],[0]
+"[∑ πr δ(πr, b)P (πr) ] (6)
+= argmin π ∑ b (1− δ(π, b))EP (πr)δ(πr, b) (7)
+= argmax π ∑ b δ(π, b)EP (πr)δ(πr, b) (8)
+This means we need to pass through the sampled list only twice: (1) to compute expectations over skip bigrams and (2) to compute expected loss of each sampled permutation.",3.3 Inference,[0],[0]
+The time complexity is O(nk2) which is quite fast in practice.,3.3 Inference,[0],[0]
+We conduct experiments with three baselines:,4 Experiments,[0],[0]
+• Baseline A: No preordering.,4 Experiments,[0],[0]
+"• Baseline B: Rule based preordering (Isozaki
+et al., 2010b), which first obtains an HPSG parse tree using Enju parser 4 and after that swaps the children by moving the syntactic head to the final position to account for different head orientation in English and Japanese.
+",4 Experiments,[0.9999999238066644],"['• Baseline B: Rule based preordering (Isozaki et al., 2010b), which first obtains an HPSG parse tree using Enju parser 4 and after that swaps the children by moving the syntactic head to the final position to account for different head orientation in English and Japanese.']"
+"4http://www.nactem.ac.uk/enju/
+• Baseline C: LADER (Neubig et al., 2012): latent variable preordering that is based on ITG and large-margin training with latent variables.",4 Experiments,[0.9999999311455333],"['• Baseline C: LADER (Neubig et al., 2012): latent variable preordering that is based on ITG and large-margin training with latent variables.']"
+"We used LADER in standard settings without any linguistic features (POS tags or syntactic trees).
+",4 Experiments,[0.999999989471276],['We used LADER in standard settings without any linguistic features (POS tags or syntactic trees).']
+And we test four variants of our model:,4 Experiments,[0],[0]
+• RGleft - only canonical left branching PET •,4 Experiments,[0],[0]
+"RGright - only canonical right branching PET • RGITG-forest - all PETs that are binary (ITG) • RGPET-forest - all PETs.
+",4 Experiments,[0.9558814565666877],['And we test four variants of our model: • RGleft - only canonical left branching PET • RGright - only canonical right branching PET • RGITG-forest - all PETs that are binary (ITG) • RGPET-forest - all PETs.']
+We test these models on English-Japanese NTCIR-8 Patent Translation (PATMT) Task.,4 Experiments,[1.0],['We test these models on English-Japanese NTCIR-8 Patent Translation (PATMT) Task.']
+For tuning we use all NTCIR-7 dev sets and for testing the test set from NTCIR-9 from both directions.,4 Experiments,[0],[0]
+All used data was tokenized (English with Moses tokenizer and Japanese with KyTea 5) and filtered for sentences between 4 and 50 words.,4 Experiments,[0],[0]
+"A subset of this data is used for training the Reordering Grammar, obtained by filtering out sentences that have prime permutations of arity > 5, and for the ITG version arity > 2.",4 Experiments,[0],[0]
+Baseline C was trained on 600 sentences because training is prohibitively slow.,4 Experiments,[0],[0]
+"Table 1 shows the sizes of data used.
+",4 Experiments,[0],[0]
+The Reordering Grammar was trained for 10 iterations of EM on train RG data.,4 Experiments,[0],[0]
+We use 30 splits for binary non-terminals and 3 for non-binary.,4 Experiments,[0],[0]
+Training on this dataset takes 2 days and parsing tuning and testing set without any pruning takes 11 and 18 hours respectively.,4 Experiments,[0],[0]
+We test how well our model predicts gold reorderings before translation by training the alignment model using MGIZA++ 6 on the training corpus and using it to align the test corpus.,4.1 Intrinsic evaluation,[0],[0]
+"Gold reorderings for the test corpus are obtained by sorting words by their average target position and (unaligned words follow their right neighboring
+5http://www.phontron.com/kytea/ 6http://www.kyloo.net/software/doku.php/mgiza:overview
+word).",4.1 Intrinsic evaluation,[0],[0]
+"We use Kendall τ score for evaluation (note the difference with Section 3.3 where we defined it as a loss function).
+",4.1 Intrinsic evaluation,[0],[0]
+Table 2 shows that our models outperform all baselines on this task.,4.1 Intrinsic evaluation,[0],[0]
+"The only strange result here is that rule-based preordering obtains a lower score than no preordering, which might be an artifact of the Enju parser changing the tokenization of its input, so the Kendall τ of this system might not really reflect the real quality of the preordering.",4.1 Intrinsic evaluation,[0],[0]
+All other systems use the same tokenization.,4.1 Intrinsic evaluation,[0],[0]
+"The reordered output of all the mentioned baselines and versions of our model are translated with phrase-based MT system (Koehn et al., 2007) (distortion limit set to 6 with distance based reordering model) that is trained on gold preordering of the training data 7 ś − t.",4.2 Extrinsic evaluation in MT,[0.9699424717308764],"['The reordered output of all the mentioned baselines and versions of our model are translated with phrase-based MT system (Koehn et al., 2007) (distortion limit set to 6 with distance based reordering model) that is trained on gold preordering of the training data 7 ś − t. The only exception is Baseline A which is trained on original s− t. We use a 5-gram language model trained with KenLM 8, tune 3 times with kb-mira (Cherry and Foster, 2012) to account for tuner instability and evaluated using Multeval 9 for statistical significance on 3 metrics: BLEU (Papineni et al., 2002), METEOR (Denkowski and Lavie, 2014) and TER (Snover et al., 2006).']"
+"The only exception is Baseline A which is trained on original s− t.
+We use a 5-gram language model trained with KenLM 8, tune 3 times with kb-mira (Cherry and Foster, 2012) to account for tuner instability and evaluated using Multeval 9 for statistical significance on 3 metrics: BLEU (Papineni et al., 2002), METEOR (Denkowski and Lavie, 2014) and TER (Snover et al., 2006).",4.2 Extrinsic evaluation in MT,[0],[0]
+"We additionally report RIBES score (Isozaki et al., 2010a) that concentrates on word order more than other metrics.
+",4.2 Extrinsic evaluation in MT,[0.9999999416047858],"['We additionally report RIBES score (Isozaki et al., 2010a) that concentrates on word order more than other metrics.']"
+Single or all PETs?,4.2 Extrinsic evaluation in MT,[0],[0]
+In Table 3 we see that using all PETs during training makes a big impact on performance.,4.2 Extrinsic evaluation in MT,[0],[0]
+"Only the all PETs variants
+7Earlier work on preordering applies the preordering model to the training data to obtain a parallel corpus of guessed ś − t pairs, which are the word re-aligned and then used for training the back-end MT system (Khalilov and Sima’an, 2011).",4.2 Extrinsic evaluation in MT,[0],[0]
+"We skip this, we take the risk of mismatch between the preordering and the back-end system, but this simplifies training and saves a good amount of training time.
+8http://kheafield.com/code/kenlm/ 9https://github.com/jhclark/multeval
+(RGITG-forest and RGPET-forest) significantly outperform all baselines.",4.2 Extrinsic evaluation in MT,[0],[0]
+"If we are to choose a single PET per training instance, then learning RG from only left-branching PETs (the one usually chosen in other work, e.g. (Saluja et al., 2014)) performs slightly worse than the right-branching PET.",4.2 Extrinsic evaluation in MT,[0],[0]
+This is possibly because English is mostly rightbranching.,4.2 Extrinsic evaluation in MT,[0],[0]
+"So even though both PETs describe the same reordering, RGright captures reordering over English input better than RGleft.
+",4.2 Extrinsic evaluation in MT,[0],[0]
+All PETs or binary only?,4.2 Extrinsic evaluation in MT,[0],[0]
+RGPET-forest performs significantly better than RGITG-forest (p < 0.05).,4.2 Extrinsic evaluation in MT,[0],[0]
+"Non-ITG reordering operators are predicted rarely (in only 99 sentences of the test set), but they make a difference, because these operators often appear high in the predicted PET.",4.2 Extrinsic evaluation in MT,[0],[0]
+"Furthermore, having these operators during training might allow for better fit to the data.
+",4.2 Extrinsic evaluation in MT,[0],[0]
+How much reordering is resolved by the Reordering Grammar?,4.2 Extrinsic evaluation in MT,[0],[0]
+"Obviously, completely factorizing out the reordering from the translation process is impossible because reordering depends to a certain degree on target lexical choice.",4.2 Extrinsic evaluation in MT,[0],[0]
+"To quantify the contribution of Reordering Grammar, we tested decoding with different distortion limit values in the SMT system.",4.2 Extrinsic evaluation in MT,[0],[0]
+"We compare the phrase-based (PB) system with distance based cost function for reordering (Koehn et al., 2007) with and without preordering.
+",4.2 Extrinsic evaluation in MT,[0],[0]
+Figure 3 shows that Reordering Grammar gives substantial performance improvements at all distortion limits (both BLEU and RIBES).,4.2 Extrinsic evaluation in MT,[0],[0]
+RGPET-forest is less sensitive to changes in decoder distortion limit than standard PBSMT.,4.2 Extrinsic evaluation in MT,[0],[0]
+"The perfor-
+mance of RGPET-forest varies only by 1.1 BLEU points while standard PBSMT by 4.3 BLEU points.",4.2 Extrinsic evaluation in MT,[0],[0]
+Some local reordering in the decoder seems to help RGPET-forest but large distortion limits seem to degrade the preordering choice.,4.2 Extrinsic evaluation in MT,[0],[0]
+"This shows also that the improved performance of RGPET-forest is not only a result of efficiently exploring the full space of permutations, but also a result of improved scoring of permutations.
+",4.2 Extrinsic evaluation in MT,[0],[0]
+Does the improvement remain for a decoder with MSD reordering model?,4.2 Extrinsic evaluation in MT,[0],[0]
+"We compare the RGPET-forest preordered model against a decoder that uses the strong MSD model (Tillmann, 2004; Koehn et al., 2007).",4.2 Extrinsic evaluation in MT,[0],[0]
+Table 4 shows that using Reordering Grammar as front-end to MSD reordering (full Moses) improves performance by 2.8 BLEU points.,4.2 Extrinsic evaluation in MT,[0],[0]
+"The improvement is confirmed by METEOR, TER and RIBES.",4.2 Extrinsic evaluation in MT,[0],[0]
+"Our preordering model and MSD are complementary – the Reordering Grammar captures long distance reordering, while MSD possibly does better local reorderings, especially reorderings conditioned on the lexical part of translation units.
+",4.2 Extrinsic evaluation in MT,[0],[0]
+"Interestingly, the MSD model (BLEU 29.6) improves over distance-based reordering (BLEU 27.8) by (BLEU 1.8), whereas the difference between these systems as back-ends to Reordering Grammar (respectively BLEU 32.4 and 32.0) is
+far smaller (0.4 BLEU).",4.2 Extrinsic evaluation in MT,[0],[0]
+This suggests that a major share of reorderings can be handled well by preordering without conditioning on target lexical choice.,4.2 Extrinsic evaluation in MT,[0],[0]
+"Furthermore, this shows that RGPET-forest preordering is not very sensitive to the decoder’s reordering model.
+",4.2 Extrinsic evaluation in MT,[0],[0]
+Comparison to a Hierarchical model (Hiero).,4.2 Extrinsic evaluation in MT,[0],[0]
+"Hierarchical preordering is not intended for a hierarchical model as Hiero (Chiang, 2005).",4.2 Extrinsic evaluation in MT,[0],[0]
+"Yet, here we compare our preordering system (PB MSD+RG) to Hiero for completeness, while we should keep in mind that Hiero’s reordering model has access to much richer training data.",4.2 Extrinsic evaluation in MT,[0],[0]
+"We will discuss these differences shortly.
+",4.2 Extrinsic evaluation in MT,[0],[0]
+"Table 4 shows that the difference in BLEU is not statistically significant, but there is more difference in METEOR and TER. RIBES, which concentrates more on reordering, prefers Reordering Grammar over Hiero.",4.2 Extrinsic evaluation in MT,[0],[0]
+It is somewhat surprising that a preordering model combined with a phrase-based model succeeds to rival Hiero’s performance on English-Japanese.,4.2 Extrinsic evaluation in MT,[0],[0]
+"Especially when looking at the differences between the two:
+1.",4.2 Extrinsic evaluation in MT,[0],[0]
+"Reordering Grammar uses only minimal phrases, while Hiero uses composite (longer) phrases which encapsulate internal reorderings, but also non-contiguous phrases.",4.2 Extrinsic evaluation in MT,[0],[0]
+2.,4.2 Extrinsic evaluation in MT,[0],[0]
+"Hiero conditions its reordering on the lexical target side, whereas the Reordering Grammar does not (by definition).",4.2 Extrinsic evaluation in MT,[0],[0]
+3.,4.2 Extrinsic evaluation in MT,[0],[0]
+"Hiero uses a range of features, e.g., a language model, while Reordering Grammar is a mere generative PCFG.",4.2 Extrinsic evaluation in MT,[0],[0]
+"The advantages of Hiero can be brought to bear upon Reordering Grammar by reformulating it as a discriminative model.
+",4.2 Extrinsic evaluation in MT,[0],[0]
+Which structure is learned?,4.2 Extrinsic evaluation in MT,[0],[0]
+"Figure 4 shows an example PET output showing how our model learns: (1) that the article “the” has no equivalent in Japanese, (2) that verbs go after their object, (3) to use postpositions instead of prepositions, and (4) to correctly group certain syntactic units, e.g. NPs and VPs.",4.2 Extrinsic evaluation in MT,[0],[0]
+"The majority of work on preordering is based on syntactic parse trees, e.g., (Lerner and Petrov, 2013; Khalilov and Sima’an, 2011; Xia and Mccord, 2004).",5 Related work,[0],[0]
+Here we concentrate on work that has common aspects with this work.,5 Related work,[0],[0]
+"Neubig et
+al (2012) trains a latent non-probabilistic discriminative model for preordering as an ITG-like grammar limited to binarizable permutations.",5 Related work,[0],[0]
+Tromble and Eisner (2009) use ITG but do not train the grammar.,5 Related work,[0],[0]
+They only use it to constrain the local search.,5 Related work,[0],[0]
+DeNero and Uszkoreit (2011) present two separate consecutive steps for unsupervised induction of hierarchical structure (ITG) and the induction of a reordering function over it.,5 Related work,[0],[0]
+"In contrast, here we learn both the structure and the reordering function simultaneously.",5 Related work,[0],[0]
+"Furthermore, at test time, our inference with MBR over a measure of permutation (Kendall) allows exploiting both structure and reordering weights for inference, whereas test-time inference in (DeNero and Uszkoreit, 2011) is also a two step process – the parser forwards to the next stage the best parse.
+",5 Related work,[0],[0]
+Dyer and Resnik (2010) treat reordering as a latent variable and try to sum over all derivations that lead not only to the same reordering but also to the same translation.,5 Related work,[0],[0]
+"In their work they consider all permutations allowed by a given syntactic tree.
+",5 Related work,[0],[0]
+"Saers et al (2012) induce synchronous grammar for translation by splitting the non-terminals, but unlike our approach they split generic nonterminals and not operators.",5 Related work,[0],[0]
+Their most expressive grammar covers only binarizable permutations.,5 Related work,[0],[0]
+The decoder that uses this model does not try to sum over many derivations that have the same yield.,5 Related work,[0],[0]
+They do not make independence assumption like our “unary trick” which is probably the reason they do not split more than 8 times.,5 Related work,[0],[0]
+"They do not compare their results to any other SMT system and test on a very small dataset.
+",5 Related work,[0],[0]
+"Saluja et al (2014) attempts inducing a refined Hiero grammar (latent synchronous CFG) from Normalized Decomposition Trees (NDT) (Zhang et al., 2008).",5 Related work,[0],[0]
+"While there are similarities with
+the present work, there are major differences.",5 Related work,[0],[0]
+"On the similarity side, NDTs are decomposing alignments in ways similar to PETs, and both Saluja’s and our models refine the labels on the nodes of these decompositions.",5 Related work,[0],[0]
+"However, there are major differences between the two:
+• Our model is completely monolingual and unlexicalized (does not condition its reordering on the translation) in contrast with the Latent SCFG used in (Saluja et al., 2014), • Our Latent PCFG label splits are defined
+as refinements of prime permutations, i.e., specifically designed for learning reordering, whereas (Saluja et al., 2014) aims at learning label splitting that helps predicting NDTs from source sentences, • Our model exploits all PETs and all deriva-
+tions, both during training (latent treebank) and during inferences.",5 Related work,[0],[0]
+"In (Saluja et al., 2014) only left branching NDT derivations are used for learning the model.",5 Related work,[0],[0]
+•,5 Related work,[0],[0]
+"The training data used by (Saluja et al., 2014)
+is about 60 times smaller in number of words than the data used here; the test set of (Saluja et al., 2014) also consists of far shorter sentences where reordering could be less crucial.
+",5 Related work,[0],[0]
+"A related work with a similar intuition is presented in (Maillette de Buy Wenniger and Sima’an, 2014), where nodes of a tree structure similar to PETs are labeled with reordering patterns obtained by factorizing word alignments into Hierarchical Alignment Trees.",5 Related work,[0],[0]
+These patterns are used for labeling the standard Hiero grammar.,5 Related work,[0],[0]
+"Unlike this work, the labels extracted by (Maillette de Buy Wenniger and Sima’an, 2014) are clustered manually into less than a dozen labels without the possibility of fitting the labels to the training data.",5 Related work,[0],[0]
+We present a generative Reordering PCFG model learned from latent treebanks over PETs obtained by factorizing permutations over minimal phrase pairs.,6 Conclusion,[0],[0]
+Our Reordering PCFG handles non-ITG reordering patterns (up to 5-ary branching) and it works with all PETs that factorize a permutation (rather than a single PET).,6 Conclusion,[0],[0]
+To the best of our knowledge this is the first time both extensions are shown to improve performance.,6 Conclusion,[0],[0]
+"The empirical results on English-Japanese show that (1) when used for preordering, the Reordering PCFG helps particularly with relieving the phrase-based model from long range reorderings, (2) combined with a state-of-the-art phrase model, Reordering PCFG shows performance not too different from Hiero, supporting the common wisdom of factorizing long range reordering outside the decoder, (3) Reordering PCFG generates derivations that seem to coincide well with linguistically-motivated reordering patterns for English-Japanese.",6 Conclusion,[0],[0]
+"There are various direction we would like to explore, the most obvious of which are integrating the learned reordering with other feature functions in a discriminative setting, and extending the model to deal with non-contiguous minimal phrases.",6 Conclusion,[0],[0]
+This work is supported by STW grant nr. 12271 and NWO VICI grant nr. 277-89-002.,Acknowledgments,[0],[0]
+We thank Wilker Aziz for comments on earlier version of the paper and discussions about MBR and sampling.,Acknowledgments,[0],[0]
+"We present a novel approach for unsupervised induction of a Reordering Grammar using a modified form of permutation trees (Zhang and Gildea, 2007), which we apply to preordering in phrase-based machine translation.",abstractText,[0],[0]
+"Unlike previous approaches, we induce in one step both the hierarchical structure and the transduction function over it from word-aligned parallel corpora.",abstractText,[0],[0]
+"Furthermore, our model (1) handles non-ITG reordering patterns (up to 5-ary branching), (2) is learned from all derivations by treating not only labeling but also bracketing as latent variable, (3) is entirely unlexicalized at the level of reordering rules, and (4) requires no linguistic annotation.",abstractText,[0],[0]
+"Our model is evaluated both for accuracy in predicting target order, and for its impact on translation quality.",abstractText,[0],[0]
+"We report significant performance gains over phrase reordering, and over two known preordering baselines for English-Japanese.",abstractText,[0],[0]
+Reordering Grammar Induction,title,[0],[0]

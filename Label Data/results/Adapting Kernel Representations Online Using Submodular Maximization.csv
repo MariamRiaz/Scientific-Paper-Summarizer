@@ -1,0 +1,1709 @@
+0,1,label2,summary_sentences
+We consider learning a classifier from logged data.,1. Introduction,[0],[0]
+"Here, the learner has access to a logged labeled dataset that has been collected according to a known pre-determined policy, and his goal is to learn a classifier that predicts the labels accurately over the entire population, not just conditioned on the logging policy.
+",1. Introduction,[0],[0]
+This problem arises frequently in many natural settings.,1. Introduction,[0],[0]
+An example is predicting the efficacy of a treatment as a function of patient characteristics based on observed data.,1. Introduction,[0],[0]
+Doctors may assign the treatment to patients based on some predetermined rule; recording these patient outcomes produces a logged dataset where outcomes are observed conditioned on the doctors’ assignment.,1. Introduction,[0],[0]
+"A second example is recidivism prediction, where the goal is to predict whether a convict will re-offend.",1. Introduction,[0],[0]
+"Judges use their own predefined policy to grant parole, and if parole is granted, then an outcome (reoffense or not) is observed.",1. Introduction,[0],[0]
+"Thus the observed data records outcomes conditioned on the judges’ parole policy,
+1University of California, San Diego.",1. Introduction,[0],[0]
+Correspondence to:,1. Introduction,[0],[0]
+"Songbai Yan <yansongbai@eng.ucsd.edu>.
+",1. Introduction,[0],[0]
+"Proceedings of the 35 th International Conference on Machine Learning, Stockholm, Sweden, PMLR 80, 2018.",1. Introduction,[0],[0]
+"Copyright 2018 by the author(s).
+while the learner’s goal is to learn a predictor over the entire population.
+",1. Introduction,[0],[0]
+A major challenge in learning from logged data is that the logging policy may leave large areas of the data distribution under-explored.,1. Introduction,[0],[0]
+"Consequently, empirical risk minimization (ERM) on the logged data leads to classifiers that may be highly suboptimal on the population.",1. Introduction,[0],[0]
+"When the logging policy is known, a second option is to use a weighted ERM, that reweighs each observed labeled data point to ensure that it reflects the underlying population.",1. Introduction,[0],[0]
+"However, this may lead to sample inefficiency if the logging policy does not adequately explore essential regions of the population.",1. Introduction,[0],[0]
+"A final approach, typically used in clinical trials, is controlled random experimentation – essentially, ignore the logged data, and record outcomes for fresh examples drawn from the population.",1. Introduction,[0],[0]
+"This approach is expensive due to the high cost of trials, and wasteful since it ignores the observed data.
+",1. Introduction,[0],[0]
+"Motivated by these challenges, we propose active learning to combine logged data with a small amount of strategically chosen labeled data that can be used to correct the bias in the logging policy.",1. Introduction,[0],[0]
+"This solution has the potential to achieve the best of both worlds by limiting experimentation to achieve higher sample efficiency, and by making the most of the logged data.",1. Introduction,[0],[0]
+"Specifically, we assume that in addition to the logged data, the learner has some additional unlabeled data that he can selectively ask an annotator to label.",1. Introduction,[0],[0]
+"The learner’s goal is to learn a highly accurate classifier over the entire population by using a combination of the logged data and with as few label queries to the annotator as possible.
+",1. Introduction,[0],[0]
+How can we utilize logged data for better active learning?,1. Introduction,[0],[0]
+This problem has not been studied to the best of our knowledge.,1. Introduction,[0],[0]
+A naive approach is to use the logged data to come up with a warm start and then do standard active learning.,1. Introduction,[0],[0]
+"In this work, we show that we can do even better.",1. Introduction,[0],[0]
+"In addition to the warm start, we show how to use multiple importance sampling estimators to utilize the logged data more efficiently.",1. Introduction,[0],[0]
+"Additionally, we introduce a novel debiasing policy that selectively avoids label queries for those examples that are highly represented in the logged data.
+",1. Introduction,[0],[0]
+"Combining these three approaches, we provide a new algorithm.",1. Introduction,[0],[0]
+"We prove that our algorithm is statistically consistent, and has a lower label requirement than simple active learning that uses the logged data as a warm start.",1. Introduction,[0],[0]
+"Finally, we
+evaluate our algorithm experimentally on various datasets and logging policies.",1. Introduction,[0],[0]
+Our experiments show that the performance of our method is either the best or close to the best for a variety of datasets and logging policies.,1. Introduction,[0],[0]
+This confirms that active learning to combine logged data with carefully chosen labeled data may indeed yield performance gains.,1. Introduction,[0],[0]
+"Instances are drawn from an instance space X and a label space Y = {0, 1}.",2.1. Problem Setup,[0],[0]
+There is an underlying data distribution D over X × Y that describes the population.,2.1. Problem Setup,[0],[0]
+There is a hypothesis spaceH ⊂ YX .,2.1. Problem Setup,[0],[0]
+"For simplicity, we assumeH is a finite set, but our results can be generalized to VC-classes by standard arguments (Vapnik & Chervonenkis, 1971).
+",2.1. Problem Setup,[0],[0]
+"The learning algorithm has access to two sources of data: logged data, and online data.",2.1. Problem Setup,[0],[0]
+"The logged data are generated from m examples {(Xt, Yt)}mt=1 drawn i.i.d.",2.1. Problem Setup,[0],[0]
+"from D, and",2.1. Problem Setup,[0],[0]
+a logging policy Q0 : X,2.1. Problem Setup,[0],[0]
+"→ [0, 1] that determines the probability of observing the label.",2.1. Problem Setup,[0],[0]
+"For each example (Xt, Yt) (1 ≤ t ≤ m), an independent Bernoulli random variable Zt is drawn with expectation Q0(Xt), and then the label Yt is revealed to the learning algorithm if Zt = 11.",2.1. Problem Setup,[0],[0]
+"We call T0 = {(Xt, Yt, Zt)}mt=1 the logged dataset.",2.1. Problem Setup,[0],[0]
+"From the algorithm’s perspective, we assume it knows the logging policy Q0, and only observes instances {Xt}mt=1, decisions of the policy {Zt}mt=1, and revealed labels {Yt | Zt = 1}mt=1.
+",2.1. Problem Setup,[0],[0]
+The online data are generated as follows.,2.1. Problem Setup,[0],[0]
+"Suppose there is a stream of another n examples {(Xt, Yt)}m+nt=m+1 drawn i.i.d.",2.1. Problem Setup,[0],[0]
+from distribution D.,2.1. Problem Setup,[0],[0]
+"At time t (m < t ≤ m+ n), the algorithm uses its query policy to compute a bit Zt ∈ {0, 1}, and then the label Yt is revealed to the algorithm if Zt = 1.",2.1. Problem Setup,[0],[0]
+"The computation of Zt may in general be randomized, and is based on the observed logged data T0, observed instances {Xi}ti=m+1, previous decisions{Zi} t−1 i=m+1, and observed labels {Yi | Zi = 1}t−1i=m+1.
+",2.1. Problem Setup,[0],[0]
+The goal of the algorithm is to learn a classifier h ∈ H from observed logged data and online data.,2.1. Problem Setup,[0],[0]
+"Fixing D, Q0, m, n, the performance measures are: (1) the error rate l(h) :",2.1. Problem Setup,[0],[0]
+= PrD(h(X) 6=,2.1. Problem Setup,[0],[0]
+"Y ) of the output classifier, and (2) the number of label queries on the online data.",2.1. Problem Setup,[0],[0]
+"Note that the error rate is over the entire population D instead of conditioned on the logging policy, and that we assume the logged data T0 come at no cost.",2.1. Problem Setup,[0],[0]
+"In this work, we are interested in the situation where n is about the same as or less than m.
+1Note that this generating process implies the standard unconfoundedness assumption in the counterfactual inference literature: Pr(Yt, Zt | Xt) = Pr(Yt | Xt) Pr(Zt",2.1. Problem Setup,[0],[0]
+"| Xt), that is, given the instance Xt, its label Yt is conditionally independent with the action Zt (whether the label is observed).",2.1. Problem Setup,[0],[0]
+"Our algorithm is based on Disagreement-Based Active Learning (DBAL) which has rigorous theoretical guarantees and can be implemented practically (see (Hanneke et al., 2014) for a survey, and (Hanneke & Yang, 2015; Huang et al., 2015) for some recent developments).",2.2. Background on Disagreement-Based Active Learning,[0],[0]
+DBAL iteratively maintains a candidate set of classifiers that contains the optimal classifier h?,2.2. Background on Disagreement-Based Active Learning,[0],[0]
+:= arg minh∈H l(h) with high probability.,2.2. Background on Disagreement-Based Active Learning,[0],[0]
+"At the k-th iteration, the candidate set Vk is constructed as all classifiers which have low estimated error on examples observed up to round k.",2.2. Background on Disagreement-Based Active Learning,[0],[0]
+"Based on Vk, the algorithm constructs a disagreement set Dk to be a set of instances on which there are at least two classifiers in Vk that predict different labels.",2.2. Background on Disagreement-Based Active Learning,[0],[0]
+"Then the algorithm draws a set Tk of unlabeled examples, where the size of Tk is a parameter of the algorithm.",2.2. Background on Disagreement-Based Active Learning,[0],[0]
+"For each instance X ∈ Tk, if it falls into the disagreement region Dk, then the algorithm queries for its label; otherwise, observing that all classifiers in Vk have the same prediction on X , its label is not queried.",2.2. Background on Disagreement-Based Active Learning,[0],[0]
+The queried labels are then used to update future candidate sets.,2.2. Background on Disagreement-Based Active Learning,[0],[0]
+"Most learning algorithms, including DBAL, require estimating the error rate of a classifier.",2.3. Background on Error Estimators,[0],[0]
+A good error estimator should be unbiased and of low variance.,2.3. Background on Error Estimators,[0],[0]
+"When instances are observed with different probabilities, a commonly used error estimator is the standard importance sampling estimator that reweighs each observed labeled example according to the inverse probability of observing it.
+",2.3. Background on Error Estimators,[0],[0]
+Consider a simplified setting where the logged dataset T0 =,2.3. Background on Error Estimators,[0],[0]
+"(Xi, Yi, Zi) m i=1",2.3. Background on Error Estimators,[0],[0]
+and Pr(Zi = 1 | Xi) = Q0(Xi).,2.3. Background on Error Estimators,[0],[0]
+On the online dataset T1 =,2.3. Background on Error Estimators,[0],[0]
+"(Xi, Yi, Zi)m+ni=m+1, the algorithm uses a fixed query policy Q1 to determine whether to query for labels, that is, Pr(Zi = 1 | Xi) = Q1(Xi) for m < i ≤",2.3. Background on Error Estimators,[0],[0]
+"m+ n. Let S = T0 ∪ T1.
+",2.3. Background on Error Estimators,[0],[0]
+"In this setting, the standard importance sampling (IS) error estimator for a classifier h is:
+lIS(h, S) := 1
+m+ n m∑ i=1 1{h(Xi) 6=",2.3. Background on Error Estimators,[0],[0]
+"Yi}Zi Q0(Xi)
+",2.3. Background on Error Estimators,[0],[0]
+"+ 1
+m+ n m+n∑ i=m+1 1{h(Xi) 6= Yi}Zi",2.3. Background on Error Estimators,[0],[0]
+Q1(Xi) .,2.3. Background on Error Estimators,[0],[0]
+"(1)
+lIS is unbiased, and its variance is proportional to supi=0,1;x∈X 1 Qi(x)
+.",2.3. Background on Error Estimators,[0],[0]
+"Although the learning algorithm can choose its query policy Q1 to avoid Q1(Xi) to be too small for i > m, Q0 is the logging policy that cannot be changed.",2.3. Background on Error Estimators,[0],[0]
+"When Q0(Xi) is small for some i ≤ m, the estimator in (1) have a high variance such that it may be even better to just ignore the logged dataset T0.
+",2.3. Background on Error Estimators,[0],[0]
+"An alternative is the multiple importance sampling (MIS) estimator with balanced heuristic (Veach & Guibas, 1995):
+lMIS(h, S) := m+n∑ i=1",2.3. Background on Error Estimators,[0],[0]
+1{h(Xi) 6=,2.3. Background on Error Estimators,[0],[0]
+Yi}Zi mQ0(Xi) + nQ1(Xi) .,2.3. Background on Error Estimators,[0],[0]
+"(2)
+It can be proved that lMIS(h, S) is indeed an unbiased estimator for l(h).",2.3. Background on Error Estimators,[0],[0]
+"Moreover, as proved in (Owen & Zhou, 2000; Agarwal et al., 2017), (2) always has a lower variance than both (1) and the standard importance sampling estimator that ignores the logged data.
+",2.3. Background on Error Estimators,[0],[0]
+"In this paper, we use multiple importance sampling estimators, and write lMIS(h, S) as l(h, S).
+",2.3. Background on Error Estimators,[0],[0]
+"Additional Notations In this paper, unless otherwise specified, all probabilities and expectations are over the distribution D, and we drop D from subscripts henceforth.
+",2.3. Background on Error Estimators,[0],[0]
+"Let ρ(h1, h2)",2.3. Background on Error Estimators,[0],[0]
+:= Pr(h1(X) 6=,2.3. Background on Error Estimators,[0],[0]
+"h2(X)) be the disagreement mass between h1 and h2, and ρS(h1, h2)",2.3. Background on Error Estimators,[0],[0]
+:= 1 N ∑N i=1 1{h1(xi) 6=,2.3. Background on Error Estimators,[0],[0]
+"h2(xi)} for S = {x1, x2, . . .",2.3. Background on Error Estimators,[0],[0]
+", xN} ⊂ X be the empirical disagreement mass between h1 and h2 on S.
+For any h ∈ H, r > 0, define B(h, r) := {h′ ∈ H | ρ(h, h′) ≤",2.3. Background on Error Estimators,[0],[0]
+r} to be r-ball around h.,2.3. Background on Error Estimators,[0],[0]
+"For any V ⊆ H, define the disagreement region DIS(V )",2.3. Background on Error Estimators,[0],[0]
+:= {x ∈ X | ∃h1 6=,2.3. Background on Error Estimators,[0],[0]
+h2 ∈ V s.t. h1(x) 6= h2(x)}.,2.3. Background on Error Estimators,[0],[0]
+"Our algorithm employs the disagreement-based active learning framework, but modifies the main DBAL algorithm in three key ways.
+",3.1. Main Ideas,[0],[0]
+"KEY IDEA 1: WARM-START
+Our algorithm applies a straightforward way of making use of the logged data T0 inside the DBAL framework: to set the initial candidate set V0 to be the set of classifiers that have a low empirical error on T0.
+",3.1. Main Ideas,[0],[0]
+KEY IDEA 2: MULTIPLE IMPORTANCE,3.1. Main Ideas,[0],[0]
+"SAMPLING
+Our algorithm uses multiple importance sampling estimators instead of standard importance sampling estimators.",3.1. Main Ideas,[0],[0]
+"As noted in the previous section, in our setting, multiple importance sampling estimators are unbiased and have lower variance, which results in a better performance guarantee.
+",3.1. Main Ideas,[0],[0]
+We remark that the main purpose of using multiple importance sampling estimators here is to control the variance due to the predetermined logging policy.,3.1. Main Ideas,[0],[0]
+"In the classical active learning setting without logged data, standard impor-
+tance sampling can give satisfactory performance guarantees (Beygelzimer et al., 2009; 2010; Huang et al., 2015).
+",3.1. Main Ideas,[0],[0]
+"KEY IDEA 3: A DEBIASING QUERY STRATEGY
+",3.1. Main Ideas,[0],[0]
+The logging policy Q0 introduces bias into the logged data: some examples may be underrepresented since Q0 chooses to reveal their labels with lower probability.,3.1. Main Ideas,[0],[0]
+Our algorithm employs a debiasing query strategy to neutralize this effect.,3.1. Main Ideas,[0],[0]
+"For any instance x in the online data, the algorithm would query for its label with a lower probability if Q0(x) is relatively large.
+",3.1. Main Ideas,[0],[0]
+It is clear that a lower query probability leads to fewer label queries.,3.1. Main Ideas,[0],[0]
+"Moreover, we claim that our debiasing strategy, though queries for less labels, does not deteriorate our theoretical guarantee on the error rate of the final output classifier.",3.1. Main Ideas,[0],[0]
+"To see this, we note that we can establish a concentration bound for multiple importance sampling estimators that with probability at least 1− δ, for all h ∈ H,
+l(h)− l(h?) ≤2(l(h, S)− l(h?, S))
+",3.1. Main Ideas,[0],[0]
++γ1 sup x∈X 1{h(x) 6=,3.1. Main Ideas,[0],[0]
+h?(x)} log |H|δ mQ0(x) +,3.1. Main Ideas,[0],[0]
+"nQ1(x)
++γ1 √ sup x∈X 1{h(x) 6=",3.1. Main Ideas,[0],[0]
+h?(x)} log |H|δ mQ0(x) +,3.1. Main Ideas,[0],[0]
+"nQ1(x) l(h?)
+(3)
+where m,n are sizes of logged data and online data respectively, Q0 and Q1 are query policy during the logging phase and the online phase respectively, and γ1 is an absolute constant (see Corollary 15 in Appendix for proof).
+",3.1. Main Ideas,[0],[0]
+"This concentration bound implies that for any x ∈ X , if Q0(x) is large, we can set Q1(x) to be relatively small (as long as mQ0(x) + nQ1(x) ≥ infx′ mQ0(x′) + nQ1(x′)) while achieving the same concentration bound.",3.1. Main Ideas,[0],[0]
+"Consequently, the upper bound on the final error rate that we can establish from this concentration bound would not be impacted by the debiasing querying strategy.
+",3.1. Main Ideas,[0],[0]
+One technical difficulty of applying both multiple importance sampling and the debiasing strategy to the DBAL framework is adaptivity.,3.1. Main Ideas,[0],[0]
+Applying both methods requires that the query policy and consequently the importance weights in the error estimator are updated with observed examples in each iteration.,3.1. Main Ideas,[0],[0]
+"In this case, the summands of the error estimator are not independent, and the estimator becomes an adaptive multiple importance sampling estimator whose convergence property is still an open problem (Cornuet et al., 2012).
+",3.1. Main Ideas,[0],[0]
+"To circumvent this convergence issue and establish rigorous theoretical guarantees, in each iteration, we compute the error estimator from a fresh sample set.",3.1. Main Ideas,[0],[0]
+"In particular, we partition the logged data and the online data stream into
+disjoint subsets, and we use one logged subset and one online subset for each iteration.",3.1. Main Ideas,[0],[0]
+"Algorithm 1 Acitve learning with logged data 1: Input: confidence δ, size of online data n, logging pol-
+icy Q0, logged data T0.",3.2. Details of the Algorithm,[0],[0]
+2: K ← dlog ne.,3.2. Details of the Algorithm,[0],[0]
+3: S̃0 ← T (0)0 ; V0 ← H; D0 ← X ; ξ0 ← infx∈X Q0(x).,3.2. Details of the Algorithm,[0],[0]
+"4: for k = 0, . . .",3.2. Details of the Algorithm,[0],[0]
+",K − 1 do 5: Define δk ← δ(k+1)(k+2) ; σ(k, δ) ← log |H|/δ mkξk+nk ;
+∆k(h, h ′)← γ0(σ(k, δk2 )+",3.2. Details of the Algorithm,[0],[0]
+"√ σ(k, δk2 )ρS̃k(h, h
+′)).",3.2. Details of the Algorithm,[0],[0]
+6: .,3.2. Details of the Algorithm,[0],[0]
+γ0 is an absolute constant defined in Lemma 16.,3.2. Details of the Algorithm,[0],[0]
+"7: ĥk ← arg minh∈Vk l(h, S̃k).",3.2. Details of the Algorithm,[0],[0]
+"8: Define the candidate set
+Vk+1",3.2. Details of the Algorithm,[0],[0]
+← {h ∈,3.2. Details of the Algorithm,[0],[0]
+"Vk | l(h, S̃k) ≤",3.2. Details of the Algorithm,[0],[0]
+"l(ĥk, S̃k)+∆k(h, ĥk)}
+and its disagreement region Dk+1 ← DIS(Vk+1).",3.2. Details of the Algorithm,[0],[0]
+"9: Define ξk+1 ← infx∈Dk+1 Q0(x), and Qk+1(x) ←
+1{Q0(x) ≤ ξk+1",3.2. Details of the Algorithm,[0],[0]
++ 1/α}.,3.2. Details of the Algorithm,[0],[0]
+"10: Draw nk+1 samples {(Xt, Yt)} m+n1+···+nk+1 t=m+n1···+nk+1, and
+present {Xt} m+n1+···+nk+1 t=m+n1+···+nk+1 to the algorithm.
+11: for t = m+n1+· · ·+nk+1 to m+n1+· · ·+nk+1 do 12:",3.2. Details of the Algorithm,[0],[0]
+Zt ← Qk+1(Xt).,3.2. Details of the Algorithm,[0],[0]
+"13: if Zt = 1 then 14: If Xt ∈ Dk+1, query for label: Ỹt ← Yt; otherwise infer Ỹt ← ĥk(Xt).",3.2. Details of the Algorithm,[0],[0]
+"15: end if 16: end for 17: T̃k+1 ← {Xt, Ỹt, Zt} m+n1+···+nk+1 t=m+n1+···+nk+1.",3.2. Details of the Algorithm,[0],[0]
+"18: S̃k+1 ← T (k+1)0 ∪ T̃k+1. 19: end for 20: Output ĥ = arg minh∈VK l(h, S̃K).
+",3.2. Details of the Algorithm,[0],[0]
+The Algorithm is shown as Algorithm 1.,3.2. Details of the Algorithm,[0],[0]
+Algorithm 1 runs in K iterations where K = dlog ne (recall n is the size of the online data stream).,3.2. Details of the Algorithm,[0],[0]
+"For simplicity, we assume n = 2K − 1.
+",3.2. Details of the Algorithm,[0],[0]
+"As noted in the previous subsection, we require the algorithm to use a disjoint sample set for each iteration.",3.2. Details of the Algorithm,[0],[0]
+"Thus, we partition the data as follows.",3.2. Details of the Algorithm,[0],[0]
+"The online data stream is partitioned into K parts T1, · · · , TK of sizes n1 = 2
+0, · · · , nK = 2K−1.",3.2. Details of the Algorithm,[0],[0]
+We define n0 = 0 for completeness.,3.2. Details of the Algorithm,[0],[0]
+"The logged data T0 is partitioned into K + 1 parts T
+(0) 0 , · · · , T (K) 0 of sizes m0 = m/3,m1 = αn1,m2 = αn2, · · · ,mK = αnK (where α = 2m/3n and we assume α ≥ 1 is an integer for simplicity.",3.2. Details of the Algorithm,[0],[0]
+m0 can take other values as long as it is a constant factor of m).,3.2. Details of the Algorithm,[0],[0]
+"The algorithm uses T (0)0 to construct an initial candidate set, and uses
+Sk := T (k) 0 ∪ Tk in iteration k.
+Algorithm 1 uses the disagreement-based active learning framework.",3.2. Details of the Algorithm,[0],[0]
+"At iteration k (k = 0, · · · ,K − 1), it first constructs a candidate set Vk+1 which is the set of classifiers whose training error (using the multiple importance sampling estimator) on T (k)0 ∪ T̃k is small, and its disagreement region Dk+1.",3.2. Details of the Algorithm,[0],[0]
+"At the end of the k-th iteration, it receives the (k + 1)-th part of the online data stream {Xi} m+n1···+nk+1",3.2. Details of the Algorithm,[0],[0]
+i=m+n1···+nk+1 from which it can query for labels.,3.2. Details of the Algorithm,[0],[0]
+It only queries for labels inside the disagreement region Dk+1.,3.2. Details of the Algorithm,[0],[0]
+"For any example X outside the disagreement region, Algorithm 1 infers its label Ỹ = ĥk(X).",3.2. Details of the Algorithm,[0],[0]
+"Throughout this paper, we denote by Tk, Sk the set of examples with original labels, and by T̃k, S̃k the set of examples with inferred labels.",3.2. Details of the Algorithm,[0],[0]
+"The algorithm only observes T̃k and S̃k.
+",3.2. Details of the Algorithm,[0],[0]
+"Algorithm 1 uses aforementioned debiasing query strategy, which leads to fewer label queries than the standard disagreement-based algorithms.",3.2. Details of the Algorithm,[0],[0]
+"To simplify our analysis, we round the query probability Qk(x) to be 0 or 1.",3.2. Details of the Algorithm,[0],[0]
+"We first introduce some additional quantities.
+",4.1. Consistency,[0],[0]
+Define h?,4.1. Consistency,[0],[0]
+":= minh∈H l(h) to be the best classifier in H, and ν",4.1. Consistency,[0],[0]
+:= l(h?) to be its error rate.,4.1. Consistency,[0],[0]
+"Let γ2 to be an absolute constant to be specified in Lemma 17 in Appendix.
+We introduce some definitions that will be used to upperbound the size of the disagreement sets in our algorithm.",4.1. Consistency,[0],[0]
+Let DIS0 := X .,4.1. Consistency,[0],[0]
+Recall K = dlog ne.,4.1. Consistency,[0],[0]
+"For k = 1, . . .",4.1. Consistency,[0],[0]
+",K, let ζk := supx∈DISk−1 log(2|H|/δk) mk−1Q0(x)+nk−1 , k := γ2ζk +
+γ2 √ ζkl(h?), DISk := DIS(B(h?, 2ν + k)).",4.1. Consistency,[0],[0]
+"Let ζ := supx∈DIS1 1 αQ0(x)+1 .
+",4.1. Consistency,[0],[0]
+"The following theorem gives statistical consistency of our algorithm.
+",4.1. Consistency,[0],[0]
+Theorem 1.,4.1. Consistency,[0],[0]
+"There is an absolute constant c0 such that for any δ > 0, with probability at least 1− δ,
+l(ĥ) ≤l(h?)",4.1. Consistency,[0],[0]
++,4.1. Consistency,[0],[0]
+c0 sup x∈DISK,4.1. Consistency,[0],[0]
+"log K|H|δ mQ0(x) + n
++ c0
+√ sup
+x∈DISK",4.1. Consistency,[0],[0]
+log K|H|δ mQ0(x) + n l(h?).,4.1. Consistency,[0],[0]
+"We first introduce the adjusted disagreement coefficient, which characterizes the rate of decrease of the query region as the candidate set shrinks.
+",4.2. Label Complexity,[0],[0]
+Definition 2.,4.2. Label Complexity,[0],[0]
+"For any measurable set A ⊆ X , define
+S(A,α) to be⋃ A′⊆A ( A′ ∩ { x : Q0(x) ≤ inf x∈A′ Q0(x)",4.2. Label Complexity,[0],[0]
+"+ 1 α }) .
+",4.2. Label Complexity,[0],[0]
+"For any r0 ≥ 2ν, α ≥ 1, define the adjusted disagreement coefficient θ̃(r0, α) to be
+sup r>r0
+1 r Pr(S(DIS(B(h?, r)), α)).
+",4.2. Label Complexity,[0],[0]
+"The adjusted disagreement coefficient is a generalization of the standard disagreement coefficient (Hanneke, 2007) which has been widely used for analyzing active learning algorithms.",4.2. Label Complexity,[0],[0]
+"The standard disagreement coefficient θ(r) can be written as θ(r) = θ̃(r, 1), and clearly θ(r) ≥ θ̃(r, α) for all α ≥ 1.
+",4.2. Label Complexity,[0],[0]
+We can upper-bound the number of labels queried by our algorithm using the adjusted disagreement coefficient.,4.2. Label Complexity,[0],[0]
+"(Recall that we only count labels queried during the online phase, and that α = 2m/3n ≥ 1) Theorem 3.",4.2. Label Complexity,[0],[0]
+"There is an absolute constant c1 such that for any δ > 0, with probability at least 1 − δ, the number of labels queried by Algorithm 1 is at most:
+c1θ̃(2ν + K , α)(nν + ζ log n log |H| log n
+δ
++ log n √ nνζ log
+|H| log n δ ).",4.2. Label Complexity,[0],[0]
+"As a sanity check, note that when Q0(x) ≡ 1 (i.e., all labels in the logged data are shown), our results reduce to the classical bounds for disagreement-based active learning with a warm-start.
+",4.3. Remarks,[0],[0]
+"Next, we compare the theoretical guarantees of our algorithm with some alternatives.",4.3. Remarks,[0],[0]
+We fix the target error rate to be ν,4.3. Remarks,[0],[0]
+"+ , assume we are given m logged data, and compare upper bounds on the number of labels required in the online phase to achieve the target error rate.",4.3. Remarks,[0],[0]
+Recall ξ0 = infx∈X Q0(x).,4.3. Remarks,[0],[0]
+"Define ξ̃K := infx∈DISK Q0(x), θ̃ := θ̃(2ν, α), θ := θ(2ν).
+",4.3. Remarks,[0],[0]
+"From Theorem 1 and 3 and some algebra, our algorithm requires Õ ( νθ̃ · (ν+ 2 log |H| δ −mξ̃K) ) labels.
+",4.3. Remarks,[0],[0]
+The first alternative is passive learning that requests all labels for {Xt}m+nt=m+1 and finds an empirical risk minimizer using both logged data and online data.,4.3. Remarks,[0],[0]
+"If standard importance sampling is used, the upper bound is Õ (
+1 ξ0 (ν+ 2 log |H| δ −mξ0)
+) .",4.3. Remarks,[0],[0]
+"If multiple importance sam-
+pling is used, the upper bound is Õ ( ν+ 2 log |H| δ −mξ̃K ) .
+",4.3. Remarks,[0],[0]
+"Both bounds are worse than ours since νθ̃ ≤ 1 and ξ0 ≤ ξ̃K ≤ 1.
+",4.3. Remarks,[0],[0]
+A second alternative is standard disagreement-based active learning with naive warm-start where the logged data is only used to construct an initial candidate set.,4.3. Remarks,[0],[0]
+"For standard importance sampling, the upper bound is Õ ( νθ ξ0 (ν+ 2 log |H| δ −mξ0) ) .",4.3. Remarks,[0],[0]
+"For multiple importance sampling (i.e., out algorithm without the debiasing step), the upper bound is Õ ( νθ · (ν+ 2 log |H| δ −mξ̃K) ) .",4.3. Remarks,[0],[0]
+"Both
+bounds are worse than ours since νθ̃ ≤",4.3. Remarks,[0],[0]
+"νθ and ξ0 ≤ ξ̃K ≤ 1.
+",4.3. Remarks,[0],[0]
+"A third alternative is to merely use past policy to label data – that is, query on x with probability Q0(x) in the online phase.",4.3. Remarks,[0],[0]
+"The upper bound here is Õ (
+E[Q0(X)]",4.3. Remarks,[0],[0]
+"ξ0 (ν+ 2 log |H| δ −mξ0)
+) .",4.3. Remarks,[0],[0]
+"This is worse than ours
+since ξ0 ≤ E[Q0(X)] and ξ0 ≤ ξ̃K ≤ 1.",4.3. Remarks,[0],[0]
+We now empirically validate our theoretical results by comparing our algorithm with a few alternatives on several datasets and logging policies.,5. Experiments,[0],[0]
+"In particular, we confirm that the test error of our classifier drops faster than several alternatives as the expected number of label queries increases.",5. Experiments,[0],[0]
+"Furthermore, we investigate the effectiveness of two key components of our algorithm: multiple importance sampling and the debiasing query strategy.",5. Experiments,[0],[0]
+"To the best of our knowledge, no algorithms with theoretical guarantees have been proposed in the literature.",5.1.1. ALGORITHMS AND IMPLEMENTATIONS,[0],[0]
+We consider the overall performance of our algorithm against two natural baselines: standard passive learning (PASSIVE) and the disagreement-based active learning algorithm with warm start (DBALW).,5.1.1. ALGORITHMS AND IMPLEMENTATIONS,[0],[0]
+"To understand the contribution of multiple importance sampling and the debiasing query strategy, we also compare the results with the disagreement-based active learning with warm start that uses multiple importance sampling (DBALWM).",5.1.1. ALGORITHMS AND IMPLEMENTATIONS,[0],[0]
+"We do not compare with the standard disagreement-based active learning that ignores the logged data since the contribution of warm start is clear: it always results in a smaller initial candidate set, and thus leads to less label queries.
+",5.1.1. ALGORITHMS AND IMPLEMENTATIONS,[0],[0]
+"Precisely, the algorithms we implement are:
+• PASSIVE:",5.1.1. ALGORITHMS AND IMPLEMENTATIONS,[0],[0]
+"A passive learning algorithm that queries labels for all examples in the online sequence and uses the standard importance sampling estimator to combine logged data and online data.
+",5.1.1. ALGORITHMS AND IMPLEMENTATIONS,[0],[0]
+• DBALW:,5.1.1. ALGORITHMS AND IMPLEMENTATIONS,[0],[0]
+"A disagreement-based active learning algorithm that uses the standard importance sampling estimator, and constructs the initial candidate set with logged data.",5.1.1. ALGORITHMS AND IMPLEMENTATIONS,[0],[0]
+"This algorithm only uses only our first key idea – warm start.
+",5.1.1. ALGORITHMS AND IMPLEMENTATIONS,[0],[0]
+• DBALWM:,5.1.1. ALGORITHMS AND IMPLEMENTATIONS,[0],[0]
+"A disagreement-based active learning algorithm that uses the multiple importance sampling estimator, and constructs the initial candidate set with logged data.",5.1.1. ALGORITHMS AND IMPLEMENTATIONS,[0],[0]
+"This algorithm uses our first and second key ideas, but not the debiasing query strategy.",5.1.1. ALGORITHMS AND IMPLEMENTATIONS,[0],[0]
+"In other words, this method sets Qk ≡ 1 in Algorithm 1.
+• IDBAL:",5.1.1. ALGORITHMS AND IMPLEMENTATIONS,[0],[0]
+"The method proposed in this paper: improved disagreement-based active learning algorithm with warm start that uses the multiple importance sampling estimator and the debiasing query strategy.
+",5.1.1. ALGORITHMS AND IMPLEMENTATIONS,[0],[0]
+Our implementation of above algorithms follows Vowpal Wabbit (vw).,5.1.1. ALGORITHMS AND IMPLEMENTATIONS,[0],[0]
+Details can be found in Appendix.,5.1.1. ALGORITHMS AND IMPLEMENTATIONS,[0],[0]
+"Due to lack of public datasets for learning with logged data, we convert datasets for standard binary classification into our setting.",5.1.2. DATA,[0],[0]
+"Specifically, we first randomly select 80% of the whole dataset as training data and the remaining 20% is test data.",5.1.2. DATA,[0],[0]
+"We randomly select 50% of the training set as logged data, and the remaining 50% is online data.",5.1.2. DATA,[0],[0]
+"We then run an artificial logging policy (to be specified later) on the logged data to determine whether each label should be revealed to the learning algorithm or not.
+",5.1.2. DATA,[0],[0]
+"Experiments are conducted on synthetic data and 11 datasets from UCI datasets (Lichman, 2013) and LIBSVM datasets (Chang & Lin, 2011).",5.1.2. DATA,[0],[0]
+"The synthetic data is generated as follows: we generate 6000 30-dimensional points uniformly from hypercube [−1, 1]30, and labels are assigned by a random linear classifier and then flipped with probability 0.1 independently.
+",5.1.2. DATA,[0],[0]
+"We use the following four logging policies:
+• IDENTICAL:",5.1.2. DATA,[0],[0]
+"Each label is revealed with probability 0.005.
+",5.1.2. DATA,[0],[0]
+• UNIFORM:,5.1.2. DATA,[0],[0]
+We first assign each instance in the instance space to three groups with (approximately) equal probability.,5.1.2. DATA,[0],[0]
+"Then the labels in each group are revealed with probability 0.005, 0.05, and 0.5 respectively.
+",5.1.2. DATA,[0],[0]
+• UNCERTAINTY:,5.1.2. DATA,[0],[0]
+We first train a coarse linear classifier using 10% of the data.,5.1.2. DATA,[0],[0]
+"Then, for an instance at distance r to the decision boundary, we reveal its label with probability exp(−cr2) where c is some constant.",5.1.2. DATA,[0],[0]
+"This policy is intended to simulate uncertainty sampling used in active learning.
+",5.1.2. DATA,[0],[0]
+• CERTAINTY:,5.1.2. DATA,[0],[0]
+We first train a coarse linear classifier using 10% of the data.,5.1.2. DATA,[0],[0]
+"Then, for an instance at distance r to the decision boundary, we reveal its label with probability cr2 where c is some constant.",5.1.2. DATA,[0],[0]
+This policy is intended to simulate a scenario where an action (i.e. querying for labels in our setting) is taken only if the current model is certain about its consequence.,5.1.2. DATA,[0],[0]
+The experiments are conducted as follows.,5.1.3. METRICS AND PARAMETER TUNING,[0],[0]
+"For a fixed policy, for each dataset d, we repeat the following process 10 times.",5.1.3. METRICS AND PARAMETER TUNING,[0],[0]
+"At time k, we first randomly generate a simulated logged dataset, an online dataset, and a test dataset as stated above.",5.1.3. METRICS AND PARAMETER TUNING,[0],[0]
+"Then for i = 1, 2, · · · , we set the horizon of the online data stream ai = 10 × 2i (in other words, we only allow the algorithm to use first ai examples in the online dataset), and run algorithm A with parameter set p (to be specified later) using the logged dataset and first ai examples in the online dataset.",5.1.3. METRICS AND PARAMETER TUNING,[0],[0]
+"We record n(d, k, i, A, p) to be the number of label queries, and e(d, k, i, A, p) to be the test error of the learned linear classifier.
+",5.1.3. METRICS AND PARAMETER TUNING,[0],[0]
+"Let n̄(d, i, A, p) = 110 ∑ k n(d, k, i, A, p), ē(d, i, A, p) =
+1 10 ∑ k e(d, k, i, A, p).",5.1.3. METRICS AND PARAMETER TUNING,[0],[0]
+"To evaluate the overall performance of algorithm A with parameter set p, we use the following area under the curve metric (see also (Huang et al., 2015)):
+AUC(d,A, p) = ∑ i ē(d, i, A, p) + ē(d, i+ 1, A, p) 2
+· (n̄(d, i+ 1, A, p)− n̄(d, i, A, p)).
+",5.1.3. METRICS AND PARAMETER TUNING,[0],[0]
+"A small value of AUC means that the test error decays fast as the number of label queries increases.
+",5.1.3. METRICS AND PARAMETER TUNING,[0],[0]
+"The parameter set p consists of two parameters:
+• Model capacity C (see also item 4 in Appendix F.1).",5.1.3. METRICS AND PARAMETER TUNING,[0],[0]
+"In our theoretical analysis there is a term C := O(log Hδ ) in the bounds, which is known to be loose in practice (Hsu, 2010).",5.1.3. METRICS AND PARAMETER TUNING,[0],[0]
+"Therefore, in experiments, we treat C as a parameter to tune.",5.1.3. METRICS AND PARAMETER TUNING,[0],[0]
+"We try C in {0.01 × 2k | k = 0, 2, 4, . . .",5.1.3. METRICS AND PARAMETER TUNING,[0],[0]
+", 18}
+• Learning rate η (see also item 3 in Appendix F.1).",5.1.3. METRICS AND PARAMETER TUNING,[0],[0]
+We use online gradient descent with stepsize √ η t+η .,5.1.3. METRICS AND PARAMETER TUNING,[0],[0]
+"We
+try η in {0.0001× 2k | k = 0, 2, 4, . . .",5.1.3. METRICS AND PARAMETER TUNING,[0],[0]
+", 18}.
+",5.1.3. METRICS AND PARAMETER TUNING,[0],[0]
+"For each policy, we report AUC(d,A) = minp AUC(d,A, p), the AUC under the parameter set that minimizes AUC for dataset d and algorithm A.",5.1.3. METRICS AND PARAMETER TUNING,[0],[0]
+We report the AUCs for each algorithm under each policy and each dataset in Tables 1 to 4.,5.2. Results and Discussion,[0],[0]
+"The test error curves can be found in Appendix.
+",5.2. Results and Discussion,[0],[0]
+"Table 1: AUC under Identical policy
+Dataset Passive DBALw DBALwm IDBAL
+synthetic 121.77 123.61 111.16 106.66 letter 4.40 3.65 3.82 3.48 skin 27.53 27.29 21.48 21.44 magic 109.46 101.77 89.95 83.82 covtype 228.04 209.56 208.82 220.27 mushrooms 19.22 25.29 18.54 23.67 phishing 78.49 73.40 70.54 71.68 splice 65.97 67.54 65.73 65.66 svmguide1 59.36 55.78 46.79 48.04 a5a 53.34 50.8 51.10 51.21 cod-rna 175.88 176.42 167.42 164.96 german 65.76 68.68 59.31 61.54
+Table 2: AUC under Uniform policy
+Dataset Passive DBALw DBALwm IDBAL
+synthetic 113.49 106.24 92.67 88.38 letter 1.68 1.29 1.45 1.59 skin 23.76 21.42 20.67 19.58 magic 53.63 51.43 51.78 50.19 covtype 262.34 287.40 274.81 263.82 mushrooms 7.31 6.81 6.51 6.90 phishing 42.53 39.56 39.19 37.02 splice 88.61 89.61 90.98 87.75 svmguide1 110.06 105.63 98.41 96.46 a5a",5.2. Results and Discussion,[0],[0]
+"46.96 48.79 49.50 47.60 cod-rna 63.39 63.30 66.32 58.48 german 63.60 55.87 56.22 55.79
+Overall Performance The results confirm that the test error of the classifier output by our algorithm (IDBAL) drops faster than the baselines PASSIVE and DBALW: as demonstrated in Tables 1 to 4, IDBAL achieves lower AUC than both PASSIVE and DBALW for a majority of datasets under all policies.",5.2. Results and Discussion,[0],[0]
+We also see that IDBAL performs better than or close to DBALWM for all policies other than Identical.,5.2. Results and Discussion,[0],[0]
+"This confirms that among our two key novel ideas, using multiple importance sampling consistently results in a performance gain.",5.2. Results and Discussion,[0],[0]
+"Using the debiasing query strategy over multiple importance sampling also leads to performance gains, but these are less consistent.
+",5.2. Results and Discussion,[0],[0]
+"The Effectiveness of Multiple Importance Sampling As noted in Section 2.3, multiple importance sampling estimators have lower variance than standard importance sampling estimators, and thus can lead to a lower label complexity.",5.2. Results and Discussion,[0],[0]
+"This is verified in our experiments that DBALWM (DBAL with multiple importance sampling estimators) has a lower AUC than DBALW (DBAL with standard impor-
+tance sampling estimator) on a majority of datasets under all policies.
+",5.2. Results and Discussion,[0],[0]
+"The Effectiveness of the Debiasing Query Strategy Under Identical policy, all labels in the logged data are revealed with equal probability.",5.2. Results and Discussion,[0],[0]
+"In this case, our algorithm IDBAL queries all examples in the disagreement region as DBALWM does.",5.2. Results and Discussion,[0],[0]
+"As shown in Table 1, IDBAL and DBALWM achieves the best AUC on similar number of datasets, and both methods outperform DBALW over most datasets.
+",5.2. Results and Discussion,[0],[0]
+"Under Uniform, Uncertainty, and Certainty policies, labels in the logged data are revealed with different probabilities.",5.2. Results and Discussion,[0],[0]
+"In this case, IDBAL’s debiasing query strategy takes effect: it queries less frequently the instances that are wellrepresented in the logged data, and we show that this could lead to a lower label complexity theoretically.",5.2. Results and Discussion,[0],[0]
+"In our experiments, as shown in Tables 2 to 4, IDBAL does indeed outperform DBALWM on these policies empirically.",5.2. Results and Discussion,[0],[0]
+"Learning from logged observational data is a fundamental problem in machine learning with applications to causal inference (Shalit et al., 2017), information retrieval (Strehl et al., 2010; Li et al., 2015; Hofmann et al., 2016), recommender systems (Li et al., 2010; Schnabel et al., 2016), online learning (Agarwal et al., 2014; Wang et al., 2017), and reinforcement learning (Thomas, 2015; Thomas et al., 2015; Mandel et al., 2016).",6. Related Work,[0],[0]
+"This problem is also closely related to covariate shift (Zadrozny, 2004; Sugiyama et al., 2007; Ben-David et al., 2010).",6. Related Work,[0],[0]
+"Two variants are widely studied – first, when the logging policy is known, a problem known as learning from logged data (Li et al., 2015; Thomas et al., 2015; Swaminathan & Joachims, 2015a;b), and second, when this policy is unknown (Johansson et al., 2016; Athey & Imbens, 2016; Kallus, 2017; Shalit et al., 2017), a problem known as learning from observational data.",6. Related Work,[0],[0]
+"Our work addresses the first problem.
+",6. Related Work,[0],[0]
+"When the logging policy is unknown, the direct method (Dudı́k et al., 2011) finds a classifier using observed data.",6. Related Work,[0],[0]
+"This method, however, is vulnerable to selection bias (Hofmann et al., 2016; Johansson et al., 2016).",6. Related Work,[0],[0]
+"Existing debiasing procedures include (Athey & Imbens, 2016; Kallus, 2017), which proposes a tree-based method to partition the data space, and (Johansson et al., 2016; Shalit et al., 2017), which proposes to use deep neural networks to learn a good representation for both the logged and population data.
+",6. Related Work,[0],[0]
+"When the logging policy is known, we can learn a classifier by optimizing a loss function that is an unbiased estimator of the expected error rate.",6. Related Work,[0],[0]
+"Even in this case, however, estimating the expected error rate of a classifier is not completely straightforward and has been one of the central problems in contextual bandit (Wang et al., 2017), off-policy evaluation (Jiang & Li, 2016), and other related fields.",6. Related Work,[0],[0]
+"The most common solution is to use importance sampling according to the inverse propensity scores (Rosenbaum & Rubin, 1983).",6. Related Work,[0],[0]
+"This method is unbiased when propensity scores are accurate, but may have high variance when some propensity scores are close to zero.",6. Related Work,[0],[0]
+"To resolve this, (Bottou et al., 2013; Strehl et al., 2010; Swaminathan & Joachims, 2015a) propose to truncate the inverse propensity score, (Swaminathan & Joachims, 2015b) proposes to use normalized importance sampling, and (Jiang & Li, 2016; Dudı́k et al., 2011; Thomas & Brunskill, 2016; Wang et al., 2017) propose doubly robust estimators.",6. Related Work,[0],[0]
+"Recently, (Thomas et al., 2015) and (Agarwal et al., 2017) suggest adjusting the importance weights according to data to further reduce the variance.",6. Related Work,[0],[0]
+"We use the multiple importance sampling estimator (which have also been recently studied in (Agarwal et al., 2017) for policy evaluation), and we prove this estimator concentrates around the true expected loss tightly.
+",6. Related Work,[0],[0]
+"Most existing work on learning with logged data falls into
+the passive learning paradigm, that is, they first collect the observational data and then train a classifier.",6. Related Work,[0],[0]
+"In this work, we allow for active learning, that is, the algorithm could adaptively collect some labeled data.",6. Related Work,[0],[0]
+"It has been shown in the active learning literature that adaptively selecting data to label can achieve high accuracy at low labeling cost (Balcan et al., 2009; Beygelzimer et al., 2010; Hanneke et al., 2014; Zhang & Chaudhuri, 2014; Huang et al., 2015).",6. Related Work,[0],[0]
+"Krishnamurthy et al. (2017) study active learning with bandit feedback and give a disagreement-based learning algorithm.
+",6. Related Work,[0],[0]
+"To the best of our knowledge, there is no prior work with theoretical guarantees that combines passive and active learning with a logged observational dataset.",6. Related Work,[0],[0]
+"Beygelzimer et al. (2009) consider active learning with warm-start where the algorithm is presented with a labeled dataset prior to active learning, but the labeled dataset is not observational: it is assumed to be drawn from the same distribution for the entire population, while in our work, we assume the logged dataset is in general drawn from a different distribution by a logging policy.",6. Related Work,[0],[0]
+We consider active learning with logged data.,7. Conclusion and Future Work,[0],[0]
+The logged data are collected by a predetermined logging policy while the learner’s goal is to learn a classifier over the entire population.,7. Conclusion and Future Work,[0],[0]
+"We propose a new disagreement-based active learning algorithm that makes use of warm start, multiple importance sampling, and a debiasing query strategy.",7. Conclusion and Future Work,[0],[0]
+We show that theoretically our algorithm achieves better label complexity than alternative methods.,7. Conclusion and Future Work,[0],[0]
+"Our theoretical results are further validated by empirical experiments on different datasets and logging policies.
+",7. Conclusion and Future Work,[0],[0]
+This work can be extended in several ways.,7. Conclusion and Future Work,[0],[0]
+"First, the derivation and analysis of the debiasing strategy are based on a variant of the concentration inequality (3) in subsection 3.1.",7. Conclusion and Future Work,[0],[0]
+"The inequality relates the generalization error with the best error rate l(h?), but has a looser variance term than some existing bounds (for example (Cortes et al., 2010)).",7. Conclusion and Future Work,[0],[0]
+"A more refined analysis on the concentration of weighted estimators could better characterize the performance of the proposed algorithm, and might also improve the debiasing strategy.",7. Conclusion and Future Work,[0],[0]
+"Second, due to the dependency of multiple importance sampling, in Algorithm 1, the candidate set Vk+1 is constructed with only the k-th segment of data S̃k instead of all data collected so far ∪ki=0S̃i.",7. Conclusion and Future Work,[0],[0]
+One future direction is to investigate how to utilize all collected data while provably controlling the variance of the weighted estimator.,7. Conclusion and Future Work,[0],[0]
+"Finally, it would be interesting to investigate how to perform active learning from logged observational data without knowing the logging policy.
+",7. Conclusion and Future Work,[0],[0]
+Acknowledgements We thank NSF under CCF 1719133 for support.,7. Conclusion and Future Work,[0],[0]
+"We thank Chris Meek, Adith Swaminathan, and Chicheng Zhang for helpful discussions.",7. Conclusion and Future Work,[0],[0]
+We also thank anonymous reviewers for constructive comments.,7. Conclusion and Future Work,[0],[0]
+"We consider active learning with logged data, where labeled examples are drawn conditioned on a predetermined logging policy, and the goal is to learn a classifier on the entire population, not just conditioned on the logging policy.",abstractText,[0],[0]
+"Prior work addresses this problem either when only logged data is available, or purely in a controlled random experimentation setting where the logged data is ignored.",abstractText,[0],[0]
+"In this work, we combine both approaches to provide an algorithm that uses logged data to bootstrap and inform experimentation, thus achieving the best of both worlds.",abstractText,[0],[0]
+"Our work is inspired by a connection between controlled random experimentation and active learning, and modifies existing disagreement-based active learning algorithms to exploit logged data.",abstractText,[0],[0]
+Active Learning with Logged Data,title,[0],[0]
+"Visual recognition is undergoing a period of transformative progress, due in large part to the success of deep architectures trained on massive datasets with supervision.",1. Introduction,[0],[0]
+"While visual data is in ready supply, high-quality supervised labels are not.",1. Introduction,[0],[0]
+One attractive solution is the exploration of unsupervised learning.,1. Introduction,[0],[0]
+"However, regardless how they are trained, one still needs to evaluate accuracy of the resulting systems.",1. Introduction,[0],[0]
+"Given the importance of rigorous, empirical benchmarking, it appears impossible to avoid the costs of assembling high-quality, human-annotated test data for test evaluation.
+",1. Introduction,[0],[0]
+"Unfortunately, manually annotating ground-truth for largescale test datasets is often prohibitively expensive, particu-
+1University of California, Irvine 2Carnegie Mellon University.",1. Introduction,[0],[0]
+"Correspondence to: Phuc Nguyen <nguyenpx@uci.edu>.
+",1. Introduction,[0],[0]
+"Proceedings of the 35 th International Conference on Machine Learning, Stockholm, Sweden, PMLR 80, 2018.",1. Introduction,[0],[0]
+"Copyright 2018 by the author(s).
+",1. Introduction,[0],[0]
+larly for rich annotations required to evaluate object detection and segmentation.,1. Introduction,[0],[0]
+Even simple image tag annotations pose an incredible cost at scale 1.,1. Introduction,[0],[0]
+"In contrast, obtaining noisy or partial annotations is often far cheaper or even free.",1. Introduction,[0],[0]
+"For example, numerous social media platforms produce image and video data that are dynamically annotated with user-provided tags (Flickr, Vine, Snapchat, Facebook, YouTube).",1. Introduction,[0],[0]
+"While much work has explored the use of such massively-large “webly-supervised” data sources for learning (Wu et al., 2015; Yu et al., 2014; Li et al., 2017; Veit et al., 2017), we instead focus on them for evaluation.
+",1. Introduction,[0],[0]
+How can we exploit such partial or noisy labels during testing?,1. Introduction,[0],[0]
+"With a limited budget for vetting noisy groundtruth labels, one may be tempted to simply evaluate performance on a small set of clean data, or alternately just trust the cheap-but-noisy labels on the whole dataset.",1. Introduction,[0],[0]
+"However, such approaches can easily give an inaccurate impression of system performance.",1. Introduction,[0],[0]
+We show in our experiments that these naive approaches can produce alarmingly-incorrect estimates of comparative model performance.,1. Introduction,[0],[0]
+"Even with a significant fraction of vetted data, naive performance esti-
+1For example, NUS-WIDE, (Chua et al., 2009) estimated 3000 man-hours to semi-manually annotate a relatively small set of 81 concepts across 270K images
+mates can incorrectly rank two algorithms in 15% of trials, while our active testing approach significantly reduces this misranking error to 3%.
+",1. Introduction,[0],[0]
+"The problem of label noise even exists for “expertly” annotated datasets, whose construction involves manual selection of a test set which is deemed representative in combination with crowd-sourced labeling by multiple experts (Rashtchian et al., 2010; Khattak & Salleb-Aouissi, 2011).",1. Introduction,[0],[0]
+"Preserving annotation quality is an area of intense research within the HCI/crowdsourcing community (Kamar et al., 2012; Sheshadri & Lease, 2013).",1. Introduction,[0],[0]
+"In practice, annotation errors are often corrected incrementally through multiple rounds of interactive error discovery and visual inspection of algorithm test results over the lifetime of the dataset.",1. Introduction,[0],[0]
+"For example, in evaluating object detectors, the careful examination of detector errors on the test set (Hoiem et al., 2012) often reveals missing annotations in widelyused benchmarks (Lin et al., 2014; Everingham et al., 2015; Dollar et al., 2012) and may in turn invoke further iterations of manual corrections (e.g., (Mathias et al., 2014)).",1. Introduction,[0],[0]
+"In this work, we formalize such ad-hoc practices in a framework we term active testing, and show that significantly improved estimates of accuracy can be made through simple statistical models and active annotation strategies.",1. Introduction,[0],[0]
+Benchmarking:,2. Related Work,[0],[0]
+Empirical benchmarking is now widely considered to be an integral tool in the development of vision and learning algorithms.,2. Related Work,[0],[0]
+"Rigorous evaluation, often in terms of challenge competitions (Russakovsky et al., 2015; Everingham et al., 2010) on held-out data, serves to formally codify proxies for scientific or application goals and provides quantitative ways to characterize progress towards them.",2. Related Work,[0],[0]
+"The importance and difficulties of test dataset construction and annotation are now readily appreciated (Ponce et al., 2006; Torralba & Efros, 2011).
+",2. Related Work,[0],[0]
+"Benchmark evaluation can be framed in terms of the well-known empirical risk minimization approach to learning (Vapnik, 1992).",2. Related Work,[0],[0]
+"Benchmarking seeks to estimate the risk, defined as the expected loss of an algorithm under the true data distribution.",2. Related Work,[0],[0]
+"Since the true distribution is unknown, the expected risk is estimated by computing loss a finite sized sample test set.",2. Related Work,[0],[0]
+"Traditional losses (such as 0-1 error) decompose over test examples, but we are often interested in multivariate ranking-based metrics that do not decompose (such as Precision@K and Average Precision (Joachims, 2005)).",2. Related Work,[0],[0]
+"Defining and estimating expected risk for such metrics is more involved (e.g., Precision@K should be replaced by precision at a specified quantile (Boyd et al., 2012))",2. Related Work,[0],[0]
+"but generalization bounds are known (Agarwal et al., 2005; Hill et al., 2002).",2. Related Work,[0],[0]
+"For simplicity, we focus on the problem of estimating the empirical risk on a fixed, large but finite
+test set.
+",2. Related Work,[0],[0]
+"Semi-supervised testing: To our knowledge, there have only been a handful of works specifically studying the problem of estimating recognition performance on partially labeled test data.",2. Related Work,[0],[0]
+"Anirudh et al. (Anirudh & Turaga, 2014) study the problem of ’test-driving’ a detector to allow the users to get a quick sense of the generalizability of the system.",2. Related Work,[0],[0]
+Closer to our approach is that of Welinder et al.,2. Related Work,[0],[0]
+"(Welinder et al., 2013), who estimate the performance curves using a generative model for the classifier’s confidence scores.",2. Related Work,[0],[0]
+"Their approach leverages ideas from the semi-supervised learning literature while our approach builds on active learning.
+",2. Related Work,[0],[0]
+The problem of estimating benchmark performance from sampled relevance labels has been explored more extensively in the information retrieval literature where complete annotation was acknowledged as infeasible.,2. Related Work,[0],[0]
+"Initial work focused on deriving labeling strategies that produce lowvariance and unbiased estimates (Yilmaz & Aslam, 2006; Aslam et al., 2006) and identifying performant retrieval systems (Moffat et al., 2007).",2. Related Work,[0],[0]
+"(Sabharwal & Sedghi, 2017) give error bounds for estimating PR and ROC curves by choosing samples to label based on the system output ranking.",2. Related Work,[0],[0]
+"(Gao et al., 2014) estimate performance using an EM algorithm to integrate relevance judgements.",2. Related Work,[0],[0]
+"(Li & Kanoulas, 2017) and (Rahman et al., 2018) take a strategy similar to ours in actively selecting test items to label as well as estimating performance on remaining unlabeled data.
+",2. Related Work,[0],[0]
+Active learning: Our proposed formulation of active testing is closely related to active learning.,2. Related Work,[0],[0]
+"From a theoretical perspective, active learning can provide strong guarantees of efficiency under certain restrictions (Balcan & Urner, 2016).",2. Related Work,[0],[0]
+"Human-in-the-loop active learning approaches have been well explored for addressing training data collection in visual recognition systems (Branson et al., 2010; Wah et al., 2011; Vijayanarasimhan & Grauman, 2014).",2. Related Work,[0],[0]
+"One
+can view active testing as a form of active learning where the actively-trained model is a statistical predictor of performance on a test set.",2. Related Work,[0],[0]
+"Active learning is typically cast within the standard machine-learning paradigm, where the goal is to (interactively) learn a model that makes accurate per-example predictions on held-out i.i.d data.",2. Related Work,[0],[0]
+"In this case, generalization is of paramount importance.",2. Related Work,[0],[0]
+"On the other hand, active-testing interactively learns a model that makes aggregate statistical predictions over a fixed dataset.",2. Related Work,[0],[0]
+"This means that models learned for active-testing (that say, predict average precision) need not generalize beyond the test set of interest.",2. Related Work,[0],[0]
+This suggests that one can be much more aggressive in overfitting to the statistics of the data at hand.,2. Related Work,[0],[0]
+"In this section, we introduce the general framework for active testing.",3. Framework for Active Testing,[0],[0]
+Figure 1 depicts the overall flow of our approach.,3. Framework for Active Testing,[0],[0]
+Our evaluation database initially contains test examples with inaccurate (noisy) annotations.,3. Framework for Active Testing,[0],[0]
+"We select a batch of data items whose labels will be manually vetted by an oracle (e.g., in-house annotators or a crowd-sourced platform such as Mechanical Turk).",3. Framework for Active Testing,[0],[0]
+Figure 2 shows examples of such noisy labels and queries to Oracle.,3. Framework for Active Testing,[0],[0]
+The evaluation database is then updated with these vetted labels to improve estimates of test performance.,3. Framework for Active Testing,[0],[0]
+"Active testing consists of two key components: a metric estimator that estimates model performance from test data with a mix of noisy and vetted labels, and a vetting strategy which selects the subset of test data to be labeled in order to achieve the best possible estimate of the true performance.",3. Framework for Active Testing,[0],[0]
+We first consider active testing for a simple binary prediction problem and then extend this idea to more complex benchmarking tasks such as multi-label tag prediction and instance segmentation.,3.1. Performance Metric Estimators,[0],[0]
+"As a running example, assume that we are evaluating an system that classifies an image (e.g., as containing a cat or not).",3.1. Performance Metric Estimators,[0],[0]
+The system returns of confidence score si ∈ R for each test example i ∈ {1 . . .,3.1. Performance Metric Estimators,[0],[0]
+N}.,3.1. Performance Metric Estimators,[0],[0]
+"Let yi denote a “noisy” binary label for example i (specifying if a cat is present), where the noise could arise from labeling the test set using some weak-but-cheap annotation technique (e.g., user-provided tags, search engine results, or approximate annotations).",3.1. Performance Metric Estimators,[0],[0]
+"Finally, let zi be the true latent binary label whose value can be obtained by rigorous human inspection of the test data item.
+",3.1. Performance Metric Estimators,[0],[0]
+Typical benchmark performance metrics can be written as a function of the true ground-truth labels and system confidences.,3.1. Performance Metric Estimators,[0],[0]
+"We focus on metrics that only depend on the rank ordering of the confidence scores and denote such a metric generically as Q({zi}) where for simplicity we hide the dependence on s by assuming that the indices are always
+sorted according to si so that s1 ≥ · · · ≥ sN .",3.1. Performance Metric Estimators,[0],[0]
+"For example, commonly-used metrics for binary labeling include precision@K and average precision (AP):
+Prec@K({z1, . . .",3.1. Performance Metric Estimators,[0],[0]
+", zN})",3.1. Performance Metric Estimators,[0],[0]
+"= 1
+K ∑",3.1. Performance Metric Estimators,[0],[0]
+i≤K zi,3.1. Performance Metric Estimators,[0],[0]
+"(1)
+AP ({z1, . . .",3.1. Performance Metric Estimators,[0],[0]
+", zN})",3.1. Performance Metric Estimators,[0],[0]
+"= 1
+",3.1. Performance Metric Estimators,[0],[0]
+Np ∑ k zk k ∑ i≤k zi,3.1. Performance Metric Estimators,[0],[0]
+"(2)
+whereNp is the number of positives.",3.1. Performance Metric Estimators,[0],[0]
+"We include derivations in supplmental material.
+",3.1. Performance Metric Estimators,[0],[0]
+"Estimation with partially vetted data: In practice, not all the data in our test set will be vetted.",3.1. Performance Metric Estimators,[0],[0]
+"Let us divide the test set into two components, the unvetted set U for which we only know the approximate noisy labels yi and the vetted set V , for which we know the ground-truth label.",3.1. Performance Metric Estimators,[0],[0]
+"With a slight abuse of notation, we henceforth treat the true label zi as a random variable, and denote its observed realization (on the vetted set) as z̃i.",3.1. Performance Metric Estimators,[0],[0]
+"The simplest strategy for estimating the true performance is to ignore unvetted data and only measure performance Q on the vetted subset:
+Q({z̃i",3.1. Performance Metric Estimators,[0],[0]
+: i ∈ V }),3.1. Performance Metric Estimators,[0],[0]
+"[Vetted Only] (3)
+",3.1. Performance Metric Estimators,[0],[0]
+"This represents the traditional approach to empirical evaluation in which we collect a single, vetted test dataset and ignore other available test data.",3.1. Performance Metric Estimators,[0],[0]
+This has the advantage that it is unbiased and converges to the true empirical performance as the whole dataset is vetted.,3.1. Performance Metric Estimators,[0],[0]
+"The limitation is that it makes use of only fully-vetted data and the variance in the estimate can be quite large when the vetting budget is limited.
+",3.1. Performance Metric Estimators,[0],[0]
+A natural alternative is to incorporate the unvetted examples by simply substituting yi as a “best guess” of the true zi.,3.1. Performance Metric Estimators,[0],[0]
+"We specify this naive assumption in terms of a distribution over all labels z = {z1, . . .",3.1. Performance Metric Estimators,[0],[0]
+", zN}:
+pnaive(z) = ∏ i∈U δ(zi = yi) ∏",3.1. Performance Metric Estimators,[0],[0]
+"i∈V δ(zi = z̃i) (4)
+where z̃i is the label assigned during vetting.",3.1. Performance Metric Estimators,[0],[0]
+"Under this assumption we can then compute an expected benchmark performance:
+Epnaive(z)
+",3.1. Performance Metric Estimators,[0],[0]
+[ Q(z) ],3.1. Performance Metric Estimators,[0],[0]
+"[Naive Estimator] (5)
+which amounts to simply substituting z̃i for vetted examples and yi for unvetted examples.
+Unfortunately, the above performance estimate may be greatly affected by noise in the nosiy labels yi.",3.1. Performance Metric Estimators,[0],[0]
+"For example, if there are systematic biases in the yi, the performance estimate will similarly be biased.",3.1. Performance Metric Estimators,[0],[0]
+"We also consider more general scenarios where side information such as features
+Algorithm 1 Active Testing Algorithm Input: unvetted set U , vetted set V , total budget T , vetting strategy V S, system scores S = {si}, estimator pest(z) while T ≥ 0 do
+of the test items and distribution of scores of the classifier under test may also be informative.",3.1. Performance Metric Estimators,[0],[0]
+"We thus propose computing the expected performance under a more sophisticated estimator:
+pest(z) = ∏ i∈U p(zi|O) ∏ i∈V δ(zi = z̃i)",3.1. Performance Metric Estimators,[0],[0]
+"(6)
+where O is the total set of all observations available to the benchmark system (e.g. noisy labels, vetted labels, classifier scores, data features).",3.1. Performance Metric Estimators,[0],[0]
+"We make the plausible assumption that the distribution of unvetted labels factors conditioned on O.
+Our proposed active testing framework (see Alg 1) estimates this distribution pest(z) based on available observations and predicts expected benchmark performance under this distribution:
+Epest(z)
+",3.1. Performance Metric Estimators,[0],[0]
+[ Q(z) ],3.1. Performance Metric Estimators,[0],[0]
+"[Learned Estimator] (7)
+",3.1. Performance Metric Estimators,[0],[0]
+Computing expected performance:,3.1. Performance Metric Estimators,[0],[0]
+"Given posterior estimates p(zi|O) we can always compute the expected performance metric Q by generating samples from these distributions, computing the metric for each joint sample, and average over samples.",3.1. Performance Metric Estimators,[0],[0]
+"Here we introduce two applications (studied in our experiments) where the metric is linear or quadratic in z, allowing us to compute the expected performance in closed-form.
+",3.1. Performance Metric Estimators,[0],[0]
+Multi-label Tags: Multi-label tag prediction is a common task in video/image retrieval.,3.1. Performance Metric Estimators,[0],[0]
+"Following recent work (Joulin et al., 2016; Gong et al., 2013; Izadinia et al., 2015; Guillaumin et al., 2009), we measure accuracy with Precision@K - e.g., what fraction of the topK search results contain the tag of interest?",3.1. Performance Metric Estimators,[0],[0]
+"In this setting, noisy labels yi come from user provided tags which may contain errors and are typically incomplete.",3.1. Performance Metric Estimators,[0],[0]
+"Conveniently, we can write expected performance Eq. 7 for Precision@K for a single tag in closed form:
+E[Prec@K] = 1
+K ( ∑ i∈VK z̃i + ∑ i∈UK p(zi = 1|O) ) (8)
+where we write VK and UK to denote the vetted and unvetted subsets of K highest-scoring examples in the total set V ∪ U .",3.1. Performance Metric Estimators,[0],[0]
+"Some benchmarks compute an aggregate mean precision over all tags under consideration, but since this average is linear, one again obtains a closed form estimate.
+",3.1. Performance Metric Estimators,[0],[0]
+Instance segmentation:,3.1. Performance Metric Estimators,[0],[0]
+Instance segmentation is another natural task for which to apply active testing.,3.1. Performance Metric Estimators,[0],[0]
+"It is well known that human annotation is prohibitively expensive – (Cordts et al., 2016) reports that an average of more than 1.5 hours is required to annotate a single image.",3.1. Performance Metric Estimators,[0],[0]
+"Widely used benchmarks such as (Cordts et al., 2016) release small fraction of images annotated with high quality, along with a larger set of noisy or “coarse”-quality annotations.",3.1. Performance Metric Estimators,[0],[0]
+"Other instance segmentation datasets such as COCO (Lin et al., 2014) are constructed stage-wise by first creating a detection dataset which only indicates rectangular bounding boxes around each object which are subsequently refined into a precise instance segmentations.",3.1. Performance Metric Estimators,[0],[0]
+"Fig. 3 shows an example of a partially vetted image in which some instances are only indicated by a bounding box (noisy), while others have a detailed mask (vetted).
+",3.1. Performance Metric Estimators,[0],[0]
+"When computing Average Precision, a predicted instance segmentation is considered a true positive if it has sufficient intersection-over-union (IoU) overlap with a ground-truth instance.",3.1. Performance Metric Estimators,[0],[0]
+"In this setting, we let the variable zi indicate that predicted instance i is matched to a ground-truth instance and has an above threshold overlap.",3.1. Performance Metric Estimators,[0],[0]
+"Assuming independence of zi’s, the expected AP can be written as (see supplement for proof):
+E[AP ] = 1
+Np (∑ k∈V z̃kE[Prec@k]
++ ∑ k∈U p(zk = 1|O)E[Prec@k] )
+(9)
+",3.1. Performance Metric Estimators,[0],[0]
+"In practice, standard instance segmentation benchmarks are somewhat more complicated.",3.1. Performance Metric Estimators,[0],[0]
+"In particular, they enforce one-to-one matching between detections and ground-truth.",3.1. Performance Metric Estimators,[0],[0]
+"For example, if two detections overlap a ground-truth instance, only one is counted as a true positive while the other
+is scored as a false positive.",3.1. Performance Metric Estimators,[0],[0]
+"This also holds for multi-class detections - if a detection is labeled as a dog (by matching to a ground-truth dog), it can no longer be labeled as cat.",3.1. Performance Metric Estimators,[0],[0]
+"While this interdependence can in principle be modeled by the conditioning variables O which could include information about which class detections overlap, in practice our estimators for p(zi = 1|O) do not take this into account.",3.1. Performance Metric Estimators,[0],[0]
+"Nevertheless, we show that such estimators provide remarkably good estimates of performance.
+",3.1. Performance Metric Estimators,[0],[0]
+Fitting estimators to partially vetted data: We alternate between vetting small batches of data and refitting the estimator to the vetted set.,3.1. Performance Metric Estimators,[0],[0]
+"For multi-label tagging, we update estimates for the prior probability that a noisy tag for a particular category will be flipped when vetted p(z̃i 6= yi).",3.1. Performance Metric Estimators,[0],[0]
+"For instance segmentation, we train a per-category classifier that uses sizes of the predicted and unvetted ground-truth bounding box to predict whether a detected instance will overlap the ground-truth.",3.1. Performance Metric Estimators,[0],[0]
+We discuss the specifics of fitting these particular estimators in the experimental results.,3.1. Performance Metric Estimators,[0],[0]
+The second component of the active testing system is a strategy for choosing the “next” data samples to vet.,3.2. Vetting Strategies,[0],[0]
+The goal of such a strategy is to produce accurate estimates of benchmark performance with fewest number of vettings.,3.2. Vetting Strategies,[0],[0]
+"An alternate, but closely related goal, is to determine the benchmark rankings of a set of recognition systems being compared.",3.2. Vetting Strategies,[0],[0]
+"The success of a given strategy depends on the distribution of the data, the chosen estimator, and the system(s) under test.",3.2. Vetting Strategies,[0],[0]
+"We consider several selection strategies, motivated by existing data collection practice and modeled after active learning, which adapt to these statistics in order to improve efficiency.
+",3.2. Vetting Strategies,[0],[0]
+Random Sampling:,3.2. Vetting Strategies,[0],[0]
+The simplest vetting strategy is to choose test examples to vet at random.,3.2. Vetting Strategies,[0],[0]
+The distribution of examples across categories often follows a long-tail distribution.,3.2. Vetting Strategies,[0],[0]
+"To achieve faster uniform convergence of performance
+estimates across all categories, we use a hierarchical sampling approach in which we first sample a category and then select a sub-batch of test examples to vet from that category.",3.2. Vetting Strategies,[0],[0]
+"This mirrors the way, e.g. image classification and detection datasets are manually curated to assure a minimum number of examples per category.
+",3.2. Vetting Strategies,[0],[0]
+Most-Confident Mistake (MCM):,3.2. Vetting Strategies,[0],[0]
+"This strategy selects unvetted examples for which the system under test reports a high-confidence detection/classification score, but which are considered a mistake according to the current metric estimator.",3.2. Vetting Strategies,[0],[0]
+"Specifically, we focus on the strategy of selecting Most-confident Negative which is applicable to image/video tagging where the set of user-provided tags are often incomplete.",3.2. Vetting Strategies,[0],[0]
+"The intuition is that, if a high-performance system believes that the current sample is a positive with high probability, it’s likely that the noisy label is at fault.",3.2. Vetting Strategies,[0],[0]
+"This strategy is motivated by experience with object detection benchmarks where, e.g., visualizing high-confident false positive face detections often reveals missing annotations in the test set (Mathias et al., 2014).
+",3.2. Vetting Strategies,[0],[0]
+Maximum Expected Estimator Change (MEEC):,3.2. Vetting Strategies,[0],[0]
+"In addition to utilizing the confidence scores produced by the system under test, it is natural to also consider the uncertainty in the learned estimator pest(z).",3.2. Vetting Strategies,[0],[0]
+"Exploiting the analogy of active testing with active learning, it is natural to vet samples that are most confusing to the current estimator (e.g., with largest entropy), or ones that will likely generate a large update to the estimator (e.g., largest information gain).
+",3.2. Vetting Strategies,[0],[0]
+"Specifically, we explore a active selection strategy based on maximum expected model change (Settles, 2010), which in our case corresponds to selecting a sample that yields the largest expected change in our estimate of Q. Let Ep(z|V )",3.2. Vetting Strategies,[0],[0]
+[Q(z)] be the expected performance based on the distribution p(z|V ) estimated from the current vetted set V .,3.2. Vetting Strategies,[0],[0]
+"Ep(z|V,zi)[Q(z)] be the expected performance after vetting example i and updating the estimator based on the outcome.",3.2. Vetting Strategies,[0],[0]
+"The actual change in the estimate of Q depends on the
+realization of the random variable zi:
+∆i(zi) =",3.2. Vetting Strategies,[0],[0]
+"∣∣∣Ep(z|V,zi)[Q(z)]− Ep(z|V )",3.2. Vetting Strategies,[0],[0]
+"[Q(z)]∣∣∣ (10)
+We can choose the example i with the largest expected change, using the current estimate of the distribution over zi ∼ p(zi|V ) to compute the expected change Ep(zi|V )",3.2. Vetting Strategies,[0],[0]
+"[∆i(zi)].
+",3.2. Vetting Strategies,[0],[0]
+"For Prec@K, this expected change is given by:
+Ep(zi|V )",3.2. Vetting Strategies,[0],[0]
+[∆i(zi)],3.2. Vetting Strategies,[0],[0]
+"= 2
+K pi(1− pi) (11)
+where we write pi = p(zi = 1|O).",3.2. Vetting Strategies,[0],[0]
+"Interestingly, selecting the sample yielded the maximum expected change in the estimator corresponds to a standard maximum entropy selection criteria for active learning.",3.2. Vetting Strategies,[0],[0]
+"Similarly, in the supplement we show that for AP :
+Ep(zi|V )",3.2. Vetting Strategies,[0],[0]
+"[∆i(zi)] = 1
+Np ripi(1− pi) (12)
+where ri is the proportion of unvetted examples scoring higher than example i.",3.2. Vetting Strategies,[0],[0]
+"In this case, we select an example to vet which has high-entropy and for which there is a relatively small proportion of higher-scoring unvetted examples.",3.2. Vetting Strategies,[0],[0]
+"We validate our active testing framework on two specific applications, multi-label classification and instance segmentation.",4. Experiments,[0],[0]
+"For each of these applications, we describe the datasets and systems evaluated and the specifics of the estimators and vetting strategies used.",4. Experiments,[0],[0]
+NUS-WIDE:,4.1. Active Testing for Multi-label Classification,[0],[0]
+"This dataset contains 269,648 Flickr images with 5018 unique tags.",4.1. Active Testing for Multi-label Classification,[0],[0]
+"The authors also provide a ’semi-
+complete’ ground-truth via manual annotations for 81 concepts.",4.1. Active Testing for Multi-label Classification,[0],[0]
+We removed images that are no longer available and images that doesn’t contain one of the 81 tags.,4.1. Active Testing for Multi-label Classification,[0],[0]
+We are left with around 100K images spanning across 81 concepts.,4.1. Active Testing for Multi-label Classification,[0],[0]
+"(Izadinia et al., 2015) analyzed the noisy and missing label statistics for this dataset.",4.1. Active Testing for Multi-label Classification,[0],[0]
+"Given that the tag is relevant to the image, there is only 38% chance that it will appear in the noisy tag list.",4.1. Active Testing for Multi-label Classification,[0],[0]
+"If the tag does not apply, there’s 1% chance that it appears anyway.",4.1. Active Testing for Multi-label Classification,[0],[0]
+"They posited that the missing tags are either non-entry level categories (e.g., person) or they are not important in the scene (e.g., clouds and buildings).
+",4.1. Active Testing for Multi-label Classification,[0],[0]
+"Micro-videos: Micro-videos have recently become a prevalent form of media on many social platforms, such as Vine, Instagram, and Snapchat.",4.1. Active Testing for Multi-label Classification,[0],[0]
+"(Nguyen et al., 2016) formulated a multi-label video-retrieval/annotation task for a large collection of Vine videos.",4.1. Active Testing for Multi-label Classification,[0],[0]
+"They introduce a micro-video dataset, MV-85k containing 260K videos with 58K tags.",4.1. Active Testing for Multi-label Classification,[0],[0]
+"This dataset, however, only provides exhaustive vetting for a small subset of tags on a small subset of videos.",4.1. Active Testing for Multi-label Classification,[0],[0]
+"We vetted 26K video-tag pairs from this dataset, spanning 17503 videos and 875 tags.",4.1. Active Testing for Multi-label Classification,[0],[0]
+"Since tags provided by users have little constraints, this dataset suffers from both under-tagging and over-tagging.",4.1. Active Testing for Multi-label Classification,[0],[0]
+"Under-tagging comes from not-yet popular concepts, while over-tagging comes from the spamming of extra tags In our experiments we use a subset of 75 tags.
+",4.1. Active Testing for Multi-label Classification,[0],[0]
+"Recognition systems: To obtain the classification results, we implement two multi-label classification algorithms for images (NUSWIDE) and videos (Microvideos).",4.1. Active Testing for Multi-label Classification,[0],[0]
+"For NUSWIDE, we trained a multi-label logistic regression model built on the pretrained ResNet-50",4.1. Active Testing for Multi-label Classification,[0],[0]
+"(He et al., 2016) features.",4.1. Active Testing for Multi-label Classification,[0],[0]
+"For Micro-videos, we follow the state-of-the-art video action recognition framework (Wang et al., 2016) modified for the multi-label setting to use multiple logistic cross-entropy losses.
+",4.1. Active Testing for Multi-label Classification,[0],[0]
+Learned Estimators: We use Precision@48 as a evaluation metric.,4.1. Active Testing for Multi-label Classification,[0],[0]
+"For tagging, we estimate the posterior over unvetted tags, p(zi|O), based on two pieces of observed information: the statistics of noisy labels yi on vetted examples, and the system confidence score, si.",4.1. Active Testing for Multi-label Classification,[0],[0]
+"This posterior probability can be derived as (see supplement for proof):
+p(zi|si, yi) = p(yi|zi)p(zi|si)∑
+v∈{0,1} p(yi|zi = v)p(zi = v|si) (13)
+",4.1. Active Testing for Multi-label Classification,[0],[0]
+"Given some vetted data, we fit the tag-flipping priors p(yi|zi) by standard maximum likelihood estimation (counting frequencies).",4.1. Active Testing for Multi-label Classification,[0],[0]
+"The posterior probabilities of the true label given the classifier confidence score, p(zi|si), is fit using logistic regression.",4.1. Active Testing for Multi-label Classification,[0],[0]
+COCO Minival:,4.2. Object Instance Detection and Segmentation,[0],[0]
+"For instance segmentation, we use ‘minival2014’ subset of the COCO dataset (Lin et al., 2014).",4.2. Object Instance Detection and Segmentation,[0],[0]
+This subset contains 5k images spanning over 80 categories.,4.2. Object Instance Detection and Segmentation,[0],[0]
+"We report the standard COCO metric: Average Precision (averaged over all IoU thresholds).
+",4.2. Object Instance Detection and Segmentation,[0],[0]
+"To systematically analyze the impact of evaluation on noise and vetting, we focus evaluation efforts on the high quality test set, but simulate noisy annotations by replacing actual instance segmentation masks by their tight-fitting bounding box (the unvetted “noisy” set).",4.2. Object Instance Detection and Segmentation,[0],[0]
+"We then simulate active testing where certain instances are vetted, meaning the bounding-box is replaced by the true segmentation mask.
+",4.2. Object Instance Detection and Segmentation,[0],[0]
+"Detection Systems: We did not implement instance segmentation algorithms ourselves, but instead utilized three sets of detection mask results produced by the authors of Mask R-CNN (He et al., 2017).",4.2. Object Instance Detection and Segmentation,[0],[0]
+"These were produced by variants of the instance segmentation systems proposed in (Xie et al., 2017; Lin et al., 2017; He et al., 2017).
+",4.2. Object Instance Detection and Segmentation,[0],[0]
+"Learned Estimators: To compute the probability whether a detection will pass the IoU threshold with a bounding box unvetted ground-truth instance (p(zi|O) in Eq. 9), we train a χ2-SVM using the vetted portion of the database.",4.2. Object Instance Detection and Segmentation,[0],[0]
+"The features for an example includes the category id, the ‘noisy’ IoU estimate, the size of the bounding box containing the detection mask and the size of ground-truth bounding box.",4.2. Object Instance Detection and Segmentation,[0],[0]
+"The training label is true whether the true IoU estimate, computed using the vetted ground-truth mask and the detection masks, is above a certain input IoU threshold.",4.2. Object Instance Detection and Segmentation,[0],[0]
+We measure the estimation accuracy of different combination of vetting strategies and estimators at different amount of vetting efforts.,4.3. Efficiency of active testing estimates,[0],[0]
+We compute the absolute error between the estimated metric and the true (fully vetted) metric and average over all classes.,4.3. Efficiency of active testing estimates,[0],[0]
+"Averaging the absolute estimation error across classes prevents over-estimation for one class
+canceling out under-estimation from another class.",4.3. Efficiency of active testing estimates,[0],[0]
+"We plot the mean and the standard deviation over 50 simulation runs of each active testing approach.
+",4.3. Efficiency of active testing estimates,[0],[0]
+Performance estimation: Figure 5 shows the results for estimating Prec@48 for NUSWIDE and Microvideos.,4.3. Efficiency of active testing estimates,[0],[0]
+The x-axis indicates the percentage of the top-k lists that are vetted.,4.3. Efficiency of active testing estimates,[0],[0]
+"For the Prec@K metric, it is only necessary to vet 100% of the top-k lists rather than 100% of the whole test set2.",4.3. Efficiency of active testing estimates,[0],[0]
+"A ’random’ strategy with a ‘naive’ estimator follows a
+2The “vetted only” estimator is not applicable in this domain until at least K examples in each short list have been vetted and hence doesn’t appear in the plots.
+linear trend since each batch of vetted examples contributes on average the same reduction in estimation error.",4.3. Efficiency of active testing estimates,[0],[0]
+The most confident mistake (mcm) heuristic works very well for Microvideos due to the substantial amount of undertagging.,4.3. Efficiency of active testing estimates,[0],[0]
+"However, in more reasonable balanced settings such as NUS-WIDE, this heuristic does not perform as well.",4.3. Efficiency of active testing estimates,[0],[0]
+The MCM vetting strategy does not pair well with a learned estimator due to its biased sampling which quickly results in priors that overestimate the number missing tags.,4.3. Efficiency of active testing estimates,[0],[0]
+"In contrast, the random and active MEEC vetting strategies offer good samples for learning a good estimator.",4.3. Efficiency of active testing estimates,[0],[0]
+"At 50% vetting effort, MEEC sampling with a learned estimator on average can achieve within 2-3% of the real estimates.
+",4.3. Efficiency of active testing estimates,[0],[0]
+Figure 6 highlights the relative value of establishing the true vetted label versus the value of vetted data in updating the estimator.,4.3. Efficiency of active testing estimates,[0],[0]
+"In some sense, traditional active learning is concerned primarily with the vertical drop (i.e. a better model/estimator), while active testing also takes direct advantage of the slope (i.e. more vetted labels).",4.3. Efficiency of active testing estimates,[0],[0]
+"The initial learned estimates have larger error due to small sample size, but the fitting during the first few vetting batches rapidly improves the estimator quality.",4.3. Efficiency of active testing estimates,[0],[0]
+"Past 40% vetting effort, the estimator model parameters stabilize and remaining vetting serves to correct labels whose true value can’t be predicted given the low-complexity of the estimator.
+",4.3. Efficiency of active testing estimates,[0],[0]
+Figure 7 shows similar results for estimating the mAP for instance segmentation on COCO.,4.3. Efficiency of active testing estimates,[0],[0]
+The current ‘gold standard’ approach of estimating performance based only on the vetted subset of images leads to large errors in estimation accuracy and high variance from from small sample sizes.,4.3. Efficiency of active testing estimates,[0],[0]
+"In the active testing framework, input algorithms are tested using the whole dataset (vetted and unvetted).",4.3. Efficiency of active testing estimates,[0],[0]
+"Naive estimation is noticeably more accurate than vetted only and the learned estimator with uncertainty sampling further reduces
+both the absolute error and the variance.
+",4.3. Efficiency of active testing estimates,[0],[0]
+Model ranking: The benefits of active testing are highlighted further when we consider the problem of ranking system performance.,4.3. Efficiency of active testing estimates,[0],[0]
+"We are often interested not in the absolute performance number, but rather in the performance gap between different systems.",4.3. Efficiency of active testing estimates,[0],[0]
+We find that active testing is also valuable in this setting.,4.3. Efficiency of active testing estimates,[0],[0]
+Figure 8 shows the error in estimating the performance gap between two different instance segmentation systems as a function of the amount data vetted.,4.3. Efficiency of active testing estimates,[0],[0]
+This follows a similar trend as the single model performance estimation plot.,4.3. Efficiency of active testing estimates,[0],[0]
+"Importantly, it highlights that only evaluating vetted data, though unbiased, typically produces a large error in in performance gap between models to high variance in the estimate of each individual models performance.",4.3. Efficiency of active testing estimates,[0],[0]
+"In particular, if we use these estimates to rank two models, we will often make errors in model ranking even when relatively large amounts of the data have been vetted.",4.3. Efficiency of active testing estimates,[0],[0]
+"Using stronger estimators, actively guided by MEEC sampling provide accurate rankings with substantially less vetting effort.",4.3. Efficiency of active testing estimates,[0],[0]
+"With 50% of the data vetted, standard approaches that evaluate on only vetted data (black curve) incorrectly rank algorithms 15% of the time, while our learned estimators with active vetting (red curve) reduce this error to 3% of the time.
+",4.3. Efficiency of active testing estimates,[0],[0]
+Conclusions We have introduced a general framework for active testing that minimizes human vetting effort by actively selecting test examples to label and using performance estimators that adapt to the statistics of the test data and the systems under test.,4.3. Efficiency of active testing estimates,[0],[0]
+Simple implementations of this concept demonstrate the potential for radically decreasing the human labeling effort needed to evaluate system performance for standard computer vision tasks.,4.3. Efficiency of active testing estimates,[0],[0]
+"We anticipate this will have substantial practical value in the ongoing construction of such benchmarks.
+",4.3. Efficiency of active testing estimates,[0],[0]
+Acknowledgement We thank Piotr Dollar and Ross Girshick for providing the instance segmentation results for the COCO dataset.,4.3. Efficiency of active testing estimates,[0],[0]
+This project was supported in part by NSF grants IIS-1618806 and IIS-1253538.,4.3. Efficiency of active testing estimates,[0],[0]
+"Much recent work on visual recognition aims to scale up learning to massive, noisily-annotated datasets.",abstractText,[0],[0]
+We address the problem of scalingup the evaluation of such models to large-scale datasets with noisy labels.,abstractText,[0],[0]
+"Current protocols for doing so require a human user to either vet (reannotate) a small fraction of the test set and ignore the rest, or else correct errors in annotation as they are found through manual inspection of results.",abstractText,[0],[0]
+"In this work, we re-formulate the problem as one of active testing, and examine strategies for efficiently querying a user so as to obtain an accurate performance estimate with minimal vetting.",abstractText,[0],[0]
+"We demonstrate the effectiveness of our proposed active testing framework on estimating two performance metrics, Precision@K and mean Average Precision, for two popular computer vision tasks, multi-label classification and instance segmentation.",abstractText,[0],[0]
+We further show that our approach is able to save significant human annotation effort and is more robust than alternative evaluation protocols.,abstractText,[0],[0]
+Active Testing: An Efficient and Robust Framework for Estimating Accuracy,title,[0],[0]
+Many natural language processing tasks require document creation time (DCT) information as a useful additional metadata.,1 Introduction,[0],[0]
+"Tasks such as information retrieval (Li and Croft, 2003; Dakka et al., 2008), temporal scoping of events and facts (Allan et al., 1998; Talukdar et al., 2012b), document summarization (Wan, 2007) and analysis (de Jong et al., 2005a) require precise and validated creation time of the documents.",1 Introduction,[0],[0]
+"Most of the documents obtained from the Web either contain DCT that cannot be trusted or contain no DCT information at all (Kanhabua and Nørvåg, 2008).",1 Introduction,[0],[0]
+"Thus, predicting the time of these documents based on their content is an important task, often referred to as Document Dating.
+",1 Introduction,[0],[0]
+"A few generative approaches (de Jong et al., 2005b; Kanhabua and Nørvåg, 2008) as well as a discriminative model (Chambers, 2012) have been previously proposed for this task.",1 Introduction,[0],[0]
+"Kotsakos et al. (2014) employs term-burstiness resulting in improved precision on this task.
+",1 Introduction,[0],[0]
+"Recently proposed NeuralDater (Vashishth et al., 2018) uses a graph convolution network (GCN) based approach for document dating, outperforming all previous models by a significant margin.",1 Introduction,[0],[0]
+NeuralDater extensively uses the syntactic and temporal graph structure present within the document itself.,1 Introduction,[0],[0]
+"Motivated by NeuralDater, we explicitly develop two different methods: a) Attentive Context Model, and b) Ordered Event Model.",1 Introduction,[0],[0]
+"The first component tries to accumulate knowledge across documents, whereas the latter uses the temporal structure of the document for predicting its DCT.
+",1 Introduction,[0],[0]
+"Motivated by the effectiveness of attention based models in different NLP tasks (Yang et al., 2016a; Bahdanau et al., 2014), we incorporate attention in our method in a principled fashion.",1 Introduction,[0],[0]
+"We use attention not only to capture context but also for feature aggregation in the graph convolution network (Hamilton et al., 2017).",1 Introduction,[0],[0]
+"Our contributions are as follows.
+",1 Introduction,[0],[0]
+"• We propose Attentive Deep Document Dater (AD3), the first attention-based neural model for time-stamping documents.
+",1 Introduction,[0],[0]
+"• We devise a novel method for label based attentive graph convolution over directed graphs and use it for the document dating task.
+",1 Introduction,[0],[0]
+"• Through extensive experiments on multiple real-world datasets, we demonstrate AD3’s effectiveness over previously proposed methods.
+",1 Introduction,[0],[0]
+AD3 source code and datasets used in the paper are available at https://github.com/malllabiisc/AD3,1 Introduction,[0],[0]
+"Document Time-Stamping: Initial attempts
+ar X
+iv :1
+90 2.
+02 16
+1v 1
+[ cs
+.C",2 Related Work,[0],[0]
+"L
+] 2
+1 Ja
+n 20
+19
+made for document time-stamping task include statistical language models proposed by de Jong et al. (2005b) and Kanhabua and Nørvåg (2008).",2 Related Work,[0],[0]
+"(Chambers, 2012) use temporal and hand-crafted features extracted from documents to predict DCT.",2 Related Work,[0],[0]
+"They propose two models, one of which learns the probabilistic constraints between year mentions and the actual creation time, whereas the other one is a discriminative model trained on hand-crafted features.",2 Related Work,[0],[0]
+"Kotsakos et al. (2014) propose a termburstiness (Lappas et al., 2009)",2 Related Work,[0],[0]
+based statistical method for the task.,2 Related Work,[0],[0]
+"Vashishth et al. (2018) propose a deep learning based model which exploits the temporal and syntactic structure in documents using graph convolutional networks (GCN).
+",2 Related Work,[0],[0]
+"Event Ordering System: The task of extracting temporally rich events and time expressions and ordering between them is introduced in the TempEval challenge (UzZaman et al., 2013; Verhagen et al., 2010).",2 Related Work,[0],[0]
+"Various approaches (McDowell et al., 2017; Mirza and Tonelli, 2016) made for solving the task use sieve-based archi-
+tectures, where multiple classifiers are ranked according to their precision and their predictions are weighted accordingly resulting in a temporal graph structure.",2 Related Work,[0],[0]
+"A method to extract temporal ordering among relational facts was proposed in (Talukdar et al., 2012a).
+",2 Related Work,[0],[0]
+"Graph Convolutional Network (GCN): GCN (Kipf and Welling, 2016) is the extension of convolutional networks over graphs.",2 Related Work,[0],[0]
+"In different NLP tasks such as semantic-role labeling (Marcheggiani and Titov, 2017), neural machine translation (Bastings et al., 2017), and event detection (Nguyen and Grishman, 2018), GCNs have proved to be effective.",2 Related Work,[0],[0]
+"We extensively use GCN for capturing both syntactic and temporal aspect of the document.
+",2 Related Work,[0],[0]
+"Attention Network: Attention networks have been well exploited for various tasks such as document classification (Yang et al., 2016b), question answering (Yang et al., 2016a), machine translation (Bahdanau et al., 2014; Vaswani et al., 2017).",2 Related Work,[0],[0]
+"Recently, attention over graph structure has been
+shown to work well by Veličković et al. (2018).",2 Related Work,[0],[0]
+"Taking motivation from them, we deploy an attentive convolutional network on temporal graph for the document dating problem.",2 Related Work,[0],[0]
+The task of document dating can be modeled as a multi-class classification problem.,3 Background: GCN & NeuralDater,[0],[0]
+"Following prior work, we shall focus on DCT prediction at the year-granularity in this paper.",3 Background: GCN & NeuralDater,[0],[0]
+"In this section, we summarize the previous state-of-the-art model NeuralDater (Vashishth et al., 2018), before moving onto our method.",3 Background: GCN & NeuralDater,[0],[0]
+"An overview of graph convolutional network (GCN) (Kipf and Welling, 2016) is also necessary as it is used in NeuralDater as well as in our model.",3 Background: GCN & NeuralDater,[0],[0]
+"GCN for Undirected Graph: Consider an undirected graph, G = (V, E), where V and E are the set of n vertices and set of edges respectively.",3.1 Graph Convolutional Network,[0],[0]
+"Matrix X ∈ Rn×m, whose rows are input representation of node u, where xu ∈ Rm, ∀ u ∈ V , is the input feature matrix.",3.1 Graph Convolutional Network,[0],[0]
+The output hidden representation hv ∈,3.1 Graph Convolutional Network,[0],[0]
+"Rd of a node v after a single layer of graph convolution operation can be obtained by considering only the immediate neighbours of v, as formulated in (Kipf and Welling, 2016).",3.1 Graph Convolutional Network,[0],[0]
+"In order to capture information at multi-hop distance, one can stack layers of GCN, one over another.",3.1 Graph Convolutional Network,[0],[0]
+"GCN for Directed Graph: Consider a labelled edge from node u to v with label l(u, v), denoted collectively as (u, v, l(u, v)).",3.1 Graph Convolutional Network,[0],[0]
+"Based on the assumption that information in a directed edge need not only propagate along its direction, Marcheggiani and Titov (2017) added opposite edges viz., for each (u, v, l(u, v)), (v, u, l(u, v)−1) is added to the edge list.",3.1 Graph Convolutional Network,[0],[0]
+Self loops are also added for passing the current embedding information.,3.1 Graph Convolutional Network,[0],[0]
+"When GCN is applied over this modified directed graph, the embedding of the node v after kth layer will be,
+hk+1v = f  ∑ u∈N (v) ( W kl(u,v)h k u + b",3.1 Graph Convolutional Network,[0],[0]
+"k l(u,v) ) .",3.1 Graph Convolutional Network,[0],[0]
+"We note that the parameters W kl(u,v) and b k l(u,v) in this case are edge label specific.",3.1 Graph Convolutional Network,[0],[0]
+hku is the input to the kth layer.,3.1 Graph Convolutional Network,[0],[0]
+"Here, N (v) refers to the set of neighbours of v, according to the updated edge list and f is any non-linear activation function (e.g., ReLU: f(x) = max(0, x)).",3.1 Graph Convolutional Network,[0],[0]
+"In this sub-section, we provide a brief overview of the components of the NeuralDater (Vashishth et al., 2018).",3.2 NeuralDater,[0],[0]
+"Given a document D with n tokens w1, w2, · · ·wn, NeuralDater extracts a temporally rich embedding of the document in a principled way as explained below:",3.2 NeuralDater,[0],[0]
+Bi-directional LSTM is employed for embedding each word with its context.,3.2.1 Context Embedding,[0],[0]
+The GloVe representation of the words X ∈ Rn×k is transformed to a context aware representationHcntx ∈,3.2.1 Context Embedding,[0],[0]
+Rn×k to get the context embedding.,3.2.1 Context Embedding,[0],[0]
+This is essentially shown as the Bi-LSTM in Figure 1.,3.2.1 Context Embedding,[0],[0]
+"In this step, the context embeddings are further processed using GCN over the dependency parse tree of the sentences in the document, in order to capture long range connection among words.",3.2.2 Syntactic Embedding,[0],[0]
+"The syntactic dependency structure is extracted by Stanford CoreNLP’s dependency parser (Manning et al., 2014).",3.2.2 Syntactic Embedding,[0],[0]
+"NeuralDater follows the same formulation of GCN for directed graph as described in Section 3.1, where additional edges are added to the graph to model the information flow.",3.2.2 Syntactic Embedding,[0],[0]
+"Again following (Marcheggiani and Titov, 2017), NeuralDater does not allocate separate weight matrices for different types of dependency edge labels, rather it considers only three type of edges: a) edges that exist originally, b) the reverse edges that are added explicitly, and c) self loops.",3.2.2 Syntactic Embedding,[0],[0]
+"The S-GCN portion of Figure 1 represents this component.
+",3.2.2 Syntactic Embedding,[0],[0]
+"More formally, Hcntx ∈",3.2.2 Syntactic Embedding,[0],[0]
+Rn×k is transformed to Hsyn ∈ Rn×ksyn by applying S-GCN.,3.2.2 Syntactic Embedding,[0],[0]
+"In this layer, NeuralDater exploits the Event-Time graph structure present in the document.",3.2.3 Temporal Embedding,[0],[0]
+"CATENA (Mirza and Tonelli, 2016), current state-of-the-art temporal and causal relation extraction algorithm, produces the temporal graph from the event time annotation of the document.",3.2.3 Temporal Embedding,[0],[0]
+"GCN applied over this Event-Time graph, namely T-GCN, chooses nT number of tokens out of total n tokens from the document for further revision in their embeddings.",3.2.3 Temporal Embedding,[0],[0]
+Note that T is the total number of events and time mentions present in the document.,3.2.3 Temporal Embedding,[0],[0]
+A special node DCT is added to the graph and its embedding is jointly learned.,3.2.3 Temporal Embedding,[0],[0]
+Note that this layer learns both label and direction specific parameters.,3.2.3 Temporal Embedding,[0],[0]
+"Finally, the DCT embedding concatenated with the average pooled syntactic embedding is fed to a softmax layer for classification.",3.2.4 Classifier,[0],[0]
+This whole procedure is trained jointly.,3.2.4 Classifier,[0],[0]
+"In this section, we describe Attentive Deep Document Dater (AD3), our proposed method.",4 Attentive Deep Document Dater (AD3): Proposed Method,[0],[0]
+"AD3 is inspired by NeuralDater, and shares many of its components.",4 Attentive Deep Document Dater (AD3): Proposed Method,[0],[0]
+"Just like in NeuralDater, AD3 also leverages two main types of signals from the document – syntactic and event-time – to predict the document’s timestamp.",4 Attentive Deep Document Dater (AD3): Proposed Method,[0],[0]
+"However, there are crucial differences between the two systems.",4 Attentive Deep Document Dater (AD3): Proposed Method,[0],[0]
+"Firstly, instead of concatenating embeddings learned from these two sources as in NeuralDater, AD3 treats these two models completely separate and combines them at a later stage.",4 Attentive Deep Document Dater (AD3): Proposed Method,[0],[0]
+"Secondly, unlike NeuralDater, AD3 employs attention mechanisms in each of these two models.",4 Attentive Deep Document Dater (AD3): Proposed Method,[0],[0]
+We call the resulting models Attentive Context Model (AC-GCN) and Ordered Event Model (OE-GCN).,4 Attentive Deep Document Dater (AD3): Proposed Method,[0],[0]
+"These two models are described in Section 4.1 and Section 4.2, respectively.",4 Attentive Deep Document Dater (AD3): Proposed Method,[0],[0]
+"Recent success of attention-based deep learning models for classification (Yang et al., 2016b), question answering (Yang et al., 2016a), and machine translation (Bahdanau et al., 2014) have motivated us to use attention during document dating.",4.1 Attentive Context Model (AC-GCN),[0],[0]
+We extend the syntactic embedding model of NeuralDater (Section 3.2.2) by incorporating an attentive pooling layer.,4.1 Attentive Context Model (AC-GCN),[0],[0]
+We call the resulting model ACGCN.,4.1 Attentive Context Model (AC-GCN),[0],[0]
+"This model (right side in Figure 1) has two major components.
+",4.1 Attentive Context Model (AC-GCN),[0],[0]
+"• Context Embedding and Syntactic Embedding: Following NeuralDater, we used Bi-LSTM and S-GCN to capture context and long-range syntactic dependencies in the document (Please refer to Section 3.2.1, Section 3.2.2 for brief description).",4.1 Attentive Context Model (AC-GCN),[0],[0]
+"The syntactic embedding, Hsyn ∈ Rn×ksyn is then fed to an Attention Network for further processing.",4.1 Attentive Context Model (AC-GCN),[0],[0]
+"Note that, ksyn is the dimension of the output of Syntactic-GCN and n is the number of tokens in the document.
+",4.1 Attentive Context Model (AC-GCN),[0],[0]
+• Attentive Embedding:,4.1 Attentive Context Model (AC-GCN),[0],[0]
+"In this layer, we
+learn the representation for the whole document through word level attention network.",4.1 Attentive Context Model (AC-GCN),[0],[0]
+"We learn a context vector, us ∈ Rs with respect to which we calculate attention for each token.",4.1 Attentive Context Model (AC-GCN),[0],[0]
+"Finally, we aggregate the token features with respect to their attention weights in order to represent the document.",4.1 Attentive Context Model (AC-GCN),[0],[0]
+"More formally, let hsynt ∈ Rksyn be the syntactic representation of the tth token in the document.",4.1 Attentive Context Model (AC-GCN),[0],[0]
+We take non-linear projection of it in Rs with Ws ∈ Rs×ksyn .,4.1 Attentive Context Model (AC-GCN),[0],[0]
+"Attention weight αt for tth token is calculated with respect to the context vector uTt as follows.
+",4.1 Attentive Context Model (AC-GCN),[0],[0]
+"ut = tanh(Wsh syn t ),
+αt =",4.1 Attentive Context Model (AC-GCN),[0],[0]
+"exp(uTt us)∑ t exp(u T t us) .
+",4.1 Attentive Context Model (AC-GCN),[0],[0]
+"Finally, the document representation for the AC-GCN is computed as shown below.
+dAC−GCN = ∑ t αth syn t
+",4.1 Attentive Context Model (AC-GCN),[0],[0]
+"This representation is fed to a softmax layer for the final classification.
+",4.1 Attentive Context Model (AC-GCN),[0],[0]
+"The final probability distribution over years predicted by the AC-GCN is given below.
+PAC−GCN(y|D) =",4.1 Attentive Context Model (AC-GCN),[0],[0]
+Softmax(W · dAC−GCN + b).,4.1 Attentive Context Model (AC-GCN),[0],[0]
+The OE-GCN model is shown on the left side of Figure 1.,4.2 Ordered Event Model (OE-GCN),[0],[0]
+"Just like in AC-GCN, context and syntactic embedding is also part of OE-GCN.",4.2 Ordered Event Model (OE-GCN),[0],[0]
+"The syntactic embedding is fed to the Attentive Graph Convolution Network (AT-GCN) where the graph is obtained from the time-event ordering algorithm CATENA (Mirza and Tonelli, 2016).",4.2 Ordered Event Model (OE-GCN),[0],[0]
+We describe these components in detail below.,4.2 Ordered Event Model (OE-GCN),[0],[0]
+"We use the same process used in NeuralDater (Vashishth et al., 2018) for procuring the Temporal Graph from the document.",4.2.1 Temporal Graph,[0],[0]
+"CATENA (Mirza and Tonelli, 2016) generates 9 different temporal links between events and time expressions present in the document.",4.2.1 Temporal Graph,[0],[0]
+"Following Vashishth et al. (2018), we choose 5 most frequent ones - AFTER, BEFORE, SIMULTANEOUS, INCLUDES, and IS INCLUDED – as labels.",4.2.1 Temporal Graph,[0],[0]
+"The temporal graph
+is constructed from the partial ordering between event verbs and time expressions.
+",4.2.1 Temporal Graph,[0],[0]
+Let ET be the edge list of the Temporal Graph.,4.2.1 Temporal Graph,[0],[0]
+"Similar to (Marcheggiani and Titov, 2017; Vashishth et al., 2018), we also add reverse edges for each of the existing edge and self loops for passing current node information as explained in Section 3.1.",4.2.1 Temporal Graph,[0],[0]
+"The new edge list E ′T is shown below.
+",4.2.1 Temporal Graph,[0],[0]
+"E ′T = ET ∪ {(j, i, l(i, j)−1)",4.2.1 Temporal Graph,[0],[0]
+"| (i, j, l(i, j)) ∈",4.2.1 Temporal Graph,[0],[0]
+"ET} ∪ {(i, i, self)",4.2.1 Temporal Graph,[0],[0]
+"| i ∈ V)}.
+",4.2.1 Temporal Graph,[0],[0]
+"The reverse edges are added with reverse labels like AFTER−1, BEFORE−1 etc .",4.2.1 Temporal Graph,[0],[0]
+"Finally, we get 10 labels for our temporal graph and we denote the set of edge labels by L.",4.2.1 Temporal Graph,[0],[0]
+"Since the temporal graph is automatically generated, it is likely to have incorrect edges.",4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+"Ideally, we would like to minimize the influence of such noisy edges while computing temporal embedding.",4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+"In order to suppress the noisy edges in the Temporal Graph and detect important edges for reasoning, we use attentive graph convolution (Hamilton et al., 2017) over the Event-Time graph.",4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+The attention mechanism learns the aggregation function jointly during training.,4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+"Here, the main objective is to calculate the attention over the neighbouring nodes with respect to the current node for a given label.",4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+Then the embedding of the current node is updated by mixing neighbouring node embedding according to their attention scores.,4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+"In this respect, we propose a label-specific attentive graph convolution over directed graphs.
+",4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+"Let us consider an edge in the temporal graph from node i to node j with type l, where l ∈ L and L is the label set.",4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+The label set L can be divided broadly into two coarse labels as done in Section 3.2.2.,4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+The attention weights are specific to only these two type of edges to reduce parameter and prevent overfitting.,4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+"For illustration, if there exists an edge from node i to j then the edge types will be,
+• L(i, j) =→ if (i, j, l(i, j)) ∈ E ′T , i.e., if the edge is an original event-time edge.
+",4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+"• L(i, j) =← if (i, j, l(i, j)−1) ∈ E ′T , i.e., if the edge is added later.
+",4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+"First, we take a linear projection (W attenL(i,j) ∈ RF×ksyn) of both the nodes in RF in order to map
+both of them in the same direction-specific space.",4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+"The concatenated vector [W attenL(i,j) × hi;W atten L(i,j) × hj ], signifies the importance of the node j w.r.t.",4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+"node i. A non linear transformation of this concatenation can be treated as the importance feature vector between i and j.
+eij = tanh[W atten L(i,j) × hi;W atten L(i,j) × hj ].
+",4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+"Now, we compute the attention weight of node j for node i with respect to a direction-specific context vector aL(i,",4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+"j) ∈ R2F , as follows.
+",4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+"α l(i,j) ij =
+exp ( aTL(i,j)eij ) ∑
+k∈N l(i,·)i
+exp ( aTL(i,j)eik ) ,
+where, αl(i,j)ij = 0",4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+"if node i and j is not connected through label l. N l(i,·) denotes the subset of the neighbourhood of node i with label l only.",4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+"Please note that, although the linear transform weight (W attenL(i,j) ∈ R
+F×ksyn) is specific to the coarse labels L, but for each finer label l ∈ L we get these convex weights of attentions.",4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+"Figure 2 illustrates the above description w.r.t. edge type BEFORE.
+",4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+"Finally, the feature aggregation is done according to the attention weights.",4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+"Prior to that, another label specific linear transformation is taken to perform the convolution operation.",4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+"Then, the updated feature for node i is calculated as follows.",4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+"hk+1i = f (∑ l∈L ∑
+j∈N l(i,·)i α l(i,j) ij
+( Wl(i,j)hj + bl(i,j) )) .
+",4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+"where, αii = 1, N l(i,·) denotes the subset of the neighbourhood of node i with label l only.",4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+"Note that, αl(i,j)ij = 0",4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+"when j /∈ N l(i,·)",4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+.,4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+"To illustrate formally, from Figure 2, we see that weight α1 and α2 is calculated specific to label type BEFORE and the neighbours which are connected through BEFORE is being multiplied with Wbefore prior to aggregation in the ReLU block.
+",4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+"Now, after applying attentive graph convolution network, we only consider the representation of Document Creation Time (DCT), hDCT , as the document representation itself.",4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+hDCT is now passed through a fully connected layer prior to softmax.,4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+"Prediction of the OE-GCN for the document D will be given as
+POE−GCN(y|D) =",4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+Softmax(W · dDCT + b).,4.2.2 Attentive Graph Convolution (AT-GCN),[0],[0]
+"In this section, we propose an unified model by mixing both AC-GCN and OE-GCN.",4.3 AD3: Attentive Deep Document Dater,[0],[0]
+"Even on validation data, we see that performance of both the models differ to a large extent.",4.3 AD3: Attentive Deep Document Dater,[0],[0]
+This significant difference (McNemar test p < 0.000001) motivated the unification.,4.3 AD3: Attentive Deep Document Dater,[0],[0]
+"We take convex combination of the output probabilities of the two models
+as shown below.
+Pjoint(y|D) = λPAC−GCN(y|D)",4.3 AD3: Attentive Deep Document Dater,[0],[0]
+"+ (1− λ)POE−GCN(y|D).
+",4.3 AD3: Attentive Deep Document Dater,[0],[0]
+The combination hyper-parameter λ is tuned on the validation data.,4.3 AD3: Attentive Deep Document Dater,[0],[0]
+"We obtain the value of λ to be 0.52 (Figure 3) and 0.54 for APW and NYT datasets, respectively.",4.3 AD3: Attentive Deep Document Dater,[0],[0]
+"This depicts that the two models are capturing significantly different aspects of documents, resulting in a substantial improvement in performance when combined.",4.3 AD3: Attentive Deep Document Dater,[0],[0]
+Dataset:,5 Experimental Setup,[0],[0]
+"Experiments are carried out on the Associated Press Worldstream (APW) and New York Times (NYT) sections of the Gigaword corpus (Parker et al., 2011).",5 Experimental Setup,[0],[0]
+We have used the same 8:1:1 split as Vashishth et al. (2018) for all the models.,5 Experimental Setup,[0],[0]
+"For quantitative details please refer to Table 1.
+",5 Experimental Setup,[0],[0]
+Evaluation Criteria:,5 Experimental Setup,[0],[0]
+"In accordance with prior work (Chambers, 2012; Kotsakos et al., 2014; Vashishth et al., 2018)",5 Experimental Setup,[0],[0]
+the final task is to predict the publication year of the document.,5 Experimental Setup,[0],[0]
+"We give a brief description of the baselines below.
+",5 Experimental Setup,[0],[0]
+"Baseline Methods:
+• MaxEnt-Joint (Chambers, 2012):",5 Experimental Setup,[0],[0]
+"This method engineers several hand-crafted temporally influenced features to classify the document using MaxEnt Classifier.
+• BurstySimDater (Kotsakos et al., 2014):",5 Experimental Setup,[0],[0]
+"This is a purely statistical method which uses lexical similarity and term burstiness (Lappas et al., 2009) for dating documents in arbitrary length time frame.",5 Experimental Setup,[0],[0]
+"For our experiments, we used a time frame length of 1 year.
+",5 Experimental Setup,[0],[0]
+"• NeuralDater (Vashishth et al., 2018):",5 Experimental Setup,[0],[0]
+This is the first deep neural network based approach for the document dating task.,5 Experimental Setup,[0],[0]
+"Details are provided in Section 3.2.
+",5 Experimental Setup,[0],[0]
+"Israel's consumer price index increased by 1.2 percent  in December, bringing the overall inflation rate for 1995 to 8.1 percent, well within the government's target rate for the year, officials said Friday.",5 Experimental Setup,[0],[0]
+"Israel radio said that it was the lowest annual inflation rate in twenty years.
+",5 Experimental Setup,[0],[0]
+Figure 5: Visualization of the attention of AC-GCN.,5 Experimental Setup,[0],[0]
+ACGCN captures the intuitive tokens as seen in the figure.,5 Experimental Setup,[0],[0]
+Darker shade implies higher attention.,5 Experimental Setup,[0],[0]
+"The correct DCT is 1996.
+",5 Experimental Setup,[0],[0]
+Hyperparameters: We use 300-dimensional GloVe embeddings and 128-dimensional hidden state for both GCNs and BiLSTM with 0.8 dropout.,5 Experimental Setup,[0],[0]
+"We use Adam (Kingma and Ba, 2014) with 0.001 learning rate for training.",5 Experimental Setup,[0],[0]
+For OE-GCN we use 2-layers of AT-GCN.,5 Experimental Setup,[0],[0]
+1-layer of S-GCN is used for both the models.,5 Experimental Setup,[0],[0]
+"In this section, we compare the effectiveness of our method with that of prior work.",6.1 Performance Analysis,[0],[0]
+"The deep network based NeuralDater model in (Vashishth et al., 2018) outperforms previous feature engi-
+neered (Chambers, 2012) and statistical methods (Kotsakos et al., 2014) by a large margin.",6.1 Performance Analysis,[0],[0]
+We observe a similar trend in our case.,6.1 Performance Analysis,[0],[0]
+"Compared to the state-of-the-art model NeuralDater, we gain, on an average, a 3.7% boost in accuracy on both the datasets (Table 2).
+",6.1 Performance Analysis,[0],[0]
+"Among individual models, OE-GCN performs at par with NeuralDater, while AC-GCN outperforms it.",6.1 Performance Analysis,[0],[0]
+The empirical results imply that ACGCN by itself is effective for this task.,6.1 Performance Analysis,[0],[0]
+The relatively worse performance of OE-GCN can be attributed to the fact that it only focuses on the Event-Time information and leaves out most of the contextual information.,6.1 Performance Analysis,[0],[0]
+"However, it captures various different (p < 0.000001, McNemar’s test, 2-tailed) aspects of the document for classification, which motivated us to propose an ensemble of the two models.",6.1 Performance Analysis,[0],[0]
+This explains the significant boost in performance of AD3 over NeuralDater as well as the individual models.,6.1 Performance Analysis,[0],[0]
+"It is worth mentioning that although AC-GCN and OE-GCN do not provide significant boosts in accuracy, their predictions have considerably lower mean-absolute-
+deviation as shown in Figure 4.",6.1 Performance Analysis,[0],[0]
+We concatenated the DCT embedding provided by OE-GCN with the document embedding provided by AC-GCN and trained in an end to end joint fashion like NeuralDater.,6.1 Performance Analysis,[0],[0]
+"We see that even with a similar training method, the Attentive NeuralDater model on an average, performs 1.6% better in terms of accuracy, once again proving the efficacy of attention based models over normal models.",6.1 Performance Analysis,[0],[0]
+"Attentive Graph Convolution (Section 4.2.2) proves to be effective for OE-GCN, giving a 2% accuracy improvement over non-attentive T-GCN of NeuralDater (Table 3).",6.2 Effectiveness of Attention,[0],[0]
+Similarly the efficacy of word level attention is also prominent from Table 3.,6.2 Effectiveness of Attention,[0],[0]
+We have also analyzed our models by visualizing attentions over words and attention over graph nodes.,6.2 Effectiveness of Attention,[0],[0]
+"Figure 5 shows that AC-GCN focuses on temporally informative words such as ”said” (for tense) or time mentions like “1995”, alongside important contextual words like “inflation”, “Israel” etc.",6.2 Effectiveness of Attention,[0],[0]
+"For OE-GCN, from Figure 6 we observe that “DCT” and time-mention ‘1995’ grabs the highest attention.",6.2 Effectiveness of Attention,[0],[0]
+"Attention between “DCT” and other event verbs indicating past tense are quite prominent, which helps the model to infer 1996 (which is correct) as the most likely time-stamp of the document.",6.2 Effectiveness of Attention,[0],[0]
+These analyses provide us with a good justification for the performance of our attentive models.,6.2 Effectiveness of Attention,[0],[0]
+"Apart from empirical improvements over previous models, we also perform a qualitative analysis of the individual models.",7 Discussion,[0],[0]
+"Figure 7 shows that the performance of AC-GCN improves with the length of documents, thus indicating that richer context leads to better model prediction.",7 Discussion,[0],[0]
+"Figure 8 shows how the performance of OE-GCN improves with the number of event-time mentions in the document, thus further reinforcing our claim that more temporal information improves model performance.
+",7 Discussion,[0],[0]
+Vashishth et al. (2018) reported that their model got confused by the presence of multiple misleading time mentions.,7 Discussion,[0],[0]
+"AD3 overcomes this limitation using attentive graph convolution, which successfully filters out noisy time mentions as is evident
+from Figure 8.",7 Discussion,[0],[0]
+"We propose AD3, an ensemble model which exploits both syntactic and temporal information in a document explicitly to predict its creation time (DCT).",8 Conclusion,[0],[0]
+"To the best of our knowledge, this is the first application of attention based deep models for dating documents.",8 Conclusion,[0],[0]
+Our experimental results demonstrate the effectiveness of our model over all previous models.,8 Conclusion,[0],[0]
+We also visualize the attention weights to show that the model is able to choose what is important for the task and filter out noise inherent in language.,8 Conclusion,[0],[0]
+"As part of future work, we would like to incorporate external knowledge as a side information for improved time-stamping of documents.",8 Conclusion,[0],[0]
+"This work is supported by the Ministry of Human Resource Development (MHRD), Government of India.",Acknowledgments,[0],[0]
+"Knowledge of the creation date of documents facilitates several tasks such as summarization, event extraction, temporally focused information extraction etc.",abstractText,[0],[0]
+"Unfortunately, for most of the documents on the Web, the time-stamp metadata is either missing or can’t be trusted.",abstractText,[0],[0]
+"Thus, predicting creation time from document content itself is an important task.",abstractText,[0],[0]
+"In this paper, we propose Attentive Deep Document Dater (AD3), an attention-based neural document dating system which utilizes both context and temporal information in documents in a flexible and principled manner.",abstractText,[0],[0]
+We perform extensive experimentation on multiple real-world datasets to demonstrate the effectiveness of AD3 over neural and non-neural baselines.,abstractText,[0],[0]
+AD3: Attentive Deep Document Dater,title,[0],[0]
+"Kernel representations provide an attractive approach to representation learning, by facilitating simple linear prediction algorithms and providing an interpretable representation.",1. Introduction,[0],[0]
+"A kernel representation consists of mapping an input observation into similarity features, with similarities to a set of prototypes.",1. Introduction,[0],[0]
+"Consequently, for an input observation, a prediction can be attributed to those prototypes that are most similar to the observation.",1. Introduction,[0],[0]
+"Further, the transformation to similarity features is non-linear, enabling nonlinear function approximation while using linear learning algorithms that simply optimize for weights on these transformed features.",1. Introduction,[0],[0]
+"Kernel representations are universal func-
+1Department of Computer Science, Indiana University, Bloomington.",1. Introduction,[0],[0]
+"Correspondence to: Martha White <martha@indiana.edu>.
+",1. Introduction,[0],[0]
+"Proceedings of the 34 th International Conference on Machine Learning, Sydney, Australia, PMLR 70, 2017.",1. Introduction,[0],[0]
+"Copyright 2017 by the author(s).
+",1. Introduction,[0],[0]
+"tion approximators1 and the flexibility in choosing the kernel (similarity function) has enabled impressive prediction performance for a range of settings, including speech (Huang et al., 2014), computer vision (Mairal et al., 2014), and object recognition (Lu et al., 2014).
+",1. Introduction,[0],[0]
+"In a continual learning setting, such as in online learning or reinforcement learning, there is a constant, effectively unending stream of data, necessitating some care when using kernel representations.",1. Introduction,[1.0],"['In a continual learning setting, such as in online learning or reinforcement learning, there is a constant, effectively unending stream of data, necessitating some care when using kernel representations.']"
+The issue arises from the choice of prototypes.,1. Introduction,[0],[0]
+"Before the advent of huge increases in dataset sizes, a common choice was to use all of the training data as prototypes.",1. Introduction,[0],[0]
+"This choice comes from the representer theorem, which states that for a broad class of functions, the empirical risk minimizer is a linear weighting of similarity features, to a set of prototypes that consists of the training data.",1. Introduction,[1.0],"['This choice comes from the representer theorem, which states that for a broad class of functions, the empirical risk minimizer is a linear weighting of similarity features, to a set of prototypes that consists of the training data.']"
+"For continual learning, however, the update should be independent of the the total number of samples— which is not clearly defined for continual learning.",1. Introduction,[0],[0]
+"Conversely, we want to permit selection of a sufficiently large number of prototypes, to maintain sufficient modeling power.",1. Introduction,[1.0],"['Conversely, we want to permit selection of a sufficiently large number of prototypes, to maintain sufficient modeling power.']"
+"For efficient, continual updating, therefore, we require per-step prototype selection strategies that are approximately linear in the number of prototypes.
+",1. Introduction,[0],[0]
+"Currently, most algorithms do not satisfy the criteria for a continual learning setting.",1. Introduction,[1.0],"['Currently, most algorithms do not satisfy the criteria for a continual learning setting.']"
+"Incremental selection of prototypes has been tackled in a wide range of areas, due to the fundamental nature of this problem.",1. Introduction,[0],[0]
+"Within the streaming community, approaches typically assume that the batch of data, though large, is accessible and fixed.",1. Introduction,[1.0],"['Within the streaming community, approaches typically assume that the batch of data, though large, is accessible and fixed.']"
+"The most related of these areas2 include active set selection for Gaussian process regression (Seeger et al., 2003), with streaming submodular maximization approaches (Krause et al., 2008b;a; Badanidiyuru et al., 2014); incremental Nystrom methods within kernel recursive least-squares (KRLS)
+1Radial basis function networks are an example of a kernel representation, that have been shown to be universal function approximators (Park & Sandberg, 1991).",1. Introduction,[0],[0]
+"Further, the representer theorem further characterizes the approximation capabilities under empirical risk minimization for a broad class of functions.
+2Facility location, k-medians and k-centers are three problems that focus on selecting representative instances from a set (c.f. (Guha et al., 2003)).",1. Introduction,[0],[0]
+"The criteria and algorithms are not designed with the intention to use the instances for prediction and so we do not consider them further here.
+",1. Introduction,[0],[0]
+"(Rudi et al., 2015)3; and functional gradients that sample random bases which avoid storing prototypes but require storing n scalars, for n training samples (Dai et al., 2014).
+",1. Introduction,[0],[0]
+"Kernel representation algorithms designed specifically for the online setting, on the other hand, are typically too computationally expensive in terms of the number of prototypes.",1. Introduction,[0],[0]
+"Kernel least-mean squares (KLMS) algorithms use stochastic updates, maintaining the most recent prototypes and truncating coefficients on the oldest (Kivinen et al., 2010; Schraudolph et al., 2006; Cheng et al., 2007); though efficient given sufficient truncation, this truncation can introduce significant errors (Van Vaerenbergh & Santamaria, 2013).",1. Introduction,[0],[0]
+"Random feature approximations (Rahimi & Recht, 2007) can be used online, but require a significant number of random features.",1. Introduction,[0],[0]
+"Gaussian process regression approaches have online variants (Csató & Opper, 2006; Cheng & Boots, 2016), however, they inherently require at least quadratic computation to update the variance parameters.",1. Introduction,[0],[0]
+"KRLS can be applied online, but has a threshold parameter that makes it difficult to control the number of prototypes and requires quadratic computation and space (Engel et al., 2004).",1. Introduction,[0],[0]
+"More efficient coherence heuristic have been proposed (Richard et al., 2009; Van Vaerenbergh et al., 2010; Chen et al., 2013; Van Vaerenbergh & Santamaria, 2013), but provide no approximation quality guarantees.
+",1. Introduction,[0],[0]
+"In this work, we provide a simple and efficient greedy algorithm for selecting prototypes for continual learning, by extending recent work in prototype selection with submodular maximization.",1. Introduction,[0],[0]
+"We introduce a generalized coherence criterion for selecting prototypes, which unifies two previously proposed criteria: the coherence criterion and the log determinant.",1. Introduction,[0],[0]
+"Because this criterion is (approximately) submodular, we pursue a generalization to streaming submodular maximization algorithms.",1. Introduction,[0],[0]
+"We avoid the need for multiple passes over the data—which is not possible in continual learning— by introducing the idea of coverage time, which reflects that areas of the observation space are repeatedly visited under sufficient mixing.",1. Introduction,[0],[0]
+"We prove that our online submodular maximization achieves an approximation-ratio of 1/2, with a small additional approximation introduced due to coverage time and from using an estimate of the submodular function.",1. Introduction,[0],[0]
+"We then provide a linear-time algorithm for approximating one instance of our submodular criterion, by exploiting the block-diagonal form of the kernel matrix.",1. Introduction,[0],[0]
+"We empirically demonstrate that this approximation closely matches the true value, despite using significantly less computation, and show effective prediction performance using the corresponding kernel representation.
+",1. Introduction,[0],[0]
+"3There is a large literature on fast Nystrom methods using related approaches, such as determinant point processes for sampling landmark points (Li et al., 2016).",1. Introduction,[0],[0]
+"The primary goal for these methods, however, is to approximate the full kernel matrix.",1. Introduction,[0],[0]
+"A kernel representation is a transformation of observations into similarity features, consisting of similarities to prototypes.",2. Using kernel representations,[0],[0]
+"A canonical example of such a representation is a radial basis function network, with radial basis kernels such as the Gaussian kernel; however, more generally any kernel similarity can be chosen.",2. Using kernel representations,[0],[0]
+"More formally, for observations x 2 X , the kernel representation consists of similarities to a set of prototypes S = {z1, . . .",2. Using kernel representations,[0.9930064563245562],"['More formally, for observations x 2 X , the kernel representation consists of similarities to a set of prototypes S = {z1, .']"
+", zb} ⇢",2. Using kernel representations,[0],[0]
+"X
+x!",2. Using kernel representations,[0],[0]
+"[k(x, z1), . . .",2. Using kernel representations,[0],[0]
+", k(x, zb)] 2 Rb.",2. Using kernel representations,[0],[0]
+for kernel k : X ⇥ X !,2. Using kernel representations,[0],[0]
+R.,2. Using kernel representations,[0],[0]
+"The observations need not be numerical; as long as a similarity k can be defined between two observations, kernel representations can be used and conveniently provide a numeric feature vector in Rb.",2. Using kernel representations,[0],[0]
+"We use the term prototype, instead of center, to emphasize that the chosen observations are representative instances, that are sub-selected from observed data.
+",2. Using kernel representations,[0],[0]
+"A fundamental result for kernel representations is the representer theorem, with significant recent generalizations (Argyriou & Dinuzzo, 2014), which states that for a broad class of function spaces H, the empirical risk minimizer f 2 H on a training set {(x
+i , y i }n i=1 has the simple form
+f(·) = nX
+i=1
+↵",2. Using kernel representations,[0],[0]
+"i k(·,x i ).
+",2. Using kernel representations,[0],[0]
+"This result makes use of a key property: the kernel function can be expressed as an inner product, k(x
+i ,x j ) =
+h (x i ), (x j )",2. Using kernel representations,[0],[0]
+i for some implicit expansion .,2. Using kernel representations,[0],[0]
+"The function f can be written f = P n
+i=1",2. Using kernel representations,[0],[0]
+"↵i (xj), with
+f(x) = h (x), nX
+i=1
+↵ i (x j
+)",2. Using kernel representations,[0],[0]
+"i = nX
+i=1
+↵",2. Using kernel representations,[0],[0]
+"i h (x), (x j )i.
+",2. Using kernel representations,[0],[0]
+"It is typically impractical to use all x i as prototypes, and a subset needs to be chosen.",2. Using kernel representations,[0],[0]
+"Recently, there has been several papers (Krause et al., 2008b;a; Krause & Gomes, 2010; Badanidiyuru et al., 2014) showing that prototypes can be effectively selected in the streaming setting using greedy submodular maximization on the log-determinant of the kernel matrix, K
+S 2 Rb⇥b where (K S ) ij =",2. Using kernel representations,[0],[0]
+k(z,2. Using kernel representations,[0],[0]
+"i , z j
+).",2. Using kernel representations,[0],[0]
+"Given some ground set ⌦ and its powerset P(⌦), submodular functions g : P(⌦) !",2. Using kernel representations,[0],[0]
+"R are set functions, with a diminishing returns property: the addition of a point to a given set increases the value less or equal than adding a point to a subset of that set.",2. Using kernel representations,[0],[0]
+"For prototype selection, the ground set considered are sets of all observations X , so S ⇢ ⌦ = X .",2. Using kernel representations,[0],[0]
+"The log-determinant of the resulting kernel matrix, log detK
+S , is a submodular function of S. Though maximizing submodular functions is NP-hard, greedy approximation algorithms have been shown to obtain reasonable approximation ratios, even for the streaming setting
+(Krause & Gomes, 2010; Badanidiyuru et al., 2014), and the resulting algorithms are elegantly simple and theoretically sound.
+",2. Using kernel representations,[0.9999999746537401],"['The log-determinant of the resulting kernel matrix, log detK S , is a submodular function of S. Though maximizing submodular functions is NP-hard, greedy approximation algorithms have been shown to obtain reasonable approximation ratios, even for the streaming setting (Krause & Gomes, 2010; Badanidiyuru et al., 2014), and the resulting algorithms are elegantly simple and theoretically sound.']"
+"In the following sections, we derive a novel criterion for prototype selection, that includes the log-determinant as a special case.",2. Using kernel representations,[0],[0]
+"Then, we provide an efficient prototype selection algorithm for the continual learning setting, using submodular maximization.",2. Using kernel representations,[0],[0]
+Many prototype selection strategies are derived based on diversity measures.,3. Selecting kernel prototypes,[0],[0]
+"The coherence criterion (Engel et al., 2004) approximates how effectively the set of prototypes spans the set of given observations.",3. Selecting kernel prototypes,[0],[0]
+"The log-determinant measures the spread of eigenvalues for the kernel matrix, and is related to information gain (Seeger, 2004).",3. Selecting kernel prototypes,[0],[0]
+"These selection criteria are designed for a finite set of observed points; here, we step back and reconsider a suitable objective for prototype selection for continual learning.
+",3. Selecting kernel prototypes,[0.9999999839132881],"['These selection criteria are designed for a finite set of observed points; here, we step back and reconsider a suitable objective for prototype selection for continual learning.']"
+Our goal is to select prototypes that minimize distance to the optimal function.,3. Selecting kernel prototypes,[1.0],['Our goal is to select prototypes that minimize distance to the optimal function.']
+"In this section, we begin from this objective and demonstrate that the coherence criterion and log-determinant are actually upper bounds on this objective, and special cases of a more general such upper bound.",3. Selecting kernel prototypes,[0],[0]
+"The analysis justifies that the log-determinant is a more suitable criteria for continual learning, which we then pursue in the remainder of this work.",3. Selecting kernel prototypes,[0],[0]
+"Let X = {x1, . . .",3.1. Criteria to select prototypes from a finite set,[0],[0]
+",xn} be a set of points, with corresponding labels y1, . . .",3.1. Criteria to select prototypes from a finite set,[0],[0]
+",yn.",3.1. Criteria to select prototypes from a finite set,[0],[0]
+"We will not assume that this is a batch of data, but could rather consist of all possible observations for a finite observation space.",3.1. Criteria to select prototypes from a finite set,[0],[0]
+"Ideally, we would learn S = {z1, . . .",3.1. Criteria to select prototypes from a finite set,[0],[0]
+", zb} ⇢ X and corresponding f S, (·) =",3.1. Criteria to select prototypes from a finite set,[0],[0]
+"Pb i=1 jk(·,xi)",3.1. Criteria to select prototypes from a finite set,[0],[0]
+"according to the loss
+min S⇢X min 2Rb kf f S, k2 (1)
+wherekf f S, k =
+nX
+i=1
+↵ i (x i
+) bX
+j=1
+j (z j )
+for the optimal f for the set of points X .",3.1. Criteria to select prototypes from a finite set,[0],[0]
+"Because we do not have f , we derive an upper bound on this value.",3.1. Criteria to select prototypes from a finite set,[0],[0]
+"Introducing dummy variables (i)
+j
+2 R such that j =
+P n
+i=1",3.1. Criteria to select prototypes from a finite set,[0],[0]
+"(i) j ,
+(1)  min S⇢X , 2Rb
+nX
+i=1
+↵",3.1. Criteria to select prototypes from a finite set,[0],[0]
+"i (x i
+) bX
+j=1
+(i) j",3.1. Criteria to select prototypes from a finite set,[0],[0]
+"(z j )
+2
+= min
+S⇢X
+nX
+i=1
+min
+(i) 1 ,..., (i) b
+↵",3.1. Criteria to select prototypes from a finite set,[0],[0]
+"i (x i
+) bX
+j=1
+(i) j",3.1. Criteria to select prototypes from a finite set,[0],[0]
+"(z j )
+2
+(2)
+",3.1. Criteria to select prototypes from a finite set,[0],[0]
+For k i . =,3.1. Criteria to select prototypes from a finite set,[0],[0]
+"[k(x i
+, z1), . . .",3.1. Criteria to select prototypes from a finite set,[0],[0]
+", k(xi, zb)], the interior minimization can be re-written as
+min
+(i)
+↵",3.1. Criteria to select prototypes from a finite set,[0],[0]
+"i (x i
+) bX
+j=1
+(i) j",3.1. Criteria to select prototypes from a finite set,[0],[0]
+"(z j )
+2
+= min
+(i) >",3.1. Criteria to select prototypes from a finite set,[0],[0]
+"K
+S
+2↵ i
+(i) >",3.1. Criteria to select prototypes from a finite set,[0],[0]
+"k
+i + ↵2",3.1. Criteria to select prototypes from a finite set,[0],[0]
+i k(x,3.1. Criteria to select prototypes from a finite set,[0],[0]
+"i ,x i )
+",3.1. Criteria to select prototypes from a finite set,[0],[0]
+"To provide more stable approximations, we regularize
+(2) min S⇢X
+nX
+i=1
+min
+(i)
+",3.1. Criteria to select prototypes from a finite set,[0],[0]
+↵,3.1. Criteria to select prototypes from a finite set,[0],[0]
+"i (x i
+) bX
+j=1
+(i) j",3.1. Criteria to select prototypes from a finite set,[0],[0]
+"(z j )
+2
++ k",3.1. Criteria to select prototypes from a finite set,[0],[0]
+"(i)k22
+= min
+S⇢X
+nX
+i=1
+min (i) (i)
+>",3.1. Criteria to select prototypes from a finite set,[0],[0]
+"(K
+S + I) 2↵ i
+(i)",3.1. Criteria to select prototypes from a finite set,[0],[0]
+>,3.1. Criteria to select prototypes from a finite set,[0],[0]
+"k
+i
++ ↵2",3.1. Criteria to select prototypes from a finite set,[0],[0]
+i,3.1. Criteria to select prototypes from a finite set,[0],[0]
+k(x,3.1. Criteria to select prototypes from a finite set,[0],[0]
+"i ,x i ).
+",3.1. Criteria to select prototypes from a finite set,[0],[0]
+"For = 0, the inequality is equality.",3.1. Criteria to select prototypes from a finite set,[0],[0]
+"Otherwise adding regularization theoretically increases the upper bound, though in practice will be key for stability.
+",3.1. Criteria to select prototypes from a finite set,[0],[0]
+Solving gives (i) =,3.1. Criteria to select prototypes from a finite set,[0],[0]
+↵,3.1. Criteria to select prototypes from a finite set,[0],[0]
+"i (K S + I) 1k i , and so
+(i) >",3.1. Criteria to select prototypes from a finite set,[0],[0]
+"(K
+S + I) 2↵ i
+(i)",3.1. Criteria to select prototypes from a finite set,[0],[0]
+>,3.1. Criteria to select prototypes from a finite set,[0],[0]
+"k
+i + ↵2",3.1. Criteria to select prototypes from a finite set,[0],[0]
+i k(x,3.1. Criteria to select prototypes from a finite set,[0],[0]
+"i ,x i )
+= ↵2 i k >",3.1. Criteria to select prototypes from a finite set,[0],[0]
+i (K S + I) 1k i 2↵2,3.1. Criteria to select prototypes from a finite set,[0],[0]
+i k >,3.1. Criteria to select prototypes from a finite set,[0],[0]
+i (K S + I) 1k,3.1. Criteria to select prototypes from a finite set,[0],[0]
+"i
++ ↵2 i k(x i ,x i )
+= ↵2 i k(x i ,x i ) ↵2 i k >",3.1. Criteria to select prototypes from a finite set,[0],[0]
+i (K S + I),3.1. Criteria to select prototypes from a finite set,[0],[0]
+1k,3.1. Criteria to select prototypes from a finite set,[0],[0]
+"i
+We can now simplify the above upper bound
+(2)  ",3.1. Criteria to select prototypes from a finite set,[0],[0]
+"min S⇢X
+nX
+i=1
+↵2 i k(x",3.1. Criteria to select prototypes from a finite set,[0],[0]
+"i ,x i ) ↵2 i k >",3.1. Criteria to select prototypes from a finite set,[0],[0]
+"i (K S + I) 1k i
+and obtain equivalent optimization
+argmax
+S⇢X
+nX
+i=1
+↵2",3.1. Criteria to select prototypes from a finite set,[0],[0]
+i k >,3.1. Criteria to select prototypes from a finite set,[0],[0]
+"i (K S + I) 1k i .
+",3.1. Criteria to select prototypes from a finite set,[0],[0]
+"This criteria closely resembles the coherence criterion (Engel et al., 2004).",3.1. Criteria to select prototypes from a finite set,[0],[0]
+"The key idea for the coherence criterion is to add a prototype x
+i , to kernel matrix K S if 1 k
+i
+K 1 S k",3.1. Criteria to select prototypes from a finite set,[0],[0]
+i  ⌫ for some threshold parameter ⌫.,3.1. Criteria to select prototypes from a finite set,[0],[0]
+"The coherence criterion,
+argmax
+S⇢X
+nX
+i=1
+k >",3.1. Criteria to select prototypes from a finite set,[0],[0]
+i (K S + I) 1k,3.1. Criteria to select prototypes from a finite set,[0],[0]
+"i
+therefore, can be seen as an upper bound on the distance the optimal function, with further relaxation because P n
+i=1",3.1. Criteria to select prototypes from a finite set,[0],[0]
+↵ 2,3.1. Criteria to select prototypes from a finite set,[0],[0]
+i k >,3.1. Criteria to select prototypes from a finite set,[0],[0]
+i (K S + I),3.1. Criteria to select prototypes from a finite set,[0],[0]
+"1k i  max{↵21, . . .",3.1. Criteria to select prototypes from a finite set,[0],[0]
+",↵2n} P n i=1",3.1. Criteria to select prototypes from a finite set,[0],[0]
+k >,3.1. Criteria to select prototypes from a finite set,[0],[0]
+"i (K S + I) 1k i .
+",3.1. Criteria to select prototypes from a finite set,[0],[0]
+The relationship to another popular criterion—the log determinant— arises when we consider the extension to an infinite state space.,3.1. Criteria to select prototypes from a finite set,[0],[0]
+The criterion above can be extended to an uncountably infinite observation space X .,3.2. Criteria to select prototypes from an infinite set,[0],[0]
+"For this setting, the optimal f = R X !",3.2. Criteria to select prototypes from an infinite set,[0],[0]
+"(x) (x)dx, for a function !",3.2. Criteria to select prototypes from an infinite set,[0],[0]
+": R
+d !",3.2. Criteria to select prototypes from an infinite set,[0],[0]
+"R. Let k(x, S) =",3.2. Criteria to select prototypes from an infinite set,[0],[0]
+"[k(x, z1), . . .",3.2. Criteria to select prototypes from an infinite set,[0],[0]
+", k(x, zb)]",3.2. Criteria to select prototypes from an infinite set,[0],[0]
+"Then, using a similar analysis to above,
+min S⇢X min 2Rb kf f S, k2  min S⇢X
+Z
+X !(x)2k(x,x)dx
+Z
+X !(x)2k(x, S)>(K S + I) 1k(x, S)dx.
+and so the resulting goal is to optimize
+argmax
+S⇢X
+Z
+X !(x)2k(x, S)>(K S + I) 1k(x, S)dx.",3.2. Criteria to select prototypes from an infinite set,[0],[0]
+"(3)
+This provides a nice relation to the log determinant criterion, with normalized kernels4: k(z, z) = 1.",3.2. Criteria to select prototypes from an infinite set,[0],[0]
+"If k(x, S) maps to a unique kernel vector k 2",3.2. Criteria to select prototypes from an infinite set,[0],[0]
+"[0, 1]b, and the function k(·, S) also maps onto [0, 1]b, then for !(x) = 1,
+Z
+X !(x)2k(x, S)>(K S + I) 1k(x, S)dx
+= Z k",3.2. Criteria to select prototypes from an infinite set,[0],[0]
+>,3.2. Criteria to select prototypes from an infinite set,[0],[0]
+"(K
+S
++ I)",3.2. Criteria to select prototypes from an infinite set,[0],[0]
+"1k dk
+= det(K
+S
++ I).
+",3.2. Criteria to select prototypes from an infinite set,[0],[0]
+"In general, it is unlikely to have a bijection k(·, S).",3.2. Criteria to select prototypes from an infinite set,[0],[0]
+"More generally, we can obtain the above criterion by setting the coefficient function !",3.2. Criteria to select prototypes from an infinite set,[0],[0]
+"so that each possible kernel vector k 2 Rb has uniform weighting, or implicitly so the integration is uniformly over k 2",3.2. Criteria to select prototypes from an infinite set,[0],[0]
+"[0, 1]b.",3.2. Criteria to select prototypes from an infinite set,[0],[0]
+"Because log is monotonically increasing, maximizing det(K
+S + I) with a fixed b is equivalent to maximizing log det(K
+S
++ I).
+",3.2. Criteria to select prototypes from an infinite set,[0],[0]
+"This derivation of an upper bound on the distance to the optimal function provides new insights into the properties of the log-determinant, clarifies the connection between the coherence criterion and the log-determinant, and suggesting potential routes for providing criteria based on the prediction utility of a prototype.",3.2. Criteria to select prototypes from an infinite set,[0],[0]
+The choice of weighting !,3.2. Criteria to select prototypes from an infinite set,[0],[0]
+to obtain the log-determinant removes all information about the utility of a prototype and essentially assumes a uniform distribution over the kernel vectors k.,3.2. Criteria to select prototypes from an infinite set,[0],[0]
+"For more general coefficient functions !, let µ(S) =",3.2. Criteria to select prototypes from an infinite set,[0],[0]
+"E[k(X, S)] and ⌃(S) = Cov(k(X, S)), where the expectations are according to density !",3.2. Criteria to select prototypes from an infinite set,[0],[0]
+2/c for normalizer c = R X !(x)dx.,3.2. Criteria to select prototypes from an infinite set,[0],[0]
+"By the quadratic expectations properties (Brookes, 2004)
+(3) = argmax S⇢X tr((K S + I) 1⌃(S))
++ µ(S)>(K S + I) 1µ(S).",3.2. Criteria to select prototypes from an infinite set,[0],[0]
+"(4)
+4A kernel can be normalized by k(x, z)/ p k(z, z)k(x,x).
+",3.2. Criteria to select prototypes from an infinite set,[0],[0]
+This more general form in (4) enables prototypes to be more highly weighted based on the magnitude of values in !.,3.2. Criteria to select prototypes from an infinite set,[0],[0]
+"We focus in this work first on online prototype selection for the popular log-determinant, and leave further investigation into this more general criteria to future work.",3.2. Criteria to select prototypes from an infinite set,[0],[0]
+"We nonetheless introduce the form here to better motivate the log-determinant, as well as demonstrate that the above analysis is amenable to a host of potential directions for more directed prototype selection.",3.2. Criteria to select prototypes from an infinite set,[0],[0]
+"In this section, we introduce an OnlineGreedy algorithm for submodular maximization, to enable optimization of the prototype selection objective from an online stream of data.",4. Online submodular maximization,[0],[0]
+"Current submodular maximization algorithms are designed for the streaming setting, which deals with incrementally processing large but fixed datasets.",4. Online submodular maximization,[0],[0]
+"Consequently, the objectives are specified for a finite batch of observations and the algorithms can do multiple passes over the dataset.",4. Online submodular maximization,[0],[0]
+"For the online setting, both of these conditions are restrictive.",4. Online submodular maximization,[0],[0]
+"We show that, with a minor modification to StreamGreedy (Krause & Gomes, 2010), we can obtain a comparable approximation guarantee that applies to the online setting.
+",4. Online submodular maximization,[0],[0]
+"We would like to note that there is one streaming algorithm, called Sieve Streaming, designed to only do one pass of the data and avoid too many calls to the submodular function (Badanidiyuru et al., 2014); however, it requires keeping parallel solutions, which introduces significant complexity and which we found prohibitively expensive.",4. Online submodular maximization,[1.0],"['We would like to note that there is one streaming algorithm, called Sieve Streaming, designed to only do one pass of the data and avoid too many calls to the submodular function (Badanidiyuru et al., 2014); however, it requires keeping parallel solutions, which introduces significant complexity and which we found prohibitively expensive.']"
+"In our experiments, we show it is significantly slower than our approach and found it typically maintained at least 500 parallel solutions.",4. Online submodular maximization,[0],[0]
+"For this reason, we opt to extend the simpler StreamGreedy algorithm, and focus on efficient estimates of the submodular function, since we will require more calls to this function than Sieve Streaming.
+",4. Online submodular maximization,[0],[0]
+"Our goal is to solve the submodular maximization problem
+max S⇢X :|S|b g(S) (5)
+where X is a general space of observations and g is a submodular function.",4. Online submodular maximization,[0],[0]
+"The key modification is to enable X to be a large, infinite or even uncountable space.",4. Online submodular maximization,[0],[0]
+"For such X , we will be unable to see all observations, let alone make multiple passes.",4. Online submodular maximization,[0],[0]
+"Instead, we will use a related notion to mixing time, where we see a cover of the space.
+",4. Online submodular maximization,[0],[0]
+The greedy algorithm consists of greedily adding in a new prototype if it is an improvement on a previous prototype.,4. Online submodular maximization,[0],[0]
+"The resulting greedy algorithm—given in Algorithm 1— is similar to StreamGreedy, and so we term it OnlineGreedy.",4. Online submodular maximization,[0],[0]
+"The algorithm queries the submodular function on each set, with a previous prototype removed and the new observation added.",4. Online submodular maximization,[0],[0]
+"To make this efficient, we will rely on us-
+Algorithm 1 OnlineGreedy Input: threshold parameter ✏
+t , where a prototype is only added if there is sufficient improvement S0 ;",4. Online submodular maximization,[0],[0]
+"for t = 1 : b do S
+t
+S t 1",4. Online submodular maximization,[0],[0]
+"[ {xt}
+while interacting, t = b+ 1, . .",4. Online submodular maximization,[0],[0]
+.,4. Online submodular maximization,[0],[0]
+"do z 0 = argmax
+z2St 1 ĝ(S t 1\{z}",4. Online submodular maximization,[0],[0]
+[ {xt}) S t S t 1\{z0} [ {xt} if ĝ(S t ) ĝ(S t 1) <,4. Online submodular maximization,[0],[0]
+"✏t then
+S t
+S t 1
+ing only an approximation to the submodular function g. We will provide a linear-time algorithm—in the number of prototypes— for querying replacement to all prototypes, as opposed to a naive solution which would be cubic in the number of prototypes.",4. Online submodular maximization,[0],[0]
+"This will enable us to use this simple greedy approach, rather than more complex streaming submodular maximization approaches that attempt to reduce the number of calls to the submodular function.
+",4. Online submodular maximization,[0],[0]
+"We bound approximation error, relative to the optimal solution.",4. Online submodular maximization,[0],[0]
+We extend an algorithm that uses multiple passes; our approach suggests more generally how algorithms from the streaming setting can be extended to an online setting.,4. Online submodular maximization,[1.0],['We extend an algorithm that uses multiple passes; our approach suggests more generally how algorithms from the streaming setting can be extended to an online setting.']
+"To focus the on this extension, we only consider submodular functions here; in Appendix B, we generalize the result to approximately submodular functions.",4. Online submodular maximization,[0],[0]
+"Many set functions are approximately submodular, rather than submodular, but still enjoy similar approximation properties.",4. Online submodular maximization,[0],[0]
+"The log-determinant is submodular, however, it is more likely that, for the variety of choices for !, the generalized coherence criterion is only approximately submodular.",4. Online submodular maximization,[0],[0]
+"For this reason, we provide this generalization to approximate submodularity, as it further justifies the design of (approximately) submodular criteria for prototype selection.
+",4. Online submodular maximization,[0],[0]
+"We compare our solution to the optimal solution
+S⇤ = argmax S⇢X :|S|b g(S) = {z⇤1, . . .",4. Online submodular maximization,[0],[0]
+", z⇤b}.
+",4. Online submodular maximization,[0],[0]
+Assumption 1 (Submodularity).,4. Online submodular maximization,[0],[0]
+g is monotone increasing and submodular.,4. Online submodular maximization,[0],[0]
+Assumption 2 (Approximation error).,4. Online submodular maximization,[0],[0]
+"We have access to a set function ĝ that approximates g: for some ✏
+f 0 for all S ⇢ X , with |S|  b,
+|ĝ(S) g(S)|  ✏ f
+Assumption 3 (Submodular coverage time).",4. Online submodular maximization,[0],[0]
+"For a fixed ✏ r
+> 0 and > 0 there exists a ⇢ 2 N such that for all S ⇢ X where |S|  b, with probability 1 , for any z⇤ 2 S⇤ an observation x is observed within ⇢ steps (starting from any point in X ) that is similar to z⇤ in that
+|g(S",4. Online submodular maximization,[0],[0]
+[ {x}) g(S,4. Online submodular maximization,[0],[0]
+"[ {z⇤})|  ✏ r .
+",4. Online submodular maximization,[0],[0]
+"This final assumption characterizes that the environment is sufficiently mixing, to see a cover of the space.",4. Online submodular maximization,[0],[0]
+"We introduce the term coverage, instead of cover time for finitestate, to indicate a relaxed notion of observing a covering of the space rather than observing all states.
+",4. Online submodular maximization,[0.9999998995885913],"['We introduce the term coverage, instead of cover time for finitestate, to indicate a relaxed notion of observing a covering of the space rather than observing all states.']"
+"For simplicity of the proof, we characterize the coverage time in terms of the submodular function.",4. Online submodular maximization,[0],[0]
+"We show that the submodular function we consider—the log-determinant— satisfies this assumption, given a more intuitive assumption that instead requires that observations be similar according to the kernel.",4. Online submodular maximization,[0],[0]
+"The statement and proof are in Appendix A.
+Now we prove our main result.",4. Online submodular maximization,[0],[0]
+Theorem 1.,4. Online submodular maximization,[0],[0]
+Assume Assumptions 1-3 and that g(S⇤) is finite and g(;) 0.,4. Online submodular maximization,[0],[0]
+"Then, for t > ⇢g(S⇤)/✏
+t , all sets S t
+chosen by OnlineGreedy using ĝ satisfy, with probability 1 ,
+g(S t ) 1 2 g(S⇤) b 2 (✏ r + 2✏ f + ✏ t )
+",4. Online submodular maximization,[0],[0]
+"Proof: The proof follows closely to the proof of Krause & Gomes (2010, Theorem 4).",4. Online submodular maximization,[0],[0]
+"The key difference is that we cannot do multiple passes through a fixed dataset, and instead use submodular coverage time.
+",4. Online submodular maximization,[0],[0]
+"Case 1: There have been t ⇢g(S⇤)/✏ t iterations, and S t has always changed within ⇢ iterations (i.e., there has never been ⇢ consecutive iterations where S
+t remained the same).",4. Online submodular maximization,[0],[0]
+"This mean that for each ⇢ iterations, ĝ(S
+t ) must have been improved by at least ✏
+t , which is the minimum threshold for improvement.",4. Online submodular maximization,[0],[0]
+"This means that over the t iterations, ĝ(S0) has improved by at least ✏
+t
+each ⇢,
+ĝ(S0) +",4. Online submodular maximization,[0],[0]
+✏tt/⇢ ✏tt/⇢ = ĝ(S⇤) g(S⇤) ✏f,4. Online submodular maximization,[0],[0]
+"The solution is within ✏
+f
+of g(S⇤), and we are done.
+",4. Online submodular maximization,[0],[0]
+Case 2:,4. Online submodular maximization,[0],[0]
+"At some time t, S t was not changed for ⇢ iterations, i.e., S
+t ⇢ = St ⇢ 1 = . . .",4. Online submodular maximization,[0],[0]
+"St. Order the prototypes in the set as z
+i = argmaxz2St g({z1, . . .",4. Online submodular maximization,[0],[0]
+", zi 1} [ {z}), with i
+= g({z1, . . .",4. Online submodular maximization,[0],[0]
+", zi}) g({z1, . . .",4. Online submodular maximization,[0],[0]
+", zi 1}).",4. Online submodular maximization,[0],[0]
+"By Lemma 3,
+i 1 i. Because the point that was observed",4. Online submodular maximization,[0],[0]
+"r
+i that was closest to z
+⇤",4. Online submodular maximization,[0],[0]
+"i was not added to S, we have the following inequalities
+|ĝ(S [ {r i }) g(S",4. Online submodular maximization,[0],[0]
+[ {r i }),4. Online submodular maximization,[0],[0]
+"|  ✏ f
+ĝ(S",4. Online submodular maximization,[0],[0]
+[ {r i }) ĝ(S,4. Online submodular maximization,[0],[0]
+"[ {z b })  ✏ t
+|g(S",4. Online submodular maximization,[0],[0]
+[ {r i }),4. Online submodular maximization,[0],[0]
+g(S,4. Online submodular maximization,[0],[0]
+[ {z⇤ i }),4. Online submodular maximization,[0],[0]
+"|  ✏ r
+where the last inequality is true for all z⇤ i with probability 1 .",4. Online submodular maximization,[0],[0]
+"Using these inequalities, as shown more explicitly in the proof in the appendix, we get
+g(S",4. Online submodular maximization,[0],[0]
+"[ {z⇤ i }) g(S)  b + ✏ r + 2✏ f + ✏ t
+Algorithm 2 BlockGreedy: OnlineGreedy for Prototype Selection using a Block-Diagonal Approximation r = block-size, with set of blocks B, S0 ; c, l book-keeping maps, with (c(B), l(B))",4. Online submodular maximization,[0],[0]
+"= (z, l) for z leading to smallest utility loss l if removed from block B. g e
+0 is the incremental estimate of log-determinant for t = 1 : b do, S
+t
+S t 1",4. Online submodular maximization,[0],[0]
+"[ {xt}
+while interacting, t = b+ 1, . .",4. Online submodular maximization,[0],[0]
+.,4. Online submodular maximization,[0],[0]
+"do if added b new prototypes since last clustering then
+cluster S t into bb/rc blocks with k-means, initialize with previous clustering; update c, l, g
+e
+BlockGreedy-Swap(x t )
+",4. Online submodular maximization,[0],[0]
+"By the definition of submodularity, g(S [ S⇤) g(S) P b
+i=1 g(S",4. Online submodular maximization,[0],[0]
+[ {z⇤i }) g(S)).,4. Online submodular maximization,[0],[0]
+"Putting this all together, with probability 1 , g(S⇤)  g(S [ S⇤)
+ g(S) + bX
+i=1
+g(S [ {z⇤ i }) g(S))
+ g(S) + bX
+i=1
+( b + ✏ r + 2✏ f + ✏ t )
+ g(S) +
+bX
+i=1
+i
+!",4. Online submodular maximization,[0],[0]
+"+ b(✏
+r + 2✏ f + ✏ t )
+= g(S) + bX
+i=1
+g({s1, . . .",4. Online submodular maximization,[0],[0]
+", zi}) g({z1, . . .",4. Online submodular maximization,[0],[0]
+", zi 1})
++ b(✏ r + 2✏ f + ✏ t )
+ g(S) + g({z1, . . .",4. Online submodular maximization,[0],[0]
+", zb}) + b(✏r + 2✏f + ✏t)  2g(S
+t ) +",4. Online submodular maximization,[0],[0]
+"b(✏ r + 2✏ f + ✏ t )
+where the last inequality uses g(S)  ",4. Online submodular maximization,[0],[0]
+"g(S t
+) which follows from monotonicity.",4. Online submodular maximization,[0],[0]
+⌅,4. Online submodular maximization,[0],[0]
+The computation of the submodular function g is the critical bottleneck in OnlineGreedy and other incremental submodular maximization techniques.,5. Block-diagonal approximation for efficient computation of the submodular function,[0],[0]
+"In this section, we propose a time and memory efficient greedy approach to computing a submodular function on K
+S , enabling each step of OnlineGreedy to cost O(db), where d is the feature dimension and b is the budget size.",5. Block-diagonal approximation for efficient computation of the submodular function,[1.0000000063110446],"['In this section, we propose a time and memory efficient greedy approach to computing a submodular function on K S , enabling each step of OnlineGreedy to cost O(db), where d is the feature dimension and b is the budget size.']"
+"The key insight is to take advantage of the block-diagonal structure of the kernel matrix, particularly due to the fact that the greedy algorithm intentionally selects diverse prototypes.",5. Block-diagonal approximation for efficient computation of the submodular function,[1.0],"['The key insight is to take advantage of the block-diagonal structure of the kernel matrix, particularly due to the fact that the greedy algorithm intentionally selects diverse prototypes.']"
+"Consequently, we can approximately cluster prototypes into small groups of
+Algorithm 3 BlockGreedy-Swap(x) B1 get-block(x) .",5. Block-diagonal approximation for efficient computation of the submodular function,[0],[0]
+"returns the nearest block to x (z1, g1) argmax
+z2B1 g(B1\{z} [ {x}) g(B1)
+",5. Block-diagonal approximation for efficient computation of the submodular function,[0],[0]
+"if g e 6= 0 and g1 ge ge < ✏ t then return with no update if low percentage improvement
+(B2, g2) argmax",5. Block-diagonal approximation for efficient computation of the submodular function,[0],[0]
+B2B\B1 g(B1,5. Block-diagonal approximation for efficient computation of the submodular function,[0],[0]
+[ {x}) l(B) if g1 < g2 then .,5. Block-diagonal approximation for efficient computation of the submodular function,[0],[0]
+"remove point from same block
+B1 B1\{z1} [ {x} update c(B1) .",5. Block-diagonal approximation for efficient computation of the submodular function,[0],[0]
+using Appendix E.3,5. Block-diagonal approximation for efficient computation of the submodular function,[0],[0]
+"g e g e
++ g1 else .",5. Block-diagonal approximation for efficient computation of the submodular function,[0],[0]
+"remove point from a different block
+B1 B1 [ {x} B2 B2 \ {c(B2)} update c(B1), c(B2) .",5. Block-diagonal approximation for efficient computation of the submodular function,[0.999999963964565],"['remove point from a different block B1 B1 [ {x} B2 B2 \\ {c(B2)} update c(B1), c(B2) .']"
+using Appendix E.3,5. Block-diagonal approximation for efficient computation of the submodular function,[0],[0]
+g,5. Block-diagonal approximation for efficient computation of the submodular function,[0],[0]
+"e g e + g2
+size r, and perform updates on only these blocks.
+",5. Block-diagonal approximation for efficient computation of the submodular function,[0],[0]
+"Approximations to the kernel matrix have been extensively explored, but towards the aim of highly accurate approximations for use within prediction.",5. Block-diagonal approximation for efficient computation of the submodular function,[0],[0]
+"These methods include low-rank approximations (Bach & Jordan, 2005), Nystrom methods (Drineas & Mahoney, 2005; Gittens & Mahoney, 2013) and a block-diagonal method for dense kernel matrices, focused on storage efficiency (Si et al., 2014).",5. Block-diagonal approximation for efficient computation of the submodular function,[0],[0]
+"Because these approximations are used for prediction and because they are designed for a fixed batch of data and so do not take advantage of incrementally updating values, they are not sufficiently efficient for use on each step, and require at least O(b2) computation.",5. Block-diagonal approximation for efficient computation of the submodular function,[0],[0]
+"For OnlineGreedy, however, we only need a more coarse approximation to K
+S to enable effective prototype selection.",5. Block-diagonal approximation for efficient computation of the submodular function,[0],[0]
+"By taking advantage of this fact, saving computation with incremental updating and using the fact that our kernel matrix is not dense—making it likely that many off-diagonal elements are near zero— we can reduce storage and computation to linear in b.
+The key steps in the algorithm are to maintain a clustering of prototypes, compute all pairwise swaps between prototypes within a block—which is much more efficient than pairwise swaps between all prototypes— and finally perform a single swap between two blocks.",5. Block-diagonal approximation for efficient computation of the submodular function,[0],[0]
+The computational complexity of Algorithm 2 on each step is O(bd + r3) for block size r (see Appendix F for an in-depth explanation).,5. Block-diagonal approximation for efficient computation of the submodular function,[0],[0]
+"We assume that, with a block-diagonal K
+S with blocks B, the submodular function separates into g(S) =P
+B2B g(B).",5. Block-diagonal approximation for efficient computation of the submodular function,[0],[0]
+"For both the log-determinant and the trace of the inverse of K
+S , this is the case because the inverse of a block-diagonal matrix corresponds to a blockdiagonal matrix of the inverses of these blocks.",5. Block-diagonal approximation for efficient computation of the submodular function,[0],[0]
+"Therefore, log det(K
+S
+)",5. Block-diagonal approximation for efficient computation of the submodular function,[0],[0]
+"= P B2B log det(KB).
+",5. Block-diagonal approximation for efficient computation of the submodular function,[0],[0]
+We use this property to avoid all pairwise comparisons.,5. Block-diagonal approximation for efficient computation of the submodular function,[0],[0]
+"If x is added to S, it gets clustered into its nearest block, based
+on distance to the mean of that cluster.",5. Block-diagonal approximation for efficient computation of the submodular function,[0],[0]
+"To compute the log-determinant for the new S, we simply need to recompute the log-determinant for the modified block, as the logdeterminant for the remaining blocks is unchanged.",5. Block-diagonal approximation for efficient computation of the submodular function,[0],[0]
+"Therefore, if K
+S really is block-diagonal, computing all pairwise swaps with x is equivalent to first computing the least useful point z in the closest cluster to x, and then determining if g(S [ {x}) would be least reduced by removing z or removing the least useful prototype from another cluster.",5. Block-diagonal approximation for efficient computation of the submodular function,[0],[0]
+"With some book-keeping, we maintain the least-useful prototype for each cluster, to avoid recomputing it each step.",5. Block-diagonal approximation for efficient computation of the submodular function,[0],[0]
+"We empirically illustrate the accuracy and efficiency of our proposed method as compared to OnlineGreedy with no approximation to the submodular function (which we call Full Greedy), Sieve Streaming, and various naive versions of our algorithm.",6. Experiments,[0],[0]
+"We also show this method can achieve reasonable regression accuracy as compared with KRLS (Engel et al., 2004).",6. Experiments,[0],[0]
+"For these experiments we use four well known datasets: Boston Housing (Lichman, 2015), Parkinson’s Telemonitoring (Tsanas et al., 2010), Sante Fe A (Weigend, 1994) and Census 1990 (Lichman, 2015).",6. Experiments,[0],[0]
+"Further details about each dataset are in Appendix C. We use a Gaussian kernel for the first three datasets, and a Hamming distance kernel for Census, which has categorical features.",6. Experiments,[0],[0]
+"To investigate the effect of the block-diagonal approximation, we select the log-determinant as the criterion, which is an instance of our criterion, and set = 1.
+",6. Experiments,[0],[0]
+"Quality of the log-determinant approximation.
+",6. Experiments,[0],[0]
+"We first investigate the quality of prototypes selection and their runtimes, depicted in Figure 1.",6. Experiments,[0],[0]
+"We compare our al-
+gorithm with the FullGreedy, SieveStreaming and a random prototype selection baseline.",6. Experiments,[0],[0]
+We also use variants of our algorithm including without clustering—naively dividing prototypes into equal-sized blocks—and one where we only consider replacement in the closest block.,6. Experiments,[0],[0]
+"We include these variants to indicate the importance of clustering and of searching between blocks as well within blocks, in BlockGreedy.",6. Experiments,[0],[0]
+"For all experiments on maximization quality, we use percentage gain with a threshold of ✏
+t
+= 0.001.
+",6. Experiments,[0],[0]
+"We plot the log determinant with increasing samples, in Figure 1(a).",6. Experiments,[0],[0]
+Experiments on the other datasets are included in Appendix C. BlockGreedy maximizes the submodular function within 1% of the FullGreedy method.,6. Experiments,[0],[0]
+"Though BlockGreedy achieves nearly as high a log determinant value, we can see that its approximation of the log determinant is an overestimate for this small block size, r = 5.
+",6. Experiments,[0],[0]
+"Our next experiment, therefore, focuses on the estimate accuracy of BlockGreedy with increasing block size, in Figure 1(b).",6. Experiments,[0],[0]
+"The accuracy is computed by 1 | gactual gestimate
+gactual |.",6. Experiments,[0],[0]
+"We can see our algorithm, BlockGreedy
+performs much better as compared to the other variants, ranging in accuracy from 0.82 to 0.99.",6. Experiments,[0],[0]
+"This suggests that one can choose reasonably small block sizes, without incurring a significant penalty in maximizing the log determinant.",6. Experiments,[0],[0]
+"In Figure 1(a), the estimate is inaccurate by about 20%, but follows the same trend of the full log determinant and picks similar prototypes to those chosen by FullGreedy.
+",6. Experiments,[0],[0]
+"The runtime of our algorithm should be much less than that of FullGreedy, and memory overhead much less than SieveStreaming.",6. Experiments,[0],[0]
+"In Figure 1(c), we can see our method scales much better than FullGreedy and even has gains in speed over SieveStreaming.",6. Experiments,[0],[0]
+"Though not shown, the number of sieves generated by SieveStreaming is large, in many instances well over 600, introducing a significant amount of
+overhead.",6. Experiments,[0],[0]
+"Overall, by taking advantage of the block structure of the kernel matrix, our algorithm obtains significant runtime and memory improvements, while also producing a highly accurate estimate of the log determinant.
+",6. Experiments,[0],[0]
+"Learning performance for regression problems.
+",6. Experiments,[0],[0]
+"While the maximization of the submodular function is useful in creating a diverse collection of prototypes, ultimately we would like to use these representations for prediction.",6. Experiments,[0],[0]
+"In Figure 2, we show the effectiveness of solving (K
+S +⌘I)w = y for the three regression datasets, by using our algorithm to select prototypes for K
+S .",6. Experiments,[0],[0]
+"For all regression experiments, we use a threshold of ✏
+t = 0.01 unless otherwise specified.
+",6. Experiments,[1.000000016172905],"['For all regression experiments, we use a threshold of ✏ t = 0.01 unless otherwise specified.']"
+"For Boston housing data, in figure 2(a), we see that BlockGreedy can perform almost as well as FullGreedy and SieveStreaming, and outperforms KRLS at early learning and finally converges to almost same performance.",6. Experiments,[1.0],"['For Boston housing data, in figure 2(a), we see that BlockGreedy can perform almost as well as FullGreedy and SieveStreaming, and outperforms KRLS at early learning and finally converges to almost same performance.']"
+"We set the parameters for KRLS using the same parameter settings for this dataset as in their paper (Engel et al., 2004).",6. Experiments,[1.0],"['We set the parameters for KRLS using the same parameter settings for this dataset as in their paper (Engel et al., 2004).']"
+"For our algorithms we set the budget size to b = 80, which is smaller than what KRLS used, and chose a block size of 4.",6. Experiments,[0],[0]
+"We also have lower learning variance than KRLS, likely because we use explicit regularization, whereas KRLS uses its prototype selection mechanism for regularization.
+",6. Experiments,[0.9999999699291221],"['We also have lower learning variance than KRLS, likely because we use explicit regularization, whereas KRLS uses its prototype selection mechanism for regularization.']"
+"On the Telemonitoring dataset, the competitive algorithms all perform equally well, reaching a RMSE of approximately 4.797.",6. Experiments,[0],[0]
+"BlockGreedy, however, uses significantly less computation for selecting prototypes.",6. Experiments,[0],[0]
+"We used a budget of b = 500, and a block size of r = 25; a block size of r = 5 for this many prototypes impacted the log determinant estimation enough that it was only able to reach a RMSE of about 5.2.",6. Experiments,[0],[0]
+"With the larger block size, BlockGreedy obtained a log determinant value within 0.5% of FullGreedy.
+",6. Experiments,[0.999999993224668],"['With the larger block size, BlockGreedy obtained a log determinant value within 0.5% of FullGreedy.']"
+"On the benchmark time series data set Santa Fe Data Set A, we train on the first 1000 time steps in the series and predict the next 100 steps, calculating the normalized MSE (NMSE), as stated in the original competition.",6. Experiments,[0],[0]
+We set the width parameter and budget size to that used with KRLS after one iteration on the training set.,6. Experiments,[1.0],['We set the width parameter and budget size to that used with KRLS after one iteration on the training set.']
+The NMSE of our algorithm and KRLS were 0.0434 and 0.026 respectively.,6. Experiments,[0],[0]
+"While our method performs worse, note that KRLS actually runs on 6⇥ 1000 samples according to its description (Engel et al., 2004), but with 1000 samples it performs worse with a NMSE of 0.0661.",6. Experiments,[0],[0]
+"We demonstrate the 100-step forecast with BlockGreedy, in Figure 2(c); we include forecast plots for the other algorithms in Figure 4, Appendix C.4.",6. Experiments,[0],[0]
+"We developed a memory and computation efficient incremental algorithm, called BlockGreedy, to select centers for kernel representations in a continual learning setting.",7. Conclusion,[0],[0]
+"We derived a criterion for prototype selection, and showed that the log-determinant is an instance of this criterion.",7. Conclusion,[1.0],"['We derived a criterion for prototype selection, and showed that the log-determinant is an instance of this criterion.']"
+"We extended results from streaming submodular maximization, to obtain an approximation ratio for OnlineGreedy.",7. Conclusion,[0],[0]
+"We then derived the efficient variant, BlockGreedy, to take advantage of the block-diagonal structure of the kernel matrix, which enables separability of the criteria and faster local computations.",7. Conclusion,[1.0],"['We then derived the efficient variant, BlockGreedy, to take advantage of the block-diagonal structure of the kernel matrix, which enables separability of the criteria and faster local computations.']"
+"We demonstrated that, by taking advantage of this structure, BlockGreedy can significantly reduce computation without incurring much penalty in maximizing the log-determinant and maintaining competitive prediction performance.",7. Conclusion,[1.0],"['We demonstrated that, by taking advantage of this structure, BlockGreedy can significantly reduce computation without incurring much penalty in maximizing the log-determinant and maintaining competitive prediction performance.']"
+"Our goal within continual learning was to provide a principled, near-linear time algorithm for prototype selection, in terms of the number of prototypes.",7. Conclusion,[1.0],"['Our goal within continual learning was to provide a principled, near-linear time algorithm for prototype selection, in terms of the number of prototypes.']"
+"We believe that BlockGreedy provides one of the first such algorithms, and is an important step towards effective kernel representations for continual learning settings, like online learning and reinforcement learning.",7. Conclusion,[1.0],"['We believe that BlockGreedy provides one of the first such algorithms, and is an important step towards effective kernel representations for continual learning settings, like online learning and reinforcement learning.']"
+"This research was supported in part by NSF CCF-1525024, IIS-1633215 and the Precision Health Initiative at Indiana University.",Acknowledgements,[0],[0]
+We would also like to thank Inhak Hwang for helpful discussions.,Acknowledgements,[0],[0]
+"Kernel representations provide a nonlinear representation, through similarities to prototypes, but require only simple linear learning algorithms given those prototypes.",abstractText,[0],[0]
+"In a continual learning setting, with a constant stream of observations, it is critical to have an efficient mechanism for sub-selecting prototypes amongst observations.",abstractText,[0],[0]
+"In this work, we develop an approximately submodular criterion for this setting, and an efficient online greedy submodular maximization algorithm for optimizing the criterion.",abstractText,[0],[0]
+"We extend streaming submodular maximization algorithms to continual learning, by removing the need for multiple passes—which is infeasible—and instead introducing the idea of coverage time.",abstractText,[0],[0]
+"We propose a general block-diagonal approximation for the greedy update with our criterion, that enables updates linear in the number of prototypes.",abstractText,[0],[0]
+"We empirically demonstrate the effectiveness of this approximation, in terms of approximation quality, significant runtime improvements, and effective prediction performance.",abstractText,[0],[0]
+Adapting Kernel Representations Online Using Submodular Maximization,title,[0],[0]

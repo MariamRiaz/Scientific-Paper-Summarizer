@@ -1,0 +1,1392 @@
+0,1,label2,summary_sentences
+Two important challenges in reinforcement learning (RL) are the problems of representation learning and of automatic discovery of skills.,1. Introduction,[0],[0]
+"Proto-value functions (PVFs) are a well-known solution for the problem of representation learning (Mahadevan, 2005; Mahadevan & Maggioni, 2007); while the problem of skill discovery is generally posed under the options framework (Sutton et al., 1999; Precup, 2000), which models skills as options.
+",1. Introduction,[0],[0]
+"In this paper, we tie together representation learning and option discovery by showing how PVFs implicitly define options.",1. Introduction,[0],[0]
+One of our main contributions is to introduce the concepts of eigenpurpose and eigenbehavior.,1. Introduction,[0],[0]
+Eigenpurposes are intrinsic reward functions that incentivize the agent to traverse the state space by following the principal directions of the learned representation.,1. Introduction,[0],[0]
+"Each intrinsic reward function leads to a different eigenbehavior, which is
+1University of Alberta 2Google DeepMind.",1. Introduction,[0],[0]
+"Correspondence to: Marlos C. Machado <machado@ualberta.ca>.
+",1. Introduction,[0],[0]
+"Proceedings of the 34 th International Conference on Machine Learning, Sydney, Australia, PMLR 70, 2017.",1. Introduction,[0],[0]
+"Copyright 2017 by the author(s).
+",1. Introduction,[0],[0]
+the optimal policy for that reward function.,1. Introduction,[0],[0]
+In this paper we introduce an algorithm for option discovery that leverages these ideas.,1. Introduction,[0],[0]
+"The options we discover are task-independent because, as PVFs, the eigenpurposes are obtained without any information about the environment’s reward structure.",1. Introduction,[0],[0]
+"We first present these ideas in the tabular case and then show how they can be generalized to the function approximation case.
+",1. Introduction,[0],[0]
+"Exploration, while traditionally a separate problem from option discovery, can also be addressed through the careful construction of options (McGovern & Barto, 2001; Şimşek et al., 2005; Solway et al., 2014; Kulkarni et al., 2016).",1. Introduction,[0],[0]
+"In this paper, we provide evidence that not all options capable of accelerating planning are useful for exploration.",1. Introduction,[0],[0]
+We show that options traditionally used in the literature to speed up planning hinder the agents’ performance if used for random exploration during learning.,1. Introduction,[0],[0]
+"Our options have two important properties that allow them to improve exploration: (i) they operate at different time scales, and (ii) they can be easily sequenced.",1. Introduction,[0],[0]
+Having options that operate at different time scales allows agents to make finely timed actions while also decreasing the likelihood the agent will explore only a small portion of the state space.,1. Introduction,[0],[0]
+"Moreover, because our options are defined across the whole state space, multiple options are available in every state, which allows them to be easily sequenced.",1. Introduction,[0],[0]
+"We generally indicate random variables by capital letters (e.g., R
+t ), vectors by bold letters (e.g., ✓), functions by lowercase letters (e.g., v), and sets by calligraphic font (e.g., S).",2. Background,[0],[0]
+"In the RL framework (Sutton & Barto, 1998), an agent aims to maximize cumulative reward by taking actions in an environment.",2.1. Reinforcement Learning,[0],[0]
+These actions affect the agent’s next state and the rewards it experiences.,2.1. Reinforcement Learning,[0],[0]
+We use the MDP formalism throughout this paper.,2.1. Reinforcement Learning,[0],[0]
+"An MDP is a 5-tuple hS,A, r, p, i.",2.1. Reinforcement Learning,[0],[0]
+"At time t the agent is in state s
+t 2 S where it takes action a
+t 2 A that leads to the next state s t+1 2 S according to the transition probability kernel p(s0|s, a), which encodes Pr(S t+1 = s 0|S t = s,A t
+= a).",2.1. Reinforcement Learning,[0],[0]
+The agent also observes a reward R t+1 ⇠,2.1. Reinforcement Learning,[0],[0]
+"r(s, a).",2.1. Reinforcement Learning,[0],[0]
+"The agent’s goal is to learn a
+policy µ : S ⇥",2.1. Reinforcement Learning,[0],[0]
+A !,2.1. Reinforcement Learning,[0],[0]
+"[0, 1] that maximizes the expected discounted return G
+t
+.",2.1. Reinforcement Learning,[0],[0]
+"= E p,µ ⇥P1 k=0",2.1. Reinforcement Learning,[0],[0]
+"k R t+k+1|st ⇤ , where
+2 [0, 1) is the discount factor.
+",2.1. Reinforcement Learning,[0],[0]
+"It is common to use the policy improvement theorem (Bellman, 1957) when learning to maximize G
+t .",2.1. Reinforcement Learning,[0],[0]
+"One technique is to alternate between solving the Bellman equations for the action-value function q
+µk(s, a),
+q µk(s, a) .",2.1. Reinforcement Learning,[0],[0]
+"= E µk,p
+⇥",2.1. Reinforcement Learning,[0],[0]
+"G
+t |S",2.1. Reinforcement Learning,[0],[0]
+"t = s,A t = a
+⇤
+=
+X
+s 0 ,r
+p(s 0 , r|s, a) ⇥",2.1. Reinforcement Learning,[0],[0]
+"r +
+X
+a
+0
+µ
+k
+(a 0|s0)q µk(s 0 , a 0 )
+",2.1. Reinforcement Learning,[0],[0]
+"⇤
+and making the next policy, µ k+1",2.1. Reinforcement Learning,[0],[0]
+", greedy w.r.t. qµk ,
+µ k+1 .",2.1. Reinforcement Learning,[0],[0]
+=,2.1. Reinforcement Learning,[0],[0]
+"argmax
+a2A q µk(s, a),
+until converging to an optimal policy µ⇤.
+",2.1. Reinforcement Learning,[0],[0]
+Sometimes it is not feasible to learn a value for each stateaction pair due to the size of the state space.,2.1. Reinforcement Learning,[0],[0]
+"Generally, this is addressed by parameterizing q
+µ (s, a) with a set of weights ✓ 2 Rn such that q
+µ (s, a) ⇡ q µ (s, a,✓).",2.1. Reinforcement Learning,[0],[0]
+"It is common to approximate q
+µ through a linear function, i.e., q
+µ (s, a,✓) =",2.1. Reinforcement Learning,[0],[0]
+"✓> (s, a), where (s, a) denotes a linear feature representation of state s when taking action a.",2.1. Reinforcement Learning,[0],[0]
+The options framework extends RL by introducing temporally extended actions called skills or options.,2.2. The Options Framework,[0],[0]
+An option ! is a 3-tuple !,2.2. The Options Framework,[0],[0]
+"= hI,⇡, T i where I 2 S denotes the option’s initiation set, ⇡ : A⇥S !",2.2. The Options Framework,[0],[0]
+"[0, 1] denotes the option’s policy, and T 2 S denotes the option’s termination set.",2.2. The Options Framework,[0],[0]
+After the agent decides to follow option !,2.2. The Options Framework,[0],[0]
+"from a state in I, actions are selected according to ⇡ until the agent reaches a state in T .",2.2. The Options Framework,[0],[0]
+"Intuitively, options are higher-level actions that extend over several time steps, generalizing MDPs to semiMarkov decision processes (SMDPs) (Puterman, 1994).
+",2.2. The Options Framework,[0],[0]
+"Traditionally, options capable of moving agents to bottleneck states are sought after.",2.2. The Options Framework,[0],[0]
+"Bottleneck states are those states that connect different densely connected regions of the state space (e.g., doorways) (Şimşek & Barto, 2004; Solway et al., 2014).",2.2. The Options Framework,[0],[0]
+"They have been shown to be very efficient for planning as these states are the states most frequently visited when considering the shortest distance between any two states in an MDP (Solway et al., 2014).",2.2. The Options Framework,[0],[0]
+"Proto-value functions (PVFs) are learned representations that capture large-scale temporal properties of an environment (Mahadevan, 2005; Mahadevan & Maggioni, 2007).",2.3. Proto-Value Functions,[0],[0]
+"They are obtained by diagonalizing a diffusion model, which is constructed from the MDP’s transition matrix.",2.3. Proto-Value Functions,[0],[0]
+"A diffusion model captures information flow on a graph, and
+it is commonly defined by the combinatorial graph Laplacian matrix L = D A, where A is the graph’s adjacency matrix and D the diagonal matrix whose entries are the row sums of A. Notice that the adjacency matrix A easily generalizes to a weight matrix W .",2.3. Proto-Value Functions,[0],[0]
+"PVFs are defined to be the eigenvectors obtained after the eigendecomposition of L. Different diffusion models can be used to generate PVFs, such as the normalized graph Laplacian L = D 12 (D A)D 12 , which we use in this paper.",2.3. Proto-Value Functions,[0],[0]
+"PVFs capture the large-scale geometry of the environment, such as symmetries and bottlenecks.",3. Option Discovery through the Laplacian,[0],[0]
+"They are task independent, in the sense that they do not use information related to reward functions.",3. Option Discovery through the Laplacian,[0],[0]
+"Moreover, they are defined over the whole state space since each eigenvector induces a realvalued mapping over each state.",3. Option Discovery through the Laplacian,[0],[0]
+We can imagine that options with these properties should also be useful.,3. Option Discovery through the Laplacian,[0],[0]
+"In this section we show how to use PVFs to discover options.
+",3. Option Discovery through the Laplacian,[0],[0]
+Let us start with an example.,3. Option Discovery through the Laplacian,[0],[0]
+Consider the traditional 4- room domain depicted in Figure 1c.,3. Option Discovery through the Laplacian,[0],[0]
+Gray squares represent walls and white squares represent accessible states.,3. Option Discovery through the Laplacian,[0],[0]
+"Four actions are available: up, down, right, and left.",3. Option Discovery through the Laplacian,[0],[0]
+The transitions are deterministic and the agent is not allowed to move into a wall.,3. Option Discovery through the Laplacian,[0],[0]
+"Ideally, we would like to discover options that move the agent from room to room.",3. Option Discovery through the Laplacian,[0],[0]
+"Thus, we should be able to automatically distinguish between the different rooms in the environment.",3. Option Discovery through the Laplacian,[0],[0]
+"This is exactly what PVFs do, as depicted in Figure 2 (left).",3. Option Discovery through the Laplacian,[0],[0]
+"Instead of interpreting a PVF as a basis function, we can interpret the PVF in our example as a desire to reach the highest point of the plot, corresponding to the centre of the room.",3. Option Discovery through the Laplacian,[0],[0]
+"Because the sign of an eigenvector is arbitrary, a PVF can also be interpreted as a desire to reach the lowest point of the plot, corresponding to the opposite room.",3. Option Discovery through the Laplacian,[0],[0]
+"In this paper we use the eigenvectors in both directions (i.e., both signs).
+",3. Option Discovery through the Laplacian,[0],[0]
+An eigenpurpose formalizes the interpretation above by defining an intrinsic reward function.,3. Option Discovery through the Laplacian,[0],[0]
+"We can see it as defining a purpose for the agent, that is, to maximize the discounted sum of these rewards.
+",3. Option Discovery through the Laplacian,[0],[0]
+Definition 3.1 (Eigenpurpose).,3. Option Discovery through the Laplacian,[0],[0]
+"An eigenpurpose is the intrinsic reward function re
+i
+(s, s 0 ) of a proto-value function
+e 2 R|S| such that
+r e i (s, s 0 )",3. Option Discovery through the Laplacian,[0],[0]
+"= e > ( (s0) (s)), (1)
+where (x) denotes the feature representation of state x.
+Notice that an eigenpurpose, in the tabular case, can be written as re
+i
+(s, s 0 )",3. Option Discovery through the Laplacian,[0],[0]
+"= e[s 0 ] e[s].
+",3. Option Discovery through the Laplacian,[0],[0]
+"We can now define a new MDP to learn the option associated with the purpose, Me
+i = hS,A[{?}, re i , p, i, where
+the reward function is defined as in (1) and the action set is augmented by the action terminate (?), which allows the agent to leave Me
+i without any cost.",3. Option Discovery through the Laplacian,[0],[0]
+The state space and the transition probability kernel remain unchanged from the original problem.,3. Option Discovery through the Laplacian,[0],[0]
+"The discount rate can be chosen arbitrarily, although it impacts the timescale the option encodes.
+",3. Option Discovery through the Laplacian,[0],[0]
+"With Me i we define a new state-value function ve ⇡ (s), for policy ⇡, as the expected value of the cumulative discounted intrinsic reward if the agent starts in state s and follows policy ⇡ until termination.",3. Option Discovery through the Laplacian,[0],[0]
+"Similarly, we define a new action-value function qe
+⇡ (s, a) as the expected value of the cumulative discounted intrinsic reward if the agent starts in state s, takes action a, and then follows policy ⇡ until termination.",3. Option Discovery through the Laplacian,[0],[0]
+"We can also describe the optimal value function for any eigenpurpose obtained through e:
+v e ⇤(s) = max
+⇡
+v e ⇡ (s) and qe⇤(s, a) = max ⇡ q e ⇡ (s, a).
+",3. Option Discovery through the Laplacian,[0],[0]
+"These definitions naturally lead us to eigenbehaviors.
+",3. Option Discovery through the Laplacian,[0],[0]
+Definition 3.2 (Eigenbehavior).,3. Option Discovery through the Laplacian,[0],[0]
+An eigenbehavior is a policy e : S !,3. Option Discovery through the Laplacian,[0],[0]
+"A that is optimal with respect to the eigenpurpose re
+i
+, i.e., e(s) = argmax a2A",3. Option Discovery through the Laplacian,[0],[0]
+"q e ⇤(s, a).
+",3. Option Discovery through the Laplacian,[0],[0]
+"Finding the optimal policy ⇡e⇤ now becomes a traditional RL problem, with a different reward function.",3. Option Discovery through the Laplacian,[0],[0]
+"Importantly, this reward function tends to be dense, avoiding challenging situations due to exploration issues.",3. Option Discovery through the Laplacian,[0],[0]
+"In this paper we use policy iteration to solve for an optimal policy.
+",3. Option Discovery through the Laplacian,[0],[0]
+"If each eigenpurpose defines an option, its corresponding eigenbehavior is the option’s policy.",3. Option Discovery through the Laplacian,[0],[0]
+"Thus, we need to define the option’s initiation and termination set.",3. Option Discovery through the Laplacian,[0],[0]
+"An option should be available in every state where it is possible to achieve its purpose, and to terminate when it is achieved.
+",3. Option Discovery through the Laplacian,[0],[0]
+"When defining the MDP to learn the option, we augmented the agent’s action set with the terminate action, allowing the agent to interrupt the option anytime.",3. Option Discovery through the Laplacian,[0],[0]
+"We want options to terminate when the agent achieves its purpose, i.e., when it is unable to accumulate further positive intrinsic rewards.",3. Option Discovery through the Laplacian,[0],[0]
+"With the defined reward function, this happens when the agent reaches the state with largest value in the eigenpurpose (or a local maximum when < 1).",3. Option Discovery through the Laplacian,[0],[0]
+Any subsequent reward will be negative.,3. Option Discovery through the Laplacian,[0],[0]
+"We are able to formalize this con-
+dition by defining q",3. Option Discovery through the Laplacian,[0],[0]
+"(s,?)",3. Option Discovery through the Laplacian,[0],[0]
+.= 0,3. Option Discovery through the Laplacian,[0],[0]
+"for all e. When the terminate action is selected, control is returned to the higher level policy (Dietterich, 2000).",3. Option Discovery through the Laplacian,[0],[0]
+"An option following a policy e terminates when qe
+(s, a)  0 for all a 2 A.",3. Option Discovery through the Laplacian,[0],[0]
+"We define the initiation set to be all states in which there exists an action a 2 A such that qe
+(s, a) > 0.",3. Option Discovery through the Laplacian,[0],[0]
+"Thus, the option’s policy is ⇡e(s) =",3. Option Discovery through the Laplacian,[0],[0]
+"argmax
+a2A",3. Option Discovery through the Laplacian,[0],[0]
+"[{?} q e ⇡ (s, a).",3. Option Discovery through the Laplacian,[0],[0]
+We refer to the options discovered with our approach as eigenoptions.,3. Option Discovery through the Laplacian,[0],[0]
+"The eigenoption corresponding to the example at the beginning of this section is depicted in Figure 2 (right).
+",3. Option Discovery through the Laplacian,[0],[0]
+"For any eigenoption, there is always at least one state in which it terminates, as we now show.",3. Option Discovery through the Laplacian,[0],[0]
+Theorem 3.1 (Option’s Termination).,3. Option Discovery through the Laplacian,[0],[0]
+"Consider an eigenoption o = hI
+o
+,⇡
+o , T o",3. Option Discovery through the Laplacian,[0],[0]
+i and < 1.,3. Option Discovery through the Laplacian,[0],[0]
+"Then, in an MDP with finite state space, T
+o
+is nonempty.
+",3. Option Discovery through the Laplacian,[0],[0]
+Proof.,3. Option Discovery through the Laplacian,[0],[0]
+"We can write the Bellman equation in the matrix form: v = r+ Tv, where v is a finite column vector with one entry per state encoding its value function.",3. Option Discovery through the Laplacian,[0],[0]
+"From (1) we have r = Tw w with w = (s)>e, where e denotes the eigenpurpose of interest.",3. Option Discovery through the Laplacian,[0],[0]
+"Therefore:
+v +w = Tw + Tv
+= (1 )Tw + T (v +w) = (1 )(I T ) 1Tw.
+",3. Option Discovery through the Laplacian,[0],[0]
+||v +w||1 = (1 )||(I,3. Option Discovery through the Laplacian,[0],[0]
+T ),3. Option Discovery through the Laplacian,[0],[0]
+1Tw||1 ||v +w||1  (1 )||(I,3. Option Discovery through the Laplacian,[0],[0]
+"T ) 1T ||1||w||1
+||v +w||1  (1 ) 1 (1 ) ||w||1
+||v +w||1  ||w||1
+We can shift w by any finite constant without changing the reward, i.e., Tw w = T (w+ ) (w+ )",3. Option Discovery through the Laplacian,[0],[0]
+"because T1 = 1 since P j T i,j
+= 1.",3. Option Discovery through the Laplacian,[0],[0]
+"Hence, we can assume w 0.",3. Option Discovery through the Laplacian,[0],[0]
+"Let s ⇤ = argmax
+s
+w
+s ⇤ , so that w s ⇤ = ||w||1.",3. Option Discovery through the Laplacian,[0],[0]
+"Clearly vs⇤ 
+0, otherwise ||v +w||1 |vs⇤ +",3. Option Discovery through the Laplacian,[0],[0]
+ws⇤ | = vs⇤ +,3. Option Discovery through the Laplacian,[0],[0]
+"ws⇤ > w
+s ⇤ = ||w||1, arriving at a contradiction.
+",3. Option Discovery through the Laplacian,[0],[0]
+This result is applicable in both the tabular and linear function approximation case.,3. Option Discovery through the Laplacian,[0],[0]
+An algorithm that does not rely on knowing the underlying graph is provided in Section 5.,3. Option Discovery through the Laplacian,[0],[0]
+"We used three MDPs in our empirical study (c.f. Figure 1): an open room, an I-Maze, and the 4-room domain.",4. Empirical Evaluation,[0],[0]
+Their transitions are deterministic and gray squares denote walls.,4. Empirical Evaluation,[0],[0]
+"Agents have access to four actions: up, down, right, and left.",4. Empirical Evaluation,[0],[0]
+"When an action that would have taken the agent into a wall is chosen, the agent’s state does not change.",4. Empirical Evaluation,[0],[0]
+"We demonstrate three aspects of our framework:1
+• How the eigenoptions present specific purposes.",4. Empirical Evaluation,[0],[0]
+"Interestingly, options leading to bottlenecks are not the first ones we discover.
+",4. Empirical Evaluation,[0],[0]
+"• How eigenoptions improve exploration by reducing the expected number of steps required to navigate between any two states.
+",4. Empirical Evaluation,[0],[0]
+• How eigenoptions help agents to accumulate reward faster.,4. Empirical Evaluation,[0],[0]
+We show how few options may hurt the agents’ performance while enough options speed up learning.,4. Empirical Evaluation,[0],[0]
+"In the PVF theory, the “smoothest” eigenvectors, corresponding to the smallest eigenvalues, are preferred (Mahadevan & Maggioni, 2007).",4.1. Discovered Options,[0],[0]
+"The same intuition applies to eigenoptions, with the eigenpurposes corresponding to the smallest eigenvalues being preferred.",4.1. Discovered Options,[0],[0]
+"Figures 3, 4, and 5 depict the first eigenoptions discovered in the three domains used for evaluation.
+",4.1. Discovered Options,[0],[0]
+"Eigenoptions do not necessarily look for bottleneck states, 1Python code can be found at: https://github.com/mcmachado/options
+allowing us to apply our algorithm in many environments in which there are no obvious, or meaningful, bottlenecks.",4.1. Discovered Options,[0],[0]
+"We discover meaningful options in these environments, such as walking down a corridor, or going to the corners of an open room.",4.1. Discovered Options,[0],[0]
+"Interestingly, doorways are not the first options we discover in the 4-room domain (the fifth eigenoption is the first to terminate at the entrance of a doorway).",4.1. Discovered Options,[0],[0]
+"In the next sections we provide empirical evidence that eigenoptions are useful, and often more so than bottleneck options.",4.1. Discovered Options,[0],[0]
+"A major challenge for agents to explore an environment is to be decisive, avoiding the dithering commonly observed in random walks (Machado & Bowling, 2016; Osband et al., 2016).",4.2. Exploration,[0],[0]
+Options provide such decisiveness by operating in a higher level of abstraction.,4.2. Exploration,[0],[0]
+"Agents performing a random walk, when equipped with options, are expected to cover larger distances in the state space, navigating back and forth between subgoals instead of dithering around the starting state.",4.2. Exploration,[0],[0]
+"However, options need to satisfy two conditions to improve exploration: (1) they have to be available in several parts of the state space, ensuring the agent always has access to many different options; and (2) they have to operate at different time scales.",4.2. Exploration,[0],[0]
+"For instance, in the 4-room domain, it is unlikely an agent randomly selects enough primitive actions leading it to a corner if all options move the agent between doorways.",4.2. Exploration,[0],[0]
+"An important result in this section is to show that it is very unlikely for an agent to explore the whole environment if it keeps going back and forth between similar high-level goals.
+",4.2. Exploration,[0],[0]
+Eigenoptions satisfy both conditions.,4.2. Exploration,[0],[0]
+"As demonstrated in Section 4.1, eigenoptions are often defined in the whole state space, allowing sequencing.",4.2. Exploration,[0],[0]
+"Moreover, PVFs can be seen as a “frequency” basis, with different PVFs being associated with different frequencies (Mahadevan & Maggioni, 2007).",4.2. Exploration,[0],[0]
+"The corresponding eigenoptions also operate
+at different frequencies, with the length of a trajectory until termination varying.",4.2. Exploration,[0],[0]
+This behavior can be seen when comparing the second and fourth eigenoptions in the 10 ⇥ 10 grid (Figure 3).,4.2. Exploration,[0],[0]
+"The fourth eigenoption terminates, on expectation, twice as often as the second eigenoption.
+",4.2. Exploration,[0],[0]
+In this section we show that eigenoptions improve exploration.,4.2. Exploration,[0],[0]
+"We do so by introducing a new metric, which we call diffusion time.",4.2. Exploration,[0],[0]
+Diffusion time encodes the expected number of steps required to navigate between two states randomly chosen in the MDP while following a random walk.,4.2. Exploration,[0],[0]
+A small expected number of steps implies that it is more likely that the agent will reach all states with a random walk.,4.2. Exploration,[0],[0]
+"We discuss how this metric can be computed in the Appendix.
+Figure 6 depicts, for our the three environments, the diffusion time with options and the diffusion time using only primitive actions.",4.2. Exploration,[0],[0]
+"We add options incrementally in order of increasing eigenvalue when computing the diffusion time for different sets of options.
+",4.2. Exploration,[0],[0]
+"The first options added hurt exploration, but when enough options are added, exploration is greatly improved when compared to a random walk using only primitive actions.",4.2. Exploration,[0],[0]
+"The fact that few options hurt exploration may be surprising at first, based on the fact that few useful options are generally sought after in the literature.",4.2. Exploration,[0],[0]
+"However, this is a major difference between using options for planning and for learning.",4.2. Exploration,[0],[0]
+"In planning, options shortcut the agents’ trajectories, pruning the search space.",4.2. Exploration,[0],[0]
+All other actions are still taken into consideration.,4.2. Exploration,[0],[0]
+"When exploring, a uniformly random policy over options and primitive actions skews where
+agents spend their time.",4.2. Exploration,[0],[0]
+"Options that are much longer than primitive actions reduce the likelihood that an agent will deviate much from the options’ trajectories, since sampling an option may undo dozens of primitive actions.",4.2. Exploration,[0],[0]
+"This biasing is often observed when fewer options are available.
+",4.2. Exploration,[0],[0]
+The discussion above can be made clearer with an example.,4.2. Exploration,[0],[0]
+"In the 4-room domain, if the only options available are those leading the agent to doorways (c.f. Appendix), it is less likely the agent will reach the outer corners.",4.2. Exploration,[0],[0]
+To do so the agent would have to select enough consecutive primitive actions without sampling an option.,4.2. Exploration,[0],[0]
+"Also, it is very likely agents will be always moving between rooms, never really exploring inside a room.",4.2. Exploration,[0],[0]
+These issues are mitigated with eigenoptions.,4.2. Exploration,[0],[0]
+"The first eigenoptions lead agents to individual rooms, but other eigenoptions operate in different time scales, allowing agents to explore different parts of rooms.
+",4.2. Exploration,[0],[0]
+"Figure 6d supports the intuition that options leading to bottleneck states are not sufficient, by themselves, for exploration.",4.2. Exploration,[0],[0]
+It shows how the diffusion time in the 4-room domain is increased when only bottleneck options are used.,4.2. Exploration,[0],[0]
+"As in the PVF literature, the ideal number of options to be used by an agent can be seen as a model selection problem.",4.2. Exploration,[0],[0]
+We now illustrate the usefulness of our options when the agent’s goal is to accumulate reward.,4.3. Accumulating Rewards,[0],[0]
+We also study the impact of an increasing number of options in such a task.,4.3. Accumulating Rewards,[0],[0]
+"In these experiments, the agent starts at the bottom left cor-
+ner and its goal is to reach the top right corner.",4.3. Accumulating Rewards,[0],[0]
+"The agent observes a reward of 0 until the goal is reached, when it observes a reward of +1.",4.3. Accumulating Rewards,[0],[0]
+"We used Q-Learning (Watkins & Dayan, 1992) (↵ = 0.1, = 0.9) to learn a policy over primitive actions.",4.3. Accumulating Rewards,[0],[0]
+"The behavior policy chooses uniformly over primitive actions and options, following them until termination.",4.3. Accumulating Rewards,[0],[0]
+"Figure 7 depicts, after learning for a given number of episodes, the average over 100 trials of the agents’ final performance.",4.3. Accumulating Rewards,[0],[0]
+"Episodes were 100 time steps long, and we learned for 250 episodes in the 10 ⇥ 10 grid and in the I-Maze, and for 500 episodes in the 4-room domain.
+",4.3. Accumulating Rewards,[0],[0]
+In most scenarios eigenoptions improve performance.,4.3. Accumulating Rewards,[0],[0]
+"As in the previous section, exceptions occur when only a few options are added to the agent’s action set.",4.3. Accumulating Rewards,[0],[0]
+The best results were obtained using 64 options.,4.3. Accumulating Rewards,[0],[0]
+"Despite being an additional parameter, our results show that the agent’s performance is fairly robust across different numbers of options.
+",4.3. Accumulating Rewards,[0],[0]
+Eigenoptions are task-independent by construction.,4.3. Accumulating Rewards,[0],[0]
+Additional results in the appendix show how the same set of eigenoptions is able to speed-up learning in different tasks.,4.3. Accumulating Rewards,[0],[0]
+"In the appendix we also compare eigenoptions to random options, that is, options that use a random state as subgoal.",4.3. Accumulating Rewards,[0],[0]
+So far we have assumed that agents have access to the adjacency matrix representing the underlying MDP.,5. Approximate Option Discovery,[0],[0]
+"However, in practical settings this is generally not true.",5. Approximate Option Discovery,[0],[0]
+"In fact, the number of states in these settings is often so large that agents rarely visit the same state twice.",5. Approximate Option Discovery,[0],[0]
+"These problems are generally tackled with sample-based methods and some sort of function approximation.
+",5. Approximate Option Discovery,[0],[0]
+In this section we propose a sample-based approach for option discovery that asymptotically discovers eigenoptions.,5. Approximate Option Discovery,[0],[0]
+We then extend this algorithm to linear function approximation.,5. Approximate Option Discovery,[0],[0]
+We provide anecdotal evidence in Atari 2600 games that this relatively naı̈ve sample-based approach to function approximation discovers purposeful options.,5. Approximate Option Discovery,[0],[0]
+"In the online setting, agents must sample trajectories.",5.1. Sample-based Option Discovery,[0],[0]
+"Naturally, one can sample trajectories until one is able to perfectly construct the MDP’s adjacency matrix, as suggested by Mahadevan & Maggioni (2007).",5.1. Sample-based Option Discovery,[0],[0]
+"However, this approach does not easily extend to linear function approximation.",5.1. Sample-based Option Discovery,[0],[0]
+"In this section we provide an approach that does not build the adjacency matrix allowing us to extend the concept of eigenpurposes to linear function approximation.
+",5.1. Sample-based Option Discovery,[0],[0]
+"In our algorithm, a sample transition is added to a matrix T if it was not previously encountered.",5.1. Sample-based Option Discovery,[0],[0]
+"The transition is added as the difference between the current and previous observations, i.e., (s0) (s).",5.1. Sample-based Option Discovery,[0],[0]
+"In the tabular case we define (s) to be the one-hot encoding of state s. Once enough transitions have been sampled, we perform a singular value decomposition on the matrix T such that T = U⌃V
+>.",5.1. Sample-based Option Discovery,[0],[0]
+"We use the columns of V , which correspond to the right-eigenvectors of T , to generate the eigenpurposes.",5.1. Sample-based Option Discovery,[0],[0]
+"The intrinsic reward and the termination criterion for an eigenbehavior are the same as before.
+",5.1. Sample-based Option Discovery,[0],[0]
+Matrix T is known as the incidence matrix.,5.1. Sample-based Option Discovery,[0],[0]
+"If all transitions in the graph are sampled once, for tabular representations, this algorithm discovers the same options we obtain with the combinatorial Laplacian.",5.1. Sample-based Option Discovery,[0],[0]
+"The theorem below states the equivalence between the obtained eigenpurposes.
+",5.1. Sample-based Option Discovery,[0],[0]
+Theorem 5.1.,5.1. Sample-based Option Discovery,[0],[0]
+"Consider the SVD of T = U T ⌃ T V > T , with each row of T consisting of the difference between observations, i.e., (s0) (s).",5.1. Sample-based Option Discovery,[0],[0]
+"In the tabular case, if all transitions in the MDP have been sampled once, the orthonormal eigenvectors of L are the columns of V >
+T
+.
+Proof.",5.1. Sample-based Option Discovery,[0],[0]
+"Given the SVD decomposition of a matrix A = U⌃V
+>, the columns of V are the eigenvectors of A > A (Strang, 2005).",5.1. Sample-based Option Discovery,[0],[0]
+"We know that T>T = 2L, where L = D W (Lemma 5.1, c.f. Appendix).",5.1. Sample-based Option Discovery,[0],[0]
+"Thus, the columns of V
+T are the eigenvectors of T>T , which can be rewritten as 2(D W ).",5.1. Sample-based Option Discovery,[0],[0]
+"Therefore, the columns of V
+T are also the eigenvectors of L.
+There is a trade-off between reconstructing the adjacency matrix and constructing the incidence matrix.",5.1. Sample-based Option Discovery,[0],[0]
+"In MDPs in which states are sparsely connected, such as the I-Maze, the latter is preferred since it has fewer transitions than states.",5.1. Sample-based Option Discovery,[0],[0]
+"However, what makes this result interesting is the fact that our algorithm can be easily generalized to linear function approximation.",5.1. Sample-based Option Discovery,[0],[0]
+An adjacency matrix is not very useful when the agent has access only to features of the state.,5.2. Function Approximation,[0],[0]
+"However, we can use the intuition about the incidence matrix to propose an algorithm compatible with linear function approximation.
+",5.2. Function Approximation,[0],[0]
+"In fact, to apply the algorithm proposed in the previous section, we just need to define what constitutes a new transition.",5.2. Function Approximation,[0],[0]
+"We define two vectors, t and t0, to be identical if and only if t t0 = 0.",5.2. Function Approximation,[0],[0]
+We then use a set data structure to avoid duplicates when storing (s0) (s).,5.2. Function Approximation,[0],[0]
+"This is a naı̈ve approach, but it provides encouraging evidence eigenoptions generalize to linear function approximation.",5.2. Function Approximation,[0],[0]
+"We expect more involved methods to perform even better.
+",5.2. Function Approximation,[0],[0]
+"We tested our method in the ALE (Bellemare et al., 2013).",5.2. Function Approximation,[0],[0]
+"The agent’s representation consists of the emulator’s RAM state (1,024 bits).",5.2. Function Approximation,[0],[0]
+"The final incidence matrix in which we ran the SVD had 25,000 rows, which we sampled uniformly from the set of observed transitions.",5.2. Function Approximation,[0],[0]
+"We provide further details of the experimental setup in the appendix.
+",5.2. Function Approximation,[0],[0]
+"In the tabular case we start selecting eigenpurposes generated by the eigenvectors with smallest eigenvalue, because these are the “smoothest” ones.",5.2. Function Approximation,[0],[0]
+"However, it is not clear such intuition holds here because we are in the function approximation setting and the matrix of transitions does not contain all possible transitions.",5.2. Function Approximation,[0],[0]
+"Therefore, we analyzed, for each game, all 1,024 discovered options.
+",5.2. Function Approximation,[0],[0]
+We approximate these options greedily ( = 0) with the ALE emulator’s look-ahead.,5.2. Function Approximation,[0],[0]
+"The next action a0 for an eigenpurpose e is selected as argmax b2A R s 0 p(s 0|s, b) re i (s, s 0 ).
+",5.2. Function Approximation,[0],[0]
+"Even with such a myopic action selection mechanism we
+were able to obtain options that clearly demonstrate intent.",5.2. Function Approximation,[0],[0]
+"In FREEWAY, a game in which a chicken is expected to cross the road while avoiding cars, we observe options in which the agent clearly wants to reach a specific lane in the street.",5.2. Function Approximation,[0],[0]
+Figure 8 (left) depicts where the chicken tends to be when the option is executed.,5.2. Function Approximation,[0],[0]
+On the right we see a histogram representing the chicken’s height during an episode.,5.2. Function Approximation,[0],[0]
+"We can clearly see how the chicken’s height varies for different options, and how a random walk over primitive actions (rand) does not explore the environment properly.",5.2. Function Approximation,[0],[0]
+"Remarkably, option #445 scores 28 points at the end of the episode, without ever explicitly taking the reward signal into consideration.",5.2. Function Approximation,[0],[0]
+"This performance is very close to those obtained by state-of-the-art algorithms.
+",5.2. Function Approximation,[0],[0]
+"In MONTEZUMA’S REVENGE, a game in which the agent needs to navigate through a room to pickup a key so it can open a door, we also observe the agent having the clear intent of reaching particular positions on the screen, such as staircases, ropes and doors (Figure 9).",5.2. Function Approximation,[0],[0]
+"Interestingly, the options we discover are very similar to those handcrafted by Kulkarni et al. (2016) when evaluating the usefulness of options to tackle such a game.",5.2. Function Approximation,[0],[0]
+A video of the highlighted options can be found online.2,5.2. Function Approximation,[0],[0]
+Most algorithms for option discovery can be seen as topdown approaches.,6. Related Work,[0],[0]
+"Agents use trajectories leading to informative rewards3 as a starting point, decomposing and refining them into options.",6. Related Work,[0],[0]
+"There are many approaches based on this principle, such as methods that use the observed rewards to generate intrinsic rewards leading to new value functions (e.g., McGovern & Barto, 2001; Menache et al., 2002; Konidaris & Barto, 2009), methods that use the observed rewards to climb a gradient (e.g., Mankowitz et al., 2016; Vezhnevets et al., 2016; Bacon et al., 2017), or to do
+2 https://youtu.be/2BVicx4CDWA
+3We define an informative reward to be the signal that informs the agent it has reached a goal.",6. Related Work,[0],[0]
+"For example, when trying to escape from a maze, we consider 0 to be an informative reward if the agent observes rewards of value 1 in every time step it is inside the maze.",6. Related Work,[0],[0]
+"A different example is a positive reward observed by an agent that typically observes rewards of value 0.
+",6. Related Work,[0],[0]
+"probabilistic inference (Daniel et al., 2016).",6. Related Work,[0],[0]
+"However, such approaches are not applicable in large state spaces with sparse rewards.",6. Related Work,[0],[0]
+"If informative rewards are unlikely to be found by an agent using only primitive actions, requiring long or specific sequences of actions, options are equally unlikely to be discovered.
+",6. Related Work,[0],[0]
+"Our algorithm can be seen as a bottom-up approach, in which options are constructed before the agent observes any informative reward.",6. Related Work,[0],[0]
+These options are composed to generate the desired policy.,6. Related Work,[0],[0]
+"Options discovered this way tend to be independent of an agent’s intention, and are potentially useful in many different tasks (Gregor et al., 2016).",6. Related Work,[0],[0]
+"Such options can also be seen as being useful for exploration by allowing agents to commit to a behavior for an extended period of time (Machado & Bowling, 2016).",6. Related Work,[0],[0]
+"Among the approaches to discover options without using extrinsic rewards are the use of global or local graph centrality measures (Şimşek & Barto, 2004; Şimşek et al., 2005; Şimşek & Barto, 2008) and clustering of states (Mannor et al., 2004; Bacon, 2013; Lakshminarayanan et al., 2016).",6. Related Work,[0],[0]
+"Interestingly, Şimşek et al. (2005) and Lakshminarayanan et al. (2016) also use the graph Laplacian in their algorithm, but to identify bottleneck states.
+",6. Related Work,[0],[0]
+Baranes & Oudeyer (2013) and Moulin-Frier & Oudeyer (2013) show how one can build policies to explicitly assist agents to explore the environment.,6. Related Work,[0],[0]
+The proposed algorithms self-generate subgoals in order to maximize learning progress.,6. Related Work,[0],[0]
+The policies built can be seen as options.,6. Related Work,[0],[0]
+"Recently, Solway et al. (2014) proved that “optimal hierarchy minimizes the geometric mean number of trial-and-error attempts necessary for the agent to discover the optimal policy for any selected task (...)”.",6. Related Work,[0],[0]
+"Our experiments confirm this result, although we propose diffusion time as a different metric to evaluate how options improve exploration.
+",6. Related Work,[0],[0]
+The idea of discovering options by learning to control parts of the environment is also related to our work.,6. Related Work,[0],[0]
+"Eigenpurposes encode different rates of change in the agents representation of the world, while the corresponding options aim at maximizing such change.",6. Related Work,[0],[0]
+Others have also proposed ways to discover options based on the idea of learning to control the environment.,6. Related Work,[0],[0]
+"Hengst (2002), for instance, proposes an algorithm that explicitly models changes in the variables that form the agent’s representation.",6. Related Work,[0],[0]
+"Recently, Gregor et al. (2016) proposed an algorithm in which agents discover options by maximizing a notion of empowerment (Salge et al., 2014), where the agent aims at getting to states with a maximal set of available intrinsic options.
+",6. Related Work,[0],[0]
+"Continual Curiosity driven Skill Acquisition (CCSA) (Kompella et al., In Press) is the closest approach to ours.",6. Related Work,[0],[0]
+CCSA also discovers skills that maximize an intrinsic reward obtained by some extracted representation.,6. Related Work,[0],[0]
+"While we use PVFs, CCSA uses Incremental Slow Feature Analysis
+(SFA) (Kompella et al., 2011) to define the intrinsic reward function.",6. Related Work,[0],[0]
+"Sprekeler (2011) has shown that, given a specific choice of adjacency function, PVFs are equivalent to SFA (Wiskott & Sejnowski, 2002).",6. Related Work,[0],[0]
+SFA becomes an approximation of PVFs if the function space used in the SFA does not allow arbitrary mappings from the observed data to an embedding.,6. Related Work,[0],[0]
+"Our method differs in how we define the initiation and termination sets, as well as in the objective being maximized.",6. Related Work,[0],[0]
+"CCSA acquires skills that produce a large variation in the slow-feature outputs, leading to options that seek for bottlenecks.",6. Related Work,[0],[0]
+"Our approach does not seek for bottlenecks, focusing on traversing different directions of the learned representation.",6. Related Work,[0],[0]
+"Being able to properly abstract MDPs into SMDPs can reduce the overall expense of learning (Sutton et al., 1999; Solway et al., 2014), mainly when the learned options are reused in multiple tasks.",7. Conclusion,[0],[0]
+"On the other hand, the wrong hierarchy can hinder the agents’ learning process, moving the agent away from desired goal states.",7. Conclusion,[0],[0]
+"Current algorithms for option discovery often depend on an initial informative reward signal, which may not be readily available in large MDPs.",7. Conclusion,[0],[0]
+"In this paper, we introduced an approach that is effective in different environments, for a multitude of tasks.
+",7. Conclusion,[0],[0]
+"Our algorithm uses the graph Laplacian, being directly related to the concept of proto-value functions.",7. Conclusion,[0],[0]
+The learned representation informs the agent what are meaningful options to be sought after.,7. Conclusion,[0],[0]
+The discovered options can be seen as traversing each one of the dimensions in the learned representation.,7. Conclusion,[0],[0]
+We believe successful algorithms in the future will be able to simultaneously discover representations and options.,7. Conclusion,[0],[0]
+"Agents will use their learned representation to discover options, which will be used to further explore the environment, improving the agent’s representation.
+",7. Conclusion,[0],[0]
+"Interestingly, the options first discovered by our approach do not necessarily find bottlenecks, which are commonly sought after.",7. Conclusion,[0],[0]
+"In this paper we showed how bottleneck options can hinder exploration strategies if naively added to the agent’s action set, and how the options we discover can help an agent to explore.",7. Conclusion,[0],[0]
+"Also, we have shown how the discovered options can be used to accumulate reward in a multitude of tasks, leveraging their exploratory properties.
+",7. Conclusion,[0],[0]
+There are several exciting avenues for future work.,7. Conclusion,[0],[0]
+"As noted, SFA can be seen as an approximation to PVFs.",7. Conclusion,[0],[0]
+It would be interesting to compare such an approach to eigenoptions.,7. Conclusion,[0],[0]
+It would also be interesting to see if the options we discover can be generated incrementally and with incomplete graphs.,7. Conclusion,[0],[0]
+"Finally, one can also imagine extensions to the proposed algorithm where a hierarchy of options is built.",7. Conclusion,[0],[0]
+"The authors would like to thank Will Dabney, Rémi Munos and Csaba Szepesvári for useful discussions.",Acknowledgements,[0],[0]
+This work was supported by grants from Alberta Innovates Technology Futures and the Alberta Machine Intelligence Institute (Amii).,Acknowledgements,[0],[0]
+Computing resources were provided by Compute Canada through CalculQuébec.,Acknowledgements,[0],[0]
+Representation learning and option discovery are two of the biggest challenges in reinforcement learning (RL).,abstractText,[0],[0]
+Proto-value functions (PVFs) are a well-known approach for representation learning in MDPs.,abstractText,[0],[0]
+In this paper we address the option discovery problem by showing how PVFs implicitly define options.,abstractText,[0],[0]
+"We do it by introducing eigenpurposes, intrinsic reward functions derived from the learned representations.",abstractText,[0],[0]
+The options discovered from eigenpurposes traverse the principal directions of the state space.,abstractText,[0],[0]
+They are useful for multiple tasks because they are discovered without taking the environment’s rewards into consideration.,abstractText,[0],[0]
+"Moreover, different options act at different time scales, making them helpful for exploration.",abstractText,[0],[0]
+We demonstrate features of eigenpurposes in traditional tabular domains as well as in Atari 2600 games.,abstractText,[0],[0]
+A Laplacian Framework for Option Discovery in Reinforcement Learning,title,[0],[0]
+"Proceedings of the 2015 Conference on Empirical Methods in Natural Language Processing, pages 632–642, Lisbon, Portugal, 17-21 September 2015. c©2015 Association for Computational Linguistics.",text,[0],[0]
+"The semantic concepts of entailment and contradiction are central to all aspects of natural language meaning (Katz, 1972; van Benthem, 2008), from the lexicon to the content of entire texts.",1 Introduction,[0],[0]
+"Thus, natural language inference (NLI) — characterizing and using these relations in computational systems (Fyodorov et al., 2000; Condoravdi et al., 2003; Bos and Markert, 2005; Dagan et al., 2006; MacCartney and Manning, 2009) — is essential in tasks ranging from information retrieval to semantic parsing to commonsense reasoning.
+",1 Introduction,[0],[0]
+"NLI has been addressed using a variety of techniques, including those based on symbolic logic, knowledge bases, and neural networks.",1 Introduction,[0],[0]
+"In recent years, it has become an important testing ground
+for approaches employing distributed word and phrase representations.",1 Introduction,[0],[0]
+"Distributed representations excel at capturing relations based in similarity, and have proven effective at modeling simple dimensions of meaning like evaluative sentiment (e.g., Socher et al. 2013), but it is less clear that they can be trained to support the full range of logical and commonsense inferences required for NLI (Bowman et al., 2015; Weston et al., 2015b; Weston et al., 2015a).",1 Introduction,[0],[0]
+"In a SemEval 2014 task aimed at evaluating distributed representations for NLI, the best-performing systems relied heavily on additional features and reasoning capabilities (Marelli et al., 2014a).
+",1 Introduction,[0],[0]
+"Our ultimate objective is to provide an empirical evaluation of learning-centered approaches to NLI, advancing the case for NLI as a tool for the evaluation of domain-general approaches to semantic representation.",1 Introduction,[0],[0]
+"However, in our view, existing NLI corpora do not permit such an assessment.",1 Introduction,[0],[0]
+"They are generally too small for training modern data-intensive, wide-coverage models, many contain sentences that were algorithmically generated, and they are often beset with indeterminacies of event and entity coreference that significantly impact annotation quality.
+",1 Introduction,[0],[0]
+"To address this, this paper introduces the Stanford Natural Language Inference (SNLI) corpus, a collection of sentence pairs labeled for entailment, contradiction, and semantic independence.",1 Introduction,[0],[0]
+"At 570,152 sentence pairs, SNLI is two orders of magnitude larger than all other resources of its type.",1 Introduction,[0],[0]
+"And, in contrast to many such resources, all of its sentences and labels were written by humans in a grounded, naturalistic context.",1 Introduction,[0],[0]
+"In a separate validation phase, we collected four additional judgments for each label for 56,941 of the examples.",1 Introduction,[0],[0]
+"Of these, 98% of cases emerge with a threeannotator consensus, and 58% see a unanimous consensus from all five annotators.
+",1 Introduction,[0],[0]
+"In this paper, we use this corpus to evaluate
+632
+a variety of models for natural language inference, including rule-based systems, simple linear classifiers, and neural network-based models.",1 Introduction,[0],[0]
+We find that two models achieve comparable performance: a feature-rich classifier model and a neural network model centered around a Long Short-Term Memory network (LSTM; Hochreiter and Schmidhuber 1997).,1 Introduction,[0],[0]
+"We further evaluate the LSTM model by taking advantage of its ready support for transfer learning, and show that it can be adapted to an existing NLI challenge task, yielding the best reported performance by a neural network model and approaching the overall state of the art.",1 Introduction,[0],[0]
+"To date, the primary sources of annotated NLI corpora have been the Recognizing Textual Entailment (RTE) challenge tasks.1 These are generally high-quality, hand-labeled data sets, and they have stimulated innovative logical and statistical models of natural language reasoning, but their small size (fewer than a thousand examples each) limits their utility as a testbed for learned distributed representations.",2 A new corpus for NLI,[0],[0]
+"The data for the SemEval 2014 task called Sentences Involving Compositional Knowledge (SICK) is a step up in terms of size, but only to 4,500 training examples, and its partly automatic construction introduced some spurious patterns into the data (Marelli et al. 2014a, §6).",2 A new corpus for NLI,[0],[0]
+"The Denotation Graph entailment set (Young et al., 2014) contains millions of examples of entailments between sentences and artificially constructed short phrases, but it was labeled using fully automatic methods, and is noisy enough that it is probably suitable only as a source of sup-
+1http://aclweb.org/aclwiki/index.php?",2 A new corpus for NLI,[0],[0]
+"title=Textual_Entailment_Resource_Pool
+plementary training data.",2 A new corpus for NLI,[0],[0]
+"Outside the domain of sentence-level entailment, Levy et al. (2014) introduce a large corpus of semi-automatically annotated entailment examples between subject–verb– object relation triples, and the second release of the Paraphrase Database (Pavlick et al., 2015) includes automatically generated entailment annotations over a large corpus of pairs of words and short phrases.
+",2 A new corpus for NLI,[0],[0]
+Existing resources suffer from a subtler issue that impacts even projects using only humanprovided annotations: indeterminacies of event and entity coreference lead to insurmountable indeterminacy concerning the correct semantic label (de Marneffe et al. 2008,2 A new corpus for NLI,[0],[0]
+§4.3; Marelli et al. 2014b).,2 A new corpus for NLI,[0],[0]
+"For an example of the pitfalls surrounding entity coreference, consider the sentence pair A boat sank in the Pacific Ocean and A boat sank in the Atlantic Ocean.",2 A new corpus for NLI,[0],[0]
+"The pair could be labeled as a contradiction if one assumes that the two sentences refer to the same single event, but could also be reasonably labeled as neutral if that assumption is not made.",2 A new corpus for NLI,[0],[0]
+"In order to ensure that our labeling scheme assigns a single correct label to every pair, we must select one of these approaches across the board, but both choices present problems.",2 A new corpus for NLI,[0],[0]
+"If we opt not to assume that events are coreferent, then we will only ever find contradictions between sentences that make broad universal assertions, but if we opt to assume coreference, new counterintuitive predictions emerge.",2 A new corpus for NLI,[0],[0]
+"For example, Ruth Bader Ginsburg was appointed to the US Supreme Court and I had a sandwich for lunch today would unintuitively be labeled as a contradiction, rather than neutral, under this assumption.
+",2 A new corpus for NLI,[0],[0]
+"Entity coreference presents a similar kind of indeterminacy, as in the pair A tourist visited New
+York and A tourist visited the city.",2 A new corpus for NLI,[0],[0]
+"Assuming coreference between New York and the city justifies labeling the pair as an entailment, but without that assumption the city could be taken to refer to a specific unknown city, leaving the pair neutral.",2 A new corpus for NLI,[0],[0]
+"This kind of indeterminacy of label can be resolved only once the questions of coreference are resolved.
+",2 A new corpus for NLI,[0],[0]
+"With SNLI, we sought to address the issues of size, quality, and indeterminacy.",2 A new corpus for NLI,[0],[0]
+"To do this, we employed a crowdsourcing framework with the following crucial innovations.",2 A new corpus for NLI,[0],[0]
+"First, the examples were grounded in specific scenarios, and the premise and hypothesis sentences in each example were constrained to describe that scenario from the same perspective, which helps greatly in controlling event and entity coreference.2 Second, the prompt gave participants the freedom to produce entirely novel sentences within the task setting, which led to richer examples than we see with the more proscribed string-editing techniques of earlier approaches, without sacrificing consistency.",2 A new corpus for NLI,[0],[0]
+"Third, a subset of the resulting sentences were sent to a validation task aimed at providing a highly reliable set of annotations over the same data, and at identifying areas of inferential uncertainty.",2 A new corpus for NLI,[0],[0]
+We used Amazon Mechanical Turk for data collection.,2.1 Data collection,[0],[0]
+"In each individual task (each HIT), a worker was presented with premise scene descriptions from a pre-existing corpus, and asked to supply hypotheses for each of our three labels— entailment, neutral, and contradiction—forcing the data to be balanced among these classes.
+",2.1 Data collection,[0],[0]
+The instructions that we provided to the workers are shown in Figure 1.,2.1 Data collection,[0],[0]
+"Below the instructions were three fields for each of three requested sentences, corresponding to our entailment, neutral, and contradiction labels, a fourth field (marked optional) for reporting problems, and a link to an FAQ page.",2.1 Data collection,[0],[0]
+That FAQ grew over the course of data collection.,2.1 Data collection,[0],[0]
+"It warned about disallowed techniques (e.g., reusing the same sentence for many different prompts, which we saw in a few cases), provided guidance concerning sentence length and
+2 Issues of coreference are not completely solved, but greatly mitigated.",2.1 Data collection,[0],[0]
+"For example, with the premise sentence A dog is lying in the grass, a worker could safely assume that the dog is the most prominent thing in the photo, and very likely the only dog, and build contradicting sentences assuming reference to the same dog.
+complexity (we did not enforce a minimum length, and we allowed bare NPs as well as full sentences), and reviewed logistical issues around payment timing.",2.1 Data collection,[0],[0]
+"About 2,500 workers contributed.
+",2.1 Data collection,[0],[0]
+"For the premises, we used captions from the Flickr30k corpus (Young et al., 2014), a collection of approximately 160k captions (corresponding to about 30k images) collected in an earlier crowdsourced effort.3",2.1 Data collection,[0],[0]
+"The captions were not authored by the photographers who took the source images, and they tend to contain relatively literal scene descriptions that are suited to our approach, rather than those typically associated with personal photographs (as in their example: Our trip to the Olympic Peninsula).",2.1 Data collection,[0],[0]
+"In order to ensure that the label for each sentence pair can be recovered solely based on the available text, we did not use the images at all during corpus collection.
+",2.1 Data collection,[0],[0]
+"Table 2 reports some key statistics about the collected corpus, and Figure 2 shows the distributions of sentence lengths for both our source hypotheses and our newly collected premises.",2.1 Data collection,[0],[0]
+"We observed that while premise sentences varied considerably in length, hypothesis sentences tended to be as
+3 We additionally include about 4k sentence pairs from a pilot study in which the premise sentences were instead drawn from the VisualGenome corpus (under construction; visualgenome.org).",2.1 Data collection,[0],[0]
+"These examples appear only in the training set, and have pair identifiers prefixed with vg in our corpus.
+Data set sizes: Training pairs 550,152 Development pairs 10,000 Test pairs 10,000
+Sentence length:",2.1 Data collection,[0],[0]
+"Premise mean token count 14.1 Hypothesis mean token count 8.3
+Parser output:",2.1 Data collection,[0],[0]
+"Premise ‘S’-rooted parses 74.0% Hypothesis ‘S’-rooted parses 88.9% Distinct words (ignoring case) 37,026
+Table 2:",2.1 Data collection,[0],[0]
+Key statistics for the raw sentence pairs in SNLI.,2.1 Data collection,[0],[0]
+"Since the two halves of each pair were collected separately, we report some statistics for both.
+short as possible while still providing enough information to yield a clear judgment, clustering at around seven words.",2.1 Data collection,[0],[0]
+"We also observed that the bulk of the sentences from both sources were syntactically complete rather than fragments, and the frequency with which the parser produces a parse rooted with an ‘S’ (sentence) node attests to this.",2.1 Data collection,[0],[0]
+"In order to measure the quality of our corpus, and in order to construct maximally useful testing and development sets, we performed an additional round of validation for about 10% of our data.",2.2 Data validation,[0],[0]
+"This validation phase followed the same basic form as the Mechanical Turk labeling task used to label the SICK entailment data: we presented workers with pairs of sentences in batches of five, and asked them to choose a single label for each pair.",2.2 Data validation,[0],[0]
+"We supplied each pair to four annotators, yielding five labels per pair including the label used by the original author.",2.2 Data validation,[0],[0]
+"The instructions were similar to the instructions for initial data collection shown in Figure 1, and linked to a similar FAQ.",2.2 Data validation,[0],[0]
+"Though we initially used a very restrictive qualification (based on past approval rate) to select workers for the validation task, we nonetheless discovered (and deleted) some instances of random guessing in an early batch of work, and subsequently instituted a fully closed qualification restricted to about 30 trusted workers.
+",2.2 Data validation,[0],[0]
+"For each pair that we validated, we assigned a gold label.",2.2 Data validation,[0],[0]
+"If any one of the three labels was chosen by at least three of the five annotators, it was
+LHS RHS 0 0 0",2.2 Data validation,[0],[0]
+"1 1 39 1 2 42 1011 1/2/00 3 156 7980 3 4 1095 29471 4 5 3882 61196 5 6 12120 74094 6 7 26514 93600 7 8 37434 85851 8 9 44028 61359 9 10 49245 46711 10 11 50919 33241 11 12 48363 22844 12 13 43314 15994 13 14 38121 11047 14 15 33183 7601 5 16 27621 5312 16 17 23250 3732 17 18 20247 2631 18 19 18513 1878 19 20 16386 1325 20 21 13746 911 21 22 12066 642 22 23 9183 449 23 24 7131 357 24
+25 6198 217 25
+26 5007 168 26
+27 3963 138 27
+28 3438 84 28
+29 2631 67 29
+30 1959 46 30 31 1956 26 31 32 1434 31 32 33 1086 23 33 34 912 16 34 35 897 19 35 36 774 8 36 37 453 12 37 38 618 4 38 39 291 5 39 40 330 2 40 41 249 4 41 42 180 2 42 43 225 1 43 44 162 1 44 45 108 1 48 46 87 1 51 47 60 2 55 48 36 1 56 49 90 1 60 50 21 1 62 51 66 52 51 53 36 54 24 55 63 56 18 57 15 58 6 59 27 60 6 61 3 62 3 63 3 64 6 65 3 66 3 67 6 68 6 69 18 70 15 71 3 72 15 73 3 75 15 79 3 82 15
+0 10,000 20,000 30,000 40,000 50,000 60,000 70,000 80,000 90,000 100,000
+0 5 10 15 20 25 30 35 40
+N um
+be r
+of se
+nt en
+ce s
+Sentence length (tokens)
+",2.2 Data validation,[0],[0]
+"Premise Hypothesis
+Figure 2: The distribution of sentence length.
+chosen as the gold label.",2.2 Data validation,[0],[0]
+"If there was no such consensus, which occurred in about 2% of cases, we assigned the placeholder label ‘-’.",2.2 Data validation,[0],[0]
+"While these unlabeled examples are included in the corpus distribution, they are unlikely to be helpful for the standard NLI classification task, and we do not include them in either training or evaluation in the experiments that we discuss in this paper.
+",2.2 Data validation,[0],[0]
+The results of this validation process are summarized in Table 3.,2.2 Data validation,[0],[0]
+"Nearly all of the examples received a majority label, indicating broad consensus about the nature of the data and categories.",2.2 Data validation,[0],[0]
+The gold-labeled examples are very nearly evenly distributed across the three labels.,2.2 Data validation,[0],[0]
+"The Fleiss κ scores (computed over every example with a full five annotations) are likely to be conservative given our large and unevenly distributed pool of annotators, but they still provide insights about the levels of disagreement across the three semantic classes.",2.2 Data validation,[0],[0]
+This disagreement likely reflects not just the limitations of large crowdsourcing efforts but also the uncertainty inherent in naturalistic NLI.,2.2 Data validation,[0],[0]
+"Regardless, the overall rate of agreement is extremely high, suggesting that the corpus is sufficiently high quality to pose a challenging but realistic machine learning task.",2.2 Data validation,[0],[0]
+Table 1 shows a set of randomly chosen validated examples from the development set with their labels.,2.3 The distributed corpus,[0],[0]
+"Qualitatively, we find the data that we collected draws fairly extensively on commonsense knowledge, and that hypothesis and premise sentences often differ structurally in significant ways, suggesting that there is room for improvement beyond superficial word alignment models.",2.3 The distributed corpus,[0],[0]
+"We also find the sentences that we collected to be largely
+635
+fluent, correctly spelled English, with a mix of full sentences and caption-style noun phrase fragments, though punctuation and capitalization are often omitted.
+",2.3 The distributed corpus,[0],[0]
+"The corpus is available under a CreativeCommons Attribution-ShareAlike license, the same license used for the Flickr30k source captions.",2.3 The distributed corpus,[0],[0]
+"It can be downloaded at: nlp.stanford.edu/projects/snli/
+Partition We distribute the corpus with a prespecified train/test/development split.",2.3 The distributed corpus,[0],[0]
+The test and development sets contain 10k examples each.,2.3 The distributed corpus,[0],[0]
+"Each original ImageFlickr caption occurs in only one of the three sets, and all of the examples in the test and development sets have been validated.
+",2.3 The distributed corpus,[0],[0]
+"Parses The distributed corpus includes parses produced by the Stanford PCFG Parser 3.5.2 (Klein and Manning, 2003), trained on the standard training set as well as on the Brown Corpus (Francis and Kucera 1979), which we found to improve the parse quality of the descriptive sentences and noun phrases found in the descriptions.",2.3 The distributed corpus,[0],[0]
+The most immediate application for our corpus is in developing models for the task of NLI.,3 Our data as a platform for evaluation,[0],[0]
+"In par-
+ticular, since it is dramatically larger than any existing corpus of comparable quality, we expect it to be suitable for training parameter-rich models like neural networks, which have not previously been competitive at this task.",3 Our data as a platform for evaluation,[0],[0]
+"Our ability to evaluate standard classifier-base NLI models, however, was limited to those which were designed to scale to SNLI’s size without modification, so a more complete comparison of approaches will have to wait for future work.",3 Our data as a platform for evaluation,[0],[0]
+"In this section, we explore the performance of three classes of models which could scale readily: (i) models from a well-known NLI system, the Excitement Open Platform; (ii) variants of a strong but simple feature-based classifier model, which makes use of both unlexicalized and lexicalized features, and (iii) distributed representation models, including a baseline model and neural network sequence models.",3 Our data as a platform for evaluation,[0],[0]
+"The first class of models is from the Excitement Open Platform (EOP, Padó et al. 2014; Magnini et al. 2014)—an open source platform for RTE research.",3.1 Excitement Open Platform models,[0],[0]
+EOP is a tool for quickly developing NLI systems while sharing components such as common lexical resources and evaluation sets.,3.1 Excitement Open Platform models,[0],[0]
+"We evaluate on two algorithms included in the distribution: a simple edit-distance based algorithm and a classifier-based algorithm, the latter both in a bare form and augmented with EOP’s full suite of lexical resources.
+",3.1 Excitement Open Platform models,[0],[0]
+"Our initial goal was to better understand the difficulty of the task of classifying SNLI corpus inferences, rather than necessarily the performance of a state-of-the-art RTE system.",3.1 Excitement Open Platform models,[0],[0]
+"We approached this by running the same system on several data sets: our own test set, the SICK test data, and the standard RTE-3 test set (Giampiccolo et al., 2007).",3.1 Excitement Open Platform models,[0],[0]
+We report results in Table 4.,3.1 Excitement Open Platform models,[0],[0]
+"Each of the models
+was separately trained on the training set of each corpus.",3.1 Excitement Open Platform models,[0],[0]
+All models are evaluated only on 2-class entailment.,3.1 Excitement Open Platform models,[0],[0]
+"To convert 3-class problems like SICK and SNLI to this setting, all instances of contradiction and unknown are converted to nonentailment.",3.1 Excitement Open Platform models,[0],[0]
+"This yields a most-frequent-class baseline accuracy of 66% on SNLI, and 71% on SICK.",3.1 Excitement Open Platform models,[0],[0]
+"This is intended primarily to demonstrate the difficulty of the task, rather than necessarily the performance of a state-of-the-art RTE system.",3.1 Excitement Open Platform models,[0],[0]
+"The edit distance algorithm tunes the weight of the three caseinsensitive edit distance operations on the training set, after removing stop words.",3.1 Excitement Open Platform models,[0],[0]
+"In addition to the base classifier-based system distributed with the platform, we train a variant which includes information from WordNet (Miller, 1995) and VerbOcean (Chklovski and Pantel, 2004), and makes use of features based on tree patterns and dependency tree skeletons (Wang and Neumann, 2007).",3.1 Excitement Open Platform models,[0],[0]
+"Unlike the RTE datasets, SNLI’s size supports approaches which make use of rich lexicalized features.",3.2 Lexicalized Classifier,[0],[0]
+We evaluate a simple lexicalized classifier to explore the ability of non-specialized models to exploit these features in lieu of more involved language understanding.,3.2 Lexicalized Classifier,[0],[0]
+"Our classifier implements 6 feature types; 3 unlexicalized and 3 lexicalized:
+1.",3.2 Lexicalized Classifier,[0],[0]
+"The BLEU score of the hypothesis with respect to the premise, using an n-gram length between 1 and 4.
+2.",3.2 Lexicalized Classifier,[0],[0]
+"The length difference between the hypothesis and the premise, as a real-valued feature.
+3.",3.2 Lexicalized Classifier,[0],[0]
+"The overlap between words in the premise and hypothesis, both as an absolute count and a percentage of possible overlap, and both over all words and over just nouns, verbs, adjectives, and adverbs.
+4.",3.2 Lexicalized Classifier,[0],[0]
+"An indicator for every unigram and bigram in the hypothesis.
+5.",3.2 Lexicalized Classifier,[0],[0]
+"Cross-unigrams: for every pair of words across the premise and hypothesis which share a POS tag, an indicator feature over the two words.
+",3.2 Lexicalized Classifier,[0],[0]
+6.,3.2 Lexicalized Classifier,[0],[0]
+Cross,3.2 Lexicalized Classifier,[0],[0]
+"-bigrams: for every pair of bigrams across the premise and hypothesis which share a POS tag on the second word, an indicator feature over the two bigrams.
+",3.2 Lexicalized Classifier,[0],[0]
+"We report results in Table 5, along with ablation studies for removing the cross-bigram features (leaving only the cross-unigram feature) and
+for removing all lexicalized features.",3.2 Lexicalized Classifier,[0],[0]
+"On our large corpus in particular, there is a substantial jump in accuracy from using lexicalized features, and another from using the very sparse cross-bigram features.",3.2 Lexicalized Classifier,[0],[0]
+The latter result suggests that there is value in letting the classifier automatically learn to recognize structures like explicit negations and adjective modification.,3.2 Lexicalized Classifier,[0],[0]
+"A similar result was shown in Wang and Manning (2012) for bigram features in sentiment analysis.
+",3.2 Lexicalized Classifier,[0],[0]
+It is surprising that the classifier performs as well as it does without any notion of alignment or tree transformations.,3.2 Lexicalized Classifier,[0],[0]
+"Although we expect that richer models would perform better, the results suggest that given enough data, cross bigrams with the noisy part-of-speech overlap constraint can produce an effective model.",3.2 Lexicalized Classifier,[0],[0]
+SNLI is suitably large and diverse to make it possible to train neural network models that produce distributed representations of sentence meaning.,3.3 Sentence embeddings and NLI,[0],[0]
+"In this section, we compare the performance of three such models on the corpus.",3.3 Sentence embeddings and NLI,[0],[0]
+"To focus specifically on the strengths of these models at producing informative sentence representations, we use sentence embedding as an intermediate step in the NLI classification task: each model must produce a vector representation of each of the two sentences without using any context from the other sentence, and the two resulting vectors are then passed to a neural network classifier which predicts the label for the pair.",3.3 Sentence embeddings and NLI,[0],[0]
+"This choice allows us to focus on existing models for sentence embedding, and it allows us to evaluate the ability of those models to learn useful representations of meaning (which may be independently useful for subsequent tasks), at the cost of excluding from con-
+sideration possible strong neural models for NLI that directly compare the two inputs at the word or phrase level.
+",3.3 Sentence embeddings and NLI,[0],[0]
+"Our neural network classifier, depicted in Figure 3 (and based on a one-layer model in Bowman et al. 2015), is simply a stack of three 200d tanh layers, with the bottom layer taking the concatenated sentence representations as input and the top layer feeding a softmax classifier, all trained jointly with the sentence embedding model itself.
+",3.3 Sentence embeddings and NLI,[0],[0]
+"We test three sentence embedding models, each set to use 100d phrase and sentence embeddings.",3.3 Sentence embeddings and NLI,[0],[0]
+Our baseline sentence embedding model simply sums the embeddings of the words in each sentence.,3.3 Sentence embeddings and NLI,[0],[0]
+"In addition, we experiment with two simple sequence embedding models: a plain RNN and an LSTM RNN (Hochreiter and Schmidhuber, 1997).
+",3.3 Sentence embeddings and NLI,[0],[0]
+"The word embeddings for all of the models are initialized with the 300d reference GloVe vectors (840B token version, Pennington et al. 2014) and fine-tuned as part of training.",3.3 Sentence embeddings and NLI,[0],[0]
+"In addition, all of the models use an additional tanh neural network layer to map these 300d embeddings into the lower-dimensional phrase and sentence embedding space.",3.3 Sentence embeddings and NLI,[0],[0]
+"All of the models are randomly initialized using standard techniques and trained using AdaDelta (Zeiler, 2012) minibatch SGD until performance on the development set stops improving.",3.3 Sentence embeddings and NLI,[0],[0]
+"We applied L2 regularization to all models, manually tuning the strength coefficient λ for each, and additionally applied dropout (Srivastava et al., 2014) to the inputs and outputs of the sen-
+tence embedding models (though not to its internal connections) with a fixed dropout rate.",3.3 Sentence embeddings and NLI,[0],[0]
+"All models were implemented in a common framework for this paper, and the implementations will be made available at publication time.
+",3.3 Sentence embeddings and NLI,[0],[0]
+The results are shown in Table 6.,3.3 Sentence embeddings and NLI,[0],[0]
+"The sum of words model performed slightly worse than the fundamentally similar lexicalized classifier— while the sum of words model can use pretrained word embeddings to better handle rare words, it lacks even the rudimentary sensitivity to word order that the lexicalized model’s bigram features provide.",3.3 Sentence embeddings and NLI,[0],[0]
+"Of the two RNN models, the LSTM’s more robust ability to learn long-term dependencies serves it well, giving it a substantial advantage over the plain RNN, and resulting in performance that is essentially equivalent to the lexicalized classifier on the test set (LSTM performance near the stopping iteration varies by up to 0.5% between evaluation steps).",3.3 Sentence embeddings and NLI,[0],[0]
+"While the lexicalized model fits the training set almost perfectly, the gap between train and test set accuracy is relatively small for all three neural network models, suggesting that research into significantly higher capacity versions of these models would be productive.",3.3 Sentence embeddings and NLI,[0],[0]
+Figure 4 shows a learning curve for the LSTM and the lexicalized and unlexicalized feature-based models.,3.4 Analysis and discussion,[0],[0]
+"It shows that the large size of the corpus is crucial to both the LSTM and the lexicalized model, and suggests that additional data would yield still better performance for both.",3.4 Analysis and discussion,[0],[0]
+"In addition, though the LSTM and the lexicalized model show similar performance when trained on the current full corpus, the somewhat steeper slope for the LSTM hints that its ability to learn arbitrarily structured representations of sentence meaning may give it an advantage over the more constrained lexicalized model on still larger datasets.
+",3.4 Analysis and discussion,[0],[0]
+"We were struck by the speed with which the lexicalized classifier outperforms its unlexicalized
+33.33 40.08 47.63 57.72 67.42 71.88 73.95 76.78 78.22
+counterpart.",3.4 Analysis and discussion,[0],[0]
+"With only 100 training examples, the cross-bigram classifier is already performing better.",3.4 Analysis and discussion,[0],[0]
+"Empirically, we find that the top weighted features for the classifier trained on 100 examples tend to be high precision entailments; e.g., playing → outside (most scenes are outdoors), a banana → person eating.",3.4 Analysis and discussion,[0],[0]
+"If relatively few spurious entailments get high weight—as it appears is the case— then it makes sense that, when these do fire, they boost accuracy in identifying entailments.
+",3.4 Analysis and discussion,[0],[0]
+There are revealing patterns in the errors common to all the models considered here.,3.4 Analysis and discussion,[0],[0]
+"Despite the large size of the training corpus and the distributional information captured by GloVe initialization, many lexical relationships are still misanalyzed, leading to incorrect predictions of independent, even for pairs that are common in the training corpus like beach/surf and sprinter/runner.",3.4 Analysis and discussion,[0],[0]
+"Semantic mistakes at the phrasal level (e.g., predicting contradiction for A male is placing an order in a deli/A man buying a sandwich at a deli) indicate that additional attention to compositional semantics would pay off.",3.4 Analysis and discussion,[0],[0]
+"However, many of the persistent problems run deeper, to inferences that depend on world knowledge and contextspecific inferences, as in the entailment pair A race car driver leaps from a burning car/A race car driver escaping danger, for which both the lexicalized classifier and the LSTM predict neutral.",3.4 Analysis and discussion,[0],[0]
+"In other cases, the models’ attempts to shortcut
+this kind of inference through lexical cues can lead them astray.",3.4 Analysis and discussion,[0],[0]
+"Some of these examples have qualities reminiscent of Winograd schemas (Winograd, 1972; Levesque, 2013).",3.4 Analysis and discussion,[0],[0]
+"For example, all the models wrongly predict entailment for A young girl throws sand toward the ocean/A girl can’t stand the ocean, presumably because of distributional associations between throws and can’t stand.
+",3.4 Analysis and discussion,[0],[0]
+Analysis of the models’ predictions also yields insights into the extent to which they grapple with event and entity coreference.,3.4 Analysis and discussion,[0],[0]
+"For the most part, the original image prompts contained a focal element that the caption writer identified with a syntactic subject, following information structuring conventions associating subjects and topics in English (Ward and Birner, 2004).",3.4 Analysis and discussion,[0],[0]
+"Our annotators generally followed suit, writing sentences that, while structurally diverse, share topic/focus (theme/rheme) structure with their premises.",3.4 Analysis and discussion,[0],[0]
+"This promotes a coherent, situation-specific construal of each sentence pair.",3.4 Analysis and discussion,[0],[0]
+"This is information that our models can easily take advantage of, but it can lead them astray.",3.4 Analysis and discussion,[0],[0]
+"For instance, all of them stumble with the amusingly simple case A woman prepares ingredients for a bowl of soup/A soup bowl prepares a woman, in which prior expectations about parallelism are not met.",3.4 Analysis and discussion,[0],[0]
+"Another headline example of this type is A man wearing padded arm protection is being bitten by a German shepherd dog/A man bit a dog, which all the models wrongly diagnose as entailment, though the sentences report two very different stories.",3.4 Analysis and discussion,[0],[0]
+A model with access to explicit information about syntactic or semantic structure should perform better on cases like these.,3.4 Analysis and discussion,[0],[0]
+"To the extent that successfully training a neural network model like our LSTM on SNLI forces that model to encode broadly accurate representations of English scene descriptions and to build an entailment classifier over those relations, we should expect it to be readily possible to adapt the trained model for use on other NLI tasks.",4 Transfer learning with SICK,[0],[0]
+"In this section, we evaluate on the SICK entailment task using a simple transfer learning method (Pratt et al., 1991) and achieve competitive results.
+",4 Transfer learning with SICK,[0],[0]
+"To perform transfer, we take the parameters of the LSTM RNN model trained on SNLI and use them to initialize a new model, which is trained from that point only on the training portion of SICK.",4 Transfer learning with SICK,[0],[0]
+"The only newly initialized parameters are
+softmax layer parameters and the embeddings for words that appear in SICK, but not in SNLI (which are populated with GloVe embeddings as above).",4 Transfer learning with SICK,[0],[0]
+"We use the same model hyperparameters that were used to train the original model, with the exception of the L2 regularization strength, which is re-tuned.",4 Transfer learning with SICK,[0],[0]
+We additionally transfer the accumulators that are used by AdaDelta to set the learning rates.,4 Transfer learning with SICK,[0],[0]
+"This lowers the starting learning rates, and is intended to ensure that the model does not learn too quickly in its first few epochs after transfer and destroy the knowledge accumulated in the pre-transfer phase of training.
+",4 Transfer learning with SICK,[0],[0]
+The results are shown in Table 7.,4 Transfer learning with SICK,[0],[0]
+"Training on SICK alone yields poor performance, and the model trained on SNLI fails when tested on SICK data, labeling more neutral examples as contradictions than correctly, possibly as a result of subtle differences in how the labeling task was presented.",4 Transfer learning with SICK,[0],[0]
+"In contrast, transferring SNLI representations to SICK yields the best performance yet reported for an unaugmented neural network model, surpasses the available EOP models, and approaches both the overall state of the art at 84.6% (Lai and Hockenmaier, 2014) and the 84% level of interannotator agreement, which likely represents an approximate performance ceiling.",4 Transfer learning with SICK,[0],[0]
+"This suggests that the introduction of a large high-quality corpus makes it possible to train representation-learning models for sentence meaning that are competitive with the best hand-engineered models on inference tasks.
+",4 Transfer learning with SICK,[0],[0]
+"We attempted to apply this same transfer evaluation technique to the RTE-3 challenge, but found that the small training set (800 examples) did not allow the model to adapt to the unfamiliar genre of text used in that corpus, such that no training configuration yielded competitive performance.",4 Transfer learning with SICK,[0],[0]
+Further research on effective transfer learning on small data sets with neural models might facilitate improvements here.,4 Transfer learning with SICK,[0],[0]
+"Natural languages are powerful vehicles for reasoning, and nearly all questions about meaningfulness in language can be reduced to questions of entailment and contradiction in context.",5 Conclusion,[0],[0]
+"This suggests that NLI is an ideal testing ground for theories of semantic representation, and that training for NLI tasks can provide rich domain-general semantic representations.",5 Conclusion,[0],[0]
+"To date, however, it has not been possible to fully realize this potential due to the limited nature of existing NLI resources.",5 Conclusion,[0],[0]
+"This paper sought to remedy this with a new, largescale, naturalistic corpus of sentence pairs labeled for entailment, contradiction, and independence.",5 Conclusion,[0],[0]
+"We used this corpus to evaluate a range of models, and found that both simple lexicalized models and neural network models perform well, and that the representations learned by a neural network model on our corpus can be used to dramatically improve performance on a standard challenge dataset.",5 Conclusion,[0],[0]
+We hope that SNLI presents valuable training data and a challenging testbed for the continued application of machine learning to semantic representation.,5 Conclusion,[0],[0]
+"We gratefully acknowledge support from a Google Faculty Research Award, a gift from Bloomberg L.P., the Defense Advanced Research Projects Agency (DARPA)",Acknowledgments,[0],[0]
+Deep Exploration and Filtering of Text (DEFT) Program under Air Force Research Laboratory (AFRL) contract no.,Acknowledgments,[0],[0]
+"FA875013-2-0040, the National Science Foundation under grant no.",Acknowledgments,[0],[0]
+"IIS 1159679, and the Department of the Navy, Office of Naval Research, under grant no.",Acknowledgments,[0],[0]
+N00014-10-1-0109.,Acknowledgments,[0],[0]
+"Any opinions, findings, and conclusions or recommendations expressed in this material are those of the authors and do not necessarily reflect the views of Google, Bloomberg L.P., DARPA, AFRL NSF, ONR, or the US government.",Acknowledgments,[0],[0]
+We also thank our many excellent Mechanical Turk contributors.,Acknowledgments,[0],[0]
+"Understanding entailment and contradiction is fundamental to understanding natural language, and inference about entailment and contradiction is a valuable testing ground for the development of semantic representations.",abstractText,[0],[0]
+"However, machine learning research in this area has been dramatically limited by the lack of large-scale resources.",abstractText,[0],[0]
+"To address this, we introduce the Stanford Natural Language Inference corpus, a new, freely available collection of labeled sentence pairs, written by humans doing a novel grounded task based on image captioning.",abstractText,[0],[0]
+"At 570K pairs, it is two orders of magnitude larger than all other resources of its type.",abstractText,[0],[0]
+"This increase in scale allows lexicalized classifiers to outperform some sophisticated existing entailment models, and it allows a neural network-based model to perform competitively on natural language inference benchmarks for the first time.",abstractText,[0],[0]
+A large annotated corpus for learning natural language inference,title,[0],[0]
+"Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics, pages 1237–1247 Vancouver, Canada, July 30 - August 4, 2017. c©2017 Association for Computational Linguistics
+https://doi.org/10.18653/v1/P17-1114",text,[0],[0]
+"Natural language processing (NLP) plays an important role in artificial intelligence, which has been extensively studied for many decades.",1 Introduction,[0],[0]
+"Conventional NLP techniques include the rule-based symbolic approaches widely used about two decades ago, and the more recent statistical approaches relying on feature engineering and statistical models.",1 Introduction,[0],[0]
+"In the recent years, deep learning approach has achieved huge successes in many applications, ranging from speech recognition to image classification.",1 Introduction,[0],[0]
+"It is drawing increasing attention in the NLP community.
+",1 Introduction,[0],[0]
+"In this paper, we are interested in a fundamental problem in NLP, namely named entity recognition (NER) and mention detection (MD).",1 Introduction,[0],[0]
+"NER and MD are very challenging tasks in NLP, laying the foundation of almost every NLP application.",1 Introduction,[0],[0]
+"NER and MD are tasks of identifying entities (named and/or nominal) from raw text, and classifying the detected entities into one of the pre-defined categories such as person (PER), organization (ORG), location (LOC), etc.",1 Introduction,[0],[0]
+"Some tasks focus on named entities only, while the others also detect nominal mentions.",1 Introduction,[0],[0]
+"Moreover, nested mentions may need to be extracted too.",1 Introduction,[0],[0]
+"For example,
+[Sue]PER and her [brother]PER N studied in [University of [Toronto]LOC ]ORG.
+where Toronto is a LOC entity, embedded in another longer ORG entity University of Toronto.
+",1 Introduction,[0],[0]
+"Similar to many other NLP problems, NER and MD is formulated as a sequence labeling problem, where a tag is sequentially assigned to each word in the input sentence.",1 Introduction,[0],[0]
+"It has been extensively studied in the NLP community (Borthwick et al., 1998).",1 Introduction,[0],[0]
+The core problem is to model the conditional probability of an output sequence given an arbitrary input sequence.,1 Introduction,[0],[0]
+"Many hand-crafted features are combined with statistical models, such as conditional random fields (CRFs) (Nguyen et al., 2010), to compute conditional probabilities.",1 Introduction,[0],[0]
+"More recently, some popular neural networks, including convolutional neural networks (CNNs) and recurrent neural networks (RNNs), are proposed to solve sequence labelling problems.",1 Introduction,[0],[0]
+"In the inference stage, the learned models compute the conditional probabilities and the output sequence is generated by the Viterbi decoding algorithm (Viterbi, 1967).
+",1 Introduction,[0],[0]
+"In this paper, we propose a novel local detection approach for solving NER and MD problems.",1 Introduction,[0],[0]
+"The idea can be easily extended to many other se-
+1237
+quence labeling problems, such as chunking, partof-speech tagging (POS).",1 Introduction,[0],[0]
+"Instead of globally modeling the whole sequence in training and jointly decode the entire output sequence in test, our method examines all word segments (up to a certain length) in a sentence.",1 Introduction,[0],[0]
+A word segment will be examined individually based on the underlying segment itself and its left and right contexts in the sentence so as to determine whether this word segment is a valid named entity and the corresponding label if it is.,1 Introduction,[0],[0]
+This approach conforms to the way human resolves an NER problem.,1 Introduction,[0],[0]
+"Given any word fragment and its contexts in a sentence or paragraph, people accurately determine whether this word segment is a named entity or not.",1 Introduction,[0],[0]
+People rarely conduct a global decoding over the entire sentence to make such a decision.,1 Introduction,[0],[0]
+The key to making an accurate local decision for each individual fragment is to have full access to the fragment itself as well as its complete contextual information.,1 Introduction,[0],[0]
+The main pitfall to implement this idea is that we can not easily encode the segment and its contexts in models since they are of varying lengths in natural languages.,1 Introduction,[0],[0]
+Many feature engineering techniques have been proposed but all of these methods will inevitably lead to information loss.,1 Introduction,[0],[0]
+"In this work, we propose to use a recent fixed-size encoding method, namely fixed-size ordinally forgetting encoding (FOFE) (Zhang et al., 2015a,b), to solve this problem.",1 Introduction,[0],[0]
+The FOFE method is a simple recursive encoding method.,1 Introduction,[0],[0]
+FOFE theoretically guarantees (almost) unique and lossless encoding of any variable-length sequence.,1 Introduction,[0],[0]
+"The left and the right contexts for each word segment are encoded by FOFE method, and then a simple neural network can be trained to make a precise recognition for each individual word segment based on the fixed-size presentation of the contextual information.",1 Introduction,[0],[0]
+This FOFE-based local detection approach is more appealing to NER and MD.,1 Introduction,[0],[0]
+"Firstly, feature engineering is almost eliminated.",1 Introduction,[0],[0]
+"Secondly, under this local detection framework, nested mention is handled with little modification.",1 Introduction,[0],[0]
+"Next, it makes better use of partially-labeled data available from many application scenarios.",1 Introduction,[0],[0]
+Sequence labeling model requires all entities in a sentence to be labeled.,1 Introduction,[0],[0]
+"If only some (not all) entities are labeled, it is not effective to learn a sequence labeling model.",1 Introduction,[0],[0]
+"However, every single labeled entity, along with its contexts, may be used to learn the proposed model.",1 Introduction,[0],[0]
+"At last, due to the simplicity of
+FOFE, simple neural networks, such as multilayer perceptrons, are sufficient for recognition.",1 Introduction,[0],[0]
+These models are much faster to train and easier to tune.,1 Introduction,[0],[0]
+"In the test stage, all possible word segments from a sentence may be packed into a mini-batch, jointly recognized in parallel on GPUs.",1 Introduction,[0],[0]
+"This leads to a very fast decoding process as well.
+",1 Introduction,[0],[0]
+"In this paper, we have applied this FOFE-based local detection approach to several popular NER and MD tasks, including the CoNLL 2003 NER task and TAC-KBP2015 and TAC-KBP2016 Trilingual Entity Discovery and Linking (EDL) tasks.",1 Introduction,[0],[0]
+Our proposed method has yielded strong performance in all of these examined tasks.,1 Introduction,[0],[0]
+It has been a long history of research involving neural networks (NN).,2 Related Work,[0],[0]
+"In this section, we briefly review some recent NN-related research work in NLP, which may be relevant to our work.
+",2 Related Work,[0],[0]
+"The success of word embedding (Mikolov et al., 2013; Liu et al., 2015) encourages researchers to focus on machine-learned representation instead of heavy feature engineering in NLP.",2 Related Work,[0],[0]
+"Using word embedding as the typical feature representation for words, NNs become competitive to traditional approaches in NER.",2 Related Work,[0],[0]
+"Many NLP tasks, such as NER, chunking and part-of-speech (POS) tagging can be formulated as sequence labeling tasks.",2 Related Work,[0],[0]
+"In (Collobert et al., 2011), deep convolutional neural networks (CNN) and conditional random fields (CRF) are used to infer NER labels at a sentence level, where they still use many hand-crafted features to improve performance, such as capitalization features explicitly defined based on first-letter capital, non-initial capital and so on.
+",2 Related Work,[0],[0]
+"Recently, recurrent neural networks (RNNs) have demonstrated the ability in modeling sequences (Graves, 2012).",2 Related Work,[0],[0]
+Huang et al. (2015) built on the previous CNN-CRF approach by replacing CNNs with bidirectional Long Short-Term Memory (B-LSTM).,2 Related Work,[0],[0]
+"Though they have reported improved performance, they employ heavy feature engineering in that work, most of which is language-specific.",2 Related Work,[0],[0]
+"There is a similar attempt in (Rondeau and Su, 2016) with full-rank CRF.",2 Related Work,[0],[0]
+"CNNs are used to extract character-level features automatically in (dos Santos et al., 2015).
+",2 Related Work,[0],[0]
+Gazetteer is a list of names grouped by the predefined categories.,2 Related Work,[0],[0]
+"Gazetteer is shown to be one of the most effective external knowledge sources
+to improve NER performance (Sang and Meulder, 2003).",2 Related Work,[0],[0]
+"Thus, gazetteer is widely used in many NER systems.",2 Related Work,[0],[0]
+"In (Chiu and Nichols, 2016), stateof-the-art performance on a popular NER task, i.e., CoNLL2003, is achieved by incorporating a large gazetteer.",2 Related Work,[0],[0]
+"Different from previous ways to use a set of bits to indicate whether a word is in gazetteer or not, they have encoded a match in BIOES (Begin, Inside, Outside, End, Single) annotation, which captures positional information.
+",2 Related Work,[0],[0]
+"Interestingly enough, none of these recent successes in NER was achieved by a vanilla RNN.",2 Related Work,[0],[0]
+"Rather, these successes are often established by sophisticated models combining CNNs, LSTMs and CRFs in certain ways.",2 Related Work,[0],[0]
+"In this paper, based on recent work in (Zhang et al., 2015a,b) and (Zhang et al., 2016), we propose a novel but simple solution to NER by applying DNN on top of FOFEbased features.",2 Related Work,[0],[0]
+"This simpler approach can achieve performance very close to state-of-the-art on various NER and MD tasks, without using any external knowledge or feature engineering.",2 Related Work,[0],[0]
+"In this section, we will briefly review some background techniques, which are important to our proposed NER and mention detection approach.",3 Preliminary,[0],[0]
+"It is well known that neural network is a universal approximator under certain conditions (Hornik, 1991).",3.1 Deep Feedforward Neural Networks,[0],[0]
+A feedforward neural network (FFNN) is a weighted graph with a layered architecture.,3.1 Deep Feedforward Neural Networks,[0],[0]
+Each layer is composed of several nodes.,3.1 Deep Feedforward Neural Networks,[0],[0]
+Successive layers are fully connected.,3.1 Deep Feedforward Neural Networks,[0],[0]
+Each node applies a function on the weighted sum of the lower layer.,3.1 Deep Feedforward Neural Networks,[0],[0]
+An NN can learn by adjusting its weights in a process called back-propagation.,3.1 Deep Feedforward Neural Networks,[0],[0]
+The learned NN may be used to generalize and extrapolate to new inputs that have not been seen during training.,3.1 Deep Feedforward Neural Networks,[0],[0]
+FFNN is a powerful computation model.,3.2 Fixed-size Ordinally Forgetting Encoding,[0],[0]
+"However, it requires fixed-size inputs and lacks the ability of capturing long-term dependency.",3.2 Fixed-size Ordinally Forgetting Encoding,[0],[0]
+"Because most NLP problems involves variablelength sequences of words, RNNs/LSTMs are more popular than FFNNs in dealing with these problems.",3.2 Fixed-size Ordinally Forgetting Encoding,[0],[0]
+"The Fixed-size Ordinally Forgetting Encoding (FOFE), originally proposed in (Zhang et al., 2015a,b), nicely overcomes the limitations
+of FFNNs because it can uniquely and losslessly encode a variable-length sequence of words into a fixed-size representation.
+",3.2 Fixed-size Ordinally Forgetting Encoding,[0],[0]
+"Give a vocabulary V , each word can be represented by a one-hot vector.",3.2 Fixed-size Ordinally Forgetting Encoding,[0],[0]
+FOFE mimics bag-ofwords (BOW) but incorporates a forgetting factor to capture positional information.,3.2 Fixed-size Ordinally Forgetting Encoding,[0],[0]
+It encodes any sequence of variable length composed by words in V .,3.2 Fixed-size Ordinally Forgetting Encoding,[0],[0]
+"Let S = w1, w2, w3, ..., wT denote a sequence of T words from V , and et be the one-hot vector of the t-th word in S, where 1 ≤ t ≤ T .",3.2 Fixed-size Ordinally Forgetting Encoding,[0],[0]
+"The FOFE of each partial sequence zt from the first word to the t-th word is recursively defined as:
+zt = { 0, if t = 0 α · zt−1 + et, otherwise
+(1)
+where the constant α is called forgetting factor, and it is picked between 0 and 1 exclusively.",3.2 Fixed-size Ordinally Forgetting Encoding,[0],[0]
+"Obviously, the size of zt is |V |, and it is irrelevant to the length of original sequence, T .
+",3.2 Fixed-size Ordinally Forgetting Encoding,[0],[0]
+Here’s an example.,3.2 Fixed-size Ordinally Forgetting Encoding,[0],[0]
+"Assume that we have three words in our vocabulary, e.g. A, B, C, whose one-hot representations are [1, 0, 0], [0, 1, 0] and [0, 0, 1] respectively.",3.2 Fixed-size Ordinally Forgetting Encoding,[0],[0]
+"When calculating from left to right, the FOFE for the sequence “ABC” is [α2, α, 1] and that of “ABCBC” is [α4, α+α3, 1+ α2].
+",3.2 Fixed-size Ordinally Forgetting Encoding,[0],[0]
+"The word sequences can be unequivocally recovered from their FOFE representations (Zhang et al., 2015a,b).",3.2 Fixed-size Ordinally Forgetting Encoding,[0],[0]
+"The uniqueness of FOFE representation is theoretically guaranteed by the following two theorems:
+Theorem 1.",3.2 Fixed-size Ordinally Forgetting Encoding,[0],[0]
+If the forgetting factor α satisfies 0,3.2 Fixed-size Ordinally Forgetting Encoding,[0],[0]
+"< α ≤ 0.5, FOFE is unique for any countable vocabulary V and any finite value T .
+",3.2 Fixed-size Ordinally Forgetting Encoding,[0],[0]
+Theorem 2.,3.2 Fixed-size Ordinally Forgetting Encoding,[0],[0]
+"For 0.5 < α < 1, given any finite value T and any countable vocabulary V , FOFE is almost unique everywhere, except only a finite set of countable choices of α.
+",3.2 Fixed-size Ordinally Forgetting Encoding,[0],[0]
+"Though in theory uniqueness is not guaranteed when α is chosen from 0.5 to 1, in practice the chance of hitting such scenarios is extremely slim, almost impossible due to quantization errors in the system.",3.2 Fixed-size Ordinally Forgetting Encoding,[0],[0]
+"Furthermore, in natural languages, normally a word does not appear repeatedly within a near context.",3.2 Fixed-size Ordinally Forgetting Encoding,[0],[0]
+"Simply put, FOFE is capable of uniquely encoding any sequence of arbitrary length, serving as a fixed-size but theoretically lossless representation for any sequence.",3.2 Fixed-size Ordinally Forgetting Encoding,[0],[0]
+Kim et al. (2016) model morphology in the character level since this may provide some additional advantages in dealing with unknown or out-ofvocabulary (OOVs) words in a language.,3.3 Character-level Models in NLP,[0],[0]
+"In the literature, convolutional neural networks (CNNs) have been widely used as character-level models in NLP (Kim et al., 2016).",3.3 Character-level Models in NLP,[0],[0]
+A trainable character embedding is initialized based on a set of possible characters.,3.3 Character-level Models in NLP,[0],[0]
+"When a word fragment comes, character vectors are retrieved according to its spelling to construct a matrix.",3.3 Character-level Models in NLP,[0],[0]
+This matrix can be viewed as a single-channel image.,3.3 Character-level Models in NLP,[0],[0]
+"CNN is applied to generate a more abstract representation of the word fragment.
+",3.3 Character-level Models in NLP,[0],[0]
+The above FOFE method can be easily extended to model character-level feature in NLP.,3.3 Character-level Models in NLP,[0],[0]
+"Any word, phrase or fragment can be viewed as a sequence of characters.",3.3 Character-level Models in NLP,[0],[0]
+"Based on a pre-defined set of all possible characters, we apply the same FOFE method to encode the sequence of characters.",3.3 Character-level Models in NLP,[0],[0]
+"This always leads to a fixed-size representation, irrelevant to the number of characters in question.",3.3 Character-level Models in NLP,[0],[0]
+"For example, a word fragment of “Walmart” may be viewed as a sequence of seven characters: ‘W’, ‘a’, ‘l’, ‘m’, ‘a’, ‘r’, ‘t’.",3.3 Character-level Models in NLP,[0],[0]
+The FOFE codes of character sequences are always fixed-sized and they can be directly fed to an FFNN for morphology modeling.,3.3 Character-level Models in NLP,[0],[0]
+"As described above, our FOFE-based local detection approach for NER, called FOFE-NER hereafter, is motivated by the way how human actually infers whether a word segment in text is an entity or mention, where the entity types of the
+other entities in the same sentence is not a must.",4 FOFE-based Local Detection for NER,[0],[0]
+"Particularly, the dependency between adjacent entities is fairly weak in NER.",4 FOFE-based Local Detection for NER,[0],[0]
+"Whether a fragment is an entity or not, and what class it may belong to, largely depend on the internal structure of the fragment itself as well as the left and right contexts in which it appears.",4 FOFE-based Local Detection for NER,[0],[0]
+"To a large extent, the meaning and spelling of the underlying fragment are informative to distinguish named entities from the rest of the text.",4 FOFE-based Local Detection for NER,[0],[0]
+"Contexts play a very important role in NER or MD when it involves multi-sense words/phrases or out-of-vocabulary (OOV) words.
+",4 FOFE-based Local Detection for NER,[0],[0]
+"As shown in Figure 1, our proposed FOFENER method will examine all possible fragments in text (up to a certain length) one by one.",4 FOFE-based Local Detection for NER,[0],[0]
+"For each fragment, it uses the FOFE method to fully encode the underlying fragment itself, its left context and right context into some fixed-size representations, which are in turn fed to an FFNN to predict whether the current fragment is NOT a valid entity mention (NONE), or its correct entity type (PER, LOC, ORG and so on) if it is a valid mention.",4 FOFE-based Local Detection for NER,[0],[0]
+This method is appealing because the FOFE codes serves as a theoretically lossless representation of the hypothesis and its full contexts.,4 FOFE-based Local Detection for NER,[0],[0]
+"FFNN is used as a universal approximator to map from text to the entity labels.
+",4 FOFE-based Local Detection for NER,[0],[0]
+"In this work, we use FOFE to explore both word-level and character-level features for each fragment and its contexts.",4 FOFE-based Local Detection for NER,[0],[0]
+"FOFE-NER generates several word-level features for each fragment hypothesis and its left and right contexts as follows:
+• Bag-of-word (BoW) of the fragment, e.g.
+bag-of-word vector of ‘Toronto’, ‘Maple’ and ‘Leafs’ in Figure 1.
+",4.1 Word-level Features,[0],[0]
+"• FOFE code for left context including the fragment, e.g. FOFE code of the word sequence of “... puck from space for the Toronto Maple Leafs” in Figure 1.
+",4.1 Word-level Features,[0],[0]
+"• FOFE code for left context excluding the fragment, e.g. the FOFE code of the word sequence of “... puck from space for the” in Figure 1..
+• FOFE code for right context including the fragment, e.g. the FOFE code of the word sequence of “... against opener home ’ Leafs Maple Toronto” in Figure 1.
+",4.1 Word-level Features,[0],[0]
+"• FOFE code for right context excluding the fragment, e.g. the FOFE code of the word sequence of “... against opener home ” in Figure 1.
+",4.1 Word-level Features,[0],[0]
+"Moreover, all of the above word features are computed for both case-sensitive words in raw text as well as case-insensitive words in normalized lower-case text.",4.1 Word-level Features,[0],[0]
+"These FOFE codes are projected to lower-dimension dense vectors based on two projection matrices, Ws and Wi, for casesensitive and case-insensitive FOFE codes respectively.",4.1 Word-level Features,[0],[0]
+"These two projection matrices are initialized by word embeddings trained by word2vec, and fine-tuned during the learning of the neural networks.
+",4.1 Word-level Features,[0],[0]
+"Due to the recursive computation of FOFE codes in eq.(1), all of the above FOFE codes can be jointly computed for one sentence or document in a very efficient manner.",4.1 Word-level Features,[0],[0]
+"On top of the above word-level features, we also augment character-level features for the underlying segment hypothesis to further model its morphological structure.",4.2 Character-level Features,[0],[0]
+"For the example in Figure 1, the current fragment, Toronto Maple Leafs, is considered as a sequence of case-sensitive characters, i.e. “{‘T’, ‘o’, ..., ‘f’ , ‘s’ }”, we then add the following character-level features for this fragment: • Left-to-right FOFE code of the character se-
+quence of the underlying fragment.",4.2 Character-level Features,[0],[0]
+"That is the FOFE code of the sequence, “‘T’, ‘o’, ..., ‘f’ , ‘s’ ”.
+",4.2 Character-level Features,[0],[0]
+•,4.2 Character-level Features,[0],[0]
+Right-to-left FOFE code of the character sequence of the underlying fragment.,4.2 Character-level Features,[0],[0]
+"That is
+the FOFE code of the sequence, “‘s’ , ‘f’ , ..., ‘o’, ‘T’ ”.
+",4.2 Character-level Features,[0],[0]
+"These case-sensitive character FOFE codes are also projected by another character embedding matrix, which is randomly initialized and finetuned during model training.
+",4.2 Character-level Features,[0],[0]
+"Alternatively, we may use the character CNNs, as described in Section 3.3, to generate characterlevel features for each fragment hypothesis as well.",4.2 Character-level Features,[0],[0]
+"Obviously, the above FOFE-NER model will take each sentence of words, S =",5 Training and Decoding Algorithm,[0],[0]
+"[w1, w2, w3, ..., wm], as input, and examine all continuous subsequences [wi, wi+1, wi+2, ..., wj ] up to n words in S for possible entity types.",5 Training and Decoding Algorithm,[0],[0]
+"All sub-sequences longer than n words are considered as non-entities in this work.
+",5 Training and Decoding Algorithm,[0],[0]
+"When we train the model, based on the entity labels of all sentences in the training set, we will generate many sentence fragments up to n words.",5 Training and Decoding Algorithm,[0],[0]
+"These fragments fall into three categories: • Exact-match with an entity label, e.g., the
+fragment “Toronto Maple Leafs” in the previous example.
+",5 Training and Decoding Algorithm,[0],[0]
+"• Partial-overlap with an entity label, e.g., “for the Toronto”.
+",5 Training and Decoding Algorithm,[0],[0]
+"• Disjoint with all entity label, e.g. “from space for”.
+",5 Training and Decoding Algorithm,[0],[0]
+"For all exact-matched fragments, we generate the corresponding outputs based on the types of the matched entities in the training set.",5 Training and Decoding Algorithm,[0],[0]
+"For both partial-overlap and disjoint fragments, we introduce a new output label, NONE, to indicate that these fragments are not a valid entity.",5 Training and Decoding Algorithm,[0],[0]
+"Therefore, the output nodes in the neural networks contains all entity types plus a rejection option denoted as NONE.
+",5 Training and Decoding Algorithm,[0],[0]
+"During training, we implement a producerconsumer software design such that a thread fetches training examples, computes all FOFE codes and packs them as a mini-batch while the other thread feeds the mini-batches to neural networks and adjusts the model parameters and all projection matrices.",5 Training and Decoding Algorithm,[0],[0]
+"Since “partial-overlap” and “disjoint” significantly outnumber “exact-match”, they are down-sampled so as to balance the data set.
+",5 Training and Decoding Algorithm,[0],[0]
+"During inference, all fragments not longer than
+n words are all fed to FOFE-NER to compute their scores over all entity types.",5 Training and Decoding Algorithm,[0],[0]
+"In practice, these fragments can be packed as one mini-batch so that we can compute them in parallel on GPUs.",5 Training and Decoding Algorithm,[0],[0]
+"As the NER result, the FOFE-NER model will return a subset of fragments only if: i) they are recognized as a valid entity type (not NONE); AND ii) their NN scores exceed a global pruning threshold.
+Occasionally, some partially-overlapped or nested fragments may occur in the above pruned prediction results.",5 Training and Decoding Algorithm,[0],[0]
+"We can use one of the following simple post-processing methods to remove overlappings from the final results:
+1. highest-first: We check every word in a sentence.",5 Training and Decoding Algorithm,[0],[0]
+"If it is contained by more than one fragment in the pruned results, we only keep the one with the maximum NN score and discard the rest.
+2.",5 Training and Decoding Algorithm,[0],[0]
+longest-first: We check every word in a sentence.,5 Training and Decoding Algorithm,[0],[0]
+"If it is contained by more than one fragment in the pruned results, we only keep the longest fragment and discard the rest.
+",5 Training and Decoding Algorithm,[0],[0]
+"Either of these strategies leads to a collection of non-nested, non-overlapping, non-NONE entity labels.
+",5 Training and Decoding Algorithm,[0],[0]
+"In some tasks, it may require to label all nested entities.",5 Training and Decoding Algorithm,[0],[0]
+This has imposed a big challenge to the sequence labeling methods.,5 Training and Decoding Algorithm,[0],[0]
+"However, the above post-processing can be slightly modified to generate nested entities’ labels.",5 Training and Decoding Algorithm,[0],[0]
+"In this case, we first run either highest-first or longest-first to generate the first round result.",5 Training and Decoding Algorithm,[0],[0]
+"For every entity survived in this round, we will recursively run either highestfirst or longest-first on all entities in the original set, which are completely contained by it.",5 Training and Decoding Algorithm,[0],[0]
+This will generate more prediction results.,5 Training and Decoding Algorithm,[0],[0]
+This process may continue to allow any levels of nesting.,5 Training and Decoding Algorithm,[0],[0]
+"For example, for a sentence of “w1 w2 w3 w4 w5”, if the model first generates the prediction results after the global pruning, as [“w2w3”, PER, 0.7], [“w3w4”, LOC, 0.8], [“w1w2w3w4”, ORG, 0.9], if we choose to run highest-first, it will generate the first entity label as [“w1w2w3w4”, ORG, 0.9].",5 Training and Decoding Algorithm,[0],[0]
+"Secondly, we will run highest-first on the two fragments that are completely contained by the first one, i.e., [“w2w3”, PER, 0.7], [“w3w4”, LOC, 0.8], then we will generate the second nested entity label as [“w3w4”, LOC, 0.8].",5 Training and Decoding Algorithm,[0],[0]
+"Fortunately, in any real NER and MD tasks, it is pretty rare to have overlapped predictions in the NN outputs.
+",5 Training and Decoding Algorithm,[0],[0]
+"Therefore, the extra expense to run this recursive post-processing method is minimal.",5 Training and Decoding Algorithm,[0],[0]
+"As we know, CRF brings marginal performance gain to all taggers (but not limited to NER) because of the dependancies (though fairly weak) between entity types.",6 Second-Pass Augmentation,[0],[0]
+We may easily add this level of information to our model by introducing another pass of FOFE-NER.,6 Second-Pass Augmentation,[0],[0]
+"We call it 2nd-pass FOFENER.
+",6 Second-Pass Augmentation,[0],[0]
+"In 2nd-pass FOFE-NER, another set of model is trained on outputs from the first-pass FOFENER, including all predicted entities.",6 Second-Pass Augmentation,[0],[0]
+"For example, given a sentence
+S =",6 Second-Pass Augmentation,[0],[0]
+"[w1, w2, ...wi, ...wj , ...wn]
+and an underlying word segment [wi, ..., wj ] in the second pass, every predicted entity outside this segment is substituted by its entity type predicted from the first pass.",6 Second-Pass Augmentation,[0],[0]
+"For example, in the first pass, a sentence like “Google has also recruited Fei-Fei Li, director of the AI lab at Stanford University.” is predicted as: “<ORG> has also recruited FeiFei Li, director of the AI lab at<ORG>.”",6 Second-Pass Augmentation,[0],[0]
+"In 2ndpass FOFE-NER, when examining the segment “Fei-Fei Li”, the predicted entity types <ORG> are used to replace the actual named entities.",6 Second-Pass Augmentation,[0],[0]
+"The 2nd-pass FOFE-NER model is trained on the outputs of the first pass, where all detected entities are replaced by their predicted types as above.
+",6 Second-Pass Augmentation,[0],[0]
+"During inference, the results returned by the 1st-pass model are substituted in the same way.",6 Second-Pass Augmentation,[0],[0]
+"The scores for each hypothesis from 1st-pass model and 2nd-pass model are linear interpolated and then decoded by either highest-first or longestfirst to generate the final results of 2nd-pass FOFE-NER.
+",6 Second-Pass Augmentation,[0],[0]
+"Obviously, 2nd-pass FOFE-NER may capture the semantic roles of other entities while filtering out unwanted constructs and sparse combonations.",6 Second-Pass Augmentation,[0],[0]
+"On the other hand, it enables longer context expansion, since FOFE memorizes contextual information in an unselective decaying fashion.",6 Second-Pass Augmentation,[0],[0]
+"In this section, we evaluate the effectiveness of our proposed methods on several popular NER and MD tasks, including CoNLL 2003 NER task and TAC-KBP2015 and TAC-KBP2016 Trilingual Entity Discovery and Linking (EDL) tasks.
+",7 Experiments,[0],[0]
+We have made our codes available at https:// github.com/xmb-cipher/fofe-ner for readers to reproduce the results in this paper.,7 Experiments,[0],[0]
+"The CoNLL-2003 dataset (Sang and Meulder, 2003) consists of newswire from the Reuters RCV1 corpus tagged with four types of nonnested named entities: location (LOC), organization (ORG), person (PER), and miscellaneous (MISC).
+",7.1 CoNLL 2003 NER task,[0],[0]
+"The top 100,000 words, are kept as vocabulary, including punctuations.",7.1 CoNLL 2003 NER task,[0],[0]
+"For the case-sensitive embedding, an OOV is mapped to <unk> if it contains no upper-case letter and <UNK> otherwise.",7.1 CoNLL 2003 NER task,[0],[0]
+We perform grid search on several hyperparameters using a held-out dev set.,7.1 CoNLL 2003 NER task,[0],[0]
+Here we summarize the set of hyper-parameters used in our experiments: i),7.1 CoNLL 2003 NER task,[0],[0]
+"Learning rate: initially set to 0.128 and is multiplied by a decay factor each epoch so that it reaches 1/16 of the initial value at the end of the training; ii) Network structure: 3 fully-connected layers of 512 nodes with ReLU activation, randomly initialized based on a uniform distribution between − √ 6
+Ni+No and
+√ 6
+Ni+No (Glorot et al., 2011); iii) Character embeddings: 64 dimensions, randomly initialized.",7.1 CoNLL 2003 NER task,[0],[0]
+iv) mini-batch: 512; v),7.1 CoNLL 2003 NER task,[0],[0]
+"Dropout rate: initially set to 0.4, slowly decreased during training until it reaches 0.1 at the end.",7.1 CoNLL 2003 NER task,[0],[0]
+"vi) Number of epochs: 128; vii)Embedding matrices case-sensitive and caseinsensitive word embeddings of 256 dimensions, trained from Reuters RCV1; viii)",7.1 CoNLL 2003 NER task,[0],[0]
+We stick to the official data train-dev-test partition.,7.1 CoNLL 2003 NER task,[0],[0]
+ix),7.1 CoNLL 2003 NER task,[0],[0]
+Forgetting factor α = 0.5.,7.1 CoNLL 2003 NER task,[0],[0]
+"1
+We have investigated the performance of our method on the CoNLL-2003 dataset by using different combinations of the FOFE features (both word-level and character-level).",7.1 CoNLL 2003 NER task,[0],[0]
+The detailed comparison results are shown in Table 1.,7.1 CoNLL 2003 NER task,[0],[0]
+"In Table 2, we have compared our best performance with some top-performing neural network systems on this task.",7.1 CoNLL 2003 NER task,[0],[0]
+"As we can see from Table 2, our system (highest-first decoding) yields very strong performance (90.85 in F1 score) in this task, outperforming most of neural network models reported on this
+1The choice of the forgetting factor α is empirical.",7.1 CoNLL 2003 NER task,[0],[0]
+"We’ve evaluatedα = 0.5, 0.6, 0.7, 0.8 on a development set in some early experiments.",7.1 CoNLL 2003 NER task,[0],[0]
+It turns out that α = 0.5 is the best.,7.1 CoNLL 2003 NER task,[0],[0]
+"As a result, α = 0.5 is used for all NER/MD tasks throughout this paper.
+dataset.",7.1 CoNLL 2003 NER task,[0],[0]
+"More importantly, we have not used any hand-crafted features in our systems, and all features (either word or char level) are automatically derived from the data.",7.1 CoNLL 2003 NER task,[0],[0]
+Highest-first and longestfirst perform similarly.,7.1 CoNLL 2003 NER task,[0],[0]
+"In (Chiu and Nichols, 2016)2, a slightly better performance (91.62 in F1 score) is reported but a customized gazetteer is used in theirs.",7.1 CoNLL 2003 NER task,[0],[0]
+"Given a document collection in three languages (English, Chinese and Spanish), the KBP2015 trilingual EDL task (Ji et al., 2015) requires to automatically identify entities (including nested entities) from a source collection of textual documents in multiple languages as in Table 3, and classify them into one of the following pre-defined five types: Person (PER), Geo-political Entity (GPE), Organization (ORG), Location (LOC) and Facility (FAC).",7.2 KBP2015 EDL Task,[0],[0]
+"The corpus consists of news articles and discussion forum posts published in recent years, related but non-parallel across languages.
+",7.2 KBP2015 EDL Task,[0],[0]
+Three models are trained and evaluated independently.,7.2 KBP2015 EDL Task,[0],[0]
+"Unless explicitly listed, hyperparameters follow those used for CoNLL2003 as described in section 7.1 and 2nd-pass model is not used.",7.2 KBP2015 EDL Task,[0],[0]
+"Three sets of word embeddings of 128 dimensions are derived from English Gigaword (Parker et al., 2011), Chinese Gigaword (Graff and Chen, 2005) and Spanish Gigaword (Mendonca et al., 2009) respectively.",7.2 KBP2015 EDL Task,[0],[0]
+Some language-specific modifications are made:,7.2 KBP2015 EDL Task,[0],[0]
+"• Chinese: Because Chinese segmentation is
+not reliable, we label Chinese at character level.",7.2 KBP2015 EDL Task,[0],[0]
+The analogous roles of case-sensitive word-embedding and case-sensitive wordembedding are played by character embedding and word-embedding in which the character appears.,7.2 KBP2015 EDL Task,[0],[0]
+"Neither Char FOFE features nor Char CNN features are used for Chinese.
+",7.2 KBP2015 EDL Task,[0],[0]
+• Spanish:,7.2 KBP2015 EDL Task,[0],[0]
+Character set of Spanish is a super set of that of English.,7.2 KBP2015 EDL Task,[0],[0]
+"When building character-level features, we use the mod function to hash each character’s UTF8 encoding into a number between 0 (inclusive) and 128 (exclusive).
+",7.2 KBP2015 EDL Task,[0],[0]
+"As shown in Table 4, our FOFE-based local detection method has obtained fairly strong perfor-
+2In their work, they have used a combination of trainingset and dev-set to train the model, differing from all other systems (including ours) in Table 2.
+mance in the KBP2015 dataset.",7.2 KBP2015 EDL Task,[0],[0]
+"The overall trilingual entity discovery performance is slightly better than the best systems participated in the official KBP2015 evaluation, with 73.9 vs. 72.4 as measured by F1 scores.",7.2 KBP2015 EDL Task,[0],[0]
+Outer and inner decodings are longest-first and highest-first respectively.,7.2 KBP2015 EDL Task,[0],[0]
+"In KBP2016, the trilingual EDL task is extended to detect nominal mentions of all 5 entity types for all three languages.",7.3 KBP2016 EDL task,[0],[0]
+"In our experiments, for simplicity, we treat nominal mention types as some extra entity types and detect them along with named entities together with a single model.",7.3 KBP2016 EDL task,[0],[0]
+No official training set is provided in KBP2016.,7.3.1 Data Description,[0],[0]
+We make use of three sets of training data:,7.3.1 Data Description,[0],[0]
+"• Training and evaluation data in KBP2015:
+as described in 7.2
+• Machine-labeled Wikipedia (WIKI): When terms or names are first mentioned in a Wikipedia article they are often linked to the corresponding Wikipedia page by hyperlinks, which clearly highlights the possible named entities with well-defined boundary in the text.",7.3.1 Data Description,[0],[0]
+We have developed a program to automatically map these hyperlinks into KBP annotations by exploring the infobox (if existing) of the destination page and/or examining the corresponding Freebase types.,7.3.1 Data Description,[0],[0]
+"In this way, we have created a fairly large amount of weakly-supervised trilingual training data for the KBP2016 EDL task.",7.3.1 Data Description,[0],[0]
+"Meanwhile, a gazeteer is created and used in KBP2016.
+",7.3.1 Data Description,[0],[0]
+"• In-house dataset: A set of 10,000 English and Chinese documents is manually labeled using some annotation rules similar to the KBP 2016 guidelines.
+",7.3.1 Data Description,[0],[0]
+"We split the available data into training, validation and evaluation sets in a ratio of 90:5:5.",7.3.1 Data Description,[0],[0]
+"The models are trained for 256 epochs if the in-house data is not used, and 64 epochs otherwise.",7.3.1 Data Description,[0],[0]
+"In our first set of experiments, we investigate the effect of using different training data sets on the final entity discovery performance.",7.3.2 Effect of various training data,[0],[0]
+Different training runs are conducted on different combinations of the aforementioned data sources.,7.3.2 Effect of various training data,[0],[0]
+"In Table 6, we have summarized the official English entity dis-
+covery results from several systems we submitted to KBP2016 EDL evaluation round I and II.",7.3.2 Effect of various training data,[0],[0]
+"The first system, using only the KBP2015 data to train the model, has achieved 0.697 in F1 score in the official KBP2016 English evaluation data.",7.3.2 Effect of various training data,[0],[0]
+"After adding the weakly labeled data, WIKI, we can see the entity discovery performance is improved to 0.718 in F1 score.",7.3.2 Effect of various training data,[0],[0]
+"Moreover, we can see that it yields even better performance by using the KBP2015 data and the in-house data sets to train our models, giving 0.750 in F1 score.",7.3.2 Effect of various training data,[0],[0]
+The official best results of our system are summarized in Table 5.,7.3.3 The official trilingual EDL performance in KBP2016,[0],[0]
+We have broken down the system performance according to different languages and categories of entities (named or nominal).,7.3.3 The official trilingual EDL performance in KBP2016,[0],[0]
+"Our system, achieving 0.718 in F1 score in the KBP2016 trilingual EDL track, ranks second among all participants.",7.3.3 The official trilingual EDL performance in KBP2016,[0],[0]
+"Note that our result is produced by a single system while the top system is a combination of two different models, each of which is based on 5-fold cross-validation (Liu et al., 2016).",7.3.3 The official trilingual EDL performance in KBP2016,[0],[0]
+"In this paper, we propose a novel solution to NER and MD by applying FFNN on top of FOFE features.",8 Conclusion,[0],[0]
+"This simple local-detection based approach has achieved almost state-of-the-art performance on various NER and MD tasks, without using any external knowledge or feature engineering.",8 Conclusion,[0],[0]
+"This work is supported mainly by a research donation from iFLYTEK Co., Ltd., Hefei, China, and partially by a discovery grant from Natural Sciences and Engineering Research Council (NSERC) of Canada.",Acknowledgement,[0],[0]
+"In this paper, we study a novel approach for named entity recognition (NER) and mention detection (MD) in natural language processing.",abstractText,[0],[0]
+"Instead of treating NER as a sequence labeling problem, we propose a new local detection approach, which relies on the recent fixed-size ordinally forgetting encoding (FOFE) method to fully encode each sentence fragment and its left/right contexts into a fixedsize representation.",abstractText,[0],[0]
+"Subsequently, a simple feedforward neural network (FFNN) is learned to either reject or predict entity label for each individual text fragment.",abstractText,[0],[0]
+"The proposed method has been evaluated in several popular NER and MD tasks, including CoNLL 2003 NER task and TAC-KBP2015 and TAC-KBP2016 Tri-lingual Entity Discovery and Linking (EDL) tasks.",abstractText,[0],[0]
+Our method has yielded pretty strong performance in all of these examined tasks.,abstractText,[0],[0]
+This local detection approach has shown many advantages over the traditional sequence labeling methods.,abstractText,[0],[0]
+A Local Detection Approach for Named Entity Recognition and Mention Detection,title,[0],[0]
+"Proceedings of NAACL-HLT 2018, pages 652–662 New Orleans, Louisiana, June 1 - 6, 2018. c©2018 Association for Computational Linguistics
+We introduce MeSys, a meaning-based approach, for solving English math word problems (MWPs) via understanding and reasoning in this paper. It first analyzes the text, transforms both body and question parts into their corresponding logic forms, and then performs inference on them. The associated context of each quantity is represented with proposed role-tags (e.g., nsubj, verb, etc.), which provides the flexibility for annotating an extracted math quantity with its associated context information (i.e., the physical meaning of this quantity). Statistical models are proposed to select the operator and operands. A noisy dataset is designed to assess if a solver solves MWPs mainly via understanding or mechanical pattern matching. Experimental results show that our approach outperforms existing systems on both benchmark datasets and the noisy dataset, which demonstrates that the proposed approach understands the meaning of each quantity in the text more.",text,[0],[0]
+"The math word problem (MWP) (see Figure 1) is frequently chosen to study natural language understanding and simulate human problem solving (Bakman, 2007; Hosseini et al., 2014; Liang et al., 2016) for the following reasons: (1) the answer to the MWP cannot be simply extracted by performing keyword/pattern matching.",1 Introduction,[1.0],"['The math word problem (MWP) (see Figure 1) is frequently chosen to study natural language understanding and simulate human problem solving (Bakman, 2007; Hosseini et al., 2014; Liang et al., 2016) for the following reasons: (1) the answer to the MWP cannot be simply extracted by performing keyword/pattern matching.']"
+"It thus shows the merit of understanding and inference.
+",1 Introduction,[0],[0]
+"(2) An MWP usually possesses less complicated syntax and requires less amount of domain knowledge, so the researchers can focus on the task of understanding and reasoning.",1 Introduction,[0],[0]
+(3) The body part of MWP that provides the given information for solving the problem consists of only a few sentences.,1 Introduction,[0],[0]
+The understanding and reasoning procedures thus could be more efficiently checked.,1 Introduction,[0],[0]
+"(4) The MWP solver has its own applications such as Computer Math Tutor (for students in primary school) and Helper for Math in Daily Life (for adults who are not good in solving mathematics related real problems).
+",1 Introduction,[0],[0]
+"According to the approaches used to identify entities, quantities, and to select operations and operands, previous MWP solvers can be classified into: (1) Rule-based approaches (Mukherjee and Garain, 20081; Hosseini et al., 2014), which make all related decisions based on a set of rules; (2) Purely statistics-based approaches (Kushman et al., 2014; Roy et al., 2015; Zhou et al., 2015; Upadhyay et al., 2016), in which all related decisions are done via a statistical classifier; (3) DNNbased approaches (Ling et al., 2017; Wang et al., 2017), which map the given text into the corresponding math operation/equation via a DNN; and (4) Mixed approaches, which identify entities and quantities with rules, yet, decide operands and operations via statistical/DNN classifiers.",1 Introduction,[1.0],"['According to the approaches used to identify entities, quantities, and to select operations and operands, previous MWP solvers can be classified into: (1) Rule-based approaches (Mukherjee and Garain, 20081; Hosseini et al., 2014), which make all related decisions based on a set of rules; (2) Purely statistics-based approaches (Kushman et al., 2014; Roy et al., 2015; Zhou et al., 2015; Upadhyay et al., 2016), in which all related decisions are done via a statistical classifier; (3) DNNbased approaches (Ling et al., 2017; Wang et al., 2017), which map the given text into the corresponding math operation/equation via a DNN; and (4) Mixed approaches, which identify entities and quantities with rules, yet, decide operands and operations via statistical/DNN classifiers.']"
+"This category can be further divided into two subtypes: (a) Without understanding (Roy and Roth, 2015; Koncel-Kedziorski et al., 2015; Huang et al., 2017; Shrivastava et al., 2017), which does not check the entity-attribute consistency between each quantity and the target of the given question; and (b) With understanding (Lin et al., 2015; Mitra and Baral, 2016; Roy and Roth, 2017), which also checks the entity-attribute consistency while solving the problem.",1 Introduction,[1.0],"['This category can be further divided into two subtypes: (a) Without understanding (Roy and Roth, 2015; Koncel-Kedziorski et al., 2015; Huang et al., 2017; Shrivastava et al., 2017), which does not check the entity-attribute consistency between each quantity and the target of the given question; and (b) With understanding (Lin et al., 2015; Mitra and Baral, 2016; Roy and Roth, 2017), which also checks the entity-attribute consistency while solving the problem.']"
+1,1 Introduction,[0],[0]
+"It is a survey paper which reviews most of the rule-based approaches before 2008.
+",1 Introduction,[0],[0]
+"652
+However, a widely covered rule-set is difficult to construct for the rule-based approach.",1 Introduction,[0],[0]
+"Also, it is awkward in resolving ambiguity problem.",1 Introduction,[0],[0]
+"In contrast, the performance of purely statistics-based approaches deteriorates significantly when the MWP includes either irrelevant information or information gaps (Hosseini et al., 2014), as it is solved without first understanding the meaning.
+",1 Introduction,[1.000000079371707],"['In contrast, the performance of purely statistics-based approaches deteriorates significantly when the MWP includes either irrelevant information or information gaps (Hosseini et al., 2014), as it is solved without first understanding the meaning.']"
+"For the category (4a), since the physical meaning is only implicitly utilized and the result is not generated via inference, it would be difficult to explain how the answer is obtained in a human comprehensible way.",1 Introduction,[0],[0]
+"Therefore, the categories (2), (3) and (4a) belong to the less favored direct translation",1 Introduction,[0],[0]
+"approach2 (Pape, 2004).
+",1 Introduction,[0],[0]
+"In contrast, the approaches of (4b) can avoid the problems mentioned above.",1 Introduction,[0],[0]
+"However, among them, Mitra and Baral (2016) merely handled Addition and Subtraction.",1 Introduction,[0],[0]
+Only the meaning-based framework proposed by Lin et al. (2015) can handle general MWPs via understanding and reasoning.,1 Introduction,[0],[0]
+"Therefore, it is possible to explain how the answer is obtained in a human comprehensible way (Huang et al., 2015).",1 Introduction,[0],[0]
+"However, although their design looks promising, only a few Chinese MWPs had been tested and performance was not evaluated.",1 Introduction,[0],[0]
+"Accordingly, it is hard to make a fair comparison between their approach and other state-of-the-art methods.",1 Introduction,[0],[0]
+"In addition, in their prototype system, the desired operands of arithmetic operations are identified with predefined lexicosyntactic patterns and ad-hoc rules.",1 Introduction,[0],[0]
+"Reusing the patterns/rules designed for Chinese in another language is thus difficult even if it is possible.
+",1 Introduction,[0],[0]
+"In this paper, we adopt the framework proposed by Lin et al. (2015) to solve English MWPs (for its potential in solving difficult/complex MWPs and providing more human comprehensible explanations).",1 Introduction,[1.0],"['In this paper, we adopt the framework proposed by Lin et al. (2015) to solve English MWPs (for its potential in solving difficult/complex MWPs and providing more human comprehensible explanations).']"
+"Additionally, we make the following improvements: (1) A new statistical model is proposed to select operands for arithmetic operations, and its model parameters can be automatically learnt via weakly supervised learning (Artzi and Zettlemoyer, 2013).",1 Introduction,[0],[0]
+(2) A new informative and robust feature-set is proposed to select the desired arithmetic operation.,1 Introduction,[0],[0]
+(3) We show the proposed approach significantly outperforms other existing systems on the common benchmark datasets reported in the literature.,1 Introduction,[0],[0]
+"(4) A noisy dataset with 2 According to (Pape, 2004), the meaning-based approach of solving MWPs achieves the best performance among various behaviors adopted by middle school children.
+more irrelevant quantities in MWPs is created and released.",1 Introduction,[0],[0]
+It could be used to check if an approach really understands what a given MWP looks for.,1 Introduction,[0],[0]
+(5) An experiment is conducted to compare various approaches on this new dataset.,1 Introduction,[0],[0]
+The superior performance of our system demonstrates that the proposed meaning-based approach has good potential in handling difficult/complex MWPs.,1 Introduction,[0],[0]
+"The adopted meaning-based framework (Lin et al., 2015) is a pipeline with following four stages (see Figure 2): (1) Language Analysis, (2) Solution Type Identification, (3) Logic Form Transformation and (4) Logic Inference.",2 System Description,[0],[0]
+"We use the Stanford CoreNLP suite (Manning et al., 2014) as the language analysis module.",2 System Description,[1.0],"['We use the Stanford CoreNLP suite (Manning et al., 2014) as the language analysis module.']"
+The other three modules are briefly described below.,2 System Description,[0],[0]
+"Last, we adopt the weakly supervised learning (Artzi and Zettlemoyer, 2013; Kushman et al., 2014) to automatically learn the model parameters without manually annotating each MWP with the adopted solution type and selected operands benchmark.",2 System Description,[0],[0]
+"After language analysis, each MWP is assigned with a specific solution type (such as Addition, Multiplication, etc.) which indicates the stereotype math operation pattern that should be adopted to solve this problem.",2.1 Solution Type Identification (STI),[0],[0]
+We classify the English MWPs released by Hosseini et al. (2014) and Roy and Roth (2015) into 6 different types:,2.1 Solution Type Identification (STI),[0],[0]
+"Addition, Subtraction, Multiplication, Division, Sum and TVQ-F3.",2.1 Solution Type Identification (STI),[0],[0]
+"An SVM (Chang and Lin, 2011) is used to identify the solution type with 26 features.",2.1 Solution Type Identification (STI),[0],[0]
+"Most of them are derived from some important properties associated with each quantity.
+",2.1 Solution Type Identification (STI),[0],[0]
+"3 TVQ-F means to get the final state of a Time-VariantQuantity that involves both Addition and Subtraction.
+",2.1 Solution Type Identification (STI),[0],[0]
+"In addition to the properties Entity4 and Verb (Hosseini et al., 2014) associated with the quantity, we also introduce a new property Time which encodes the tense and aspect of a verb into an integer to specify a point in the timeline.",2.1 Solution Type Identification (STI),[0],[0]
+"We assign 2, 4, and 6 to the tenses Past, Present and Future, respectively, and then adjust it with the aspectvalues -1, 0 and 1 for Perfect, Simple, and Progressive, respectively.
+",2.1 Solution Type Identification (STI),[0],[0]
+Another property Anchor is associated with the unknown quantity asked in the question sentence.,2.1 Solution Type Identification (STI),[0],[0]
+"If the subject of the question sentence is a noun phrase (e.g., “how many apples does John have?”), Anchor is the subject (i.e., John).",2.1 Solution Type Identification (STI),[0],[0]
+"If the subject is an expletive nominal (e.g. “how many apples are there in the box?”), then Anchor is the associated nominal modifier nmod (i.e., “box”).",2.1 Solution Type Identification (STI),[0],[0]
+"Otherwise, Anchor is set to “Unknown”.
+",2.1 Solution Type Identification (STI),[0],[0]
+"Inspired by (Hosseini et al., 2014), we transform Verb to Verb-Class (VC) which is positive, negative or stative.",2.1 Solution Type Identification (STI),[0],[0]
+A verb is positive/negative if it increases/decreases the associated quantity of the subject.,2.1 Solution Type Identification (STI),[0],[0]
+"For example, in the sentence “Tom borrowed 3 dollars from Mike”, the verb is positive because the money of subject “Tom” increases.
+",2.1 Solution Type Identification (STI),[0],[0]
+"However, a positive verb does not always imply the Addition operation.",2.1 Solution Type Identification (STI),[0],[0]
+"If the question is “How much money does Mike have now?” for the above body sentence, the operation should be Subtraction.",2.1 Solution Type Identification (STI),[0],[0]
+"Two new properties Anchor-Role (AR) and Action (A) are thus proposed: ARi indicates the role that Anchor associated with qi, and is set to nsubj/obj/nmod/φ.",2.1 Solution Type Identification (STI),[0],[0]
+"Ai is determined by following rules: (1) Ai=positive if (VCi, ARi) is either (positive, nsubj) or (negative, obj/nmod).",2.1 Solution Type Identification (STI),[0],[0]
+"(2) Ai=negative if (VCi, ARi) is either (negative,
+4",2.1 Solution Type Identification (STI),[0],[0]
+"In our works, the term “Entity” also includes the unit of the quantity (e.g., “cup of coffee”).
+nsubj) or (positive, obj/nmod).",2.1 Solution Type Identification (STI),[0],[0]
+"(3) Otherwise, Ai=VCi.
+To rule out the noisy quantities introduced by irrelevant information, we further associate each known quantity with the property Relevance (R) according to the unknown quantity asked in the question sentence.",2.1 Solution Type Identification (STI),[0],[0]
+"Let qi denote the i-th known quantity, Ei denote the entity of qi, Xi denote the property X of qi, qU denote the unknown quantity asked, and XU denote the property X of qU. Ri is specified with following rules: (1) Ri=2",2.1 Solution Type Identification (STI),[0],[0]
+(DirectlyRelated) if either {Anchor is Unknown & Ei entails EU} or {Anchor is not Unknown & ARi≠φ & Ei entails EU} (2) Ri=1,2.1 Solution Type Identification (STI),[0],[0]
+"(Indirectly-Related) if there is a qj which maps5 to qi and Rj=2 (i.e., qj is Directly-Related).",2.1 Solution Type Identification (STI),[0],[0]
+"(3) Ri=0 (Unrelated) otherwise.
+",2.1 Solution Type Identification (STI),[0],[0]
+The solution type is identified by an SVM based on 26 binary features.,2.1 Solution Type Identification (STI),[0],[0]
+"Let the symbols p, n, s, A, E, R, T, V, SB, SQ and wQ stand for positive, negative, stative, Action, Entity, Relevance, Time, Verb, “a body sentence”, “the question sentence” and “a word in question sentence” respectively.",2.1 Solution Type Identification (STI),[1.0],"['Let the symbols p, n, s, A, E, R, T, V, SB, SQ and wQ stand for positive, negative, stative, Action, Entity, Relevance, Time, Verb, “a body sentence”, “the question sentence” and “a word in question sentence” respectively.']"
+"Also, let I(x) be the indicator function to check if x is true.",2.1 Solution Type Identification (STI),[0],[0]
+"The 26 features are briefly described as follows:
+(1) VCU=p; (2) ∃Ri=2 s.t.",2.1 Solution Type Identification (STI),[0],[0]
+Ai=p; (3) ∃Ri=2 s.t.,2.1 Solution Type Identification (STI),[0],[0]
+Ai=n; (4) ∃Ri=2 s.t.,2.1 Solution Type Identification (STI),[0],[0]
+Ai=s; (5) ∑𝑖𝑖,2.1 Solution Type Identification (STI),[0],[0]
+I( Ri =2) > 2; (6) ∑𝑖𝑖,2.1 Solution Type Identification (STI),[0],[0]
+"I( Ri=2 & Ai ∈{p, n} )",2.1 Solution Type Identification (STI),[0],[0]
+= 2; (7) ∃Ri=2 s.t.,2.1 Solution Type Identification (STI),[0],[0]
+Ai=p & TU<Ti; (8) ∃Ri=2 s.t.,2.1 Solution Type Identification (STI),[0],[0]
+Ai=n & TU<Ti; (9) ∃Ri=2 s.t.,2.1 Solution Type Identification (STI),[0],[0]
+Ai=s & Ti=max Tj; (10) ∃Ri=2 s.t.,2.1 Solution Type Identification (STI),[0],[0]
+Ai=s & Ti<TU; (11) TU ≥ max Ti; (12) TU ≤,2.1 Solution Type Identification (STI),[0],[0]
+"min Ti; (13) ∀Ri=2, Vi are the same; (14) ∀Ri=2",2.1 Solution Type Identification (STI),[0],[0]
+"s.t. Ti=TU; (15) ∀Ri=2, Ti are the same; (16) ∃Ri=2, ∃Rj=1 s.t. qi maps to qj & qi > qj;
+5",2.1 Solution Type Identification (STI),[0],[0]
+"That is, 𝑞𝑞𝑖𝑖 is linked to a directly-related quantity 𝑞𝑞𝑗𝑗 under an expression such as “2 pencils weigh 30 grams”.
+(17) ∃Ri=2, ∃Rj=1 s.t. qi maps to qj & qi is associated with a word “each/every/per/a/an”; (18) ∃Ri=2, ∃Rj=1 s.t. qi maps to qj & qj is associated with a word “each/every/per/a/an”; (19) ∃qi, qj, qk s.t. Ri = Rj = Rk =2 & Vi = Vj = Vk; (20) ∃wQ ∈{total, in all, altogether, sum}; (21) ∃wQ ∈{more, than} or ∃wQ s.t. wQ-POS=RBR; (22) ∃wQ =“left”; (23).",2.1 Solution Type Identification (STI),[0],[0]
+∃qi appears in SQ; (24) “the rest V EU” appears in SB (V for any verb); (25) “each NN” appears in SQ (NN for any noun); (26) AnchorU,2.1 Solution Type Identification (STI),[0],[0]
+is Unknown/nmod & VCU = s.,2.1 Solution Type Identification (STI),[0],[0]
+"The results of language analysis are transformed into a logic form, which is expressed with the first-order logic (FOL) formalism (Russell and Norvig, 2009).",2.2 Logic Form Transformation (LFT),[0],[0]
+Figure 3 shows how to transform the sentence (a) “Pack 100 candies into 5 boxes.” into the corresponding logic form (d).,2.2 Logic Form Transformation (LFT),[1.0],['Figure 3 shows how to transform the sentence (a) “Pack 100 candies into 5 boxes.” into the corresponding logic form (d).']
+"First, the dependency tree (b) is transformed into the semantic representation tree (c) adopted by Lin et al., (2015).",2.2 Logic Form Transformation (LFT),[1.0],"['First, the dependency tree (b) is transformed into the semantic representation tree (c) adopted by Lin et al., (2015).']"
+"Afterwards, according to the procedure proposed in (Lin et al., 2015), the domaindependent logic expressions are generated in (d).
+",2.2 Logic Form Transformation (LFT),[0],[0]
+"The domain-dependent logic expressions are related to crucial generic math facts, such as quantities and relations between quantities.",2.2 Logic Form Transformation (LFT),[0],[0]
+"The FOL function quan(quanid, unit6,entity)=number is for describing the quantity fact.",2.2 Logic Form Transformation (LFT),[0],[0]
+The first argument denotes its unique identifier.,2.2 Logic Form Transformation (LFT),[0],[0]
+The other arguments and the function value describe its meaning.,2.2 Logic Form Transformation (LFT),[0],[0]
+"Another FOL predicate qmap(mapid, quanid1, quanid2) (denotes the mapping from quanid1 to quanid2) is for describing a relation between two quantity facts, where the first argument is a unique identifier to represent this relation.
+",2.2 Logic Form Transformation (LFT),[0],[0]
+"The role-tags (e.g., verb, dobj, etc.) associated with quanid and mapid denote entity attributes (i.e., the physical meaning of the quantity), are created to help the logic inference module find the 6 This second argument denotes the associated unit used to count the entity.",2.2 Logic Form Transformation (LFT),[0],[0]
+"It is set to “#” if the unit of the entity is not specified.
+solution.",2.2 Logic Form Transformation (LFT),[0],[0]
+"For example, quan(q2,#,box) = 5 & verb(q2,pack) &… means that q2 is the quantity of boxes being packed.",2.2 Logic Form Transformation (LFT),[0],[0]
+"With those role-tags, the system can select the operands more reliably, and the inference engine can also derive new quantities to solve complex MWPs which require multi-step arithmetic operations (see section 2.3).
+",2.2 Logic Form Transformation (LFT),[0],[0]
+The question in the MWP is also transformed into an FOL-like utility function according to the solution type to ask the logic inference module to find out the answer.,2.2 Logic Form Transformation (LFT),[1.0],['The question in the MWP is also transformed into an FOL-like utility function according to the solution type to ask the logic inference module to find out the answer.']
+"For example, the utility function instance Division(quan(q1, #, candy), quan(q2, #, box)) asks the inference module to divide “100 candies” by “5 boxes”.",2.2 Logic Form Transformation (LFT),[0],[0]
+"Since associated operands must be specified before calling those utility functions, a statistical model (see section 2.4) is used to identify the appropriate quantities.",2.2 Logic Form Transformation (LFT),[1.0],"['Since associated operands must be specified before calling those utility functions, a statistical model (see section 2.4) is used to identify the appropriate quantities.']"
+"The logic inference module adopts the inference engine from (Lin et al., 2015).",2.3 Logic Inference,[0],[0]
+Figure 4 shows how it uses inference rules to derive new facts from the initial facts directly provided from the description.,2.3 Logic Inference,[0],[0]
+The MWP (a) provides some facts (b) generated from the LFT module.,2.3 Logic Inference,[0],[0]
+"An inference rule (c) 7 , which implements the common sense that people must pay money to buy something, is unified with the given facts (b) and derives new facts (d).",2.3 Logic Inference,[0],[0]
+"The facts associated with q6 can be interpreted as “Mary paid 0.5 dollar for two puddings”.
+",2.3 Logic Inference,[0],[0]
+"The inference engine (IE) also provides 5 utility functions, including Addition, Subtraction, Multiplication and Division, and Sum.",2.3 Logic Inference,[0],[0]
+The first four utilities all return a value by performing the named math operation on its two input arguments.,2.3 Logic Inference,[0],[0]
+"On the other hand, Sum(function,condition) returns the sum of the values of FOL function instances which can be unified with the first argument (i.e., function) and satisfy the second argument (i.e., condition).",2.3 Logic Inference,[0],[0]
+"For example, according to 7 In the inference rule, $q is a meta symbol to ask the inference engine to generate a unique identifier for the newly derived quantity fact.
+",2.3 Logic Inference,[0],[0]
+(a) A sandwich is priced at $0.75.,2.3 Logic Inference,[0],[0]
+A pudding is priced at $0.25.,2.3 Logic Inference,[0],[0]
+Tim bought 2 sandwiches and 4 puddings.,2.3 Logic Inference,[0],[0]
+Mary bought 2 puddings.,2.3 Logic Inference,[0],[0]
+"How much money should Tim pay?
+(b) …price(sandwich,0.75)&price(pudding,0.25)… quan(q1,#,sandwich)=2&verb(q1,buy)&nsubj(q1,Tim)… quan(q2,#,pudding)=4&verb(q2,buy)&nsubj(q2,Tim)… quan(q3,#,pudding)=2&verb(q3,buy)&nsubj(q3,Mary)… ASK Sum(quan(?q,dollar,#),verb(?q,pay)&nsubj(?q,Tim))
+",2.3 Logic Inference,[0],[0]
+"(c) quan(?q,?u,?o)&verb(?q,buy)&nsubj(?q,?a)&price(?o,?p)  quan($q,dollar,#)=quan(?q,?u,?o)×?p & verb($q,pay) & nsubj($q,?a) (d) quan(q4,dollar,#)=1.5&verb(q4,pay)&nsubj(q4,Tim)… quan(q5,dollar,#)=1&verb(q5,pay)&nsubj(q5,Tim)…
+quan(q6,dollar,#)=0.5&verb(q6,pay)&nsubj(q6,Mary)
+",2.3 Logic Inference,[0],[0]
+"Figure 2: A logic inference example
+(a) A sandwich is priced at $0.75.",2.3 Logic Inference,[0],[0]
+A pudding is priced at $0.25.,2.3 Logic Inference,[0],[0]
+Tim bought 2 sandwiches and 4 puddings.,2.3 Logic Inference,[0],[0]
+Mary bought 2 puddings.,2.3 Logic Inference,[0],[0]
+"How much money should Tim pay?
+(b) price(sandwich,0.75)&price(pudding,0.25) quan(q1,#,sandwich)=2&verb(q1,buy)&nsubj(q1,Tim) quan(q2,#,pudding)=4&verb(q2,buy)&nsubj(q2,Tim) quan(q3,#,pudding)=2&verb(q3,buy)&nsubj(q3,Mary) ASK Sum(quan(?q,dollar,#),verb(?q,pay)&nsubj(?q,Tim))
+",2.3 Logic Inference,[0],[0]
+"(c) quan(?q,?u,?o)&verb(?q,buy)&nsubj(?q,?a)&price(?o,?p) quan($q,dollar,#)=quan(?q,?u,?o)×?p & verb($q,pay) & nsubj($q,?a) (d) quan(q4,dollar,#)=1.5&verb(q4,pay)&nsubj(q4,Tim)",2.3 Logic Inference,[0],[0]
+"quan(q5,dollar,#)=1&verb(q5,pay)&nsubj(q5,Tim)
+",2.3 Logic Inference,[0],[0]
+"quan(q6,dollar,#)=0.5&verb(q6,pay)&nsubj(q6,Mary)
+",2.3 Logic Inference,[0],[0]
+"Figure 4: A logic inference example
+the last line in Figure 4(b), three newly derived quantity facts q4, q5 and q6 (in 4(d)) can be unified with the first argument quan(?q,dollar,#) in 4(c), but only q4 and q5 satisfy the second argument verb(?q,pay)&nsubj(?q,Tim).",2.3 Logic Inference,[0],[0]
+"As a result, the answer 2.5 is returned by taking sum on the values of the quantity facts quan(q4,dollar,#) and quan(q5,dollar,#).",2.3 Logic Inference,[0],[0]
+The most error-prone part in the LFT module is instantiating the utility function of math operation especially if many irrelevant quantity facts appear in the given MWP.,2.4 Probabilistic Operand Selection,[0],[0]
+Figure 5 shows the LFT module needs to select two quantity facts (among 4) for Addition.,2.4 Probabilistic Operand Selection,[0],[0]
+"Please note that the question quantity qQ, transformed from “how many flowers”, is not a candidate for operand selection.
+",2.4 Probabilistic Operand Selection,[0],[0]
+"Lin et al., (2015) used predefined lexicosyntactic patterns and ad-hoc rules to instantiate utility functions.",2.4 Probabilistic Operand Selection,[0],[0]
+"However, their rule-based approach fails when the MWP involves more quantities.",2.4 Probabilistic Operand Selection,[0],[0]
+"Therefore, we propose a statistical model to select operands for the utility functions Addition, Subtraction, Multiplication and Division.",2.4 Probabilistic Operand Selection,[0],[0]
+"The operand selection procedure can be regarded as finding the most likely configuration (𝑜𝑜1𝑛𝑛, 𝑟𝑟), where 𝑜𝑜1𝑛𝑛 = 𝑜𝑜1,⋯ , 𝑜𝑜𝑛𝑛 is a sequence of random indicators which denote if the corresponding quantity will be selected as an operand, and 𝑟𝑟 is a tri-state variable to represent the relation between the values of two operands (i.e., 𝑟𝑟 = −1, 0 or 1 ; which denote that the first operand is less than, equal to, or greater than the second operand, respectively).",2.4 Probabilistic Operand Selection,[0],[0]
+"Given a solution type 𝑠𝑠, the MWP logic expressions 𝕃𝕃 and the 𝑛𝑛 quantities 𝑞𝑞1𝑛𝑛 = 𝑞𝑞1,⋯ , 𝑞𝑞𝑛𝑛 in 𝕃𝕃.",2.4 Probabilistic Operand Selection,[0],[0]
+"The procedure is formulated as:
+𝑃𝑃(𝑟𝑟, 𝑜𝑜1𝑛𝑛|𝑞𝑞1𝑛𝑛,𝕃𝕃, 𝑠𝑠) ≈ 𝑃𝑃(𝑟𝑟|𝑠𝑠) × 𝑃𝑃(𝑜𝑜1𝑛𝑛|𝑞𝑞1𝑛𝑛,𝕃𝕃, 𝑠𝑠), (1)
+𝑃𝑃(𝑟𝑟|𝑠𝑠) simply refers to Relative Frequency (as it has only a few parameters and we have enough training samples). 𝑃𝑃(𝑜𝑜1𝑛𝑛|𝑞𝑞1𝑛𝑛,𝕃𝕃",2.4 Probabilistic Operand Selection,[0],[0]
+", 𝑠𝑠) is further derived as:
+𝑃𝑃(𝑜𝑜1𝑛𝑛|𝑞𝑞1𝑛𝑛,𝕃𝕃, 𝑠𝑠) ≈ ∏ 𝑃𝑃(𝑜𝑜𝑖𝑖|𝑞𝑞𝑖𝑖 ,𝕃𝕃, 𝑠𝑠)𝑛𝑛𝑖𝑖=1 ≈ ∏ 𝑃𝑃�𝑜𝑜𝑖𝑖�Φ(𝑞𝑞𝑖𝑖 ,𝕃𝕃, 𝑠𝑠)�,𝑛𝑛𝑖𝑖=1 (2)
+where Φ(∙) is a feature extraction function to map 𝑞𝑞𝑖𝑖 and its context into a feature vector.",2.4 Probabilistic Operand Selection,[0],[0]
+"Here, the probabilistic factor 𝑃𝑃�𝑜𝑜𝑖𝑖�Φ(𝑞𝑞𝑖𝑖,𝕃𝕃, 𝑠𝑠)� is obtained via an SVM classifier (Chang and Lin, 2011).",2.4 Probabilistic Operand Selection,[1.0],"['Here, the probabilistic factor 𝑃𝑃�𝑜𝑜𝑖𝑖�Φ(𝑞𝑞𝑖𝑖,𝕃𝕃, 𝑠𝑠)� is obtained via an SVM classifier (Chang and Lin, 2011).']"
+"Φ(∙) extracts total 25 features (specified as follows, and 24 of them are binary) for 𝑞𝑞𝑖𝑖. The following 11 of them are independent on the question in the MWP:
+1.",2.4 Probabilistic Operand Selection,[0],[0]
+"Four features to indicate if 𝑠𝑠 is Addition, Subtraction, Multiplication or Division.",2.4 Probabilistic Operand Selection,[0],[0]
+2.,2.4 Probabilistic Operand Selection,[0],[0]
+A feature to indicate if 𝑞𝑞𝑖𝑖 is within a qmap(…).,2.4 Probabilistic Operand Selection,[0],[0]
+3.,2.4 Probabilistic Operand Selection,[0],[0]
+A feature to indicate if 𝑞𝑞𝑖𝑖 = 1. 4.,2.4 Probabilistic Operand Selection,[0],[0]
+"Five features to indicate if 𝑛𝑛 < 2, 𝑛𝑛 = 2, 𝑛𝑛 =
+3, 𝑛𝑛 = 4 or 𝑛𝑛 > 4; where 𝑛𝑛 is the number of quantities in Eq (1).
+Φ(∙) also extracts features by matching the logic expressions of 𝑞𝑞𝑖𝑖 with those of question quantity qQ to check the role-tag consistencies between 𝑞𝑞𝑖𝑖 and qQ. Another fourteen features are extracted with three indicator functions 𝐼𝐼𝑚𝑚(⋅), 𝐼𝐼𝑒𝑒(⋅), 𝐼𝐼∃(⋅) and one tri-state function 𝑇𝑇𝑚𝑚(⋅) as follows:
+[ 𝐼𝐼𝑚𝑚(𝑞𝑞𝑖𝑖 , qQ, entity), 𝐼𝐼𝑒𝑒(𝑞𝑞𝑖𝑖 , qQ, entity), 𝐼𝐼𝑚𝑚(𝑞𝑞𝑖𝑖 , qQ, verb), 𝐼𝐼𝑒𝑒(𝑞𝑞𝑖𝑖 , qQ, verb), 𝐼𝐼∃(qQ, nsubj),𝑇𝑇𝑚𝑚(𝑞𝑞𝑖𝑖 , qQ, nsubj), 𝐼𝐼∃(qQ, modifier), 𝐼𝐼𝑚𝑚(𝑞𝑞𝑖𝑖 , qQ, modifier), 𝐼𝐼∃(qQ, place), 𝐼𝐼𝑚𝑚(𝑞𝑞𝑖𝑖 , qQ, place), 𝐼𝐼∃(qQ, temporal), 𝐼𝐼𝑚𝑚(𝑞𝑞𝑖𝑖 , qQ, temporal), 𝐼𝐼∃(qQ, xcomp), 𝐼𝐼𝑚𝑚(𝑞𝑞𝑖𝑖 , qQ, xcomp)",2.4 Probabilistic Operand Selection,[0],[0]
+"]
+where the indicator functions 𝐼𝐼𝑚𝑚(𝑥𝑥,𝑦𝑦, 𝑧𝑧) checks if the 𝑧𝑧 of 𝑥𝑥 matches the 𝑧𝑧 of 𝑦𝑦, 𝐼𝐼𝑒𝑒(𝑥𝑥,𝑦𝑦, 𝑧𝑧) checks if the 𝑧𝑧 of 𝑥𝑥 entails the 𝑧𝑧 of 𝑦𝑦 and 𝐼𝐼∃(𝑦𝑦, 𝑧𝑧) checks if the 𝑧𝑧 of 𝑦𝑦 exists.",2.4 Probabilistic Operand Selection,[0],[0]
+"𝑇𝑇𝑚𝑚(𝑞𝑞𝑖𝑖, qQ, nsubj) returns “exactmatch” (if nsubj of 𝑞𝑞𝑖𝑖 matches nsubj of qQ ), “quasi-match” (if nsubj of qQ does not exist or is a plural pronoun), and “unmatch”.",2.4 Probabilistic Operand Selection,[0],[0]
+𝐼𝐼𝑒𝑒(⋅) uses the WordNet hypernym and hyponym relationship to judge whether one entity/verb entails another one or not via checking if they are in an inherited hypernym-path in WordNet.,2.4 Probabilistic Operand Selection,[0],[0]
+"The entity, verb and nsubj of a quantity are determined according to the logic expressions.",2.4 Probabilistic Operand Selection,[0],[0]
+"The modifier, place, temporal and xcomp of a quantity are extracted from the dependency tree with some lexico-syntactic patterns.",2.4 Probabilistic Operand Selection,[0],[0]
+"For example, the modifier and place of the quantity in the sentence “There are 30 red flowers in the garden.”",2.4 Probabilistic Operand Selection,[0],[0]
+are “red” and “garden” respectively.,2.4 Probabilistic Operand Selection,[0],[0]
+"The temporal
+and xcomp of a quantity are extracted according to the dependency relations “tmod” (i.e., temporal modifier) and “xcomp” (i.e., open clausal complement), respectively.",2.4 Probabilistic Operand Selection,[0],[0]
+The AI2 dataset provided by Hosseini et al. (2014) and the IL dataset released by Roy and Roth (2015) are adopted to compare our approach with other state-of-the-art methods.,3 Datasets for Performance Evaluation,[0],[0]
+"The AI2 dataset has 395 MWPs on addition and subtraction, with 121 MWPs containing irrelevant information (Hosseini et al., 2014).",3 Datasets for Performance Evaluation,[0],[0]
+It is the most popular one for comparing different approaches.,3 Datasets for Performance Evaluation,[0],[0]
+"On the other hand, the IL dataset consists of 562 elementary MWPs which can be solved by one of the four arithmetic operations (i.e., +, −, ×, and ÷) without any irrelevant quantity.",3 Datasets for Performance Evaluation,[0],[0]
+"It is the first publicly available dataset for comparing performances that covers all four arithmetic operations.
+",3 Datasets for Performance Evaluation,[0],[0]
+"However, the difficulty of solving an MWP depends not only on the number of arithmetic operations required, but also on how many irrelevant quantities inside, and even on how the quantities are described.",3 Datasets for Performance Evaluation,[0],[0]
+One way to test if a proposed approach solves the MWPs with understanding is to check whether it is robust to those irrelevant quantities.,3 Datasets for Performance Evaluation,[0],[0]
+"Therefore, it is desirable to have a big enough dataset that contains irrelevant quantities which are created under different situations (e.g., confusing with an irrelevant agent, entity, or modifier, etc.) and allow us to probe the system weakness from different angles.",3 Datasets for Performance Evaluation,[0],[0]
+We thus create a new dataset with more irrelevant quantities8.,3 Datasets for Performance Evaluation,[0],[0]
+"But before we do that, we need to know how difficult the task of solving the given MWPs is.",3 Datasets for Performance Evaluation,[0],[0]
+"Therefore, we first propose a way to measure how easy that a system solves the problem by simply guessing.",3 Datasets for Performance Evaluation,[0],[0]
+"We propose to adopt the Perplexity to measure the task difficulty, which evaluates how likely a solver will get the correct answer by guessing.",3.1 Perplexity-flavor Measure,[0],[0]
+"Every MWP in the datasets can be associated with a solution expression template, such as “⊡ + ⊡” or “⊡−⊡”, where the symbol ⊡ represents a slot to hold a quantity.",3.1 Perplexity-flavor Measure,[0],[0]
+The solution can be obtained by placing correct quantities at appropriate slots.,3.1 Perplexity-flavor Measure,[1.0],['The solution can be obtained by placing correct quantities at appropriate slots.']
+"A 8 The IL dataset does not include any irrelevant information; on the other hand, the AI2 dataset only contains 121 MWPS with irrelevant information (but not systematically created).
+",3.1 Perplexity-flavor Measure,[0],[0]
+random baseline is to solve an MWP by guessing.,3.1 Perplexity-flavor Measure,[1.0],['random baseline is to solve an MWP by guessing.']
+"It first selects a solution expression template according to the prior distribution of the templates and then places quantities into the selected template according to the uniform distribution.
+",3.1 Perplexity-flavor Measure,[0],[0]
+The expected accuracy of the random baseline on solving an MWP is a trivial combination and permutation exercise9.,3.1 Perplexity-flavor Measure,[0],[0]
+"For example, the expected accuracy of solving an MWP associated with “⊡ + ⊡” template is 𝑝𝑝⊡+⊡ ×",3.1 Perplexity-flavor Measure,[0],[0]
+"𝐶𝐶𝑛𝑛 2 −1 , where the factor 𝑝𝑝⊡+⊡ denotes the prior probability of the template “⊡ + ⊡” and 𝑛𝑛 is the total number of quantities (including irrelevant ones) in the MWP.",3.1 Perplexity-flavor Measure,[0],[0]
+"On the other hand, expected accuracy of solving an MWP associated with “⊡−⊡”10 template is 𝑝𝑝⊡−⊡ × 𝑃𝑃𝑛𝑛 2 −1 .",3.1 Perplexity-flavor Measure,[0],[0]
+Let 𝐴𝐴𝑖𝑖 denote the expected accuracy of solving the 𝑖𝑖-th MWP in a dataset.,3.1 Perplexity-flavor Measure,[0],[0]
+"The accuracy of the random baseline on the dataset of size 𝑁𝑁 is then computed as 𝐴𝐴 = (1/𝑁𝑁) × ∑ 𝐴𝐴𝑖𝑖𝑁𝑁𝑖𝑖=1 .
+",3.1 Perplexity-flavor Measure,[0],[0]
+"The word “Accuracy” comprises the opposite sense of the word “Perplexity”11 (i.e., in the sense of how hard a prediction problem is).",3.1 Perplexity-flavor Measure,[0],[0]
+"The lower the Accuracy is, the higher the Perplexity is.",3.1 Perplexity-flavor Measure,[0],[0]
+"Therefore, we transform the Accuracy measure into a Perplexity-Flavor measure (PP) via the formula: PP = 2− log2 𝐴𝐴 For instance, the Perplexity-Flavor measures of AI2 and IL datasets are 4.46 and 8.32 respectively.",3.1 Perplexity-flavor Measure,[0],[0]
+"Human Math/Science tests have been considered more suitable for judging AI progress than Turing test (Clark and Etzioni, 2016).",3.2 Noisy Dataset,[0],[0]
+"In our task, solving MWPs is mainly regarded as a test for intelligence (not just for creating a Math Solver package).",3.2 Noisy Dataset,[0],[0]
+"By injecting various irrelevant quantities into original MWPs, a noisy dataset is thus created to assess if a solver solves the MWPs mainly via understanding or via mechanical/statistical pattern matching.",3.2 Noisy Dataset,[0],[0]
+"If a system solves an MWP mainly via pattern matching, it would have difficulty in solving a similar MWP augmented from the original one with some irrelevant quantities.",3.2 Noisy Dataset,[0],[0]
+"Therefore, we first create a noisy dataset by selecting some 9 Let 𝐶𝐶𝑛𝑛 𝑘𝑘 denote 𝑘𝑘-combinations of 𝑛𝑛 and 𝑃𝑃𝑛𝑛 𝑘𝑘 denote 𝑘𝑘- permutations of 𝑛𝑛. 10",3.2 Noisy Dataset,[0],[0]
+"We assume the operands have different values and, therefore, they are not permutable for the subtraction operator.",3.2 Noisy Dataset,[0],[0]
+11,3.2 Noisy Dataset,[0],[0]
+"The Perplexity of a uniform distribution over k discrete events (such as casting a fair k-sided dice) is k.
+MWPs that can be correctly solved, and then augmenting each of them with an additional noisy sentence which involves an irrelevant quantity.",3.2 Noisy Dataset,[0],[0]
+"This dataset is created to examine if the solver knows that this newly added quantity is irrelevant.
+",3.2 Noisy Dataset,[0],[0]
+Figure 6 shows how we inject noise into an MWP (a).,3.2 Noisy Dataset,[0],[0]
+"(a.1) is created by associating an irrelevant quantity to a new subject (i.e., Mary).",3.2 Noisy Dataset,[0],[0]
+Here the ellipse symbol “…” denotes unchanged text.,3.2 Noisy Dataset,[0],[0]
+"(a.2) is obtained by associating an irrelevant quantity to a new entity (i.e., books).",3.2 Noisy Dataset,[0],[0]
+"In addition, we also change modifiers (such as yellow, red, …) to add new noisy sentence (not shown here).",3.2 Noisy Dataset,[0],[0]
+"Since the noisy dataset is not designed to assess the lexicon coverage rate of a solver, we reuse the words in the original dataset as much as possible while adding new subjects, entities and modifiers.
+136 MWPs that both Illinois Math Solver 12 (Roy and Roth, 2016) and our system can correctly solve are selected from the AI2 and IL datasets.",3.2 Noisy Dataset,[0],[0]
+This subset is denoted as OSS (Original Sub-Set).,3.2 Noisy Dataset,[0],[0]
+"Afterwards, based on the 136 MWPs of OSS, we create a noisy dataset of 396 MWPs by adding irrelevant quantities.",3.2 Noisy Dataset,[0],[0]
+This noisy dataset is named as NDS13.,3.2 Noisy Dataset,[0],[0]
+"Table 1 lists the size of MWPs, Perplexities (PP), and the average numbers of quantities in each MWP of these two datasets.",3.2 Noisy Dataset,[0],[0]
+"We compare our approach with (Roy and Roth, 2015) and (Roy and Roth, 2017) because they achieved the state-of-the-art performance on the IL dataset.",4 Experimental Results and Discussion,[0],[0]
+"In the approach of (Roy and Roth, 2015), each quantity in the MWP was associated with a quantity schema whose attributes are extracted from the context of the quantity.",4 Experimental Results and Discussion,[0],[0]
+"Based on the attributes, several statistical classifiers were used to select operands and determine the operator.",4 Experimental Results and Discussion,[0],[0]
+"They also reported the performances on the AI2 dataset to compare their approach with those 12 We submit MWPs to Illinois Math Solver (https://cogcomp.cs.illinois.edu/page/demo_view/Math) in May and June, 2017. 13",4 Experimental Results and Discussion,[0],[0]
+The noisy dataset can be downloaded from https://github.com /chaochun/nlu-mwp-noise-dataset.,4 Experimental Results and Discussion,[0],[0]
+"It includes 102 Addition, 147 Subtraction, 101 Multiplication and 46 Division MWPs.
+of others (e.g., Kushman et al. (2014), which is a purely statistical approach that aligns the text with various pre-extracted equation templates).",4 Experimental Results and Discussion,[0],[0]
+"Roy and Roth (2017) further introduced the concept of Unit Dependency Graphs to reinforce the consistency of physical units among selected operands associated with the same operator.
+",4 Experimental Results and Discussion,[0],[0]
+"To compare the performance of the statistical method with the DNN approach, we only implement a Bi-directional RNN-based Solution Type Identifier (as our original statistical Operand Selector is relatively much better).",4 Experimental Results and Discussion,[0],[0]
+"It consists of a word embedding layer (for both body and question parts), and a bidirectional GRU layer as an encoder.",4 Experimental Results and Discussion,[0],[0]
+"We apply the attention mechanism to scan all hidden state sequence of body by the last hidden state of question to pay more attention to those more important (i.e., more similar between the body and the question) words.",4 Experimental Results and Discussion,[0],[0]
+"Lastly, it outputs the solution type by a softmax function.",4 Experimental Results and Discussion,[0],[0]
+"We train it for 100 epochs, with mini-batch-size = 128 and learning-rate = 0.001; the number of nodes in the hidden layer is 200, and the drop-out rate is 0.714.
+",4 Experimental Results and Discussion,[0],[0]
+"We follow the same n-fold cross-validation evaluation setting adopted in (Roy and Roth, 2015) exactly.",4 Experimental Results and Discussion,[0],[0]
+"Therefore, various performances could be directly compared.",4 Experimental Results and Discussion,[0],[0]
+"Table 2 lists the accuracies of different systems in solving the MWPs 14 Since the dataset is not large enough for splitting a development set, we choose those hyper parameters based on the test set in coarse grain.",4 Experimental Results and Discussion,[0],[0]
+"Therefore, the DNN performance we show here might be a bit optimistic.
+of various datasets.",4 Experimental Results and Discussion,[0],[0]
+"The performance of (Roy and Roth, 2017) system is directly delivered by their code15.",4 Experimental Results and Discussion,[0],[0]
+"The last two rows are extracted from (Roy and Roth, 2015).",4 Experimental Results and Discussion,[1.0],"['The last two rows are extracted from (Roy and Roth, 2015).']"
+"The results show that our performances of the statistical approach significantly outperform that of our DNN approach and other systems on every dataset.
+",4 Experimental Results and Discussion,[0],[0]
+The performances of STI and LFT modules are listed in Table 3.,4 Experimental Results and Discussion,[0],[0]
+"As described in section 2, the benchmark for both solution type and the operand selection benchmark are automatically determined by weakly supervised learning.",4 Experimental Results and Discussion,[0],[0]
+"The first and second rows of Table 3 show the solution type accuracies of our statistical and DNN approaches, respectively.",4 Experimental Results and Discussion,[0],[0]
+The third row shows the operand selection accuracy obtained by given the solution type benchmark.,4 Experimental Results and Discussion,[0],[0]
+"Basically, LFT accuracies are from 92% to 95%, and the system accuracies are dominated by STI.",4 Experimental Results and Discussion,[1.0],"['Basically, LFT accuracies are from 92% to 95%, and the system accuracies are dominated by STI.']"
+"We analyzed errors resulted from our statistical STI on AI2 and IL datasets, respectively.",4 Experimental Results and Discussion,[1.0],"['We analyzed errors resulted from our statistical STI on AI2 and IL datasets, respectively.']"
+"For AI2, major errors come from: (1) failure of ruling out some irrelevant quantities (40%), and (2) making confusion between TVQ-F and Sum these two solution types (20%) for those cases that only involve addition operation (however, both types would return the same answer).",4 Experimental Results and Discussion,[1.0],"['For AI2, major errors come from: (1) failure of ruling out some irrelevant quantities (40%), and (2) making confusion between TVQ-F and Sum these two solution types (20%) for those cases that only involve addition operation (however, both types would return the same answer).']"
+"For IL, major errors come from: (1) requiring additional information (35%), and (2) not knowing PartWhole relation (17%).",4 Experimental Results and Discussion,[0],[0]
+"Table 4 shows a few examples for different STI error types.
+",4 Experimental Results and Discussion,[0],[0]
+The left-half of Table 5 shows the performances on the OSS and NDS datasets.,4 Experimental Results and Discussion,[0],[0]
+"Recall that OSS is created by selecting some MWPs which both Illinois Math Solver (Roy and Roth, 2016) and our system16 can correctly solve.",4 Experimental Results and Discussion,[0],[0]
+"Therefore, both systems have 100% accuracy in solving the OSS dataset.",4 Experimental Results and Discussion,[0],[0]
+"However, these two systems behave very differently while solving the noisy dataset.",4 Experimental Results and Discussion,[1.0],"['However, these two systems behave very differently while solving the noisy dataset.']"
+The much higher accuracy of our system on the noisy dataset shows that our meaning-based approach understands the meaning of each quantity more.,4 Experimental Results and Discussion,[0],[0]
+"Therefore, it is less confused17 with the irrelevant quantities.
+",4 Experimental Results and Discussion,[0],[0]
+One MWP in the noisy dataset that confuses Illinois Math Solver (IMS) is “Tom has 9 yellow balloons.,4 Experimental Results and Discussion,[0],[0]
+Sara has 8 yellow balloons.,4 Experimental Results and Discussion,[0],[0]
+Bob has 5 yellow flowers.,4 Experimental Results and Discussion,[0],[0]
+How many yellow balloons do 15 https://github.com/CogComp/arithmetic. 16,4 Experimental Results and Discussion,[0],[0]
+"In evaluating the performances on OSS and NDS datasets, our system is trained on the folds 2-5 of the IL dataset.",4 Experimental Results and Discussion,[0],[0]
+"17 Since the gap between two different types of approaches is quite big, those 396 examples on OSS and 196 examples on NDS are sufficient to confirm the conclusion.
+",4 Experimental Results and Discussion,[0],[0]
+"they have in total?”, where the underlined sentence is the added noisy sentence.",4 Experimental Results and Discussion,[1.0],"['they have in total?”, where the underlined sentence is the added noisy sentence.']"
+"The solver sums all quantities and gives the wrong answer 22, which reveals that IMS cannot understand that the quantity “5 yellow flowers” is irrelevant to the question “How many yellow balloons?”.",4 Experimental Results and Discussion,[0],[0]
+"On the contrary, our system avoids this mistake.
+",4 Experimental Results and Discussion,[0],[0]
+"Although the meaning of each quantity is explicitly checked in our LFT module, our system still cannot correctly solve all MWPs in NDS.",4 Experimental Results and Discussion,[0],[0]
+"The error analysis reveals that the top-4 error sources are STI, LFT, CoreNLP and incorrect problem construction (for 27%, 27%, 18%, 18%), which indicates that our STI and LFT still cannot completely prevent the damage caused from the noisy sentences (which implies that more consistency check for quantity meaning should be done).",4 Experimental Results and Discussion,[0],[0]
+"The remaining errors are due to incorrect quantity extraction, lacking common-sense or not knowing entailment relationship between two entities.
+",4 Experimental Results and Discussion,[0],[0]
+A similar experiment is performed to check if the DNN approach will be affected by the noisy information more.,4 Experimental Results and Discussion,[0],[0]
+We first select 124 MWPs (denoted as OSS′) from OSS that can be correctly solved by both our statistical and DNN approaches and then filter out 350 derived MWPs (denotes as NDS′) from NDS.,4 Experimental Results and Discussion,[0],[0]
+"The right-half of Table 5 shows that the performance of the DNN approach drops more than the statistical approach does in the noisy dataset, which indicates that our statistical approach is less sensitive to the irrelevant quantities and more close to human’s approach.",4 Experimental Results and Discussion,[0],[0]
+"To the best of our knowledge, MWP solvers proposed before 2014 all adopted the rule-based approach.",5 Related Work,[0],[0]
+Mukherjee and Garain (2008) had given a good survey for all related approaches before 2008.,5 Related Work,[0],[0]
+"Afterwards, Ma et al. (2010) proposed a MSWPAS system to simulate human arithmetic multi-step addition and subtraction behavior without evaluation.",5 Related Work,[0],[0]
+"Besides, Liguda and Pfeiffer (2012) proposed a model based on augmented semantic networks, and claimed that it could solve multi-step MWPs and complex equation systems and was more robust to irrelevant information (also no evaluation).
+",5 Related Work,[0],[0]
+"Recently, Hosseini et al. (2014) proposed a Container-Entity based approach, which solved the MWP with a sequence of state transition.",5 Related Work,[0],[0]
+"And Kushman et al. (2014) proposed the first statistical approach, which heuristically extracts some algebraic templates from labeled equations, and then aligns them with the given sentence.",5 Related Work,[0],[0]
+"Since no semantic analysis is conducted, the performance is quite limited.
+",5 Related Work,[0],[0]
+"In more recent researches (Roy and Roth, 2015; Koncel-Kedziorski et al., 2015; Roy and Roth, 2017), quantities in an MWP were associated with attributes extracted from their contexts.",5 Related Work,[0],[0]
+"Based on the attributes, several statistical classifiers were used to select operands and determine operators to solve multi-step MWPs.",5 Related Work,[0],[0]
+"Since the physical meaning of each quantity is not explicitly considered in getting the answer, the reasoning process cannot be explained in a human comprehensible way.",5 Related Work,[0],[0]
+"Besides, Shi et al. (2015) attacked the number word problem, which only deal with numbers, with a semantic parser.",5 Related Work,[0],[0]
+"Mitra and Baral (2016) mapped MWPs into three types of problems, including Part-Whole, Change and Comparison.",5 Related Work,[0],[0]
+Each problem was associated with a generic formula.,5 Related Work,[0],[0]
+They used a log-linear model to determine how to instantiate the formula with quantities and solve the only one Unknown variable.,5 Related Work,[0],[0]
+They achieved the best performance on the AI2 dataset.,5 Related Work,[0],[0]
+"However, their approach cannot handle Multiplication or Division related MWPs.",5 Related Work,[0],[0]
+"Recently, DNN-based approaches (Ling et al, 2017; Wang et al, 2017) have emerged.",5 Related Work,[0],[0]
+"However, they only attacked algebraic word problems, and required a very large training-set.
+",5 Related Work,[0],[0]
+"Our proposed approach mainly differs from those previous approaches in combining the statistical framework with logic inference, and also in
+adopting the meaning-based statistical approach for selecting the desired operands.",5 Related Work,[0],[0]
+"A meaning-based logic form represented with role-tags (e.g., nsubj, verb, etc.) is first proposed to associate the extracted math quantity with its physical meaning, which then can be used to identify the desired operands and filter out irrelevant quantities.",6 Conclusion,[0],[0]
+"Afterwards, a statistical framework is proposed to perform understanding and reasoning based on those logic expressions.",6 Conclusion,[0],[0]
+"We further compare the performance with a typical DNN approach, the results show the proposed approach is still better.",6 Conclusion,[1.0],"['We further compare the performance with a typical DNN approach, the results show the proposed approach is still better.']"
+"We will try to integrate domain concepts into the DNN approach to improve the learning efficiency in the future.
+",6 Conclusion,[0],[0]
+The main contributions of our work are: (1) Adopting a meaning-based approach to solve English math word problems and showing its superiority over other state-of-the-art systems on common datasets.,6 Conclusion,[0],[0]
+(2) Proposing a statistical model to select operands by explicitly checking the meanings of quantities against the meaning of the question sentence.,6 Conclusion,[1.0],['(2) Proposing a statistical model to select operands by explicitly checking the meanings of quantities against the meaning of the question sentence.']
+(3) Designing a noisy dataset to test if a system solves the problems by understanding.,6 Conclusion,[1.0],['(3) Designing a noisy dataset to test if a system solves the problems by understanding.']
+(4) Proposing a perplexity-flavor measure to assess the complexity of a dataset.,6 Conclusion,[1.0],['(4) Proposing a perplexity-flavor measure to assess the complexity of a dataset.']
+"We introduce MeSys, a meaning-based approach, for solving English math word problems (MWPs) via understanding and reasoning in this paper.",abstractText,[0],[0]
+"It first analyzes the text, transforms both body and question parts into their corresponding logic forms, and then performs inference on them.",abstractText,[0],[0]
+"The associated context of each quantity is represented with proposed role-tags (e.g., nsubj, verb, etc.), which provides the flexibility for annotating an extracted math quantity with its associated context information (i.e., the physical meaning of this quantity).",abstractText,[0],[0]
+Statistical models are proposed to select the operator and operands.,abstractText,[0],[0]
+A noisy dataset is designed to assess if a solver solves MWPs mainly via understanding or mechanical pattern matching.,abstractText,[0],[0]
+"Experimental results show that our approach outperforms existing systems on both benchmark datasets and the noisy dataset, which demonstrates that the proposed approach understands the meaning of each quantity in the text more.",abstractText,[0],[0]
+A Meaning-based Statistical English Math Word Problem Solver,title,[0],[0]

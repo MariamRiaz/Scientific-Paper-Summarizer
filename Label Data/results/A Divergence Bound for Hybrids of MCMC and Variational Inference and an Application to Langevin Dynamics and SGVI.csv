@@ -1,0 +1,685 @@
+0,1,label2,summary_sentences
+"Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics (Long Papers), pages 1938–1947 Melbourne, Australia, July 15 - 20, 2018. c©2018 Association for Computational Linguistics
+1938",text,[0],[0]
+"The explicit modeling of morphology has been shown to improve a number of tasks (Seeker and Çetinoglu, 2015; Luong et al., 2013).",1 Introduction,[0],[0]
+"In a large number of the world’s languages, many words are composed through morphological operations on subword units.",1 Introduction,[0],[0]
+"Some languages are rich in inflectional morphology, characterized by syntactic transformations like pluralization.",1 Introduction,[0],[0]
+"Similarly, languages like English are rich in derivational morphology, where the semantics of words are composed from
+∗These authors contributed equally; listed alphabetically.
+smaller parts.",1 Introduction,[0],[0]
+"The AGENT derivational transformation, for example, answers the question, what is the word for ‘someone who runs’?",1 Introduction,[0],[0]
+"with the answer, a runner.1 Here, AGENT is spelled out as suffixing -ner onto the root verb run.
+",1 Introduction,[0],[0]
+We tackle the task of derived word generation.,1 Introduction,[0],[0]
+"In this task, a root word x and a derivational transformation t are given to the learner.",1 Introduction,[0],[0]
+"The learner’s job is to produce the result of the transformation on the root word, called the derived word y. Table 1 gives examples of these transformations.
+",1 Introduction,[0],[0]
+"Previous approaches to derived word generation model the task as a character-level sequenceto-sequence (seq2seq) problem (Cotterell et al., 2017b).",1 Introduction,[0],[0]
+"The letters from the root word and some encoding of the transformation are given as input to a neural encoder, and the decoder is trained to produce the derived word, one letter at a time.",1 Introduction,[0],[0]
+"We identify the following problems with these approaches:
+First, because these models are unconstrained, they can generate sequences of characters that do
+1We use the verb run as a demonstrative example; the transformation can be applied to most verbs.
+",1 Introduction,[0],[0]
+not form actual words.,1 Introduction,[0],[0]
+"We argue that requiring the model to generate a known word is a reasonable constraint in the special case of English derivational morphology, and doing so avoids a large number of common errors.
+",1 Introduction,[0],[0]
+"Second, sequence-based models can only generalize string manipulations (such as “add -ment”) if they appear frequently in the training data.",1 Introduction,[0],[0]
+"Because of this, they are unable to generate derived words that do not follow typical patterns, such as generating truth as the nominative derivation of true.",1 Introduction,[0],[0]
+We propose to learn a function for each transformation in a low dimensional vector space that corresponds to mapping from representations of the root word to the derived word.,1 Introduction,[0],[0]
+"This eliminates the reliance on orthographic information, unlike related approaches to distributional semantics, which operate at the suffix level (Gupta et al., 2017).
+",1 Introduction,[0],[0]
+"We contribute an aggregation model of derived word generation that produces hypotheses independently from two separate learned models: one from a seq2seq model with only orthographic information, and one from a feed-forward network using only distributional semantic information in the form of pretrained word vectors.",1 Introduction,[0],[0]
+The model learns to choose between the hypotheses according to the relative confidence of each.,1 Introduction,[0],[0]
+This system can be interpreted as learning to decide between positing an orthographically regular form or a semantically salient word.,1 Introduction,[0],[0]
+"See Figure 1 for a diagram of our model.
+",1 Introduction,[0],[0]
+"We show that this model helps with two open problems with current state-of-the-art seq2seq derived word generation systems, suffix ambiguity and orthographic irregularity (Section 2).",1 Introduction,[0],[0]
+"We also
+improve the accuracy of seq2seq-only derived word systems by adding external information through constrained decoding and hypothesis rescoring.",1 Introduction,[0],[0]
+"These methods provide orthogonal gains to our main contribution.
+",1 Introduction,[0],[0]
+"We evaluate models in two categories: open vocabulary models that can generate novel words unattested in a preset vocabulary, and closedvocabulary models, which cannot.",1 Introduction,[0],[0]
+Our best openvocabulary and closed-vocabulary models demonstrate 22% and 37% relative error reductions over the current state of the art.,1 Introduction,[0],[0]
+Derivational transformations generate novel words that are semantically composed from the root word and the transformation.,2 Background: Derivational Morphology,[0],[0]
+"We identify two unsolved problems in derived word transformation, each of which we address in Sections 3 and 4.
+",2 Background: Derivational Morphology,[0],[0]
+"First, many plausible choices of suffix for a single pair of root word and transformation.",2 Background: Derivational Morphology,[0],[0]
+"For example, for the verb ground, the RESULT transformation could plausibly take as many forms as2
+(ground, RESULT)→ grounding (ground, RESULT)→ *groundation (ground, RESULT)→ *groundment (ground, RESULT)→ *groundal
+However, only one is correct, even though each suffix appears often in the RESULT transformation of other words.",2 Background: Derivational Morphology,[0],[0]
+"We will refer to this problem as “suffix ambiguity.”
+",2 Background: Derivational Morphology,[0],[0]
+"Second, many derived words seem to lack a generalizable orthographic relationship to their root words.",2 Background: Derivational Morphology,[0],[0]
+"For example, the RESULT of the verb speak is speech.",2 Background: Derivational Morphology,[0],[0]
+"It is unlikely, given an orthographically similar verb creak, that the RESULT be creech instead of, say, creaking.",2 Background: Derivational Morphology,[0],[0]
+Seq2seq models must grapple with the problem of derived words that are the result of unlikely or potentially unseen string transformations.,2 Background: Derivational Morphology,[0],[0]
+We refer to this problem as “orthographic irregularity.”,2 Background: Derivational Morphology,[0],[0]
+"In this section, we introduce the prior state-of-theart model, which serves as our baseline system.",3 Sequence Models and Corpus Knowledge,[0],[0]
+"Then we build on top of this system by incorporating a dictionary constraint and rescoring the
+2The * indicates a non-word.
+model’s hypotheses with token frequency information to address the suffix ambiguity problem.",3 Sequence Models and Corpus Knowledge,[0],[0]
+We begin by formalizing the problem and defining some notation.,3.1 Baseline Architecture,[0],[0]
+"For source word x = x1, x2, . . .",3.1 Baseline Architecture,[0],[0]
+"xm, a derivational transformation t, and target word y = y1, y2, . . .",3.1 Baseline Architecture,[0],[0]
+"yn, our goal is to learn some function from the pair (x, t) to y. Here, xi and yj are the ith and jth characters of the input strings x and y.",3.1 Baseline Architecture,[0],[0]
+"We will sometimes use x1:i to denote x1, x2, . . .",3.1 Baseline Architecture,[0],[0]
+"xi, and similarly for y1:j .
+",3.1 Baseline Architecture,[0],[0]
+"The current state-of-the-art model for derivedform generation approaches this problem by learning a character-level encoder-decoder neural network with an attention mechanism (Cotterell et al., 2017b; Bahdanau et al., 2014).
+",3.1 Baseline Architecture,[0],[0]
+"The input to the bidirectional LSTM encoder (Hochreiter and Schmidhuber, 1997; Graves and Schmidhuber, 2005) is the sequence #, x1, x2, . . .",3.1 Baseline Architecture,[0],[0]
+"xm, #, t, where # is a special symbol to denote the start and end of a word, and the encoding of the derivational transformation t is concatenated to the input characters.",3.1 Baseline Architecture,[0],[0]
+The model is trained to minimize the cross entropy of the training data.,3.1 Baseline Architecture,[0],[0]
+"We refer to our reimplementation of this model as SEQ.
+",3.1 Baseline Architecture,[0],[0]
+"For a more detailed treatment of neural sequenceto-sequence models with attention, we direct the reader to Luong et al. (2015).",3.1 Baseline Architecture,[0],[0]
+The suffix ambiguity problem poses challenges for models which rely exclusively on input characters for information.,3.2 Dictionary Constraint,[0],[0]
+"As previously demonstrated, words derived via the same transformation may take different suffixes, and it is hard to select among them based on character information alone.",3.2 Dictionary Constraint,[0],[0]
+"Here, we describe a process for restricting our inference procedure to only generate known English words, which we call a dictionary constraint.",3.2 Dictionary Constraint,[0],[0]
+"We believe that for English morphology, a large enough corpus will contain the vast majority of derived forms, so while this approach is somewhat restricting, it removes a significant amount of ambiguity from the problem.
+",3.2 Dictionary Constraint,[0],[0]
+"To describe how we implemented this dictionary constraint, it is useful first to discuss how decoding in a seq2seq model is equivalent to solving a shortest path problem.",3.2 Dictionary Constraint,[0],[0]
+"The notation is specific to our model, but the argument is applicable to seq2seq models in general.
+",3.2 Dictionary Constraint,[0],[0]
+"The goal of decoding is to find the most probable structure ŷ conditioned on some observation x and transformation t. That is, the problem is to solve
+ŷ =",3.2 Dictionary Constraint,[0],[0]
+"argmax y∈Y
+p(y | x, t) (1)
+= argmin y∈Y − log p(y | x, t) (2)
+where Y is the set of valid structures.",3.2 Dictionary Constraint,[0],[0]
+"Sequential models have a natural ordering y = y1, y2, . . .",3.2 Dictionary Constraint,[0],[0]
+"yn over which − log p(y | x, t) can be decomposed
+− log p(y | x, t) = n∑
+t=1
+− log p(yt | y1:t−1,x, t)
+(3)",3.2 Dictionary Constraint,[0],[0]
+Solving Equation 2 can be viewed as solving a shortest path problem from a special starting state to a special ending state via some path which uniquely represents y.,3.2 Dictionary Constraint,[0],[0]
+Each vertex in the graph represents some sequence y1,3.2 Dictionary Constraint,[0],[0]
+":i, and the weight of the edge from y1:i to y1:i+1 is given by
+− log p(yi+1 | y1:i−1,x, t) (4)
+",3.2 Dictionary Constraint,[0],[0]
+The weight of the path from the start state to the end state via the unique path that describes y is exactly equal to Equation 3.,3.2 Dictionary Constraint,[0],[0]
+"When the vocabulary size is too large, the exact shortest path is intractable, and approximate search methods, such as beam search, are used instead.
+",3.2 Dictionary Constraint,[0],[0]
+"In derived word generation, Y is an infinite set of strings.",3.2 Dictionary Constraint,[0],[0]
+"Since Y is unrestricted, almost all of the strings in Y are not valid words.",3.2 Dictionary Constraint,[0],[0]
+"Given a dictionary YD, the search space is restricted to only those words in the dictionary by searching over the trie induced from YD, which is a subgraph of the unrestricted graph.",3.2 Dictionary Constraint,[0],[0]
+"By limiting the search space to YD, the decoder is guaranteed to generate some known word.",3.2 Dictionary Constraint,[0],[0]
+Models which use this dictionaryconstrained inference procedure will be labeled with +DICT.,3.2 Dictionary Constraint,[0],[0]
+"Algorithm 1 has the pseudocode for our decoding procedure.
+",3.2 Dictionary Constraint,[0],[0]
+We discuss specific details of the search procedure and interesting observations of the search space in Section 6.,3.2 Dictionary Constraint,[0],[0]
+Section 5.2 describes how we obtained the dictionary of valid words.,3.2 Dictionary Constraint,[0],[0]
+"We also consider the inclusion of explicit word frequency information to help solve suffix ambiguity, using the intuition that “real” derived words
+are likely to be frequently attested.",3.3 Word Frequency Knowledge through Rescoring,[0],[0]
+"This permits a high-recall, potentially noisy dictionary.
+",3.3 Word Frequency Knowledge through Rescoring,[0],[0]
+"We are motivated by very high top-10 accuracy compared to top-1 accuracy, even among dictionary-constrained models.",3.3 Word Frequency Knowledge through Rescoring,[0],[0]
+"By rescoring the hypotheses of a model using word frequency (a word-global signal) as a feature, attempt to recover a portion of this top-10 accuracy.
+",3.3 Word Frequency Knowledge through Rescoring,[0],[0]
+"When a model has been trained, we query it for its top-10 most likely hypotheses.",3.3 Word Frequency Knowledge through Rescoring,[0],[0]
+The union of all hypotheses for a subset of the training observations forms the training set for a classifier that learns to predict whether a hypothesis generated by the model is correct.,3.3 Word Frequency Knowledge through Rescoring,[0],[0]
+"Each hypothesis is labelled with its correctness, a value in {±1}.",3.3 Word Frequency Knowledge through Rescoring,[0],[0]
+"We train a simple combination of two scores: the seq2seq model score for the hypothesis, and the log of the word frequency of the hypothesis.
+",3.3 Word Frequency Knowledge through Rescoring,[0],[0]
+"To permit a nonlinear combination of word frequency and model score, we train a small multilayer perceptron with the model score and the frequency of a derived word hypothesis as features.
+",3.3 Word Frequency Knowledge through Rescoring,[0],[0]
+"At testing time, the 10 hypotheses generated by a single seq2seq model for a single observation are rescored.",3.3 Word Frequency Knowledge through Rescoring,[0],[0]
+"The new model top-1 hypothesis, then, is the argmax over the 10 hypotheses according to the rescorer.",3.3 Word Frequency Knowledge through Rescoring,[0],[0]
+"In this way, we are able to incorporate word-global information, e.g. word frequency, that is ill-suited for incorporation at each character prediction step of the seq2seq model.",3.3 Word Frequency Knowledge through Rescoring,[0],[0]
+We label models that are rescored in this way +FREQ.,3.3 Word Frequency Knowledge through Rescoring,[0],[0]
+"So far, we have presented models that learn derivational transformations as orthographic operations.",4 Distributional Models,[0],[0]
+"Such models struggle by construction with the orthographic irregularity problem, as they are trained to generalize orthographic information.",4 Distributional Models,[0],[0]
+"However, the semantic relationships between root words and derived words are the same even when the orthography is dissimilar.",4 Distributional Models,[0],[0]
+"It is salient, for example, that irregular word speech is related to its root speak in about the same way as how exploration is related to the word explore.
+",4 Distributional Models,[0],[0]
+"We model distributional transformations as functions in dense distributional word embedding spaces, crucially learning a function per derivational transformation, not per suffix pair.",4 Distributional Models,[0],[0]
+"In this way, we aim to explicitly model the semantic transformation, not the othographic information.",4 Distributional Models,[0],[0]
+"For all source words x and all target words y, we look up static distributional embeddings vx, vy ∈ Rd.",4.1 Feed-forward derivational transformations,[0],[0]
+"For each derivational transformation t, we learn a function ft : Rd → Rd that maps vx to vy.",4.1 Feed-forward derivational transformations,[0],[0]
+"ft is parametrized as two-layer perceptron, trained using a squared loss,
+L = bTb (5) b =",4.1 Feed-forward derivational transformations,[0],[0]
+"ft(vx)− vy (6)
+We perform inference by nearest neighbor search in the embedding space.",4.1 Feed-forward derivational transformations,[0],[0]
+"This inference strategy requires a subset of strings for our embedding dictionary, YV .
+",4.1 Feed-forward derivational transformations,[0],[0]
+"Upon receiving (x, t) at test time, we compute ft(vx) and find the most similar embeddings in YV .",4.1 Feed-forward derivational transformations,[0],[0]
+"Specifically, we find the top-k most similar embeddings, and take the most similar derived word that starts with the same 4 letters as the root word, and is not identical to it.",4.1 Feed-forward derivational transformations,[0],[0]
+"This heuristic filters out highly implausible hypotheses.
+",4.1 Feed-forward derivational transformations,[0],[0]
+"We use the single-word subset of the Google News vectors (Mikolov et al., 2013) as YV , so the size of the vocabulary is 929k words.",4.1 Feed-forward derivational transformations,[0],[0]
+The seq2seq and distributional models we have presented learn with disjoint information to solve separate problems.,4.2 SEQ and DIST Aggregation,[0],[0]
+"We leverage this intuition to build a model that chooses, for each observation, whether to generate according to orthographic information via the SEQ model, or produce a potentially irregular form via the DIST model.
+",4.2 SEQ and DIST Aggregation,[0],[0]
+"To train this model, we use a held-out portion of the training set, and filter it to only observations for which exactly one of the two models produces the correct derived form.",4.2 SEQ and DIST Aggregation,[0],[0]
+"Finally, we make the strong assumption that the probability of a derived form being generated correctly according to 1 model as opposed to the other is dependent only on the unnormalized model score from each.",4.2 SEQ and DIST Aggregation,[0],[0]
+"We model this as a logistic regression (t is omitted for clarity):
+P (·|yD,yS,x) = softmax(We [DIST(yD|x); SEQ(yS|x)]",4.2 SEQ and DIST Aggregation,[0],[0]
+"+ be)
+where We and be are learned parameters, yD and yS are the hypotheses of the distributional and seq2seq models, and DIST(·) and SEQ(·) are the models’ likelihood functions.",4.2 SEQ and DIST Aggregation,[0],[0]
+We denote this aggregate AGGR in our results.,4.2 SEQ and DIST Aggregation,[0],[0]
+In this section we describe the derivational morphology dataset used in our experiments and how we collected the dictionary and token frequencies used in the dictionary constraint and rescorer.,5 Datasets,[0],[0]
+"In our experiments, we use the derived word generation derivational morphology dataset released in Cotterell et al. (2017b).",5.1 Derivational Morphology,[0],[0]
+"The dataset, derived from NomBank (Meyers et al., 2004) , consists of 4,222 training, 905 validation, and 905 test triples of the form (x, t,y).",5.1 Derivational Morphology,[0],[0]
+"The transformations are from the following categories: ADVERB (ADJ→ ADV), RESULT (V→ N), AGENT (V→ N), and NOMINAL (ADJ→ N).",5.1 Derivational Morphology,[0],[0]
+Examples from the dataset can be found in Table 1.,5.1 Derivational Morphology,[0],[0]
+"The dictionary and token frequency statistics used in the dictionary constraint and frequency reranking come from the Google Books NGram corpus (Michel et al., 2011).",5.2 Dictionary and Token Frequency Statistics,[0],[0]
+"The unigram frequency counts were aggregated across years, and any tokens which appear fewer than approximately 2,000 times, do not end in a known possible suffix, or contain a character outside of our vocabulary were removed.
+",5.2 Dictionary and Token Frequency Statistics,[0],[0]
+"The frequency threshold was determined using development data, optimizing for high recall.",5.2 Dictionary and Token Frequency Statistics,[0],[0]
+We collect a set of known suffixes from the training data by removing the longest common prefix between the source and target words from the target word.,5.2 Dictionary and Token Frequency Statistics,[0],[0]
+"The result is a dictionary with frequency information for around 360k words, which covers 98% of the target words in the training data.3",5.2 Dictionary and Token Frequency Statistics,[0],[0]
+"In many sequence models where the vocabulary size is large, exact inference by finding the true shortest path in the graph discussed in Section 3.2 is intractable.",6 Inference Procedure Discussion,[0],[0]
+"As a result, approximate inference techniques such as beam search are often used, or the size of the search space is reduced, for example, by using a Markov assumption.",6 Inference Procedure Discussion,[0],[0]
+"We, however, observed that exact inference via a shortest path algorithm is not only tractable in our model, but
+3 The remaining 2% is mostly words with hyphens or mistakes in the dataset.
+only slightly more expensive than greedy search and significantly less expensive than beam search.
+",6 Inference Procedure Discussion,[0],[0]
+"To quantify this claim, we measured the accuracy and number of states explored by greedy search, beam search, and shortest path with and without a dictionary constraint on the development data.",6 Inference Procedure Discussion,[0],[0]
+Table 2 shows the results averaged over 30 runs.,6 Inference Procedure Discussion,[0],[0]
+"As expected, beam search and shortest path have higher accuracies than greedy search and explore more of the search space.",6 Inference Procedure Discussion,[0],[0]
+"Surprisingly, beam search and shortest path have nearly identical accuracies, but shortest path explores significantly fewer hypotheses.
+",6 Inference Procedure Discussion,[0],[0]
+At least two factors contribute to the tractability of exact search in our model.,6 Inference Procedure Discussion,[0],[0]
+"First, our characterlevel sequence model has a vocabulary size of 63, which is significantly smaller than token-level models, in which a vocabulary of 50k words is not uncommon.",6 Inference Procedure Discussion,[0],[0]
+"The search space of sequence models is dependent upon the size of the vocabulary, so the model’s search space is dramatically smaller than for a token-level model.
+",6 Inference Procedure Discussion,[0],[0]
+"Second, the inherent structure of the task makes it easy to eliminate large subgraphs of the search space.",6 Inference Procedure Discussion,[0],[0]
+"The first several characters of the input word and output word are almost always the same, so the model assigns very low probability to any sequence with different starting characters than the input.",6 Inference Procedure Discussion,[0],[0]
+"Then, the rest of the search procedure is dedicated to deciding between suffixes.",6 Inference Procedure Discussion,[0],[0]
+"Any suffix which does not appear frequently in the training data receives a low score, leaving the search to decide between a handful of possible options.",6 Inference Procedure Discussion,[0],[0]
+The result is that the learned probability distribution is very spiked; it puts very high probability on just a few output sequences.,6 Inference Procedure Discussion,[0],[0]
+"It is empirically true that the top few most probable sequences have significantly higher scores than the next most probable sequences, which supports this hypothesis.
+",6 Inference Procedure Discussion,[0],[0]
+"In our subsequent experiments, we decode using
+Algorithm 1 The decoding procedure uses a shortest-path algorithm to find the most probable output sequence.",6 Inference Procedure Discussion,[0],[0]
+"The dictionary constraint is (optionally) implemented on line 9 by only considering prefixes that are contained in some trie T .
+1: procedure DECODE(x, t, V , T ) 2: H ← Heap() 3: H .insert(0, #) 4: while H is not empty",6 Inference Procedure Discussion,[0],[0]
+do 5: y← H .remove() 6: if y is a complete word then return y 7: for y ∈ V do 8: y′,6 Inference Procedure Discussion,[0],[0]
+"← y + y 9: if y′ ∈ T then
+10: s← FORWARD(x, t,y′) 11: H .insert(s, y′)
+exact inference by running a shortest path algorithm (see Algorithm 1).",6 Inference Procedure Discussion,[0],[0]
+"For reranking models, instead of typically using a beam of size k, we use the top k most probable sequences.",6 Inference Procedure Discussion,[0],[0]
+"In all of our experiments, we use the training, development, and testing splits provided by Cotterell et al. (2017b) and average over 30 random restarts.",7 Results,[0],[0]
+"Table 3 displays the accuracies and average edit distances on the test set of each of the systems presented in this work and the state-of-the-art model from Cotterell et al. (2017b).
+",7 Results,[0],[0]
+"First, we observed that SEQ outperforms the results reported in Cotterell et al. (2017b) by a large margin, despite the fact that the model architectures are the same.",7 Results,[0],[0]
+"We attribute this difference to better hyperparameter settings and improved learning rate annealing.
+",7 Results,[0],[0]
+"Then, it is clear that the accuracy of the distributional model, DIST, is significantly lower than any seq2seq model.",7 Results,[0],[0]
+"We believe the orthographyinformed models perform better because most observations in the dataset are orthographically regular, providing low-hanging fruit.
+",7 Results,[0],[0]
+"Open-vocabulary models Our open-vocabulary aggregation model AGGR improves performance by 3.8 points accuracy over SEQ, indicating that the sequence models and the distributional model are contributing complementary signals.",7 Results,[0],[0]
+"AGGR is an open-vocabulary model like Cotterell et al. (2017b) and improves upon it by 6.3 points, making it our best comparable model.",7 Results,[0],[0]
+"We provide an in-
+depth analysis of the strengths of SEQ and DIST in Section 7.1.
+",7 Results,[0],[0]
+Closed-vocabulary models We now consider closed-vocabulary models that improve upon the seq2seq model in AGGR.,7 Results,[0],[0]
+"First, we see that restricting the decoder to only generate known words is extremely useful, with SEQ+DICT improving over SEQ by 6.2 points.",7 Results,[0],[0]
+"Qualitatively, we note that this constraint helps solve the suffix ambiguity problem, since orthographically plausible incorrect hypotheses are pruned as non-words.",7 Results,[0],[0]
+See Table 6 for examples of this phenomenon.,7 Results,[0],[0]
+"Additionally, we observe that the dictionary-constrained model outperforms the unconstrained model according to top-10 accuracy (see Table 5).
+",7 Results,[0],[0]
+"Rescoring (+FREQ) provides further improvement of 0.8 points, showing that the decoding dictionary constraint provides a higher-quality beam that still has room for top-1 improvement.",7 Results,[0],[0]
+"All together, AGGR+FREQ+DICT provides a 4.4 point improvement over the best open-vocabulary model, AGGR.",7 Results,[0],[0]
+"This shows the disambiguating power of assuming a closed vocabulary.
+",7 Results,[0],[0]
+Edit Distance One interesting side effect of the dictionary constraint appears when comparing AGGR+FREQ with and without the dictionary constraint.,7 Results,[0],[0]
+"Although the accuracy of the dictionaryconstrained model is better, the average edit distance is worse.",7 Results,[0],[0]
+"The unconstrained model is free to put invalid words which are orthographically similar to the target word in its top-k, however the constrained model can only choose valid words.",7 Results,[0],[0]
+"This means it is easier for the unconstrained model to generate words which have a low edit distance to the ground truth, whereas the constrained model
+can only do that if such a word exists.",7 Results,[0],[0]
+"The result is a more accurate, yet more orthographically diverse, set of hypotheses.
+",7 Results,[0],[0]
+"Results by Transformation Next, we compare our best open vocabulary and closed vocabulary models to previous work across each derivational transformation.",7 Results,[0],[0]
+"These results are in Table 4.
+",7 Results,[0],[0]
+"The largest improvement over the baseline system is for NOMINAL transformations, in which the AGGR has a 49% reduction in error.",7 Results,[0],[0]
+We attribute most of this gain to the difficulty of this particular transformation.,7 Results,[0],[0]
+"NOMINAL is challenging because there are several plausible endings (e.g. -ity, -ness, -ence) which occur at roughly the same rate.",7 Results,[0],[0]
+"Additionally, NOMINAL examples are the least frequent transformation in the dataset, so it is challenging for a sequential model to learn to generalize.",7 Results,[0],[0]
+"The distributional model, which does not rely on suffix information, does not have this same weakness, so the aggregation AGGR model has better results.
+",7 Results,[0],[0]
+"The performance of AGGR+FREQ+DICT is worse than AGGR, however.",7 Results,[0],[0]
+"This is surprising because, in all other transformations, adding dictionary information improves the accuracies.",7 Results,[0],[0]
+"We believe this is due to the ambiguity of the ground truth: Many root words have seemingly multiple plausible nominal transformations, such as rigid → {rigidness, rigidity} and equivalent → {equivalence, equivalency}.",7 Results,[0],[0]
+"The dictionary constraint produces a better set of hypotheses to rescore, as demonstrated in Table 5.",7 Results,[0],[0]
+"Therefore, the dictionary-constrained model is likely to have more of these ambiguous cases, which makes the task more difficult.",7 Results,[0],[0]
+In this subsection we explore why AGGR improves consistently over SEQ even though it maintains an open vocabulary.,7.1 Strengths of SEQ and DIST,[0],[0]
+"We have argued that DIST is able to correctly produce derived words that are
+orthographically irregular or infrequent in the training data.",7.1 Strengths of SEQ and DIST,[0],[0]
+"Figure 2 quantifies this phenomenon, analyzing the difference in accuracy between the two models, and plotting this in relationship to the frequency of the suffix in the training data.",7.1 Strengths of SEQ and DIST,[0],[0]
+"The plot shows that SEQ excels at generating derived words ending in -ly, -ion, and other suffixes that appeared frequently in the training data.",7.1 Strengths of SEQ and DIST,[0],[0]
+"DIST’s improvements over SEQ are generally much less frequent in the training data, or as in the case of -ment, are less frequent than other suffixes for the same transformation (like -ion.)",7.1 Strengths of SEQ and DIST,[0],[0]
+"By producing derived words whose suffixes show up rarely in the training data, DIST helps solve the orthographic irregularity problem.",7.1 Strengths of SEQ and DIST,[0],[0]
+"There has been much work on the related task of inflected word generation (Durrett and DeNero,
+2013; Rastogi et al., 2016; Hulden et al., 2014).",8 Prior Work,[0],[0]
+"It is a structurally similar task to ours, but does not have the same difficulty of challenges (Cotterell et al., 2017a,b), which we have addressed in our work.",8 Prior Work,[0],[0]
+The paradigm completion for derivational morphology dataset we use in this work was introduced in Cotterell et al. (2017b).,8 Prior Work,[0],[0]
+"They apply the model that won the 2016 SIGMORPHON shared task on inflectional morphology to derivational morphology (Kann and Schütze, 2016; Cotterell et al., 2016).",8 Prior Work,[0],[0]
+"We use this as our baseline.
+",8 Prior Work,[0],[0]
+Our implementation of the dictionary constraint is an example of a special constraint which can be directly incorporated into the inference algorithm at little additional cost.,8 Prior Work,[0],[0]
+"Roth and Yih (2004, 2007) propose a general inference procedure that naturally incorporates constraints through recasting inference as solving an integer linear program.
+Beam or hypothesis rescoring to incorporate an expensive or non-decomposable signal into search has a history in machine translation (Huang and Chiang, 2007).",8 Prior Work,[0],[0]
+"In inflectional morphology, Nicolai et al. (2015) use this idea to rerank hypotheses using orthographic features and Faruqui et al. (2016) use a character-level language model.",8 Prior Work,[0],[0]
+"Our approach is similar to Faruqui et al. (2016) in that we use statistics from a raw corpus, but at the token level.
+",8 Prior Work,[0],[0]
+There have been several attempts to use distributional information in morphological generation and analysis.,8 Prior Work,[0],[0]
+"Soricut and Och (2015) collect pairs of words related by any morphological change in an unsupervised manner, then select a vector offset which best explains their observations.",8 Prior Work,[0],[0]
+"There has been subsequent work exploring the vector offset method, finding it unsuccessful in captur-
+ing derivational transformations (Gladkova et al., 2016).",8 Prior Work,[0],[0]
+"However, we use more expressive, nonlinear functions to model derivational transformations and report positive results.",8 Prior Work,[0],[0]
+Gupta et al. (2017) then learn a linear transformation per orthographic rule to solve a word analogy task.,8 Prior Work,[0],[0]
+"Our distributional model learns a function per derivational transformation, not per orthographic rule, which allows it to generalize to unseen orthography.",8 Prior Work,[0],[0]
+"Our models are implemented in Python using the DyNet deep learning library (Neubig et al., 2017).",9 Implementation Details,[0],[0]
+"The code is freely available for download.4
+Sequence Model The sequence-to-sequence model uses character embeddings of size 20, which are shared across the encoder and decoder, with a vocabulary size of 63.",9 Implementation Details,[0],[0]
+"The hidden states of the LSTMs are of size 40.
+",9 Implementation Details,[0],[0]
+"For training, we use Adam with an initial learning rate of 0.005, a batch size of 5, and train for a maximum of 30 epochs.",9 Implementation Details,[0],[0]
+"If after one epoch of the training data, the loss on the validation set does not decrease, we anneal the learning rate by half and revert to the previous best model.
+",9 Implementation Details,[0],[0]
+"During decoding, we find the top 1 most probable sequence as discussed in Section 6 unless rescoring is used, in which we use the top 10.
+",9 Implementation Details,[0],[0]
+Rescorer The rescorer is a 1-hidden-layer perceptron with a tanh nonlinearity and 4 hidden units.,9 Implementation Details,[0],[0]
+"It is trained for a maximum of 5 epochs.
+",9 Implementation Details,[0],[0]
+Distributional Model,9 Implementation Details,[0],[0]
+"The DIST model is a 1- hidden-layer perceptron with a tanh nonlinearity
+4https://github.com/danieldeutsch/ acl2018
+and 100 hidden units.",9 Implementation Details,[0],[0]
+It is trained for a maximum of 25 epochs.,9 Implementation Details,[0],[0]
+"In this work, we present a novel aggregation model for derived word generation.",10 Conclusion,[0],[0]
+This model learns to choose between the predictions of orthographicallyand distributionally-informed models.,10 Conclusion,[0],[0]
+"This ameliorates suffix ambiguity and orthographic irregularity, the salient problems of the generation task.",10 Conclusion,[0],[0]
+"Concurrently, we show that derivational transformations can be usefully modeled as nonlinear functions on distributional word embeddings.",10 Conclusion,[0],[0]
+"The distributional and orthographic models aggregated contribute orthogonal information to the aggregate, as shown by substantial improvements over state-of-the-art results, and qualitative analysis.",10 Conclusion,[0],[0]
+Two ways of incorporating corpus knowledge – constrained decoding and rescoring – demonstrate further improvements to our main contribution.,10 Conclusion,[0],[0]
+"We would like to thank Shyam Upadhyay, Jordan Kodner, and Ryan Cotterell for insightful discussions about derivational morphology.",Acknowledgements,[0],[0]
+"We would also like to thank our anonymous reviewers for helpful feedback on clarity and presentation.
+",Acknowledgements,[0],[0]
+This work was supported by Contract HR001115-2-0025 with the US Defense Advanced Research Projects Agency (DARPA).,Acknowledgements,[0],[0]
+"Approved for Public Release, Distribution Unlimited.",Acknowledgements,[0],[0]
+The views expressed are those of the authors and do not reflect the official policy or position of the Department of Defense or the U.S. Government.,Acknowledgements,[0],[0]
+"Modeling derivational morphology to generate words with particular semantics is useful in many text generation tasks, such as machine translation or abstractive question answering.",abstractText,[0],[0]
+"In this work, we tackle the task of derived word generation.",abstractText,[0],[0]
+"That is, given the word “run,” we attempt to generate the word “runner” for “someone who runs.”",abstractText,[0],[0]
+We identify two key problems in generating derived words from root words and transformations: suffix ambiguity and orthographic irregularity.,abstractText,[0],[0]
+We contribute a novel aggregation model of derived word generation that learns derivational transformations both as orthographic functions using sequence-to-sequence models and as functions in distributional word embedding space.,abstractText,[0],[0]
+"Our best open-vocabulary model, which can generate novel words, and our best closed-vocabulary model, show 22% and 37% relative error reductions over current state-of-the-art systems on the same dataset.",abstractText,[0],[0]
+A Distributional and Orthographic Aggregation Model for English Derivational Morphology,title,[0],[0]
+"One of the simplest Markov chain Monte Carlo (MCMC) methods is Langevin dynamics (Grenander & Miller, 1994; Robert & Casella, 2004, Sec. 7.8.5) where one repeats gradient steps with injected Gaussian noise.",1. Introduction,[0],[0]
+"Namely, one iterates
+z z + ✏ 2 rz log p(z) + p ✏⌘, (1)
+where ⌘ is sampled from a standard Gaussian distribution and ✏ is a step-size that may decay over time.",1. Introduction,[0],[0]
+"To get exact samples, a Metropolis-Hastings rejection step should be used.",1. Introduction,[0],[0]
+"However, as the step-size ✏ becomes smaller, the acceptance probability goes to one, and so this can be disregarded.",1. Introduction,[0],[0]
+"In the Bayesian inference setting, z denotes unknown parameters and p(z) represents a posterior over
+1College of Computing and Information Sciences, University of Massachusetts, Amherst, USA.",1. Introduction,[0],[0]
+"Correspondence to: Justin Domke <domke@cs.umass.edu>.
+",1. Introduction,[0],[0]
+"Proceedings of the 34 th International Conference on Machine Learning, Sydney, Australia, PMLR 70, 2017.",1. Introduction,[0],[0]
+"Copyright 2017 by the author(s).
+them.",1. Introduction,[0],[0]
+Computing p(z) thus requires a full pass over the dataset.,1. Introduction,[0],[0]
+"The idea of Stochastic Gradient Langevin Dynamics (Welling & Teh, 2011) is to get an unbiased estimate of the gradient of log p(z) by approximating the posterior using a minibatch.",1. Introduction,[0],[0]
+"Since the gradient term is multiplied by ✏, the variance of its error has order ✏2, while the variance of p ✏⌘ has order ✏.",1. Introduction,[0],[0]
+"Thus, with a small step ✏, the injected noise dominates, meaning one can might expect these to have a stationary distribution close to the target p(z).
+",1. Introduction,[0],[0]
+The idea of variational inference is to posit a simple family of distributions qw(z) and then optimize w to minimize the KL-divergence from qw(z) to the target p(z).,1. Introduction,[0],[0]
+"(In a Bayesian setting, this is equivalent to maximizing the evidence lower bound.)",1. Introduction,[0],[0]
+"If one were to use plain gradient ascent to perform this optimization, this leads to the iterate of
+w w + ✏ 2 rwEqw(Z)[log",1. Introduction,[0],[0]
+"p(Z) log qw(Z)], (2)
+where the gradient step ✏ is divided by two for convenience, and may again decay over time.",1. Introduction,[0],[0]
+"In practice, doing gradient ascent like this has two difficulties.",1. Introduction,[0],[0]
+"First, in the Bayesian inference setting, computing log p(z) requires a full pass over the data.",1. Introduction,[0],[0]
+This can be approximated without bias using a minibatch.,1. Introduction,[0],[0]
+The second difficulty stems from the expectation of log p(z) with respect to qw(z) in Eq. 2.,1. Introduction,[0],[0]
+The gradient of this expectation can be approximated in different ways using samples from qw(Z) (Section 3.2).,1. Introduction,[0],[0]
+"Since this gives unbiased estimates of the gradient, stochastic optimization methods, such as stochastic gradient descent, will converge to a local optima when the step-size becomes small.
+",1. Introduction,[0],[0]
+"Intuitively, both MCMC and variational methods can be thought of as trying to find a high-probability region of log p(z), with different strategies to encourage entropy to get coverage of the distribution.",1. Introduction,[1.0],"['Intuitively, both MCMC and variational methods can be thought of as trying to find a high-probability region of log p(z), with different strategies to encourage entropy to get coverage of the distribution.']"
+"In MCMC, entropy is created by randomness in the Markov chain, while in variational methods the KL-divergence directly measures the entropy of the variational distribution.",1. Introduction,[1.0],"['In MCMC, entropy is created by randomness in the Markov chain, while in variational methods the KL-divergence directly measures the entropy of the variational distribution.']"
+It is natural to think that hybrid methods might employ fractions of these two strategies.,1. Introduction,[1.0],['It is natural to think that hybrid methods might employ fractions of these two strategies.']
+This paper does so by defining a distribution over the parameters w of the approximating family q(z|w).,1. Introduction,[1.0],['This paper does so by defining a distribution over the parameters w of the approximating family q(z|w).']
+"This distribution q(w) is designed to minimize a bound on the KL-divergence of the resulting marginal distribution
+q(z) to the target p(z).",1. Introduction,[0],[0]
+"Intuitively, when defining q(w), there are two ways to encourage entropy, namely to give higher density to vectors w where q(Z|w) has high entropy or to encourage entropy over w itself.
+",1. Introduction,[0],[0]
+"Given a distribution q(w, z) and a target distribution p(z), this paper uses two bounds on the marginal divergence Dtrue = KL (q(Z)kp(Z)) .",1. Introduction,[0],[0]
+"First, one can upper-bound by the conditional divergence D0 = KL (q(Z|W )kp(Z)).",1. Introduction,[0],[0]
+"Second, one can “adjoin” some distribution p(w|z) to p(z), and bound Dtrue by the joint divergence D1 = KL (q(W,Z)kp(W,Z)).",1. Introduction,[1.0],"['Second, one can “adjoin” some distribution p(w|z) to p(z), and bound Dtrue by the joint divergence D1 = KL (q(W,Z)kp(W,Z)).']"
+"This paper takes a convex combination of these two bounds, i.e. uses the family of bounds D = (1 )D0 + D1 .",1. Introduction,[0],[0]
+"For any between 0 and 1, the distribution q(w) is derived that minimizes this bound for fixed p and a fixed approximating family q(z|w) (Theorem 3).",1. Introduction,[0],[0]
+"Then, one can sample from this distribution over w by (stochastic) Langevin dynamics.",1. Introduction,[0],[0]
+"This turns out to lead to the iterate
+w w +",1. Introduction,[0],[0]
+"✏ 2
+rw ⇣ Eqw [log p(Z) + ( 1) log qw(Z)]
++ log r(w) ⌘",1. Introduction,[0],[0]
+"+ p ✏ ⌘, (3)
+where r(w) is related to the adjoining distribution p(w|z) and may be thought of as a “base measure” 1 over the space of w. Of course, exactly computing this gradient is intractable in general, but the same strategies used for variational inference can be used to efficiently compute an un-
+1To see why r is necessary, consider a reparameterization of w.",1. Introduction,[0],[0]
+"In order for the marginal distribution q(z) to stay the same, the density of the base measure must be transformed corresponding to the reparameterization.",1. Introduction,[0],[0]
+"Put another way, without r(w), the results of inference would depend on the parameterization of w, even with an arbitrarily small step-size.
+biased estimate.
+",1. Introduction,[0],[0]
+"It can be shown that as ! 0, the solution concentrates in the optima of the variational optimization, and thus the sampling algorithm reduces to gradient ascent on the variational objective.",1. Introduction,[0],[0]
+"Meanwhile, as will be discussed in Sections 2.3 and 5 it is best to make r a function of such that w with high entropy have less density when approaches 1.",1. Introduction,[0],[0]
+"When this is true, then as ! 1, only w indexing highly concentrated distributions over z retain density, and so sampling from q(w) is essentially just a reparameterization of sampling from p(z), and the algorithm reduces to Langevin dynamics.
+",1. Introduction,[0],[0]
+"Thus, for the extreme cases of = 0 and = 1, this algorithm reduces to variational inference and Langevin dynamics, respectively.",1. Introduction,[0],[0]
+"Informally, at these extremes, the algorithm is “fast but approximate” and “slow but accurate”.",1. Introduction,[1.0],"['Informally, at these extremes, the algorithm is “fast but approximate” and “slow but accurate”.']"
+"In the intermediate range, the algorithm exhibits new behavior with a fine-grained trade-off between speed and accuracy.",1. Introduction,[1.0],"['In the intermediate range, the algorithm exhibits new behavior with a fine-grained trade-off between speed and accuracy.']"
+"Thus, this approach gives a smooth continuum of algorithms with different priorities of speed and accuracy.",1. Introduction,[0],[0]
+This paper uses three notational conventions that are not universal.,1.1. Notation,[0],[0]
+"First, the conditional probability q(z|w) will alternatively be written as qw(z) when convenient.",1.1. Notation,[0],[0]
+"Second, A ' B indicates that A and B have the same expected value or (if A is a constant) that B is an unbiased estimator of A. Finally, upper and lower-cases indicate what terms are random variables in a KL-divergence.",1.1. Notation,[0],[0]
+"So, KL (q(Z|w)kp(Z|w)) = Eq(Z|w) log (q(Z|w)/p(Z|w)) is the divergence between q(z|w) and p(z|w) for a fixed w, while KL (q(Z|W )kp(Z|W ))",1.1. Notation,[0.9957106883142334],"['So, KL (q(Z|w)kp(Z|w)) = Eq(Z|w) log (q(Z|w)/p(Z|w)) is the divergence between q(z|w) and p(z|w) for a fixed w, while KL (q(Z|W )kp(Z|W )) = Eq(W,Z) log (q(Z|W )/p(Z|W )) is a standard conditional divergence.']"
+"=
+Eq(W,Z) log (q(Z|W )/p(Z|W )) is a standard conditional divergence.",1.1. Notation,[0],[0]
+"This section derives a few results from an information theoretic viewpoint, without any particular regard for form of the target distribution, or how one might sample from it.",2. Information Theoretic Results,[1.0],"['This section derives a few results from an information theoretic viewpoint, without any particular regard for form of the target distribution, or how one might sample from it.']"
+Proofs are given in the appendix.,2. Information Theoretic Results,[0],[0]
+Let p(z) be the target distribution.,2.1. Preliminaries,[1.0],['Let p(z) be the target distribution.']
+"For simplicity, z is treated here as a continuous variable, although the results in this section remain true if it is discrete.",2.1. Preliminaries,[1.0],"['For simplicity, z is treated here as a continuous variable, although the results in this section remain true if it is discrete.']"
+"There is some fixed set of conditional distributions q(z|w), which may also be written as qw(z).",2.1. Preliminaries,[0],[0]
+"In principle, one might like to know how to set q(w) such that the resulting marginal distribution over z, is close to p(z), as measured by the KLdivergence,
+Dtrue = KL (q(Z)kp(Z))",2.1. Preliminaries,[0],[0]
+"= Eq(Z) log q(Z)
+p(Z) .",2.1. Preliminaries,[0],[0]
+"(4)
+This quantity is difficult to control directly, since the marginal q(z) typically cannot be evaluated in closed form.",2.1. Preliminaries,[0.9999999585770563],"['(4) This quantity is difficult to control directly, since the marginal q(z) typically cannot be evaluated in closed form.']"
+"One bound comes from the conditional KL-divergence, as stated in the following Lemma.
+",2.1. Preliminaries,[0],[0]
+Lemma 1.,2.1. Preliminaries,[0],[0]
+"The divergence from q(z) to p(z) is
+KL (q(Z)kp(Z))",2.1. Preliminaries,[0],[0]
+"= KL (q(Z|W )kp(Z))| {z } D0 Iq[W,Z],
+(5) where D0 = Eq(W,Z) log (q(Z|W )/p(Z)) is the conditional divergence and Iq = KL (q(Z,W )kq(Z)q(W ))",2.1. Preliminaries,[0.9920440736564506],"['The divergence from q(z) to p(z) is KL (q(Z)kp(Z)) = KL (q(Z|W )kp(Z))| {z } D0 Iq[W,Z], (5) where D0 = Eq(W,Z) log (q(Z|W )/p(Z)) is the conditional divergence and Iq = KL (q(Z,W )kq(Z)q(W )) denotes mutual information under q.']"
+"denotes mutual information under q.
+A second bound comes from adjoining some distribution p(w|z) to p(z).",2.1. Preliminaries,[0],[0]
+"Then, the following lemma is essentially just a re-statement of the chain rule for the KL-divergence (Cover & Thomas, 2006, Thm. 2.5.3).
+",2.1. Preliminaries,[0],[0]
+Lemma 2.,2.1. Preliminaries,[0],[0]
+"The KL-divergence between q(z) and p(z) can be written as
+KL(q(Z)kp(Z)))",2.1. Preliminaries,[0],[0]
+"= KL (q(W,Z)kp(W,Z))| {z } D1
+KL (q(W |Z)kp(W |Z)) .",2.1. Preliminaries,[0],[0]
+"(6)
+Since the mutual information in Eq. 5 and the conditional divergence on the right of Eq. 6 are both non-negative, both D0 and D1 are upper-bounds on Dtrue.",2.1. Preliminaries,[0],[0]
+"Note that if p(w|z) = q(w), then D1 = D0, and so Lemma 1 follows from Lemma 2.",2.1. Preliminaries,[0],[0]
+"This paper is based on convex combination of D0 and D1 , parameterized by some 2 [0, 1], namely
+D = (1 )D0 + D1.",2.2. Divergence Bound and its Minimizer,[0],[0]
+"(7)
+Since D0 and D1 are upper-bounds, so is D .",2.2. Divergence Bound and its Minimizer,[0],[0]
+"The following theorem gives the distribution q(w) to minimize D .
+Theorem 3.",2.2. Divergence Bound and its Minimizer,[0],[0]
+"For fixed values of and p(w|z), the distribution q(w) that minimizes D is
+q⇤(w) = exp s(w) A) (8)
+A = log
+Z
+w exp s(w)
+s(w) = log p(w) KL (q(Z|w)kp(Z|w))
+",2.2. Divergence Bound and its Minimizer,[0.9922546044984543],"['For fixed values of and p(w|z), the distribution q(w) that minimizes D is q⇤(w) = exp s(w) A) (8) A = log Z w exp s(w) s(w) = log p(w) KL (q(Z|w)kp(Z|w)) 1 1 KL (q(Z|w)kp(Z)) .']"
+"1 1 KL (q(Z|w)kp(Z)) .
+",2.2. Divergence Bound and its Minimizer,[0],[0]
+"Moreover, at q⇤, the objective value is D⇤ = A.
+Since A is an upper-bound on the KLdivergence, A must be non-positive.",2.2. Divergence Bound and its Minimizer,[0],[0]
+"This can also be seen directly, since it can be written as A = log R w p(w) exp( KL (q(Z|w)kp(Z|w))
+1 1 KL (q(Z|w)kp(Z))), and the inner diver-
+gences as well as 1 1 are non-negative.
+",2.2. Divergence Bound and its Minimizer,[0],[0]
+"To understand the connection of this bound to variational inference and MCMC, one can look at behavior where = 0 or where = 1.",2.2. Divergence Bound and its Minimizer,[0],[0]
+"For the former case, one obtains a result closely related to the solution to the variational inference problem.",2.2. Divergence Bound and its Minimizer,[0],[0]
+Remark 4.,2.2. Divergence Bound and its Minimizer,[0],[0]
+In the limit where ! 0,2.2. Divergence Bound and its Minimizer,[0],[0]
+"the divergence bound at the optimal q⇤ becomes
+lim !0",2.2. Divergence Bound and its Minimizer,[0],[0]
+D⇤ = infw KL (q(Z|w)kp(Z)) .,2.2. Divergence Bound and its Minimizer,[0],[0]
+"(9)
+Similarly, when ! 0, q⇤(w) concentrates at the minimizer(s) of this divergence.",2.2. Divergence Bound and its Minimizer,[0],[0]
+"(Formally, with multiple global optima with the same divergence, q(w) will concentrate equally around all minimizers.)
+",2.2. Divergence Bound and its Minimizer,[0],[0]
+"For the case where = 1 , it is easy to see that
+D⇤1 = log Z
+w p(w) exp ( KL (q(Z|w)kp(Z|w))) ,
+(10) which will be zero if p(w) is only supported on w where the divergence between q(z|w) and p(z|w) is zero.",2.2. Divergence Bound and its Minimizer,[0],[0]
+"This may initially seem like a strange condition, given that p(w) results from both the target distribution p(z) and the adjoined distribution p(w|z).",2.2. Divergence Bound and its Minimizer,[1.0],"['This may initially seem like a strange condition, given that p(w) results from both the target distribution p(z) and the adjoined distribution p(w|z).']"
+"However, the next section gives more specifics.
+2.3.",2.2. Divergence Bound and its Minimizer,[0],[0]
+"Specific Form for p(w|z)
+",2.2. Divergence Bound and its Minimizer,[0],[0]
+The results in the previous section were written without without considering the specific form of p(w|z).,2.2. Divergence Bound and its Minimizer,[0],[0]
+"This paper takes the approach of defining
+p(w|z)",2.2. Divergence Bound and its Minimizer,[0],[0]
+"= r(w)q(z|w) rz , (11)
+where r(w) is a possibly improper distribution over w and rz = R w r(w)q(z|w) is a normalizer.",2.2. Divergence Bound and its Minimizer,[0],[0]
+"Note that p(w|z) is still well-defined as long as the integral defining rz exists.
+",2.2. Divergence Bound and its Minimizer,[0],[0]
+"Here, we assume for convenience that rz is a constant, not depending on z. Enforcing rz to be constant essentially means choosing r(w) in such a way that it doesn’t “favor” any z over any other since if q(w) / r(w) then q(z) is uniform over z. Lemma 5.",2.2. Divergence Bound and its Minimizer,[1.0],"['Here, we assume for convenience that rz is a constant, not depending on z. Enforcing rz to be constant essentially means choosing r(w) in such a way that it doesn’t “favor” any z over any other since if q(w) / r(w) then q(z) is uniform over z. Lemma 5.']"
+If p(w|z),2.2. Divergence Bound and its Minimizer,[0],[0]
+=,2.2. Divergence Bound and its Minimizer,[0],[0]
+"r(w)q(z|w)/rz and rz is a constant, then the solution in Thm. 3 holds with
+s(w) = log r(w)",2.2. Divergence Bound and its Minimizer,[0],[0]
+log rz +,2.2. Divergence Bound and its Minimizer,[0],[0]
+Eqw(Z)[ 1 log p(Z) + (1 1) log qw(Z)].,2.2. Divergence Bound and its Minimizer,[0],[0]
+"(12)
+This gives a distribution over q(w) that can be written in various equivalent ways, such as
+q⇤(w) / r(w) exp 1E(w) + ( 1 1)H(w) (13)
+=r(w) exp H(w) 1KL (qw(Z)kp(Z))
+",2.2. Divergence Bound and its Minimizer,[0],[0]
+=r(w) exp1/ E qw(Z),2.2. Divergence Bound and its Minimizer,[0],[0]
+[log p(Z),2.2. Divergence Bound and its Minimizer,[0],[0]
+"+ ( 1) log qw(Z)] ,
+where H(w) = Eqw(Z)[log qw(Z)] is the entropy of qw and E(w) = Eqw(z)[log p(Z)].
+",2.2. Divergence Bound and its Minimizer,[0],[0]
+"Here, r(w) plays a role similar to a base density in an exponential family.",2.2. Divergence Bound and its Minimizer,[0],[0]
+"If one simply used r(w) = 1, then p(w|z) may not be well-defined.",2.2. Divergence Bound and its Minimizer,[1.0],"['If one simply used r(w) = 1, then p(w|z) may not be well-defined.']"
+"Further, without a base density, the marginal q(z) would depend on the particular parameterization of w. To see this, take single parameter w, and imagine re-parameterizing so the negative reals are “squashed” by a factor of two.",2.2. Divergence Bound and its Minimizer,[0],[0]
+The base density must increase by a factor of two for the negative reals to compensate in order to leave the marginal q(z) unchanged under the reparameterization.,2.2. Divergence Bound and its Minimizer,[0],[0]
+Adjoining p(w|z) to p(z),2.4. Latent variables in variational inference,[0],[0]
+"to define D1 above is strongly related to auxiliary random variables (Agakov & Barber, 2004) explored in variational inference to increase the representative power of q, e.g. by including latent stochastic transition operators (Salimans et al., 2015), random Gaussian process mappings (Tran et al., 2016), or hierarchical variables (Ranganath et al., 2016).",2.4. Latent variables in variational inference,[0],[0]
+"Imagine doing variational inference with q✓(z, w), where now w is auxiliary
+and the goal is to set ✓ so that q✓(z) ⇡ p(z).",2.4. Latent variables in variational inference,[0],[0]
+"Since w must be integrated out, the entropy of z under q is typically intractable, but can be bounded by augmenting p with some distribution p(w|z) and then optimizing the joint KLdivergence over z and w, similarly to Lemma 2.",2.4. Latent variables in variational inference,[0],[0]
+Note two differences.,2.4. Latent variables in variational inference,[0],[0]
+"First, here the distribution over w is mathematically derived to minimize the bound, while previous work numerically optimizes ✓ at run-time.",2.4. Latent variables in variational inference,[0],[0]
+"Second, previous work also optimizes parameters of the distribution p(w|z) to further improve the bound, while here it is left fixed (for each ) for simplicity (Sec. 5).",2.4. Latent variables in variational inference,[0],[0]
+Future work might explore optimizing p(w|z) at run-time in the current paper’s framework.,2.4. Latent variables in variational inference,[0],[0]
+This section considers algorithms to sample from the distribution defined by Eq. 13.,3. Bayesian Inference,[0],[0]
+"Probabilistic inference can be used in various settings, but for concreteness the rest of this paper will focus on Bayesian inference.",3. Bayesian Inference,[0],[0]
+"To fix notation, suppose a set of N inputs xi with corresponding outputs yi.",3. Bayesian Inference,[0],[0]
+"(In a generative setting, xi would be empty.)",3. Bayesian Inference,[0],[0]
+"Then, if z is a vector of parameters, the posterior distribution over z is, up to a constant
+log p(z) = log p0(z)",3. Bayesian Inference,[0],[0]
+"+ NX
+i=1
+log p(yi|xi, z) +",3. Bayesian Inference,[0],[0]
+"C, (14)
+where p0(z) is the prior, and p(yi|xi, z) is the likelihood for the i-th datum.",3. Bayesian Inference,[0],[0]
+The goal of probabilistic inference is to be able to evaluate expectations with respect to p(z).,3. Bayesian Inference,[1.0],['The goal of probabilistic inference is to be able to evaluate expectations with respect to p(z).']
+The goal of MCMC methods is to obtain samples from the target distribution p(z).,3.1. Langevin Dynamics,[1.0],['The goal of MCMC methods is to obtain samples from the target distribution p(z).']
+Langevin dynamics sample by an extremely simple process of repeating gradient steps of log(z) with injected Gaussian noise.,3.1. Langevin Dynamics,[1.0],['Langevin dynamics sample by an extremely simple process of repeating gradient steps of log(z) with injected Gaussian noise.']
+"Specifically, the iterate is
+z z + ✏ 2 r log p(z) + p ✏⌘, (15)
+where ⌘ is sampled from a standard Multivariate Gaussian distribution and ✏ is a step-size that may decay over time.",3.1. Langevin Dynamics,[1.000000140665299],"['Specifically, the iterate is z z + ✏ 2 r log p(z) + p ✏⌘, (15) where ⌘ is sampled from a standard Multivariate Gaussian distribution and ✏ is a step-size that may decay over time.']"
+"If Langevin dynamics are used as a proposal for a MetropolisHastings sampler, it can be shown that correct acceptance ratio is
+exp s(z0) s(z) +",3.1. Langevin Dynamics,[0],[0]
+"✏
+8 krs(z)k2 ✏ 8 krs(z0)k2
++
+1
+2
+(z z0) · (rs(z) +rs(z0)) , (16)
+where s(z) = log p(z) up to a constant factor, and z0 is the proposed point from Eq. 15.",3.1. Langevin Dynamics,[0],[0]
+"It is easy to see that as ✏ becomes small, this acceptance ratio will go to one, and so one can disregard the acceptance step with some bias in the results determined by the step size.
+",3.1. Langevin Dynamics,[1.0000000392454669],"['It is easy to see that as ✏ becomes small, this acceptance ratio will go to one, and so one can disregard the acceptance step with some bias in the results determined by the step size.']"
+"Langevin dynamics explore the space of z through a random walk, and thus are likely to be slower than alternatives such as Hamiltonian Monte Carlo when used as an exact method (Neal, 2010, Section 5.2).",3.1. Langevin Dynamics,[0],[0]
+The main practical advantage of Langevin dynamics comes from the case where the number of data N is large.,3.1. Langevin Dynamics,[0],[0]
+"In that case, one can use a minibatch of M elements and approximate r log p(z) as
+r log p(z) '",3.1. Langevin Dynamics,[0],[0]
+"r log p0(z)+ N
+M
+X
+i2minibatch r log p(yi|xi, z).
+",3.1. Langevin Dynamics,[0],[0]
+"(17)
+Thus, Stochastic Gradient Langevin Dynamics, avoid a full pass through the dataset in each iteration, and so can scale to large datasets.",3.1. Langevin Dynamics,[0],[0]
+Though Eq. 17 is an unbiased estimate of the gradient of log p(z) this still adds a bias to the stationary distribution of the the chain.,3.1. Langevin Dynamics,[0],[0]
+"(See (Mandt et al., 2016) for an analysis.)",3.1. Langevin Dynamics,[0],[0]
+"In the limit of a small step-size, the variance of the noise due to stochastic estimation of the gradient of log p(z) will be of order ✏2 while the variance of the injected noise is of order ✏, meaning the latter dominates (Welling & Teh, 2011; Teh et al., 2016).",3.1. Langevin Dynamics,[0],[0]
+"The goal of variational inference is to maximize
+L(w) =",3.2. Stochastic Gradient Variational Inference,[0],[0]
+"Eqw(Z)[log p(Z) log qw(Z)], (18)
+equivalent to minimizing the KL divergence between qw(z) and p(z).",3.2. Stochastic Gradient Variational Inference,[0],[0]
+"If it were possible to exactly compute L, this could be maximized (to a local optima) by a simple gradient iteration like
+w w + ✏ 2 rwL(w).",3.2. Stochastic Gradient Variational Inference,[0],[0]
+"(19)
+While in some cases with specific p and q, one can derive exact updates of L (Ghahramani & Beal, 2000) in general one cannot exactly evaluate the expectation over Z in L. One line of approach to this (Ranganath et al., 2014; Salimans & Knowles, 2014) is to write the gradient as rL = Eqw(Z)[(log qw(Z) log p(Z))r log qw(Z)], and estimate this by drawing samples from qw(z).",3.2. Stochastic Gradient Variational Inference,[1.0000000090815384],"['(19) While in some cases with specific p and q, one can derive exact updates of L (Ghahramani & Beal, 2000) in general one cannot exactly evaluate the expectation over Z in L. One line of approach to this (Ranganath et al., 2014; Salimans & Knowles, 2014) is to write the gradient as rL = Eqw(Z)[(log qw(Z) log p(Z))r log qw(Z)], and estimate this by drawing samples from qw(z).']"
+"This experimentally seems to result in gradients with large variance, but this can be reduced by two strategies.",3.2. Stochastic Gradient Variational Inference,[1.0],"['This experimentally seems to result in gradients with large variance, but this can be reduced by two strategies.']"
+"Firstly, one can use control variates, based on either Taylor expansion (Paisley et al., 2012) or the fact that the expected value of rw log qw(Z) is zero.",3.2. Stochastic Gradient Variational Inference,[1.0],"['Firstly, one can use control variates, based on either Taylor expansion (Paisley et al., 2012) or the fact that the expected value of rw log qw(Z) is zero.']"
+"Secondly, since log p(z) is often a sum of terms defined on subsets of variables, one can RaoBlackwellize by integrating out other variables.",3.2. Stochastic Gradient Variational Inference,[0],[0]
+"This approach only needs to be able to compute log p(z)– no other access, even to the gradient of p, is needed.",3.2. Stochastic Gradient Variational Inference,[0],[0]
+"Another line of approach to variational inference is based on the “reparameterization trick” (Kingma & Welling,
+2014; Rezende et al., 2014; Titsias & Lázaro-Gredilla, 2014), known in the stochastic approximation literature as a “pathwise” derivative (Kushner & Yin, 2003, Sec. 2.5.1).",3.2.1. REPARAMETERIZATION TRICK,[0],[0]
+"Suppose that there is a deterministic mapping zr,w from parameters w and random numbers r (from some fixed standard distribution) such that zr,w ⇠ qw(z).",3.2.1. REPARAMETERIZATION TRICK,[0],[0]
+"Then, we could equivalently write
+L(w) = ER[log",3.2.1. REPARAMETERIZATION TRICK,[0],[0]
+"p(zR,w)]",3.2.1. REPARAMETERIZATION TRICK,[0],[0]
++H(w).,3.2.1. REPARAMETERIZATION TRICK,[0],[0]
+"(20)
+where H(w) = Eqw(Z) log qw(Z) denotes the entropy.",3.2.1. REPARAMETERIZATION TRICK,[0],[0]
+The advantage of Eq. 20,3.2.1. REPARAMETERIZATION TRICK,[0],[0]
+"this is that the expectation is not a function of w, and so if computing the gradient of L, the gradient moves inside the expectation.",3.2.1. REPARAMETERIZATION TRICK,[0],[0]
+"Then, provided zr,w is differentiable with respect to w, an unbiased estimate of the gradient of L is available as
+rwL(w) '",3.2.1. REPARAMETERIZATION TRICK,[0],[0]
+"rw log p(zr,w) +rwH(w).",3.2.1. REPARAMETERIZATION TRICK,[0],[0]
+"(21)
+If H(w) cannot be integrated in closed-form an alternative estimator based on
+L(w) = ER[log",3.2.1. REPARAMETERIZATION TRICK,[0],[0]
+"p(zR,w) log qw(zR,w)]",3.2.1. REPARAMETERIZATION TRICK,[0],[0]
+"(22)
+is possible, and in some circumstances this can even have lower variance (Roeder et al., 2016).
+",3.2.1. REPARAMETERIZATION TRICK,[0],[0]
+"Computing the gradient of log p(zr,w) with respect to w amounts to computing the derivative of log p(z) with respect to z multiplied by the Jacobian dzTr,w/dw.",3.2.1. REPARAMETERIZATION TRICK,[0],[0]
+"For simple distributions like Gaussians zr,w this is easy to do analytically (Section 5).",3.2.1. REPARAMETERIZATION TRICK,[0],[0]
+"Alternatively, this can all be done efficiently by automatic differentiation, (Kucukelbir et al., 2017)",3.2.1. REPARAMETERIZATION TRICK,[0],[0]
+"the approach used here.
+",3.2.1. REPARAMETERIZATION TRICK,[0],[0]
+"As with Langevin dynamics, with a large dataset, log p(z) can be approximated by taking a sum over a minibatch.",3.2.1. REPARAMETERIZATION TRICK,[0],[0]
+The most obious approach to this would be to choose a single vector r and use it throughout the minibatch.,3.2.1. REPARAMETERIZATION TRICK,[0],[0]
+"However, variance can often be reduced by the “local reparameterization trick” (Kingma et al., 2015) in which a different random vector ri is drawn for each datum in the minibatch.",3.2.1. REPARAMETERIZATION TRICK,[0],[0]
+"Intuitively, the motivation is that if i and j are two data in the minibatch then log p(yi|xi, zr,w) should be less correlated with log p(yj |xj , zr0,w) when a different random vector r0 is used for the second datum (consider the limiting case where all data are identical).",3.2.1. REPARAMETERIZATION TRICK,[0],[0]
+"Then, one can write the approximation as
+rwL(w) ' 1
+M
+X
+i2minibatch
+⇣ rw log p0(zri,w)
++Nrw log p(yi|xi, zri,w) rw log qw(zri,w) ⌘ .",3.2.1. REPARAMETERIZATION TRICK,[0],[0]
+"(23)
+Note that the approximation on the right-hand side depends both on the choice of the minibatch and on the random vectors ri, one chosen per element of the minibatch.",3.2.1. REPARAMETERIZATION TRICK,[0],[0]
+An algorithm that interpolates between the methods in the previous section results from applying Langevin dynamics to the distribution over w defined by Thm. 3,4. Hybrid Dynamics,[0],[0]
+"If the adjoining distribution p(w|z) is chosen as in in Sec. 2.3 with some r (w) that depends on , then define
+L(w) = log",4. Hybrid Dynamics,[0],[0]
+"r (w) + Eqw(Z)[log p(z) + ( 1) log q(z|w)], (24)
+which is times the form of s(w) derived in 5, with the constant term of log rz dropped.",4. Hybrid Dynamics,[0],[0]
+"Applying Langevin Dynamics2 to this results in the iteration
+w w + ✏ 2
+rL(w)",4. Hybrid Dynamics,[0],[0]
+"+ p ✏ ⌘, (25)
+where again ✏ is a step-size that may decrease over time and ⌘ is sampled from a standard Gaussian distribution.
+",4. Hybrid Dynamics,[0],[0]
+"This paper uses a closed-form for the entropy H(w) = Eqw(Z) log qw(Z), and so uses the gradient estimator
+rL(w) ' r log r (w) + (1 )rH(w) + Eqw(Z)[log p(z) + ( 1) log q(z|w)].",4. Hybrid Dynamics,[0],[0]
+(26),4. Hybrid Dynamics,[0],[0]
+"The following experiments use the simplest common variational distribution for qw(Z), namely a fully-factorized Gaussian distribution.",5. Specifics For Gaussians,[0],[0]
+"To make w unconstrained, let w = (µ, ⌫) where µ is a vector of mean components and the standard deviation of the i-th dimension is i = 10⌫i .",5. Specifics For Gaussians,[0],[0]
+"To sample from this distribution given a vector r, one can simply take zr,w = µ + r where is element-wise product.",5. Specifics For Gaussians,[0],[0]
+"The entropy of qw(Z) is, up to constant factors H(w)",5. Specifics For Gaussians,[0],[0]
+= P i ⌫,5. Specifics For Gaussians,[0],[0]
+"i ln 10.
+",5. Specifics For Gaussians,[0],[0]
+It remains to set the base density.,5. Specifics For Gaussians,[0],[0]
+These experiments used an improper prior r (w) / Q,5. Specifics For Gaussians,[0],[0]
+"i N (⌫i|u , 1) that is uniform over µ with a Gaussian prior on ⌫ with a fixed variance of 1 and a mean u .",5. Specifics For Gaussians,[0],[0]
+"Since this is uniform over µ, rz is a constant.",5. Specifics For Gaussians,[0],[0]
+The value u was calculated to numerically optimize the divergence bound D⇤ for a one-dimensional standard Gaussian p(z).,5. Specifics For Gaussians,[0],[0]
+"Since D⇤ = A at the solution (Theorem 3), for any given and u , D⇤ can be evaluated by symbolically integrating out µ and then numerically integrating over ⌫.",5. Specifics For Gaussians,[0],[0]
+"The values used in these experiments are below, with linear interpolation used for any other .
+",5. Specifics For Gaussians,[0],[0]
+0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 u -.33 -.472 -.631 -.792,5. Specifics For Gaussians,[0],[0]
+"-.953 -1.11 -1.29 -1.49 -1.74 -2.10 -10
+2For some step-size ✏0, the Langevin dynamics would immediately be w w + (✏0/2)rs(w) + p ✏0⌘.",5. Specifics For Gaussians,[0],[0]
+"If we define ✏ = ✏0, then this results in the given form since ✏0rs(w) =",5. Specifics For Gaussians,[0],[0]
+"(✏/ )rs(w) = ✏rL(w).
+",5. Specifics For Gaussians,[0],[0]
+"Theoretically, it’s easy to show that as ! 1, D⇤ is minimized (with a minimum of zero) by u ! 1, meaning that after one iteration, ⌫ = 1, and henceforth, zr,w = µ.",5. Specifics For Gaussians,[0],[0]
+"Thus, Eq. 25 is equivalent to Langevin dynamics as in Eq. 15.",5. Specifics For Gaussians,[0],[0]
+"However, using u = 10, r(w) (a prior centered on a standard deviation of = 10 10) is practically equivalent and is more useful to guide linear interpolation.",5. Specifics For Gaussians,[0],[0]
+"Meanwhile, when ! 0, the algorithm is independent of r(w), though the optimal value of u ⇡ .33 is correct for small .
+",5. Specifics For Gaussians,[0],[0]
+The above choice of r (w) is quite arbitrary.,5. Specifics For Gaussians,[0],[0]
+"It is possible that other choices could be better, though performance was surprisingly insensitive in practice.",5. Specifics For Gaussians,[0],[0]
+With large datasets log p(z) dominates log r(w) just as likelihoods dominate Bayesian priors.,5. Specifics For Gaussians,[0],[0]
+"Calling on inspiration from recent work in variational inference, it might also be useful to optimize p(w|z) at runtime (Section 2.4).",5. Specifics For Gaussians,[0],[0]
+There does not appear to be a single standard performance measure to evaluate approximate inference algorithms.,6. Experiments,[0],[0]
+"For Bayesian inference, test-set accuracy or likelihood are sometimes used, but these measures have high variance due to the dataset, and conflate evaluation of the inference method with evaluation of the model it is running on.",6. Experiments,[0],[0]
+"(An inference method with poor coverage of p(z) can have higher accuracy than a perfect sampler due to model mis-specification or dataset peculiarities.)
+",6. Experiments,[0],[0]
+"For a more fine-grained measure of inference performance, this paper uses the Maximum Mean Discrepancy (MMD) measure (Gretton et al., 2006; 2012).",6. Experiments,[0],[0]
+MMD is essentially the empirical difference of the means of two samples in some feature space.,6. Experiments,[0],[0]
+"We first draw a sample from p(z) by exhaustively running a traditional MCMC algorithm (Stan (Team, 2016), based on a variant of Hamil-
+tonian Monte Carlo (Hoffman & Gelman, 2014)) for a large number of iterations, and compare this to the results of approximate inference.",6. Experiments,[0],[0]
+"Since we have large samples, and want to compute the online performance at all iterations, a finite-dimensional feature space must be used to avoid the quadratic complexity of computing MMD using an arbitrary kernel.",6. Experiments,[0],[0]
+"For two-dimensional problems, it was beneficial to use random Fourier features (Rahimi & Recht, 2007) to approximate the radial-basis function kernel k(x, y) = exp",6. Experiments,[0],[0]
+( kx yk2).,6. Experiments,[0],[0]
+"For higher dimensions, the original feature space was sufficiently discriminative.
+",6. Experiments,[0],[0]
+Approximate inference gives a sequence of vectors wt.,6. Experiments,[0],[0]
+"For each time-step, a set of 100 samples At are drawn from q(z|wt).",6. Experiments,[0],[0]
+"Then, the MMD between A1[A2[ · · ·At and the sample from exhaustive MCMC can be computed for all t in linear time.",6. Experiments,[0],[0]
+"A disadvantage of this approach is the need for exhaustive MCMC for comparison, which by definition eludes the large-scale cases that motivate Langevin dynamics and stochastic variational inference.",6. Experiments,[0],[0]
+However this gives a more fine-grained view of performance.,6. Experiments,[0],[0]
+"For a first demonstration, the algorithm was applied to a set of toy 2-dimensional distributions, with various values of .",6.1. Toy Distributions,[0],[0]
+"A few results are shown in Fig. 1, with more in
+the appendix.",6.1. Toy Distributions,[0],[0]
+"While the algorithm displays the expected trade-offs between speed and accuracy for different (Fig. 2), the results fairly uninteresting as all curves cross near the same time/MMD point where = 0 (variational inference) and = 1 (MCMC) meet.",6.1. Toy Distributions,[0],[0]
+"So, for any given amount of time, either variational inference or MCMC are nearoptimal, and so intermediate do not much expand the “Pareto frontier” on these problems, although one might prefer an intermediate since the crossover horizon is not known in advance.",6.1. Toy Distributions,[0],[0]
+"Next, the algorithm was applied to binary logistic regression with several standard datasets, using a minibatch size of 25, a different random vector r for each element in the minibatch, and a standard multivariate Laplace distribution as a prior.",6.2. Bayesian Logistic Regression,[0],[0]
+"Simply picking a single value or schedule for the step ✏ is unsatisfactory, as the best schedule for a given problem, length of time, and value of varies.",6.2. Bayesian Logistic Regression,[0],[0]
+"To give a fair comparison, inference was run for with a range of constant ✏ varying by factors of two from 23/N to 2 2/N .",6.2. Bayesian Logistic Regression,[0],[0]
+This spans the range from large enough to often diverge to below optimal even after 106 iterations.,6.2. Bayesian Logistic Regression,[0],[0]
+"Then, for each time, the best value of ✏ was retrospectively chosen (with performance averaged over repetitions before this choice).",6.2. Bayesian Logistic Regression,[0],[0]
+"It is likely that decaying step-size schedules would perform
+better, but this was not pursued since it would reduce transparency of the results.
+",6.2. Bayesian Logistic Regression,[0],[0]
+"The mean errors after 100 repetitions are shown in Fig. 4, while samples are compared to the ground truth for ionosphere in Fig. 3.",6.2. Bayesian Logistic Regression,[0],[0]
+"This confirms the basic ideas of the algorithm, namely that it smoothly interpolates between the two previous algorithms without introducing any new behavior.",6.2. Bayesian Logistic Regression,[0],[0]
+The main experimental finding is that there is usually a large range of time horizons for which an intermediate setting of performs better than either of the previous existing algorithms.,6.2. Bayesian Logistic Regression,[0],[0]
+"This suggests that, say, someone who has a time budget slightly larger than that needed for variational inference could benefit from running the algorithm with a small value of for a slightly larger time.",6.2. Bayesian Logistic Regression,[0],[0]
+This is in contrast to the toy two-dimensional examples where for almost all time horizons either = 0 or = 1 was optimal.,6.2. Bayesian Logistic Regression,[0],[0]
+This paper has two contributions.,7. Discussion,[0],[0]
+"First, a distribution over variational parameters is derived to minimize a bound on the marginal divergence to a target distribution.",7. Discussion,[0],[0]
+"Secondly, this is used to derive an algorithm that interpolates between Langevin dynamics and stochastic variational inference.",7. Discussion,[0],[0]
+"The Bayesian logistic regression experiments show that the intermediate values of this algorithm are useful in the sense that there are several orders of magnitude of time horizons where an intermediate algorithm performs better than either Langevin dynamics or variational inference.
+",7. Discussion,[0],[0]
+Many improvements to stochastic Langevin dynamics and variational inference have been proposed beyond the simple algorithms used here.,7. Discussion,[0],[0]
+"For Langevin dynamics, Welling & Teh (2011) and Li et al. (2016) suggest adding a preconditioner, Patterson & Teh (2013) propose Riemannian Langevin Dynamics, and Dubey et al. (2016) propose to make use of the finite sum structure in a Bayesian posterior p(z) by incorporating techniques for incremental optimization.",7. Discussion,[0],[0]
+"For stochastic variational inference, Hoffman et al.
+(2013) propose to use the natural gradient, Mandt & Blei (2014) propose using smoothed gradients, and Sakaya & Klami (2016) propose a strategy of re-using previous gradient computations.",7. Discussion,[0],[0]
+"It would be interesting to consider using these ideas with the hybrid algorithm, which could give insight into the relationship between the two different methods.
+",7. Discussion,[0],[0]
+There is other work based on combining the advantages of variational inference and MCMC.,7. Discussion,[0],[0]
+"Stochastic Gradient Fisher Scoring (Ahn et al., 2012) interpolates between Langevin dynamics and a Gaussian approximation of the target.",7. Discussion,[0],[0]
+"However, this approximation is based on the Bayesian central limit theorem and so will not be the same in general as the optimal variational distribution, even when a Gaussian is used as the variational family.",7. Discussion,[0],[0]
+"Another line of research is that of interpreting the path of a MCMC algorithm as a variational distribution, and then fitting parameters to tighten a variational bound (Salimans et al., 2015; Rezende & Mohammed, 2015).",7. Discussion,[0],[0]
+"While motivationally quite similar, the contribution of this paper is orthogonal, in that one could conceivably use these same ideas to define the variational family qw(z) used in this paper.",7. Discussion,[0],[0]
+This would result in a somewhat unusual method that runs MCMC over the parameters of variational family of distributions that are themselves defined in terms of a (different) MCMC algorithm.,7. Discussion,[0],[0]
+Two popular classes of methods for approximate inference are Markov chain Monte Carlo (MCMC) and variational inference.,abstractText,[0],[0]
+"MCMC tends to be accurate if run for a long enough time, while variational inference tends to give better approximations at shorter time horizons.",abstractText,[0],[0]
+"However, the amount of time needed for MCMC to exceed the performance of variational methods can be quite high, motivating more fine-grained tradeoffs.",abstractText,[0],[0]
+"This paper derives a distribution over variational parameters, designed to minimize a bound on the divergence between the resulting marginal distribution and the target, and gives an example of how to sample from this distribution in a way that interpolates between the behavior of existing methods based on Langevin dynamics and stochastic gradient variational inference (SGVI).",abstractText,[0],[0]
+A Divergence Bound for Hybrids of MCMC and Variational Inference and an Application to Langevin Dynamics and SGVI,title,[0],[0]

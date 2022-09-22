@@ -1,0 +1,303 @@
+0,1,label2,summary_sentences
+"Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics, pages 1–10 Vancouver, Canada, July 30 - August 4, 2017. c©2017 Association for Computational Linguistics
+https://doi.org/10.18653/v1/P17-1001",text,[0],[0]
+Multi-task learning is an effective approach to improve the performance of a single task with the help of other related tasks.,1 Introduction,[0],[0]
+"Recently, neuralbased models for multi-task learning have become very popular, ranging from computer vision (Misra et al., 2016; Zhang et al., 2014) to natural language processing (Collobert and Weston, 2008; Luong et al., 2015), since they provide a convenient way of combining information from multiple tasks.
+",1 Introduction,[0],[0]
+"However, most existing work on multi-task learning (Liu et al., 2016c,b) attempts to divide the features of different tasks into private and shared spaces, merely based on whether parameters of
+some components should be shared.",1 Introduction,[0],[0]
+"As shown in Figure 1-(a), the general shared-private model introduces two feature spaces for any task: one is used to store task-dependent features, the other is used to capture shared features.",1 Introduction,[0],[0]
+"The major limitation of this framework is that the shared feature space could contain some unnecessary taskspecific features, while some sharable features could also be mixed in private space, suffering from feature redundancy.
+",1 Introduction,[0],[0]
+"Taking the following two sentences as examples, which are extracted from two different sentiment classification tasks: Movie reviews and Baby products reviews.
+",1 Introduction,[0],[0]
+The infantile cart is simple and easy to use.,1 Introduction,[0],[0]
+"This kind of humour is infantile and boring.
+",1 Introduction,[0],[0]
+The word “infantile” indicates negative sentiment in Movie task while it is neutral in Baby task.,1 Introduction,[0],[0]
+"However, the general shared-private model could place the task-specific word “infantile” in a shared space, leaving potential hazards for other tasks.",1 Introduction,[0],[0]
+"Additionally, the capacity of shared space could also be wasted by some unnecessary features.
+",1 Introduction,[0],[0]
+"To address this problem, in this paper we propose an adversarial multi-task framework, in which the shared and private feature spaces are in-
+1
+herently disjoint by introducing orthogonality constraints.",1 Introduction,[0],[0]
+"Specifically, we design a generic sharedprivate learning framework to model the text sequence.",1 Introduction,[0],[0]
+"To prevent the shared and private latent feature spaces from interfering with each other, we introduce two strategies: adversarial training and orthogonality constraints.",1 Introduction,[0],[0]
+"The adversarial training is used to ensure that the shared feature space simply contains common and task-invariant information, while the orthogonality constraint is used to eliminate redundant features from the private and shared spaces.
+",1 Introduction,[0],[0]
+"The contributions of this paper can be summarized as follows.
+1.",1 Introduction,[0],[0]
+"Proposed model divides the task-specific and shared space in a more precise way, rather than roughly sharing parameters.",1 Introduction,[0],[0]
+2.,1 Introduction,[0],[0]
+"We extend the original binary adversarial training to multi-class, which not only enables multiple tasks to be jointly trained, but allows us to utilize unlabeled data.",1 Introduction,[0],[0]
+3.,1 Introduction,[0],[0]
+"We can condense the shared knowledge among multiple tasks into an off-the-shelf neural layer, which can be easily transferred to new tasks.",1 Introduction,[0],[0]
+"There are many neural sentence models, which can be used for text modelling, involving recurrent neural networks (Sutskever et al., 2014; Chung et al., 2014; Liu et al., 2015a), convolutional neural networks (Collobert et al., 2011; Kalchbrenner et al., 2014), and recursive neural networks (Socher et al., 2013).",2 Recurrent Models for Text Classification,[0],[0]
+"Here we adopt recurrent neural network with long short-term memory (LSTM) due to their superior performance in various NLP tasks (Liu et al., 2016a; Lin et al., 2017).
+",2 Recurrent Models for Text Classification,[0],[0]
+"Long Short-term Memory Long short-term memory network (LSTM) (Hochreiter and Schmidhuber, 1997) is a type of recurrent neural network (RNN) (Elman, 1990), and specifically addresses the issue of learning long-term dependencies.",2 Recurrent Models for Text Classification,[0],[0]
+"While there are numerous LSTM variants, here we use the LSTM architecture used by (Jozefowicz et al., 2015), which is similar to the architecture of (Graves, 2013) but without peep-hole connections.
+",2 Recurrent Models for Text Classification,[0],[0]
+"We define the LSTM units at each time step t to be a collection of vectors in Rd: an input gate it, a
+forget gate ft, an output gate ot, a memory cell ct and a hidden state ht. d is the number of the LSTM units.",2 Recurrent Models for Text Classification,[0.9907638526137732],"['We define the LSTM units at each time step t to be a collection of vectors in Rd: an input gate it, a forget gate ft, an output gate ot, a memory cell ct and a hidden state ht.']"
+"The elements of the gating vectors it, ft and ot are in [0, 1].
+",2 Recurrent Models for Text Classification,[0.9999998963076259],"['The elements of the gating vectors it, ft and ot are in [0, 1].']"
+"The LSTM is precisely specified as follows.
+ 
+",2 Recurrent Models for Text Classification,[0],[0]
+"c̃t ot it ft
+  =  
+tanh σ σ",2 Recurrent Models for Text Classification,[0],[0]
+"σ
+  ( Wp [ xt
+ht−1
+] + bp ) , (1)
+ct = c̃t it + ct−1 ft, (2) ht = ot tanh (ct) , (3)
+",2 Recurrent Models for Text Classification,[0],[0]
+where xt ∈,2 Recurrent Models for Text Classification,[0],[0]
+Re is the input at the current time step;,2 Recurrent Models for Text Classification,[0],[0]
+"Wp ∈ R4d×(d+e) and bp ∈ R4d are parameters of affine transformation; σ denotes the logistic sigmoid function and denotes elementwise multiplication.
+",2 Recurrent Models for Text Classification,[0],[0]
+"The update of each LSTM unit can be written precisely as follows:
+ht = LSTM(ht−1,xt, θp).",2 Recurrent Models for Text Classification,[0.9999999889746035],"['The update of each LSTM unit can be written precisely as follows: ht = LSTM(ht−1,xt, θp).']"
+"(4)
+Here, the function LSTM(·, ·, ·, ·) is a shorthand for Eq.",2 Recurrent Models for Text Classification,[0],[0]
+"(1-3), and θp represents all the parameters of LSTM.
+",2 Recurrent Models for Text Classification,[0.9999999702108123],"['(1-3), and θp represents all the parameters of LSTM.']"
+"Text Classification with LSTM Given a text sequence x = {x1, x2, · · · , xT }, we first use a lookup layer to get the vector representation (embeddings) xi of the each word xi.",2 Recurrent Models for Text Classification,[0],[0]
+"The output at the last moment hT can be regarded as the representation of the whole sequence, which has a fully connected layer followed by a softmax non-linear layer that predicts the probability distribution over classes.
+",2 Recurrent Models for Text Classification,[0],[0]
+"ŷ = softmax(WhT + b) (5)
+where ŷ is prediction probabilities, W is the weight which needs to be learned, b is a bias term.
+",2 Recurrent Models for Text Classification,[0],[0]
+"Given a corpus with N training samples (xi, yi), the parameters of the network are trained to minimise the cross-entropy of the predicted and true distributions.
+",2 Recurrent Models for Text Classification,[0],[0]
+"L(ŷ, y) =",2 Recurrent Models for Text Classification,[0],[0]
+"− N∑
+i=1
+C∑
+j=1
+yji log(ŷ j i ), (6)
+where yji is the ground-truth label; ŷ",2 Recurrent Models for Text Classification,[0],[0]
+"j i is prediction probabilities, and C is the class number.
+",2 Recurrent Models for Text Classification,[0],[0]
+"softmax Lmtask
+LSTM
+softmax Lntask
+xm xn
+(a) Fully Shared Model (FS-MTL)",2 Recurrent Models for Text Classification,[1.000000009730694],['softmax Lmtask LSTM softmax Lntask xm xn (a) Fully Shared Model (FS-MTL)']
+The goal of multi-task learning is to utilizes the correlation among these related tasks to improve classification by learning tasks in parallel.,3 Multi-task Learning for Text Classification,[0],[0]
+"To facilitate this, we give some explanation for notations used in this paper.",3 Multi-task Learning for Text Classification,[1.0],"['To facilitate this, we give some explanation for notations used in this paper.']"
+"Formally, we refer to Dk as a dataset with Nk samples for task k. Specifically,
+",3 Multi-task Learning for Text Classification,[0],[0]
+"Dk = {(xki , yki )}Nki=1 (7)
+where xki and y k",3 Multi-task Learning for Text Classification,[0],[0]
+i denote a sentence and corresponding label for task k.,3 Multi-task Learning for Text Classification,[0],[0]
+The key factor of multi-task learning is the sharing scheme in latent feature space.,3.1 Two Sharing Schemes for Sentence Modeling,[0],[0]
+"In neural network based model, the latent features can be regarded as the states of hidden neurons.",3.1 Two Sharing Schemes for Sentence Modeling,[0],[0]
+"Specific to text classification, the latent features are the hidden states of LSTM at the end of a sentence.",3.1 Two Sharing Schemes for Sentence Modeling,[0],[0]
+"Therefore, the sharing schemes are different in how to group the shared features.",3.1 Two Sharing Schemes for Sentence Modeling,[0],[0]
+"Here, we first introduce two sharing schemes with multi-task learning: fully-shared scheme and shared-private scheme.
+",3.1 Two Sharing Schemes for Sentence Modeling,[0],[0]
+Fully-Shared Model (FS-MTL),3.1 Two Sharing Schemes for Sentence Modeling,[0],[0]
+"In fully-shared model, we use a single shared LSTM layer to extract features for all the tasks.",3.1 Two Sharing Schemes for Sentence Modeling,[0],[0]
+"For example, given two tasks m and n, it takes the view that the features of task m can be totally shared by task n and vice versa.",3.1 Two Sharing Schemes for Sentence Modeling,[0],[0]
+This model ignores the fact that some features are task-dependent.,3.1 Two Sharing Schemes for Sentence Modeling,[1.0],['This model ignores the fact that some features are task-dependent.']
+"Figure 2a illustrates the fully-shared model.
+",3.1 Two Sharing Schemes for Sentence Modeling,[0],[0]
+Shared-Private Model (SP-MTL),3.1 Two Sharing Schemes for Sentence Modeling,[0],[0]
+"As shown in Figure 2b, the shared-private model introduces two feature spaces for each task: one is used to store task-dependent features, the other is used to capture task-invariant features.",3.1 Two Sharing Schemes for Sentence Modeling,[0],[0]
+"Accordingly, we can see each task is assigned a private LSTM layer and shared LSTM layer.",3.1 Two Sharing Schemes for Sentence Modeling,[1.0],"['Accordingly, we can see each task is assigned a private LSTM layer and shared LSTM layer.']"
+"Formally, for any sentence in task k, we can compute its shared representation skt and task-specific representation h k t as follows:
+skt = LSTM(xt, s k t−1, θs), (8)
+hkt = LSTM(xt,h m t−1, θk) (9)
+where LSTM(., θ) is defined as Eq. (4).",3.1 Two Sharing Schemes for Sentence Modeling,[0.9934356013081789],"['Formally, for any sentence in task k, we can compute its shared representation skt and task-specific representation h k t as follows: skt = LSTM(xt, s k t−1, θs), (8) hkt = LSTM(xt,h m t−1, θk) (9) where LSTM(., θ) is defined as Eq.']"
+The final features are concatenation of the features from private space and shared space.,3.1 Two Sharing Schemes for Sentence Modeling,[0],[0]
+"For a sentence in task k, its feature h(k), emitted by the deep muti-task architectures, is ultimately fed into the corresponding task-specific softmax layer for classification or other tasks.
+",3.2 Task-Specific Output Layer,[0],[0]
+The parameters of the network are trained to minimise the cross-entropy of the predicted and true distributions on all the tasks.,3.2 Task-Specific Output Layer,[0],[0]
+"The loss Ltask can be computed as:
+LTask = K∑
+k=1
+αkL(ŷ (k), y(k))",3.2 Task-Specific Output Layer,[0],[0]
+"(10)
+where αk is the weights for each task k respectively.",3.2 Task-Specific Output Layer,[0],[0]
+"L(ŷ, y) is defined as Eq. 6.",3.2 Task-Specific Output Layer,[0],[0]
+"Although the shared-private model separates the feature space into the shared and private spaces, there is no guarantee that sharable features can not exist in private feature space, or vice versa.",4 Incorporating Adversarial Training,[0],[0]
+"Thus, some useful sharable features could be ignored in shared-private model, and the shared feature space is also vulnerable to contamination by some taskspecific information.
+",4 Incorporating Adversarial Training,[0.9999999785651804],"['Thus, some useful sharable features could be ignored in shared-private model, and the shared feature space is also vulnerable to contamination by some taskspecific information.']"
+"Therefore, a simple principle can be applied into multi-task learning that a good shared feature space should contain more common information and no task-specific information.",4 Incorporating Adversarial Training,[0],[0]
+"To address this problem, we introduce adversarial training into multi-task framework as shown in Figure 3 (ASPMTL).",4 Incorporating Adversarial Training,[1.0],"['To address this problem, we introduce adversarial training into multi-task framework as shown in Figure 3 (ASPMTL).']"
+"Adversarial networks have recently surfaced and are first used for generative model (Goodfellow et al., 2014).",4.1 Adversarial Network,[1.0],"['Adversarial networks have recently surfaced and are first used for generative model (Goodfellow et al., 2014).']"
+The goal is to learn a generative distribution pG(x) that matches the real data distribution Pdata(x),4.1 Adversarial Network,[0],[0]
+"Specifically, GAN learns a generative network G and discriminative model D, in which G generates samples from the generator distribution pG(x).",4.1 Adversarial Network,[0],[0]
+and D learns to determine whether a sample is from pG(x) or Pdata(x).,4.1 Adversarial Network,[0],[0]
+"This min-max game can be optimized by the following risk:
+φ = min G max D
+( Ex∼Pdata [logD(x)]
++ Ez∼p(z)[log(1−D(G(z)))] )
+(11)
+While originally proposed for generating random samples, adversarial network can be used as a general tool to measure equivalence between distributions (Taigman et al., 2016).",4.1 Adversarial Network,[0.9999999480496904],"['This min-max game can be optimized by the following risk: φ = min G max D ( Ex∼Pdata [logD(x)] + Ez∼p(z)[log(1−D(G(z)))] ) (11) While originally proposed for generating random samples, adversarial network can be used as a general tool to measure equivalence between distributions (Taigman et al., 2016).']"
+"Formally, (Ajakan et al., 2014) linked the adversarial loss to the H-divergence between two distributions and successfully achieve unsupervised domain adaptation with adversarial network.",4.1 Adversarial Network,[0],[0]
+"Motivated by theory on domain adaptation (Ben-David et al., 2010, 2007; Bousmalis et al., 2016) that a transferable feature is one for which an algorithm cannot learn to identify the domain of origin of the input observation.",4.1 Adversarial Network,[1.0],"['Motivated by theory on domain adaptation (Ben-David et al., 2010, 2007; Bousmalis et al., 2016) that a transferable feature is one for which an algorithm cannot learn to identify the domain of origin of the input observation.']"
+"Inspired by adversarial networks (Goodfellow et al., 2014), we proposed an adversarial sharedprivate model for multi-task learning, in which a shared recurrent neural layer is working adversarially towards a learnable multi-layer perceptron, preventing it from making an accurate prediction about the types of tasks.",4.2 Task Adversarial Loss for MTL,[1.0],"['Inspired by adversarial networks (Goodfellow et al., 2014), we proposed an adversarial sharedprivate model for multi-task learning, in which a shared recurrent neural layer is working adversarially towards a learnable multi-layer perceptron, preventing it from making an accurate prediction about the types of tasks.']"
+"This adversarial training encourages shared space to be more pure and ensure the shared representation not be contaminated by task-specific features.
+",4.2 Task Adversarial Loss for MTL,[0],[0]
+"Task Discriminator Discriminator is used to map the shared representation of sentences into a probability distribution, estimating what kinds of tasks the encoded sentence comes from.
+D(skT , θD) = softmax(b+Us k T ) (12)
+where U ∈ Rd×d is a learnable parameter and b ∈ Rd is a bias.
+",4.2 Task Adversarial Loss for MTL,[0],[0]
+"Adversarial Loss Different with most existing multi-task learning algorithm, we add an extra task adversarial loss LAdv to prevent task-specific feature from creeping in to shared space.",4.2 Task Adversarial Loss for MTL,[0],[0]
+The task adversarial loss is used to train a model to produce shared features such that a classifier cannot reliably predict the task based on these features.,4.2 Task Adversarial Loss for MTL,[0],[0]
+The original loss of adversarial network is limited since it can only be used in binary situation.,4.2 Task Adversarial Loss for MTL,[1.0],['The original loss of adversarial network is limited since it can only be used in binary situation.']
+"To overcome this, we extend it to multi-class form, which allow our model can be trained together with multiple tasks:
+LAdv = min θs ( λmax θD ( K∑
+k=1
+Nk∑
+i=1
+dki log[D(E(x k))]) )",4.2 Task Adversarial Loss for MTL,[0],[0]
+"(13)
+where dki denotes the ground-truth label indicating the type of the current task.",4.2 Task Adversarial Loss for MTL,[0],[0]
+"Here, there is a minmax optimization and the basic idea is that, given a sentence, the shared LSTM generates a representation to mislead the task discriminator.",4.2 Task Adversarial Loss for MTL,[0],[0]
+"At the same time, the discriminator tries its best to make a correct classification on the type of task.",4.2 Task Adversarial Loss for MTL,[1.0],"['At the same time, the discriminator tries its best to make a correct classification on the type of task.']"
+"After the training phase, the shared feature extractor and task discriminator reach a point at which both cannot improve and the discriminator is unable to differentiate among all the tasks.
+",4.2 Task Adversarial Loss for MTL,[0.9999999751841157],"['After the training phase, the shared feature extractor and task discriminator reach a point at which both cannot improve and the discriminator is unable to differentiate among all the tasks.']"
+Semi-supervised Learning Multi-task Learning,4.2 Task Adversarial Loss for MTL,[0],[0]
+"We notice that the LAdv requires only the input sentence x and does not require the corresponding label y, which makes it possible to combine our model with semi-supervised learning.",4.2 Task Adversarial Loss for MTL,[0],[0]
+"Finally, in this semi-supervised multi-task learning framework, our model can not only utilize the data from related tasks, but can employ abundant unlabeled corpora.",4.2 Task Adversarial Loss for MTL,[0],[0]
+We notice that there is a potential drawback of the above model.,4.3 Orthogonality Constraints,[0],[0]
+"That is, the task-invariant features can appear both in shared space and private space.
+",4.3 Orthogonality Constraints,[0],[0]
+"Motivated by recently work(Jia et al., 2010; Salzmann et al., 2010; Bousmalis et al., 2016)
+on shared-private latent space analysis, we introduce orthogonality constraints, which penalize redundant latent representations and encourages the shared and private extractors to encode different aspects of the inputs.
+",4.3 Orthogonality Constraints,[1.0000000022225488],"['Motivated by recently work(Jia et al., 2010; Salzmann et al., 2010; Bousmalis et al., 2016) on shared-private latent space analysis, we introduce orthogonality constraints, which penalize redundant latent representations and encourages the shared and private extractors to encode different aspects of the inputs.']"
+"After exploring many optional methods, we find below loss is optimal, which is used by Bousmalis et al. (2016) and achieve a better performance:
+Ldiff = K∑
+k=1
+∥∥∥Sk>Hk ∥∥∥ 2
+F , (14)
+where ‖ · ‖2F is the squared Frobenius norm.",4.3 Orthogonality Constraints,[1.0000000281915935],"['After exploring many optional methods, we find below loss is optimal, which is used by Bousmalis et al. (2016) and achieve a better performance: Ldiff = K∑ k=1 ∥∥∥Sk>Hk ∥∥∥ 2 F , (14) where ‖ · ‖2F is the squared Frobenius norm.']"
+"Sk and Hk are two matrics, whose rows are the output of shared extractor Es(, ; θs) and task-specific extrator Ek(, ; θk) of a input sentence.",4.3 Orthogonality Constraints,[0],[0]
+"The final loss function of our model can be written as:
+L = LTask + λLAdv + γLDiff",4.4 Put It All Together,[0],[0]
+"(15)
+where λ and γ are hyper-parameter.",4.4 Put It All Together,[0],[0]
+"The networks are trained with backpropagation and this minimax optimization becomes possible via the use of a gradient reversal layer (Ganin and Lempitsky, 2015).",4.4 Put It All Together,[1.0],"['The networks are trained with backpropagation and this minimax optimization becomes possible via the use of a gradient reversal layer (Ganin and Lempitsky, 2015).']"
+"To make an extensive evaluation, we collect 16 different datasets from several popular review corpora.
+",5.1 Dataset,[0],[0]
+"The first 14 datasets are product reviews, which contain Amazon product reviews from different domains, such as Books, DVDs, Electronics, ect.",5.1 Dataset,[0],[0]
+The goal is to classify a product review as either positive or negative.,5.1 Dataset,[0],[0]
+"These datasets are collected based on the raw data 1 provided by (Blitzer et al., 2007).",5.1 Dataset,[0],[0]
+"Specifically, we extract the sentences and corresponding labels from the unprocessed original data 2.",5.1 Dataset,[0],[0]
+"The only preprocessing operation of these sentences is tokenized using the Stanford tokenizer 3.
+",5.1 Dataset,[0],[0]
+The remaining two datasets are about movie reviews.,5.1 Dataset,[0],[0]
+"The IMDB dataset4 consists of movie reviews with binary classes (Maas et al., 2011).",5.1 Dataset,[0],[0]
+One key aspect of this dataset is that each movie review has several sentences.,5.1 Dataset,[0],[0]
+"The MR dataset also consists of movie reviews from rotten tomato website with two classes 5(Pang and Lee, 2005).
+",5.1 Dataset,[0],[0]
+"All the datasets in each task are partitioned randomly into training set, development set and testing set with the proportion of 70%, 20% and 10% respectively.",5.1 Dataset,[0],[0]
+The detailed statistics about all the datasets are listed in Table 1.,5.1 Dataset,[0],[0]
+The multi-task frameworks proposed by previous works are various while not all can be applied to the tasks we focused.,5.2 Competitor Methods for Multi-task Learning,[0],[0]
+"Nevertheless, we chose two most related neural models for multi-task learning and implement them as competitor methods.
+",5.2 Competitor Methods for Multi-task Learning,[0],[0]
+• MT-CNN:,5.2 Competitor Methods for Multi-task Learning,[0],[0]
+"This model is proposed by Collobert and Weston (2008) with convolutional layer, in which lookup-tables are shared partially while other layers are task-specific.
+1https://www.cs.jhu.edu/˜mdredze/ datasets/sentiment/
+2Blitzer et al. (2007) also provides two extra processed datasets with the format of Bag-of-Words, which are not proper for neural-based models.
+",5.2 Competitor Methods for Multi-task Learning,[0],[0]
+"3http://nlp.stanford.edu/software/ tokenizer.shtml
+4https://www.cs.jhu.edu/˜mdredze/ datasets/sentiment/unprocessed.tar.gz
+5https://www.cs.cornell.edu/people/ pabo/movie-review-data/.
+• MT-DNN:",5.2 Competitor Methods for Multi-task Learning,[0],[0]
+"The model is proposed by Liu et al. (2015b) with bag-of-words input and multi-layer perceptrons, in which a hidden layer is shared.",5.2 Competitor Methods for Multi-task Learning,[0],[0]
+"The word embeddings for all of the models are initialized with the 200d GloVe vectors ((Pennington et al., 2014)).",5.3 Hyperparameters,[0],[0]
+"The other parameters are initialized by randomly sampling from uniform distribution in [−0.1, 0.1].",5.3 Hyperparameters,[0],[0]
+"The mini-batch size is set to 16.
+",5.3 Hyperparameters,[0],[0]
+"For each task, we take the hyperparameters which achieve the best performance on the development set via an small grid search over combinations of the initial learning rate [0.1, 0.01], λ ∈",5.3 Hyperparameters,[0],[0]
+"[0.01, 0.1], and γ ∈",5.3 Hyperparameters,[0],[0]
+"[0.01, 0.1].",5.3 Hyperparameters,[0],[0]
+"Finally, we chose the learning rate as 0.01, λ as 0.05 and γ as 0.01.",5.3 Hyperparameters,[0],[0]
+Table 2 shows the error rates on 16 text classification tasks.,5.4 Performance Evaluation,[0],[0]
+"The column of “Single Task” shows the results of vanilla LSTM, bidirectional LSTM (BiLSTM), stacked LSTM (sLSTM) and the average error rates of previous three models.",5.4 Performance Evaluation,[0],[0]
+The column of “Multiple Tasks” shows the results achieved by corresponding multi-task models.,5.4 Performance Evaluation,[0],[0]
+"From this table, we can see that the performance of most tasks can be improved with a large margin with the help of multi-task learning, in which our model achieves the lowest error rates.",5.4 Performance Evaluation,[0],[0]
+"More concretely, compared with SP-MTL, ASP-
+MTL achieves 4.1% average improvement surpassing SP-MTL with 1.0%, which indicates the importance of adversarial learning.",5.4 Performance Evaluation,[0],[0]
+"It is noteworthy that for FS-MTL, the performances of some tasks are degraded, since this model puts all private and shared information into a unified space.",5.4 Performance Evaluation,[0],[0]
+"With the help of adversarial learning, the shared feature extractor Es can generate more pure taskinvariant representations, which can be considered as off-the-shelf knowledge and then be used for unseen new tasks.
+",5.5 Shared Knowledge Transfer,[0],[0]
+"To test the transferability of our learned shared extractor, we also design an experiment, in which we take turns choosing 15 tasks to train our model MS with multi-task learning, then the learned shared layer are transferred to a second network MT that is used for the remaining one task.",5.5 Shared Knowledge Transfer,[0],[0]
+"The parameters of transferred layer are kept frozen, and the rest of parameters of the network MT are randomly initialized.
+",5.5 Shared Knowledge Transfer,[0],[0]
+"More formally, we investigate two mechanisms towards the transferred shared extractor.",5.5 Shared Knowledge Transfer,[0],[0]
+As shown in Figure 4.,5.5 Shared Knowledge Transfer,[0],[0]
+"The first one Single Channel (SC) model consists of one shared feature extractor Es from MS , then the extracted representation will be sent to an output layer.",5.5 Shared Knowledge Transfer,[0],[0]
+"By contrast, the BiChannel (BC) model introduces an extra LSTM layer to encode more task-specific information.",5.5 Shared Knowledge Transfer,[0],[0]
+"To evaluate the effectiveness of our introduced adversarial training framework, we also make a compar-
+ison with vanilla multi-task learning method.
+",5.5 Shared Knowledge Transfer,[0],[0]
+"Results and Analysis As shown in Table 3, we can see the shared layer from ASP-MTL achieves a better performance compared with SP-MTL.",5.5 Shared Knowledge Transfer,[0],[0]
+"Besides, for the two kinds of transfer strategies, the Bi-Channel model performs better.",5.5 Shared Knowledge Transfer,[0],[0]
+The reason is that the task-specific layer introduced in the BiChannel model can store some private features.,5.5 Shared Knowledge Transfer,[0],[0]
+"Overall, the results indicate that we can save the existing knowledge into a shared recurrent layer using adversarial multi-task learning, which is quite useful for a new task.",5.5 Shared Knowledge Transfer,[0],[0]
+"To get an intuitive understanding of how the introduced orthogonality constraints worked compared with vanilla shared-private model, we design an experiment to examine the behaviors of neurons from private layer and shared layer.",5.6 Visualization,[0],[0]
+"More concretely, we refer to htj as the activation of the jneuron at time step t, where t ∈ {1, . . .",5.6 Visualization,[0],[0]
+",",5.6 Visualization,[0],[0]
+"n} and
+j ∈ {1, . .",5.6 Visualization,[0],[0]
+.,5.6 Visualization,[0],[0]
+", d}.",5.6 Visualization,[0],[0]
+"By visualizing the hidden state hj and analyzing the maximum activation, we can find what kinds of patterns the current neuron focuses on.
+",5.6 Visualization,[0],[0]
+Figure 5 illustrates this phenomenon.,5.6 Visualization,[0],[0]
+"Here, we randomly sample a sentence from the validation set of Baby task and analyze the changes of the predicted sentiment score at different time steps, which are obtained by SP-MTL and our proposed model.",5.6 Visualization,[0],[0]
+"Additionally, to get more insights into how neurons in shared layer behave diversely towards different input word, we visualize the activation of two typical neurons.",5.6 Visualization,[0],[0]
+"For the positive sentence “Five stars, my baby can fall asleep soon in the stroller”, both models capture the informative pattern “Five stars” 6.",5.6 Visualization,[0],[0]
+"However, SP-MTL makes a wrong prediction due to misunderstanding of the word “asleep”.
+",5.6 Visualization,[0],[0]
+"By contrast, our model makes a correct prediction and the reason can be inferred from the activation of Figure 5-(b), where the shared layer of SP-MTL is so sensitive that many features related to other tasks are included, such as ”asleep”, which misleads the final prediction.",5.6 Visualization,[0],[0]
+"This indicates the importance of introducing adversarial learning to prevent the shared layer from being contaminated by task-specific features.
+",5.6 Visualization,[0],[0]
+"We also list some typical patterns captured by
+6For this case, the vanilla LSTM also give a wrong answer due to ignoring the feature “Five stars”.
+",5.6 Visualization,[0],[0]
+"Model Shared Layer Task-Movie Task-Baby
+SP-MTL
+good, great bad, love, simple, cut, slow, cheap, infantile good, great, well-directed, pointless, cut, cheap, infantile love, bad, cute, safety, mild, broken simple
+ASP-MTL good, great, love, bad poor well-directed, pointless, cut, cheap, infantile cute, safety, mild, broken simple
+Table 4: Typical patterns captured by shared layer and task-specific layer of SP-MTL and ASP-MTL models on Movie and Baby tasks.
+neurons from shared layer and task-specific layer in Table 4, and we have observed that: 1) for SP-MTL, if some patterns are captured by taskspecific layer, they are likely to be placed into shared space.",5.6 Visualization,[0],[0]
+"Clearly, suppose we have many tasks to be trained jointly, the shared layer bear much pressure and must sacrifice substantial amount of capacity to capture the patterns they actually do not need.",5.6 Visualization,[0],[0]
+"Furthermore, some typical taskinvariant features also go into task-specific layer.",5.6 Visualization,[0],[0]
+"2) for ASP-MTL, we find the features captured by shared and task-specific layer have a small amount of intersection, which allows these two kinds of layers can work effectively.",5.6 Visualization,[0],[0]
+There are two threads of related work.,6 Related Work,[0],[0]
+One thread is multi-task learning with neural network.,6 Related Work,[0],[0]
+"Neural networks based multi-task learning has been proven effective in many NLP problems (Collobert and Weston, 2008; Glorot et al., 2011).
+",6 Related Work,[0],[0]
+"Liu et al. (2016c) first utilizes different LSTM layers to construct multi-task learning framwork
+for text classification.",6 Related Work,[0],[0]
+"Liu et al. (2016b) proposes a generic multi-task framework, in which different tasks can share information by an external memory and communicate by a reading/writing mechanism.",6 Related Work,[0],[0]
+"These work has potential limitation of just learning a shared space solely on sharing parameters, while our model introduce two strategies to learn the clear and non-redundant shared-private space.
+",6 Related Work,[0],[0]
+Another thread of work is adversarial network.,6 Related Work,[0],[0]
+Adversarial networks have recently surfaced as a general tool measure equivalence between distributions and it has proven to be effective in a variety of tasks.,6 Related Work,[0],[0]
+"Ajakan et al. (2014); Bousmalis et al. (2016) applied adverarial training to domain adaptation, aiming at transferring the knowledge of one source domain to target domain.",6 Related Work,[0],[0]
+"Park and Im (2016) proposed a novel approach for multimodal representation learning which uses adversarial back-propagation concept.
+",6 Related Work,[0],[0]
+"Different from these models, our model aims to find task-invariant sharable information for multiple related tasks using adversarial training strategy.",6 Related Work,[0],[0]
+"Moreover, we extend binary adversarial training to multi-class, which enable multiple tasks to be jointly trained.",6 Related Work,[0],[0]
+"In this paper, we have proposed an adversarial multi-task learning framework, in which the taskspecific and task-invariant features are learned non-redundantly, therefore capturing the sharedprivate separation of different tasks.",7 Conclusion,[0],[0]
+We have demonstrated the effectiveness of our approach by applying our model to 16 different text classification tasks.,7 Conclusion,[0],[0]
+"We also perform extensive qualitative
+analysis, deriving insights and indirectly explaining the quantitative improvements in the overall performance.",7 Conclusion,[0],[0]
+"We would like to thank the anonymous reviewers for their valuable comments and thank Kaiyu Qian, Gang Niu for useful discussions.",Acknowledgments,[0],[0]
+"This work was partially funded by National Natural Science Foundation of China (No. 61532011 and 61672162), the National High Technology Research and Development Program of China (No. 2015AA015408), Shanghai Municipal Science and Technology Commission (No. 16JC1420401).",Acknowledgments,[0],[0]
+"Neural network models have shown their promising opportunities for multi-task learning, which focus on learning the shared layers to extract the common and task-invariant features.",abstractText,[0],[0]
+"However, in most existing approaches, the extracted shared features are prone to be contaminated by task-specific features or the noise brought by other tasks.",abstractText,[0],[0]
+"In this paper, we propose an adversarial multi-task learning framework, alleviating the shared and private latent feature spaces from interfering with each other.",abstractText,[0],[0]
+"We conduct extensive experiments on 16 different text classification tasks, which demonstrates the benefits of our approach.",abstractText,[0],[0]
+"Besides, we show that the shared knowledge learned by our proposed model can be regarded as off-the-shelf knowledge and easily transferred to new tasks.",abstractText,[0],[0]
+The datasets of all 16 tasks are publicly available at http://nlp.fudan.,abstractText,[0],[0]
+Adversarial Multi-task Learning for Text Classification,title,[0],[0]

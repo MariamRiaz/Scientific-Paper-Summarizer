@@ -1,0 +1,875 @@
+0,1,label2,summary_sentences
+"Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing, pages 3622–3631 Brussels, Belgium, October 31 - November 4, 2018. c©2018 Association for Computational Linguistics
+3622",text,[0],[0]
+"Despite the massive success brought by neural machine translation (NMT, Sutskever et al., 2014; Bahdanau et al., 2015; Vaswani et al., 2017), it has been noticed that the vanilla NMT often lags behind conventional machine translation systems, such as statistical phrase-based translation systems (PBMT, Koehn et al., 2003), for low-resource language pairs (see, e.g., Koehn and Knowles, 2017).",1 Introduction,[0],[0]
+"In the past few years, various approaches have been proposed to address this issue.",1 Introduction,[0],[0]
+"The first attempts at tackling this problem exploited the availability of monolingual corpora (Gulcehre
+* Equal contribution.
+",1 Introduction,[0],[0]
+"et al., 2015; Sennrich et al., 2015; Zhang and Zong, 2016).",1 Introduction,[0],[0]
+"It was later followed by approaches based on multilingual translation, in which the goal was to exploit knowledge from high-resource language pairs by training a single NMT system on a mix of high-resource and low-resource language pairs (Firat et al., 2016a,b; Lee et al., 2016; Johnson et al., 2016; Ha et al., 2016b).",1 Introduction,[0],[0]
+"Its variant, transfer learning, was also proposed by Zoph et al. (2016), in which an NMT system is pretrained on a high-resource language pair before being finetuned on a target low-resource language pair.
+",1 Introduction,[0],[0]
+"In this paper, we follow up on these latest approaches based on multilingual NMT and propose a meta-learning algorithm for low-resource neural machine translation.",1 Introduction,[0],[0]
+"We start by arguing that the recently proposed model-agnostic meta-learning algorithm (MAML, Finn et al., 2017) could be applied to low-resource machine translation by viewing language pairs as separate tasks.",1 Introduction,[0],[0]
+This view enables us to use MAML to find the initialization of model parameters that facilitate fast adaptation for a new language pair with a minimal amount of training examples (§3).,1 Introduction,[0],[0]
+"Furthermore, the vanilla MAML however cannot handle tasks with mismatched input and output.",1 Introduction,[0],[0]
+"We overcome this limitation by incorporating the universal lexical representation (Gu et al., 2018b) and adapting it for the meta-learning scenario (§3.3).
+",1 Introduction,[0],[0]
+We extensively evaluate the effectiveness and generalizing ability of the proposed meta-learning algorithm on low-resource neural machine translation.,1 Introduction,[0],[0]
+"We utilize 17 languages from Europarl and Russian from WMT as the source tasks and test the meta-learned parameter initialization against five target languages (Ro, Lv, Fi, Tr and Ko), in all cases translating to English.",1 Introduction,[0],[0]
+"Our experiments using only up to 160k tokens in each of the target task reveal that the proposed meta-learning approach outperforms the multilingual translation
+approach across all the target language pairs, and the gap grows as the number of training examples decreases.",1 Introduction,[0],[0]
+Neural Machine Translation (NMT),2 Background,[0],[0]
+"Given a source sentence X = {x1, ..., xT 0}, a neural machine translation model factors the distribution over possible output sentences Y = {y1, ..., yT } into a chain of conditional probabilities with a leftto-right causal structure:
+p(Y |X; ✓) = T+1Y
+t=1
+p(yt|y0:t 1, x1:T 0 ; ✓), (1)
+where special tokens y0 (hbosi) and yT+1 (heosi) are used to represent the beginning and the end of a target sentence.",2 Background,[0],[0]
+These conditional probabilities are parameterized using a neural network.,2 Background,[0],[0]
+"Typically, an encoder-decoder architecture (Sutskever et al., 2014; Cho et al., 2014; Bahdanau et al., 2015) with a RNN-based decoder is used.",2 Background,[0],[0]
+"More recently, architectures without any recurrent structures (Gehring et al., 2017; Vaswani et al., 2017) have been proposed and shown to speed up training while achieving state-of-the-art performance.
+",2 Background,[0],[0]
+"Low Resource Translation NMT is known to easily over-fit and result in an inferior performance when the training data is limited (Koehn and Knowles, 2017).",2 Background,[0],[0]
+"In general, there are two ways for handling the problem of low resource translation: (1) utilizing the resource of unlabeled monolingual data, and (2) sharing the knowledge between low- and high-resource language pairs.",2 Background,[0],[0]
+"Many research efforts have been spent on incorporating the monolingual corpora into machine translation, such as multi-task learning (Gulcehre et al., 2015; Zhang and Zong, 2016), back-translation (Sennrich et al., 2015), dual learning (He et al., 2016) and unsupervised machine translation with monolingual corpora only for both sides (Artetxe et al., 2017b; Lample et al., 2017; Yang et al., 2018).
+",2 Background,[0],[0]
+"For the second approach, prior researches have worked on methods to exploit the knowledge of auxiliary translations, or even auxiliary tasks.",2 Background,[0],[0]
+"For instance, Cheng et al. (2016); Chen et al. (2017); Lee et al. (2017); Chen et al. (2018) investigate the use of a pivot to build a translation path between two languages even without any directed resource.",2 Background,[0],[0]
+The pivot can be a third language or even an image in multimodal domains.,2 Background,[0],[0]
+"When pivots are
+not easy to obtain, Firat et al. (2016a); Lee et al. (2016); Johnson et al. (2016) have shown that the structure of NMT is suitable for multilingual machine translation.",2 Background,[0],[0]
+"Gu et al. (2018b) also showed that such a multilingual NMT system could improve the performance of low resource translation by using a universal lexical representation to share embedding information across languages.
+",2 Background,[0],[0]
+"All the previous work for multilingual NMT assume the joint training of multiple high-resource languages naturally results in a universal space (for both the input representation and the model) which, however, is not necessarily true, especially for very low resource cases.
+",2 Background,[0.9501730700055744],"['Available for dozens of languages, each dataset contains 64-dimension embeddings for the 100,000 most frequent words in a language’s training corpus (of variable size), as well as an UNK embedding to be used for OOV words.']"
+"Meta Learning In the machine learning community, meta-learning, or learning-to-learn, has recently received interests.",2 Background,[0],[0]
+Meta-learning tries to solve the problem of “fast adaptation on new training data.”,2 Background,[0],[0]
+"One of the most successful applications of meta-learning has been on few-shot (or oneshot) learning (Lake et al., 2015), where a neural network is trained to readily learn to classify inputs based on only one or a few training examples.",2 Background,[0],[0]
+"There are two categories of meta-learning:
+1.",2 Background,[0],[0]
+"learning a meta-policy for updating model parameters (see, e.g., Andrychowicz et al., 2016; Ha et al., 2016a; Mishra et al., 2017)
+2.",2 Background,[0],[0]
+"learning a good parameter initialization for fast adaptation (see, e.g., Finn et al., 2017; Vinyals et al., 2016; Snell et al., 2017).
+",2 Background,[0],[0]
+"In this paper, we propose to use a meta-learning algorithm for low-resource neural machine translation based on the second category.",2 Background,[0],[0]
+"More specifically, we extend the idea of model-agnostic metalearning (MAML, Finn et al., 2017) in the multilingual scenario.",2 Background,[0],[0]
+"The underlying idea of MAML is to use a set of source tasks T 1, . . .",3 Meta Learning for Low-Resource Neural Machine Translation,[0],[0]
+", T K to find the initialization of parameters ✓0 from which learning a target task T 0 would require only a small number of training examples.",3 Meta Learning for Low-Resource Neural Machine Translation,[0],[0]
+"In the context of machine translation, this amounts to using many high-resource language pairs to find good initial parameters and training a new translation model on a low-resource language starting from the found initial parame-
+ters.",3 Meta Learning for Low-Resource Neural Machine Translation,[0],[0]
+"This process can be understood as
+✓⇤ = Learn(T 0;MetaLearn(T 1, . . .",3 Meta Learning for Low-Resource Neural Machine Translation,[0],[0]
+", T K)).
+",3 Meta Learning for Low-Resource Neural Machine Translation,[0],[0]
+"That is, we meta-learn the initialization from auxiliary tasks and continue to learn the target task.",3 Meta Learning for Low-Resource Neural Machine Translation,[0],[0]
+We refer the proposed meta-learning method for NMT to MetaNMT.,3 Meta Learning for Low-Resource Neural Machine Translation,[0],[0]
+See Fig. 1 for the overall illustration.,3 Meta Learning for Low-Resource Neural Machine Translation,[0],[0]
+"Given any initial parameters ✓0 (which can be either random or meta-learned),
+the prior distribution of the parameters of a desired NMT model can be defined as an isotropic Guassian:
+✓i ⇠ N (✓0i , 1/ ),
+where 1/ is a variance.",3.1 Learn: language-specific learning,[0],[0]
+"With this prior distribution, we formulate the language-specific learning process Learn(DT ; ✓0) as maximizing the logposterior of the model parameters given data DT :
+Learn(DT ; ✓0) = argmax ✓ LDT (✓)
+= argmax
+✓
+X
+(X,Y )2DT
+log p(Y |X, ✓) k✓ ✓0k2,
+where we assume p(X|✓) to be uniform.",3.1 Learn: language-specific learning,[0],[0]
+The first term above corresponds to the maximum likelihood criterion often used for training a usual NMT system.,3.1 Learn: language-specific learning,[0],[0]
+"The second term discourages the newly learned model from deviating too much from the initial parameters, alleviating the issue of overfitting when there is not enough training data.",3.1 Learn: language-specific learning,[0],[0]
+"In practice, we solve the problem above by maximizing the first term with gradient-based optimization and early-stopping after only a few update steps.
+",3.1 Learn: language-specific learning,[0],[0]
+"Thus, in the low-resource scenario, finding a good initialization ✓0 strongly correlates the final performance of the resulting model.",3.1 Learn: language-specific learning,[0],[0]
+"We find the initialization ✓0 by repeatedly simulating low-resource translation scenarios using auxiliary, high-resource language pairs.",3.2 MetaLearn,[0],[0]
+"Following Finn et al. (2017), we achieve this goal by defining the meta-objective function as
+L(✓) =EkEDT k ,D0T k (2)2
+64 X
+(X,Y )2D0 T k
+log p(Y |X;Learn(DT k ; ✓))
+3
+75 ,
+where k ⇠ U({1, . . .",3.2 MetaLearn,[0],[0]
+",K}) refers to one metalearning episode, and DT , D0T follow the uniform distribution over T ’s data.
+",3.2 MetaLearn,[0],[0]
+"We maximize the meta-objective function using stochastic approximation (Robbins and Monro, 1951) with gradient descent.",3.2 MetaLearn,[0],[0]
+"For each episode, we uniformly sample one source task at random, T k.",3.2 MetaLearn,[0],[0]
+"We then sample two subsets of training examples independently from the chosen task, DT k and D0T k .",3.2 MetaLearn,[0],[0]
+We use the former to simulate languagespecific learning and the latter to evaluate its outcome.,3.2 MetaLearn,[0],[0]
+"Assuming a single gradient step is taken only the with learning rate ⌘, the simulation is:
+✓0k = Learn(DT k ;",3.2 MetaLearn,[0],[0]
+✓) =,3.2 MetaLearn,[0],[0]
+"✓ ⌘r✓LDT k (✓).
+",3.2 MetaLearn,[0],[0]
+"Once the simulation of learning is done, we evaluate the updated parameters ✓0k on D 0 T k , The gradient computed from this evaluation, which we refer to as meta-gradient, is used to update the
+meta model ✓.",3.2 MetaLearn,[0],[0]
+"It is possible to aggregate multiple episodes of source tasks before updating ✓:
+✓ ✓ ⌘0 X
+k
+r✓LD 0 T k (✓0k),
+where ⌘0 is the meta learning rate.",3.2 MetaLearn,[0],[0]
+"Unlike a usual learning scenario, the resulting model ✓0 from this meta-learning procedure is not necessarily a good model on its own.",3.2 MetaLearn,[0],[0]
+It is however a good starting point for training a good model using only a few steps of learning.,3.2 MetaLearn,[0],[0]
+"In the context of machine translation, this procedure can be understood as finding the initialization of a neural machine translation system that could quickly adapt to a new language pair by simulating such a fast adaptation scenario using many high-resource language pairs.
+",3.2 MetaLearn,[0],[0]
+"Meta-Gradient We use the following approximation property
+H(x)v ⇡ r(x+ ⌫v) r(x) ⌫
+to approximate the meta-gradient:1
+r✓LD 0",3.2 MetaLearn,[0],[0]
+(✓0),3.2 MetaLearn,[0],[0]
+= r✓0LD 0,3.2 MetaLearn,[0],[0]
+"(✓0)r✓(✓ ⌘r✓LD(✓))
+",3.2 MetaLearn,[0],[0]
+= r✓0LD 0,3.2 MetaLearn,[0],[0]
+(✓0) ⌘,3.2 MetaLearn,[0],[0]
+r✓0LD 0,3.2 MetaLearn,[0],[0]
+"(✓0)H✓(LD(✓))
+⇡ r✓0LD 0",3.2 MetaLearn,[0],[0]
+"(✓0) ⌘
+⌫
+ r✓LD(✓)
+",3.2 MetaLearn,[0],[0]
+"✓̂ r✓LD(✓) ✓ ,
+where ⌫ is a small constant and
+ˆ✓ = ✓ + ⌫r",3.2 MetaLearn,[0],[0]
+✓0LD 0,3.2 MetaLearn,[0],[0]
+"(✓0).
+",3.2 MetaLearn,[0],[0]
+"In practice, we find that it is also possible to ignore the second-order term, ending up with the following simplified update rule:
+r✓LD 0 (✓0) ⇡ r✓0LD 0",3.2 MetaLearn,[0],[0]
+(✓0).,3.2 MetaLearn,[0],[0]
+"(3)
+1We omit the subscript k for simplicity.
+",3.2 MetaLearn,[0],[0]
+"Related Work: Multilingual Transfer Learning The proposed MetaNMT differs from the existing framework of multilingual translation (Lee et al., 2016; Johnson et al., 2016; Gu et al., 2018b) or transfer learning (Zoph et al., 2016).",3.2 MetaLearn,[0],[0]
+"The latter can be thought of as solving the following problem:
+max ✓ Lmulti(✓) =",3.2 MetaLearn,[0],[0]
+"Ek
+2 4 X
+(X,Y )2Dk
+log p(Y |X; ✓)
+3
+5 ,
+where Dk is the training set of the k-th task, or language pair.",3.2 MetaLearn,[0],[0]
+"The target low-resource language pair could either be a part of joint training or be trained separately starting from the solution ✓0 found from solving the above problem.
+",3.2 MetaLearn,[0],[0]
+"The major difference between the proposed MetaNMT and these multilingual transfer approaches is that the latter do not consider how learning happens with the target, low-resource language pair.",3.2 MetaLearn,[0],[0]
+The former explicitly incorporates the learning process within the framework by simulating it repeatedly in Eq.,3.2 MetaLearn,[0],[0]
+(2).,3.2 MetaLearn,[0],[0]
+"As we will see later in the experiments, this results in a substantial gap in the final performance on the low-resource task.
+",3.2 MetaLearn,[0],[0]
+"Illustration In Fig. 2, we contrast transfer learning, multilingual learning and meta-learning using three source language pairs (Fr-En, Es-En and Pt-En) and two target pairs (Ro-En and Lv-En).",3.2 MetaLearn,[0],[0]
+"Transfer learning trains an NMT system specifically for a source language pair (Es-En) and finetunes the system for each target language pair (RoEn, Lv-En).",3.2 MetaLearn,[0],[0]
+"Multilingual learning often trains a single NMT system that can handle many different language pairs (Fr-En, Pt-En, Es-En), which may or may not include the target pairs (Ro-En, LvEn).",3.2 MetaLearn,[0],[0]
+"If not, it finetunes the system for each target pair, similarly to transfer learning.",3.2 MetaLearn,[0],[0]
+Both of these however aim at directly solving the source tasks.,3.2 MetaLearn,[0],[0]
+"On the other hand, meta-learning trains the NMT system to be useful for fine-tuning on various tasks including the source and target tasks.",3.2 MetaLearn,[0],[0]
+"This is done by repeatedly simulating the learning process on
+low-resource languages using many high-resource language pairs (Fr-En, Pt-En, Es-En).",3.2 MetaLearn,[0],[0]
+I/O mismatch across language pairs One major challenge that limits applying meta-learning for low resource machine translation is that the approach outlined above assumes the input and output spaces are shared across all the source and target tasks.,3.3 Unified Lexical Representation,[0],[0]
+"This, however, does not apply to machine translation in general due to the vocabulary mismatch across different languages.",3.3 Unified Lexical Representation,[0],[0]
+"In multilingual translation, this issue has been tackled by using a vocabulary of sub-words (Sennrich et al., 2015) or characters (Lee et al., 2016) shared across multiple languages.",3.3 Unified Lexical Representation,[0],[0]
+"This surface-level sharing is however limited, as it cannot be applied to languages exhibiting distinct orthography (e.g., IndoEuroepan languages vs. Korean.)
+",3.3 Unified Lexical Representation,[0],[0]
+"Universal Lexical Representation (ULR) We tackle this issue by dynamically building a vocabulary specific to each language using a keyvalue memory network (Miller et al., 2016; Gulcehre et al., 2018), as was done successfully for low-resource machine translation recently by Gu et al. (2018b).",3.3 Unified Lexical Representation,[0],[0]
+"We start with multilingual word embedding matrices ✏kquery 2 R|Vk|⇥d pretrained on large monolingual corpora, where Vk is the vocabulary of the k-th language.",3.3 Unified Lexical Representation,[0],[0]
+"These embedding vectors can be obtained with small dictionaries of seed word pairs (Artetxe et al., 2017a; Smith et al., 2017) or in a fully unsupervised manner (Zhang et al., 2017; Conneau et al., 2018).",3.3 Unified Lexical Representation,[0],[0]
+"We take one of these languages k0 to build universal lexical representation consisting of a universal embedding matrix ✏u 2 RM⇥d and a corresponding key matrix ✏key 2 RM⇥d, where M < |V 0k|.",3.3 Unified Lexical Representation,[0],[0]
+Both ✏kquery and ✏key are fixed during meta-learning.,3.3 Unified Lexical Representation,[0],[0]
+"We then compute the language-specific embedding of token x from the language k as the convex sum of the universal embedding vectors by
+✏0[x] = MX
+i=1
+↵i✏u[i],
+where ↵i / exp 1⌧ ✏key[i]",3.3 Unified Lexical Representation,[0],[0]
+>A✏kquery[x] and ⌧ is set to 0.05.,3.3 Unified Lexical Representation,[0],[0]
+"This approach allows us to handle languages with different vocabularies using a fixed number of shared parameters (✏u, ✏key and A.)
+",3.3 Unified Lexical Representation,[0],[0]
+"Learning of ULR It is not desirable to update the universal embedding matrix ✏u when fine-
+tuning on a small corpus which contains a limited set of unique tokens in the target language, as it could adversely influence the other tokens’ embedding vectors.",3.3 Unified Lexical Representation,[0],[0]
+"We thus estimate the change to each embedding vector induced by languagespecific learning by a separate parameter ✏k[x]:
+✏k[x] = ✏0[x] + ✏k[x].
+",3.3 Unified Lexical Representation,[0],[0]
+"During language-specific learning, the ULR ✏0[x] is held constant, while only ✏k[x] is updated, starting from an all-zero vector.",3.3 Unified Lexical Representation,[0],[0]
+"On the other hand, we hold ✏k[x]’s constant while updating ✏u and A during the meta-learning stage.",3.3 Unified Lexical Representation,[0],[0]
+"Target Tasks We show the effectiveness of the proposed meta-learning method for low resource NMT with extremely limited training examples on five diverse target languages: Romanian (Ro) from WMT’16,2 Latvian (Lv), Finnish (Fi), Turkish (Tr) from WMT’17,3 and Korean (Ko) from Korean Parallel Dataset.4 We use the officially provided train, dev and test splits for all these languages.",4.1 Dataset,[0],[0]
+The statistics of these languages are presented in Table 1.,4.1 Dataset,[0],[0]
+"We simulate the low-resource translation scenarios by randomly sub-sampling the training set with different sizes.
+",4.1 Dataset,[0],[0]
+"Source Tasks We use the following languages from Europarl5: Bulgarian (Bg), Czech (Cs), Danish (Da), German (De), Greek (El), Spanish (Es), Estonian (Et), French (Fr), Hungarian (Hu), Italian (It), Lithuanian (Lt), Dutch (Nl), Polish (Pl), Portuguese (Pt), Slovak (Sk), Slovene (Sl) and
+2 http://www.statmt.org/wmt16/translation-task.html 3 http://www.statmt.org/wmt17/translation-task.html 4 https://sites.google.com/site/koreanparalleldata/ 5 http://www.statmt.org/europarl/
+Swedish (Sv), in addition to Russian (Ru)6 to learn the intilization for fine-tuning.",4.1 Dataset,[0],[0]
+"In our experiments, different combinations of source tasks are explored to see the effects from the source tasks.
+",4.1 Dataset,[0],[0]
+Validation We pick either Ro-En or Lv-En as a validation set for meta-learning and test the generalization capability on the remaining target tasks.,4.1 Dataset,[0],[0]
+"This allows us to study the strict form of metalearning, in which target tasks are unknown during both training and model selection.
+",4.1 Dataset,[0],[0]
+"Preprocessing and ULR Initialization As described in §3.3, we initialize the query embedding vectors ✏kquery of all the languages.",4.1 Dataset,[0],[0]
+"For each language, we use the monolingual corpora built from Wikipedia7 and the parallel corpus.",4.1 Dataset,[0],[0]
+"The concatenated corpus is first tokenized and segmented using byte-pair encoding (BPE, Sennrich et al., 2016), resulting in 40, 000 subwords for each language.",4.1 Dataset,[0],[0]
+"We then estimate word vectors using fastText (Bojanowski et al., 2016) and align them across all the languages in an unsupervised way
+6 A subsample of approximately 2M pairs from WMT’17.",4.1 Dataset,[0],[0]
+"7 We use the most recent Wikipedia dump (2018.5) from
+https://dumps.wikimedia.org/backup-index.html.
+using MUSE (Conneau et al., 2018) to get multilingual word vectors.",4.1 Dataset,[0],[0]
+"We use the multilingual word vectors of the 20,000 most frequent words in English to form the universal embedding matrix ✏u.",4.1 Dataset,[0],[0]
+"Model We utilize the recently proposed Transformer (Vaswani et al., 2017) as an underlying NMT system.",4.2 Model and Learning,[0],[0]
+"We implement Transformer in this paper based on (Gu et al., 2018a)8 and modify it to use the universal lexical representation from §3.3.",4.2 Model and Learning,[0],[0]
+"We use the default set of hyperparameters (dmodel = dhidden = 512, nlayer = 6, nhead = 8, nbatch = 4000, twarmup = 16000) for all the language pairs and across all the experimental settings.",4.2 Model and Learning,[0],[0]
+"We refer the readers to (Vaswani et al., 2017; Gu et al., 2018a) for the details of the model.",4.2 Model and Learning,[0],[0]
+"However, since the proposed metalearning method is model-agnostic, it can be easily extended to any other NMT architectures, e.g. RNN-based sequence-to-sequence models with attention (Bahdanau et al., 2015).
+",4.2 Model and Learning,[0],[0]
+8,4.2 Model and Learning,[0],[0]
+"https://github.com/salesforce/nonauto-nmt
+Learning We meta-learn using various sets of source languages to investigate the effect of source task choice.",4.2 Model and Learning,[0],[0]
+"For each episode, by default, we use a single gradient step of language-specific learning with Adam (Kingma and Ba, 2014) per computing the meta-gradient, which is computed by the first-order approximation in Eq.",4.2 Model and Learning,[0],[0]
+"(3).
+",4.2 Model and Learning,[0],[0]
+"For each target task, we sample training examples to form a low-resource task.",4.2 Model and Learning,[0],[0]
+"We build tasks of 4k, 16k, 40k and 160k English tokens for each language.",4.2 Model and Learning,[0],[0]
+We randomly sample the training set five times for each experiment and report the average score and its standard deviation.,4.2 Model and Learning,[0],[0]
+"Each fine-tuning is done on a training set, early-stopped on a validation set and evaluated on a test set.",4.2 Model and Learning,[0],[0]
+"In default without notation, datasets of 16k tokens are used.
+",4.2 Model and Learning,[0],[0]
+"Fine-tuning Strategies The transformer consists of three modules; embedding, encoder and decoder.",4.2 Model and Learning,[0],[0]
+"We update all three modules during metalearning, but during fine-tuning, we can selectively tune only a subset of these modules.",4.2 Model and Learning,[0],[0]
+"Following (Zoph et al., 2016), we consider three fine-tuning
+strategies; (1) fine-tuning all the modules (all), (2) fine-tuning the embedding and encoder, but freezing the parameters of the decoder (emb+enc) and (3) fine-tuning the embedding only (emb).",4.2 Model and Learning,[0],[0]
+vs. Multilingual Transfer Learning We metalearn the initial models on all the source tasks using either Ro-En or Lv-En as a validation task.,5 Results,[0],[0]
+We also train the initial models to be multilingual translation systems.,5 Results,[0],[0]
+"We fine-tune them using the four target tasks (Ro-En, Lv-En, Fi-En and Tr-En; 16k tokens each) and compare the proposed meta-learning strategy and the multilingual, transfer learning strategy.",5 Results,[0],[0]
+"As presented in Fig. 3, the proposed learning approach significantly outperforms the multilingual, transfer learning strategy across all the target tasks regardless of which target task was used for early stopping.",5 Results,[0],[0]
+We also notice that the emb+enc strategy is most effective for both meta-learning and transfer learning approaches.,5 Results,[0],[0]
+"With the proposed meta-learning and emb+enc fine-tuning, the final NMT systems trained using only a fraction of all available training examples achieve 2/3 (Ro-En) and 1/2 (Lv-En, Fi-En and Tr-En) of the BLEU score achieved by the models trained with full training sets.
+",5 Results,[0],[0]
+"vs. Statistical Machine Translation We also test the same Ro-En datasets with 16, 000 target tokens using the default setting of Phrase-based MT (Moses) with the dev set for adjusting the parameters and the test set for calculating the final performance.",5 Results,[0],[0]
+"We obtain 4.79(±0.234) BLEU point, which is higher than the standard NMT performance (0 BLEU).",5 Results,[0],[0]
+"It is however still lower than both the multi-NMT and meta-NMT.
+",5 Results,[0],[0]
+"Impact of Validation Tasks Similarly to training any other neural network, meta-learning still requires early-stopping to avoid overfitting to a
+specific set of source tasks.",5 Results,[0],[0]
+"In doing so, we observe that the choice of a validation task has nonnegligible impact on the final performance.",5 Results,[0],[0]
+"For instance, as shown in Fig. 3, Fi-En benefits more when Ro-En is used for validation, while the opposite happens with Tr-En.",5 Results,[0],[0]
+"The relationship between the task similarity and the impact of a validation task must be investigated further in the future.
+",5 Results,[0],[0]
+"Training Set Size We vary the size of the target task’s training set and compare the proposed meta-learning strategy and multilingual, transfer learning strategy.",5 Results,[0],[0]
+We use the emb+enc fine-tuning on Ro-En and Fi-En.,5 Results,[0],[0]
+Fig. 4 demonstrates that the meta-learning approach is more robust to the drop in the size of the target task’s training set.,5 Results,[0],[0]
+"The gap between the meta-learning and transfer learning grows as the size shrinks, confirming the effectiveness of the proposed approach on extremely lowresource language pairs.
+",5 Results,[0],[0]
+"Impact of Source Tasks In Table 2, we present the results on all five target tasks obtained while varying the source task set.",5 Results,[0],[0]
+We first see that it is always beneficial to use more source tasks.,5 Results,[0],[0]
+"Although the impact of adding more source tasks varies from one language to another, there is up to 2⇥ improvement going from one source task to 18 source tasks (Lv-En, Fi-En, Tr-En and Ko-En).",5 Results,[0],[0]
+"The same trend can be observed even without any fine-tuning (i.e., unsupervised translation, (Lample et al., 2017; Artetxe et al., 2017b)).",5 Results,[0],[0]
+"In addition, the choice of source languages has different implications for different target languages.",5 Results,[0],[0]
+"For instance, Ro-En benefits more from {Es, Fr, It, Pt} than from {De, Ru}, while the opposite effect is observed with all the other target tasks.
+",5 Results,[0],[0]
+Training Curves,5 Results,[0],[0]
+The benefit of meta-learning over multilingual translation is clearly demonstrated when we look at the training curves in Fig. 5.,5 Results,[0],[0]
+"With the multilingual, transfer learning ap-
+",5 Results,[0],[0]
+"proach, we observe that training rapidly saturates and eventually degrades, as the model overfits to the source tasks.",5 Results,[0],[0]
+MetaNMT,5 Results,[0],[0]
+"on the other hand continues to improve and never degrades, as the metaobjective ensures that the model is adequate for fine-tuning on target tasks rather than for solving the source tasks.
+",5 Results,[0],[0]
+Sample Translations We present some sample translations from the tested models in Table 3.,5 Results,[0],[0]
+Inspecting these examples provides the insight into the proposed meta-learning algorithm.,5 Results,[0],[0]
+"For instance, we observe that the meta-learned model without any fine-tuning produces a word-by-word translation in the first example (Tr-En), which is due to the successful use of the universal lexcial representation and the meta-learned initialization.",5 Results,[0],[0]
+"The system however cannot reorder tokens from Turkish to English, as it has not seen any training example of Tr-En.",5 Results,[0],[0]
+"After seeing around 600 sentence pairs (16K English tokens), the model rapidly learns to correctly reorder tokens to form a better translation.",5 Results,[0],[0]
+A similar phenomenon is observed in the Ko-En example.,5 Results,[0],[0]
+These cases could be found across different language pairs.,5 Results,[0],[0]
+"In this paper, we proposed a meta-learning algorithm for low-resource neural machine translation that exploits the availability of high-resource languages pairs.",6 Conclusion,[0],[0]
+"We based the proposed algorithm on the recently proposed model-agnostic metalearning and adapted it to work with multiple languages that do not share a common vocabulary using the technique of universal lexcal representation, resulting in MetaNMT.",6 Conclusion,[0],[0]
+"Our extensive evaluation, using 18 high-resource source tasks and 5 low-resource target tasks, has shown that the proposed MetaNMT significantly outperforms the existing approach of multilingual, transfer learning in low-resource neural machine translation across all the language pairs considered.
+",6 Conclusion,[0],[0]
+The proposed approach opens new opportunities for neural machine translation.,6 Conclusion,[0],[0]
+"First, it is a principled framework for incorporating various extra sources of data, such as source- and targetside monolingual corpora.",6 Conclusion,[0],[0]
+"Second, it is a generic framework that can easily accommodate existing and future neural machine translation systems.",6 Conclusion,[0],[0]
+This research was supported in part by the Facebook Low Resource Neural Machine Translation Award.,Acknowledgement,[0],[0]
+This work was also partly supported by Samsung Advanced Institute of Technology (Next Generation Deep Learning: from pattern recognition to AI) and Samsung Electronics (Improving Deep Learning using Latent Structure).,Acknowledgement,[0],[0]
+"KC thanks support by eBay, TenCent, NVIDIA and CIFAR.",Acknowledgement,[0],[0]
+"In this paper, we propose to extend the recently introduced model-agnostic meta-learning algorithm (MAML, Finn et al., 2017) for lowresource neural machine translation (NMT).",abstractText,[0],[0]
+"We frame low-resource translation as a metalearning problem, and we learn to adapt to low-resource languages based on multilingual high-resource language tasks.",abstractText,[0],[0]
+"We use the universal lexical representation (Gu et al., 2018b) to overcome the input-output mismatch across different languages.",abstractText,[0],[0]
+"We evaluate the proposed meta-learning strategy using eighteen European languages (Bg, Cs, Da, De, El, Es, Et, Fr, Hu, It, Lt, Nl, Pl, Pt, Sk, Sl, Sv and Ru) as source tasks and five diverse languages (Ro, Lv, Fi, Tr and Ko) as target tasks.",abstractText,[0],[0]
+"We show that the proposed approach significantly outperforms the multilingual, transfer learning based approach (Zoph et al., 2016) and enables us to train a competitive NMT system with only a fraction of training examples.",abstractText,[0],[0]
+"For instance, the proposed approach can achieve as high as 22.04 BLEU on Romanian-English WMT’16 by seeing only 16,000 translated words (⇠ 600 parallel sentences).",abstractText,[0],[0]
+Meta-Learning for Low-Resource Neural Machine Translation,title,[0],[0]
+"Proceedings of NAACL-HLT 2018, pages 375–385 New Orleans, Louisiana, June 1 - 6, 2018. c©2018 Association for Computational Linguistics",text,[0],[0]
+"Online platforms have revolutionized the way individuals collect and share information (O’Connor et al., 2010; Lee and Ma, 2012; Bakshy et al., 2015), but the vast bulk of online content is irrelevant or unpalatable to any given individual.",1 Introduction,[0],[0]
+"A user interested in political discussion, for instance, might prefer content concerning a specific candidate or issue, and only then if discussed in a positive light without controversy (Adamic and Glance, 2005; Bakshy et al., 2015).
+",1 Introduction,[0],[0]
+"How do individuals facing such large quantities of superfluous material select which conversations to engage in, and how might we better algorithmically recommend conversations suited to individual users?",1 Introduction,[0],[0]
+We approach this problem from a microblog conversation recommendation framework.,1 Introduction,[0.9736015224774274],['We approach this challenge from a quasigenerative perspective.']
+"Where prior work has focused on the content of individual posts for recommendation (Chen
+et al., 2012; Yan et al., 2012; Vosecky et al., 2014; He and Tan, 2015), we examine the entire history and context of a conversation, including both topical content and discourse modes such as agreement, question-asking, argument and other dialogue acts (Ritter et al.,",1 Introduction,[0],[0]
+"2010).1 And where Backstrom et al. (2013) leveraged conversation reply structure (such as previous user engagement), their model is unable to predict first entry into new conversations, while ours is able to predict both new
+1In this paper, discourse mode refers to a certain type of dialogue act, e.g., agreement or argument.",1 Introduction,[0],[0]
+"The discourse structure of a conversation means some combination (or a probability distribution) of discourse modes.
+375
+and repeated entry into conversations based on a combination of topical and discourse features.
+",1 Introduction,[0],[0]
+"To illustrate the interplay between topics and discourse, Figure 1 displays two snippets of conversations on Twitter collected during the 2016 United States presidential election.",1 Introduction,[0],[0]
+User U1 participates in both conversations.,1 Introduction,[0],[0]
+"The first conversation is centered around Clinton, and U1, who is more typically involved with conversations about candidate Sanders, does not return.",1 Introduction,[0],[0]
+"In the second conversation, however, U1 is involved in a heated back-and-forth debate, and thus is drawn back to a conversation that they may otherwise have abandoned but for their enjoyment of adversarial discourse.
+",1 Introduction,[0],[0]
+"Effective conversation prediction and recommendation requires an understanding of both user interests and discourse behaviors, such as agreement, disagreement, inquiry, backchanneling, and emotional reactions.",1 Introduction,[0],[0]
+"However, acquiring manual labels for both is a time-consuming process and hard to scale for new datasets.",1 Introduction,[0],[0]
+"We instead propose a unified statistical learning framework for conversation recommendation, which jointly learns (1) hidden factors that reflect user interests based on conversation history, and (2) topics and discourse modes in ongoing conversations, as discovered by a novel probabilistic latent variable model.",1 Introduction,[0],[0]
+"Our model is built on the success of collaborative filtering (CF) in recommendation systems, where latent dimensions of product ratings or movie reviews are extracted to better capture user preferences (Linden et al., 2003; Salakhutdinov and Mnih, 2008; Wang and Blei, 2011; McAuley and Leskovec, 2013).",1 Introduction,[0],[0]
+"To the best of our knowledge, we are the first to model both topics and discourse modes as part of a CF framework and apply it to microblog conversation recommendation.2
+Experimental results on two Twitter conversation datasets show that our proposed model yields significantly better performance than state-of-theart post-level recommendation systems.",1 Introduction,[0],[0]
+"For example, by leveraging both topical content and discourse structure, our model achieves a mean average precision (MAP) of 0.76 on conversations about the U.S. presidential election, compared with 0.70 by McAuley and Leskovec (2013), which only considers topics.",1 Introduction,[0],[0]
+"We further con-
+2To ensure the general applicability of our approach to domains lacking such information, we do not utilize external features such as network structure, but it may certainly be added in future, more narrowly targeted applications.
+ducted detailed analysis on the latent topics and discourse modes and find that our model can discover reasonable topic and discourse representations, which play an important role in characterizing reply behaviors.",1 Introduction,[0],[0]
+"Finally, we also provide a pilot study on recommendation for first time replies, which shows that our model outperforms comparable recommendation systems.
+",1 Introduction,[0],[0]
+The rest of this paper is structured as follows.,1 Introduction,[0],[0]
+The related work is discussed in Section 2.,1 Introduction,[0],[0]
+We then present our microblog conversation recommendation model in Section 3.,1 Introduction,[0],[0]
+The experimental setup and results are described in Sections 4 and 5.,1 Introduction,[0],[0]
+"Finally, we conclude in Section 6.",1 Introduction,[0],[0]
+"Social media has attracted increasing attention in digital communication research (Agichtein et al., 2008; Kwak et al., 2010; Wu et al., 2011).",2 Related Work,[0],[0]
+"The problem studied here is closely related to work on recommendation and response prediction in microblogs (Artzi et al., 2012; Hong et al., 2013), where the goal is to predict whether a user will share or reply to a given post.",2 Related Work,[0],[0]
+"Existing methods focus on measuring features that reflect personalized user interests, including topics (Hong et al., 2013) and network structures (Pan et al., 2013; He and Tan, 2015).",2 Related Work,[0],[0]
+"These features have been investigated under a learning to rank framework (Duan et al., 2010; Artzi et al., 2012), graph ranking models (Yan et al., 2012; Feng and Wang, 2013; Alawad et al., 2016), and neural network-based representation learning methods (Yu et al., 2016).
+",2 Related Work,[0],[0]
+"Distinguishing from prior work that focuses on post-level recommendation, we tackle the challenges of predicting user reply behaviors at the conversation-level.",2 Related Work,[0],[0]
+"In addition, our model not only captures latent factors such as the topical interests of users, but also leverages the automatically learned discourse structure.",2 Related Work,[0],[0]
+"Much of the previous work on discourse structure and dialogue acts has relied on labeled data (Jurafsky et al., 1997; Stolcke et al., 2000), while unsupervised approaches have not been applied to the problem of conversation recommendation (Woszczyna and Waibel, 1994; Crook et al., 2009; Ritter et al., 2010; Joty et al., 2011).
+",2 Related Work,[0],[0]
+"Our work is also in line with conversation modeling for social media discussions (Ritter et al., 2010; Budak and Agrawal, 2013; Louis and Cohen, 2015; Cheng et al., 2017).",2 Related Work,[0],[0]
+"Topic modeling
+has been employed to identify conversation content on Twitter (Ritter et al., 2010).",2 Related Work,[0],[0]
+"In this work, we propose a probabilistic model to capture both topics and discourse modes as latent variables.",2 Related Work,[0],[0]
+"A further line of work studies the reposting and reply structure of conversations (Gómez et al., 2011; Laniado et al., 2011; Backstrom et al., 2013; Budak and Agrawal, 2013).",2 Related Work,[0],[0]
+"But none of this work distinguishes the rich discourse functions of replies, which is modeled and exploited in our work.",2 Related Work,[0],[0]
+Our proposed microblog conversation recommendation framework is based on collaborative filtering and a novel probabilistic graphical model.,3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"Concretely, our objective function takes the form:
+minL+ µ ·NLL(C |Θ) (1)
+",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+This function encodes two types of information.,3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"First, L models user reply preference in a similar fashion to collaborative filtering (CF) (Hu et al., 2008; Pan et al., 2008).",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"It captures topics of interests and discourse structures users are commonly involved (e.g., argumentation), and takes the form of mean square error (MSE) based on user reply history.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"This part is detailed in Section 3.1.
+",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"The second term, NLL(C |Θ), denotes the negative log-likelihood of a set of conversations C, with Θ containing all parameters.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"A probabilistic model is described in Section 3.2 that shows how the topical content and discourse structures of conversations are captured by these latent variables.
+",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+The hyperparameter µ controls the trade-off between the two effects.,3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"`2 regularization is also added for parameters to avoid model overfitting.
+",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"For the rest of this section, we first present the construction of L andNLL(C |Θ) in Sections 3.1 and 3.2.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+We then discuss how these two components can be mutually informed by each other in Section 3.3.,3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"Finally, the generative process and parameter learning are described in Section 3.4.
+3.1 Reply Preference (L) Our user reply preference modeling is built on the success of collaborative filtering (CF) for product ratings.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"However, classic CF problems, such as product recommendation, generally rely on explicit user feedback.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"Unlike user ratings on products, our input lacks explicit feedback from users about negative preferences and nonresponse.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"Therefore, we follow one-class Collaborative Filtering (Hu et al., 2008; Pan et al., 2008),
+which weights positive instances higher during training and is thus suited to our data.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"Formally, for user u and conversation c, we measure reply preference based on the MSE between predicted preference score pu,c and reply history ru,c. ru,c equals 1 if u is in the conversation history; otherwise, it is 0.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"The first term of objective (Eq. 1) takes the following form:
+L = |U|∑
+u=1
+|C|∑
+c=1
+fu,c · (pu,c − ru,c)2 (2)
+where U consists of users {u} and C is a set of conversations {c} in a dataset.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"fu,c is the corresponding weight for a conversation c and a target user u. Intuitively, it has a large value if positive feedback (user replied) is observed.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"Therefore, we adapt the formulation from Pan et al. (2008):
+fu,c = { s if ru,c = 1 (i.e., user replied) 1 if ru,c = 0
+(3)
+where s > 1, an integer hyperparameter to be tuned.
+",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"Inspired by prior models (Koren et al., 2009; McAuley and Leskovec, 2013), we propose the following latent factor model to describe pu,c:
+pu,c = λ · γUu · γCc + (1− λ) ·",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+δUu · δCc,3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"+ bu + bc + a (4)
+γUu and γ C c are K-dimensional latent vectors that encode topic-specific information (where K is the number of latent topics) for users and conversations.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"Specifically, γUu reflects the topical interests of u, with higher value γUu,k indicating greater interest by u in topic k. γCc captures the extents that topics are discussed in conversation c.
+Similarly, D-dimensional vectors δUu and δ C c capture discourse structures in shaping reply behaviors (where D is the number of discourse clusters).",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"δUu reflects the discourse behaviors u prefers, such as u1 often enjoys arguments as in the second conversation of Figure 1, while δCc captures the discourse modes used throughout conversation c. By multiplying user and conversation factors, we can measure the corresponding similarity.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"The predicted score pu,c thereby reflects the tendency for a user u to be involved in conversation c.
+As pointed out by McAuley and Leskovec (2013), these latent vectors often encode hidden factors that are hard to interpret under a CF framework.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"Therefore, in Section 3.2, we present a novel probabilistic model which can extract interpretable topics and discourse modes as word
+distributions.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"We then describe how they can be aligned with the latent vectors of γC and δU .
+",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"Parameter a is an offset parameter, bu and bc are user and conversation biases, and λ ∈",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"[0, 1] serves as the weight for trading offs of topic and discourse factors in reply preference modeling.
+",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+3.2 Corpus Likelihood NLL(C |Θ),3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+Here we present a novel probabilistic model that learns coherent word distributions for latent topics and discourse modes of conversations.,3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"Formally, we assume that each conversation c ∈ C contains Mc messages, and each message m has Nc,m words.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"We distinguish three latent components – discourse, topic, and background – underlying conversations, each with their own type of word distribution.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"At the corpus level, there are K topics represented by word distribution φTk (k = 1, 2, ...,K), while φDd (d = 1, 2, ..., D) represents the D discourse modes embedded in corpus.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"In addition, we add a background word distribution φB to capture general information (e.g., common words), which do not indicate either discourse or topic information.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"φDd , φ T k , and φ
+B are all multinomial word distributions over vocabulary size V .",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"Below describes more details.
+",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+Message-level Modeling.,3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"Our model assigns two types of message-level multinomial variables to each message: zc,m reflects its latent topic and dc,m represents its discourse mode.
+",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+Topic assignments.,3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"Due to the short nature of microblog posts, we assume each message m in conversation c contains only one topic, indexed as zc,m. This strategy has been proven useful to alleviate data sparsity for topic inference (Quan et al., 2015).",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+We further assume messages in the same conversation would focus on similar topics.,3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"We thus draw topic zc,m ∼ θc, where θc denotes the fractions of topics discussed in conversation c.
+Discourse assignments.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"To capture discourse behaviors of u, distribution πu is used to represent the discourse modes in messages posted by u.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"The discourse mode dc,m for message m is then generated from πuc,m , where uc,m is the author of m in c.
+Word-level Modeling.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"We aim to separate discourse, topic, and background information for conversations.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"Therefore, for each word wc,m,n of message m, a ternary switcher xc,m,n ∈ {DISC, TOPIC,BACK} controls word wc,m,n to
+fall into one of the three types: discourse, topic, and background.
+",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+Discourse words (DISC) are indicative of the discourse modes of messages.,3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"When xc,m,n = DISC (i.e., wc,m,n is assigned as a discourse word), word wc,m,n is generated from the discourse word distribution φDdc,m where dc,m is discourse assignment to",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"message m.
+Topic words (TOPIC) describe the topical focus of a conversation.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"When xc,m,n = TOPIC, wc,m,n is assigned as a topic word and generated from φTzc,m – word distribution given topic of m.
+Background words (BACK) capture the general information that is not related to discourse or topic.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"When word wc,m,n is assigned as a background word (xc,m,n = BACK), it is drawn from background distribution φB .
+",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"Switching among Topic, Discourse, and Background.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"We further assume the word type switcher xc,m,n is sampled from a multinomial distribution which depends on the current discourse mode dc,m. The intuition is that messages of different discourse modes may show different distributions of the three word types.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"For instance, a statement message may contain more content words than a rhetorical question.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"Specifically, xc,m,n ∼ Multi(τdc,m), where τd is a 3-dimension stochastic vector that expresses the appearing probabilities of three kinds of words (DISC, TOPIC, BACK), when the discourse assignment is d. Stop words and punctuations are forced to be labeled as discourse or background.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"By explicitly distinguishing different types of words with switcher xc,m,n, we can thus separate word distributions that reflect discourse, topic, and background information.
+",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+Likelihood.,3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"Based on the message-level and the word-level generation process, the probability of observing words in the given corpus is:
+Pr(C |θ,π,φ, τ , z,d,x)
+=
+C∏
+c=1
+Mc∏
+m=1
+θc,zc,mπuc,m,dc,m
+× ∏
+xc,m,n=BACK
+τdc,m,BACKφ B wc,m,n
+× ∏
+xc,m,n=DISC
+τdc,m,DISCφ D dc,m,wc,m,n
+× ∏
+xc,m,n=TOPIC
+τdc,m,TOPICφ T zc,m,wc,m,n
+(5)
+",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"And we use negative log likelihood to model corpus likelihood effect in Eq. 1, i.e., NLL(C |Θ) =
+− log(Pr(C |Θ), where parameters set Θ = {θ,π,φ, τ , z,d,x}.",3 The Joint Model of Topic and Discourse for Recommendation,[0],[0]
+"Latent Variables
+As mentioned above, the hidden factors discovered in Section 3.1 lack interpretability, which can be boosted by the learned latent topics and discourse modes in Section 3.2.",3.3 Mutually Informed User Preference and,[0],[0]
+"However, it is nontrivial to link the topic-related parameters of γCc to the conversation topic distributions of θc, since the former takes real values from −∞ to +∞ while the latter is a stochastic vector.",3.3 Mutually Informed User Preference and,[0.9644337515885578],"['By backpropagating from this loss, it is possible to obtain local gradients with respect to the parameters of the LSTMs, the character embeddings, and the output model.']"
+"Therefore, we follow the strategy from McAuley and Leskovec (2013) to apply a softmax function over γCc :
+θc,k = exp(κT γCc,k)∑K
+k′=1 exp(κ T γCc,k′)
+(6)
+",3.3 Mutually Informed User Preference and,[0],[0]
+"We further assume that the discourse mode preference by users, δUu , can also be informed by the discourse mode distribution captured by πu, i.e., a user who enjoys arguments may be willing to participate another.",3.3 Mutually Informed User Preference and,[0],[0]
+"So similarly, we define:
+πu,d = exp(κDδUu,d)∑D
+d′=1 exp(κ DδUu,d′)
+(7)
+where κT and κD are learnable parameters that control the “peakiness” of the transformation.",3.3 Mutually Informed User Preference and,[0],[0]
+"For example, a larger κT indicates a more focused conversation, while a smaller κT means users discuss diverse topics.
+",3.3 Mutually Informed User Preference and,[0],[0]
+"Finally, softmax transformation is also applied to φTk , φ D d , φ
+B , and τd, as done in McAuley and Leskovec (2013), with additional parameters ψTk , ψDd , ψ
+B , and χd (as shown in Figure 2).",3.3 Mutually Informed User Preference and,[0],[0]
+This is to ensure that the distributions φ∗∗ and τd are stochastic vectors.,3.3 Mutually Informed User Preference and,[0],[0]
+"In doing so, these distributions can be learned via optimizing ψ∗∗ and χd, which take any value and thus ensure that the cost function in Eq. 1 is optimized without considering any parameter constraints.",3.3 Mutually Informed User Preference and,[0],[0]
+"Our word generation process is displayed in Figure 2 and described as follows:
+• Compute topic distribution θc by Eq. 6 •",3.4 Generative Process and Model Learning,[0],[0]
+"For message m = 1 to Mc:
+– Compute discourse distribution πuc,m by Eq. 7 – Draw topic assignment zc,m ∼Multi(θc) – Draw discourse mode dc,m ∼Multi(πuc,m) –",3.4 Generative Process and Model Learning,[0],[0]
+"For word index n = 1 to Nc,m: ∗ Draw word type xc,m,n ∼Multi(τd)
+∗",3.4 Generative Process and Model Learning,[0],[0]
+"if xc,m,n == BACK:",3.4 Generative Process and Model Learning,[0],[0]
+"Draw word wc,m,n ∼Multi(φB) ∗",3.4 Generative Process and Model Learning,[0],[0]
+"if xc,m,n == DISC:",3.4 Generative Process and Model Learning,[0],[0]
+"Draw word wc,m,n ∼Multi(φDdc,m) ∗",3.4 Generative Process and Model Learning,[0],[0]
+"if xc,m,n == TOPIC:",3.4 Generative Process and Model Learning,[0],[0]
+"Draw word wc,m,n ∼Multi(φTzc,m)
+Parameter Learning.",3.4 Generative Process and Model Learning,[0],[0]
+"For learning, we randomly initialize all learnable parameters and then alternate between the following two steps: Step 1.",3.4 Generative Process and Model Learning,[0],[0]
+"Fix topic and discourse assignments z and d, and word type switcher x, then optimize the remaining parameters in Eq. 1 by L-BFGS (Nocedal, 1980):
+Update a, b, γ∗, δ∗, κ∗, ψ∗, χ = argminL+ µ ·NLL(C |Θ) (8)
+Step 2.",3.4 Generative Process and Model Learning,[0],[0]
+"Sample topic and discourse assignments z and d at the message level and word type switcher x at the word level, using the distributions, computed according to parameters optimized in step 1:
+Sample zc,m, dc,m, xc,m,n with probabilities p(zc,m = k) =",3.4 Generative Process and Model Learning,[0],[0]
+"θc,k
+p(dc,m = d) = πuc,m,d p(xc,m,n = BACK) = φ B wc,m,nτdc,m,BACK p(xc,m,n = DISC) = φ D dc,m,wc,m,nτdc,m,DISC p(xc,m,n = TOPIC) = φ T zc,m,wc,m,nτdc,m,TOPIC
+(9)
+Step 2 is analogous to Gibbs Sampling (Griffiths, 2002) in probabilistic graphical models, such as LDA (Blei et al., 2003).",3.4 Generative Process and Model Learning,[0],[0]
+"However, distinguishing from previous models, the multinomial distributions in our models are not drawn from a Dirichlet prior.",3.4 Generative Process and Model Learning,[0],[0]
+"Instead, they are computed based on the parameters learned in Step 1.
+",3.4 Generative Process and Model Learning,[0],[0]
+"Our learning process stops when the change of parameters is small (i.e., below a pre-specified
+threshold).",3.4 Generative Process and Model Learning,[0],[0]
+"Multiple restarts are tried, and similar results are achieved.",3.4 Generative Process and Model Learning,[0],[0]
+Datasets.,4 Experimental Setup,[0],[0]
+"We collected two microblog conversation datasets from Twitter for experiments3: one contains discussions about the U.S. presidential election (henceforth US Election), the other gathers conversations of diverse topics based on the tweets released by TREC 2011 microblog track (henceforth TREC)4.",4 Experimental Setup,[0],[0]
+"US Election was collected from January to June of 2016 using Twitter’s Streaming API5 with a small set of political keywords.6 To recover conversations, Tweet Search API7 was used to retrieve messages with the “inreply-to” relations to collect tweets in a recursive way until full conversations were recovered.
+",4 Experimental Setup,[0],[0]
+Statistics of the datasets are shown in Table 1.,4 Experimental Setup,[0],[0]
+Figure 3 displays the number of conversations individual users participated in.,4 Experimental Setup,[0],[0]
+"As can be seen, most users are involved in only a few conversations.",4 Experimental Setup,[0],[0]
+"Simply leveraging personal chat history will not produce good performance for conversation
+3The datasets are available at http://www.ccs. neu.edu/home/luwang/
+4 http://trec.nist.gov/data/tweets/ 5https://developer.twitter.com/
+en/docs/tweets/filter-realtime/ api-reference/post-statuses-filter.html
+6Keyword list: “trump”, “hillary”, “clinton”, “president”, “politics”, and “election.”
+",4 Experimental Setup,[0],[0]
+"7https://developer.twitter.com/en/ docs/tweets/search/api-reference/ get-saved_searches-show-id
+recommendation.",4 Experimental Setup,[0],[0]
+"In our experiments, we predict whether a user will engage in a conversation given the previous messages in that conversation and past conversations the user is involved.",4 Experimental Setup,[0],[0]
+"For model training and testing, we divide conversations into three ordered segments, corresponding to training, development, and test sets at 75%, 12.5%, and 12.5%.8
+Preprocessing and Hyperparameter Tuning.",4 Experimental Setup,[0],[0]
+"For preprocessing, links, mentions (i.e., @username), and hashtags in tweets were replaced with generic tags of “URL”, “MENTION”, and “HASHTAG”.",4 Experimental Setup,[0],[0]
+We then utilized the Twitter NLP tool9,4 Experimental Setup,[0],[0]
+"(Gimpel et al., 2011; Owoputi et al., 2013) for tokenization and non-alphabetic token removal.",4 Experimental Setup,[0],[0]
+We removed stop words and punctuations for all comparisons to ensure comparable performance.,4 Experimental Setup,[0],[0]
+"We maintain a vocabulary with the 5,000 most frequent words.
+",4 Experimental Setup,[0],[0]
+"Our model parameters are tuned on the development set based on grid search, i.e. the parameters that give the lowest value for our objective are selected.",4 Experimental Setup,[0],[0]
+"Specifically, the number of discourse modes (D) and topics (K) are tuned to be 10.",4 Experimental Setup,[0],[0]
+"The trade-off parameter µ between user preference and corpus negative log-likelihood takes value of 0.1, and λ, the parameter for balancing topic and discourse, is set to 0.5.",4 Experimental Setup,[0],[0]
+"Finally, the confidence parameter s takes a value of 200 to give higher weight for positive instances, i.e., a user replied to a conversation.
+",4 Experimental Setup,[0],[0]
+Evaluation Metrics.,4 Experimental Setup,[0],[0]
+"Following prior work on social media post recommendation (Chen et al., 2012; Yan et al., 2012), we treat our task on conversation recommendation as a ranking problem.",4 Experimental Setup,[0],[0]
+"Therefore, popular information retrieval evaluation metrics, including precision at K (P@K), mean average precision (MAP) (Manning et al., 2008), and normalized Discounted Cumulative Gain at K (nDCG@K) (Järvelin and Kekäläinen, 2002) are reported.",4 Experimental Setup,[0],[0]
+The metrics are computed per user in the dataset and then averaged over all users.,4 Experimental Setup,[0],[0]
+"The values range from 0.0 to 1.0, with higher values indicating better performance.
+",4 Experimental Setup,[0],[0]
+Baselines and Comparisons.,4 Experimental Setup,[0],[0]
+"For comparison, we first consider three baselines: 1) ranking
+8At least one turn per conversation is retained for training.",4 Experimental Setup,[0],[0]
+"It is possible that one user only replies in either development set or test set, but it is rather infrequent.
+",4 Experimental Setup,[0],[0]
+"9http://www.cs.cmu.edu/˜ark/TweetNLP/
+conversations randomly (RANDOM); 2) longer conversations (i.e., more words) ranked higher (LENGTH); 3) conversations with more distinct users ranked higher (POPULARITY).
+",4 Experimental Setup,[0],[0]
+"We further compare results with three established recommendation models: • OCCF: one-class Collaborative Filtering (Pan et al., 2008), which only considers users’ reply history without modeling content in conversations.",4 Experimental Setup,[0],[0]
+• RSVM:,4 Experimental Setup,[0],[0]
+"ranking SVM (Joachims, 2002), which ranks conversations for each user with the content and Twitter features as in Duan et al. (2010).",4 Experimental Setup,[0],[0]
+"• CTR: messages in one conversation are aggregated into one post and a state-of-the art Collaborative Filtering-based post recommendation model is applied (Chen et al., 2012).
+",4 Experimental Setup,[0],[0]
+"Finally, we also adapt the “hidden factors as topics” (HFT) model proposed in McAuley and Leskovec (2013) (henceforth ADAPTED HFT).",4 Experimental Setup,[0],[0]
+"Because the original model leverages the ratings for all product reviews and does not handle implicit user feedback well, we replace their user preference objective function with ours (Eq. 2).",4 Experimental Setup,[0],[0]
+"In this section, we first discuss our main evaluation in Section 5.1.",5 Experimental Results,[0],[0]
+"A case study and corresponding discussion are provided in Section 5.2 to provide further insights, which is followed by an analysis of the topics and discourse modes discovered by our model (Section 5.3).",5 Experimental Results,[0],[0]
+We also examine our performance on first time replies (Section 5.4).,5 Experimental Results,[0],[0]
+"Experimental results are displayed in Table 2, where our model yields statistically significantly better results than baselines and comparisons
+(paired t-tests, p < 0.01).",5.1 Conversation Recommendation Results,[0],[0]
+"For P@K, we only report P@1, because a significant amount of users participate only in 1 or 2 conversations.",5.1 Conversation Recommendation Results,[0],[0]
+"For nDCG@K, different K values are experimented, which results in similar trend, so only nDCG@5 is reported.
+",5.1 Conversation Recommendation Results,[0],[0]
+"We find that the baselines that rank conversations with simple features (e.g., length or popularity) perform poorly.",5.1 Conversation Recommendation Results,[0],[0]
+"This implies that generic algorithms that do not consider conversation content or user preference cannot produce reasonable recommendations.
+",5.1 Conversation Recommendation Results,[0],[0]
+"Although some non-baseline systems capture content in one way or another, only ADAPTED HFT and our model exploit latent topic models to better represent content in tweets, and outperform other methods.
+",5.1 Conversation Recommendation Results,[0],[0]
+"Compared to ADAPTED HFT, which only considers latent topics under a collaborative filtering framework, our model extracts both topics and discourse modes as latent variables, and shows superior performance on both datasets.",5.1 Conversation Recommendation Results,[0],[0]
+"Our discourse variables go beyond topical content to capture social behaviors that affect user engagement, such as
+arguments, question-asking, agreement, and other discourse modes.
+",5.1 Conversation Recommendation Results,[0],[0]
+Training with Varying Conversation History.,5.1 Conversation Recommendation Results,[0],[0]
+"To test the model performance based different levels of user engagement history, we further experiment with varying the length of conversations for training.",5.1 Conversation Recommendation Results,[0],[0]
+"Specifically, in addition to using 75% of conversation history, we also extract the first 25% and 50% of history as training.",5.1 Conversation Recommendation Results,[0],[0]
+The rest of a conversation is separated equally for development and test.,5.1 Conversation Recommendation Results,[0],[0]
+Figure 4 shows the MAP scores for US Election and TREC datasets.,5.1 Conversation Recommendation Results,[0],[0]
+"The increasing MAP for all methods as the training history increases indicates that generally, conversation history is essential for recommendation.",5.1 Conversation Recommendation Results,[0],[0]
+"Our model performs consistently better over different lengths of conversation histories.
+",5.1 Conversation Recommendation Results,[0],[0]
+Results for Varying Degree of Data Sparsity.,5.1 Conversation Recommendation Results,[0],[0]
+"From Table 1 and Figure 3, we observe that most users in our datasets are involved in only a few conversations.",5.1 Conversation Recommendation Results,[0],[0]
+"In order to study the effects of data sparsity on recommendation models, we examine in Figure 5 the MAP scores for users engaged in a varying number of conversations, as measured on the TREC dataset.",5.1 Conversation Recommendation Results,[0],[0]
+The results on the US Election dataset have similar distributions.,5.1 Conversation Recommendation Results,[0],[0]
+"As we see, the prediction results become worse for users involved in fewer conversations.",5.1 Conversation Recommendation Results,[0],[0]
+This indicates that data sparsity serves as a challenge for all recommendation models.,5.1 Conversation Recommendation Results,[0],[0]
+We also observe that our model performs consistently better than other models over different degrees of sparsity.,5.1 Conversation Recommendation Results,[0],[0]
+"This implies that effectively capturing discourse structure in conversation context is useful to mitigating the effects of
+data sparsity on conversation recommendation.",5.1 Conversation Recommendation Results,[0],[0]
+Here we present a case study based on the sample conversations in Figure 1.,5.2 Case Study and Discussion,[0],[0]
+"Recall that user U1 is interested in conversations about Sanders, and also prefers more argumentative discourse, and thus returns in conversation c2 but not c1.
+",5.2 Case Study and Discussion,[0],[0]
+"Table 3 shows the predicted scores for the two conversations from OCCF, ADAPTED HFT, and our model (as in Eq. 2).",5.2 Case Study and Discussion,[0],[0]
+"Both ADAPTED HFT and our model more accurately recommend c2 over c1, with our model producing a slightly higher recommendation score for c2.
+",5.2 Case Study and Discussion,[0],[0]
+Table 4 shows the latent dimension values for the learned topics and discourse modes for this user and these two conversations.,5.2 Case Study and Discussion,[0],[0]
+"Based on human inspection, topic 1 appears to contain words about Sanders, which is the main topic in conversation c2.",5.2 Case Study and Discussion,[0],[0]
+"Topic 2 is about Clinton, which is a dominating topic in conversation c1.",5.2 Case Study and Discussion,[0],[0]
+"Our model also picks up user interest in topic 1 (Sanders), and thus assigns γUu1,1 a high value.",5.2 Case Study and Discussion,[0],[0]
+"For discourse modes, our model also generates a high score for “argument” discourse (labeled via human inspection) for both the user and c2.",5.2 Case Study and Discussion,[0],[0]
+Ablation Study.,5.3 Further Analysis of Topic and Discourse,[0],[0]
+"We have shown that joint modeling of topical content and discourse modes produces the superior performance for our model.
+",5.3 Further Analysis of Topic and Discourse,[0],[0]
+Here we provide an ablation study to examine the relative contributions of those two aspects by setting the trade-off parameter λ to 1.0 (topic only) or 0.0 (discourse only).,5.3 Further Analysis of Topic and Discourse,[0],[0]
+"Table 5 shows that topics or discourse individually improve slightly upon the comparison ADAPTED HFT, but only jointly do they improve significantly upon it.
+",5.3 Further Analysis of Topic and Discourse,[0],[0]
+Topic Coherence.,5.3 Further Analysis of Topic and Discourse,[0],[0]
+"To examine the quality of topics found by our model, we use the CV topic coherence score measured via the open-source toolkit Palmetto10, which has been shown to produce evaluation performance comparable to human judgment (Röder et al., 2015).",5.3 Further Analysis of Topic and Discourse,[0],[0]
+"Our model achieves topic coherence scores of 0.343 and 0.376 on TREC and US Election datasets, compared to 0.338 and 0.371 for the topics from ADAPTED HFT.
+",5.3 Further Analysis of Topic and Discourse,[0],[0]
+Sample Discourse Modes.,5.3 Further Analysis of Topic and Discourse,[0],[0]
+"While our topic word distributions are relatively unsurprising, of greater interest are the discourse mode word distributions.",5.3 Further Analysis of Topic and Discourse,[0],[0]
+Table 6 shows a sample of discourse modes as labeled by human.,5.3 Further Analysis of Topic and Discourse,[0],[0]
+"Although this is merely a qualitative human judgment at this point, there does appear to be a notable overlap in discourse modes between the two datasets even though they were learned separately.
+",5.3 Further Analysis of Topic and Discourse,[0],[0]
+10https://github.com/AKSW/Palmetto/,5.3 Further Analysis of Topic and Discourse,[0],[0]
+"From a recommendation perspective, users may be interested in joining new conversations.",5.4 First Time Reply Results,[0],[0]
+We thus compare each recommendation system for first time replies.,5.4 First Time Reply Results,[0],[0]
+"For each user, we only evaluate for conversations where they are newcomers.",5.4 First Time Reply Results,[0],[0]
+"Table 7 shows that, unsurprisingly, all systems perform poorly on this task, though our model performs slightly better.",5.4 First Time Reply Results,[0],[0]
+"This suggests that other features, e.g., network structures or other discussion thread features, could usefully be included in future studies that target new conversations.",5.4 First Time Reply Results,[0],[0]
+This paper has presented a framework for microblog conversation recommendation via jointly modeling topics and discourse modes.,6 Conclusion,[0],[0]
+Experimental results show that our method can outperform competitive approaches that omit user discourse behaviors.,6 Conclusion,[0],[0]
+Qualitative analysis shows that our joint model yields meaningful topics and discourse representations.,6 Conclusion,[0],[0]
+This work is partly supported by Innovation and Technology Fund (ITF) Project,Acknowledgements,[0],[0]
+"No. 6904333, General Research Fund (GRF) Project No. 14232816 (12183516), and National Science Foundation Grant IIS-1566382.",Acknowledgements,[0],[0]
+"We thank Shuming Shi, Yan Song, and the three anonymous reviewers for the insightful suggestions on various aspects of this work.",Acknowledgements,[0],[0]
+Millions of conversations are generated every day on social media platforms.,abstractText,[0],[0]
+"With limited attention, it is challenging for users to select which discussions they would like to participate in.",abstractText,[0],[0]
+Here we propose a new method for microblog conversation recommendation.,abstractText,[0],[0]
+"While much prior work has focused on postlevel recommendation, we exploit both the conversational context, and user content and behavior preferences.",abstractText,[0],[0]
+"We propose a statistical model that jointly captures: (1) topics for representing user interests and conversation content, and (2) discourse modes for describing user replying behavior and conversation dynamics.",abstractText,[0],[0]
+Experimental results on two Twitter datasets demonstrate that our system outperforms methods that only model content without considering discourse.,abstractText,[0],[0]
+Microblog Conversation Recommendation via Joint Modeling of Topics and Discourse,title,[0],[0]
+"Proceedings of the 2017 Conference on Empirical Methods in Natural Language Processing, pages 102–112 Copenhagen, Denmark, September 7–11, 2017. c©2017 Association for Computational Linguistics",text,[0],[0]
+"One of the key advantages of word embeddings for natural language processing is that they enable generalization to words that are unseen in labeled training data, by embedding lexical features from large unlabeled datasets into a relatively low-dimensional Euclidean space.",1 Introduction,[0],[0]
+"These low-dimensional embeddings are typically trained to capture distributional similarity, so that information can be shared among words that tend to appear in similar contexts.
+",1 Introduction,[0],[0]
+"However, it is not possible to enumerate the entire vocabulary of any language, and even large unlabeled datasets will miss terms that appear in later applications.",1 Introduction,[0],[0]
+The issue of how to handle these out-of-vocabulary (OOV) words poses challenges for embedding-based methods.,1 Introduction,[0],[0]
+"These challenges are particularly acute when working with lowresource languages, where even unlabeled data may be difficult to obtain at scale.",1 Introduction,[0],[0]
+"A typical solution is to abandon hope, by assigning a single OOV embedding to all terms that do not appear in the unlabeled data.
+",1 Introduction,[0],[0]
+We approach this challenge from a quasigenerative perspective.,1 Introduction,[0],[0]
+"Knowing nothing of a word except for its embedding and its written form, we attempt to learn the former from the latter.",1 Introduction,[0],[0]
+"We train a recurrent neural network (RNN) on the character level with the embedding as the target, and use it later to predict vectors for OOV words in any downstream task.",1 Introduction,[0],[0]
+"We call this model the MIMICK-RNN, for its ability to read a word’s spelling and mimick its distributional embedding.
+",1 Introduction,[0],[0]
+"Through nearest-neighbor analysis, we show that vectors learned via this method capture both word-shape features and lexical features.",1 Introduction,[0],[0]
+"As a result, we obtain reasonable near-neighbors for OOV abbreviations, names, novel compounds, and orthographic errors.",1 Introduction,[0],[0]
+"Quantitative evaluation on the Stanford RareWord dataset (Luong et al., 2013) provides more evidence that these character-based embeddings capture word similarity for rare and unseen words.
+",1 Introduction,[0.9999999470474329],"['Quantitative evaluation on the Stanford RareWord dataset (Luong et al., 2013) provides more evidence that these character-based embeddings capture word similarity for rare and unseen words.']"
+"As an extrinsic evaluation, we conduct experiments on joint prediction of part-of-speech tags and morphosyntactic attributes for a diverse set of 23 languages, as provided in the Universal Dependencies dataset (De Marneffe et al., 2014).",1 Introduction,[0],[0]
+"Our model shows significant improvement
+102
+across the board against a single UNK-embedding backoff method, and obtains competitive results against a supervised character-embedding model, which is trained end-to-end on the target task.",1 Introduction,[1.000000027151479],"['Our model shows significant improvement 102 across the board against a single UNK-embedding backoff method, and obtains competitive results against a supervised character-embedding model, which is trained end-to-end on the target task.']"
+"In low-resource settings, our approach is particularly effective, and is complementary to supervised character embeddings trained from labeled data.",1 Introduction,[0],[0]
+The MIMICK-RNN therefore provides a useful new tool for tagging tasks in settings where there is limited labeled data.,1 Introduction,[0],[0]
+Models and code are available at www.github.com/ yuvalpinter/mimick .,1 Introduction,[0],[0]
+Compositional models for embedding rare and unseen words.,2 Related Work,[0],[0]
+"Several studies make use of morphological or orthographic information when training word embeddings, enabling the prediction of embeddings for unseen words based on their internal structure.",2 Related Work,[0],[0]
+Botha and Blunsom (2014) compute word embeddings by summing over embeddings of the morphemes; Luong et al. (2013) construct a recursive neural network over each word’s morphological parse; Bhatia et al. (2016) use morpheme embeddings as a prior distribution over probabilistic word embeddings.,2 Related Work,[0],[0]
+"While morphology-based approaches make use of meaningful linguistic substructures, they struggle with names and foreign language words, which include out-of-vocabulary morphemes.",2 Related Work,[0],[0]
+"Character-based approaches avoid these problems: for example, Kim et al. (2016) train a recurrent neural network over words, whose embeddings are constructed by convolution over character embeddings; Wieting et al. (2016) learn embeddings of character ngrams, and then sum them into word embeddings.",2 Related Work,[0],[0]
+"In all of these cases, the model for composing embeddings of subword units into word embeddings is learned by optimizing an objective over a large unlabeled corpus.",2 Related Work,[0],[0]
+"In contrast, our approach is a post-processing step that can be applied to any set of word embeddings, regardless of how they were trained.",2 Related Work,[0],[0]
+"This is similar to the “retrofitting” approach of Faruqui et al. (2015), but rather than smoothing embeddings over a graph, we learn a function to build embeddings compositionally.
+",2 Related Work,[0],[0]
+Supervised subword models.,2 Related Work,[0],[0]
+Another class of methods learn task-specific character-based word embeddings within end-to-end supervised systems.,2 Related Work,[0],[0]
+"For example, Santos and Zadrozny (2014) build word embeddings by convolution over char-
+acters, and then perform part-of-speech (POS) tagging using a local classifier; the tagging objective drives the entire learning process.",2 Related Work,[0],[0]
+"Ling et al. (2015) propose a multi-level long shortterm memory (LSTM; Hochreiter and Schmidhuber, 1997), in which word embeddings are built compositionally from an LSTM over characters, and then tagging is performed by an LSTM over words.",2 Related Work,[0],[0]
+Plank et al. (2016) show that concatenating a character-level or bit-level LSTM network to a word representation helps immensely in POS tagging.,2 Related Work,[0],[0]
+"Because these methods learn from labeled data, they can cover only as much of the lexicon as appears in their labeled training sets.",2 Related Work,[0],[0]
+"As we show, they struggle in several settings: lowresource languages, where labeled training data is scarce; morphologically rich languages, where the number of morphemes is large, or where the mapping from form to meaning is complex; and in Chinese, where the number of characters is orders of magnitude larger than in non-logographic scripts.",2 Related Work,[0],[0]
+"Furthermore, supervised subword models can be combined with MIMICK, offering additive improvements.
+",2 Related Work,[0],[0]
+Morphosyntactic attribute tagging.,2 Related Work,[0],[0]
+"We evaluate our method on the task of tagging word tokens for their morphosyntactic attributes, such as gender, number, case, and tense.",2 Related Work,[0],[0]
+"The task of morpho-syntactic tagging dates back at least to the mid 1990s (Oflazer and Kuruöz, 1994; Hajič and Hladká, 1998), and interest has been rejuvenated by the availability of large-scale multilingual morphosyntactic annotations through the Universal Dependencies (UD) corpus (De Marneffe et al., 2014).",2 Related Work,[0],[0]
+"For example, Faruqui et al. (2016) propose a graph-based technique for propagating typelevel morphological information across a lexicon, improving token-level morphosyntactic tagging in 11 languages, using an SVM tagger.",2 Related Work,[0],[0]
+"In contrast, we apply a neural sequence labeling approach, inspired by the POS tagger of Plank et al. (2016).",2 Related Work,[0],[0]
+"We approach the problem of out-of-vocabulary (OOV) embeddings as a generation problem: regardless of how the original embeddings were created, we assume there is a generative wordformbased protocol for creating these embeddings.",3 MIMICK Word Embeddings,[0],[0]
+"By training a model over the existing vocabulary, we can later use that model for predicting the embedding of an unseen word.
+",3 MIMICK Word Embeddings,[0],[0]
+"Formally: given a language L, a vocabulary V ⊆ L of size V , and a pre-trained embeddings table W ∈ RV×d where each word {wk}Vk=1 is assigned a vector ek of dimension d, our model is trained to find the function f :",3 MIMICK Word Embeddings,[0.9879926918336954],"['Formally: given a language L, a vocabulary V ⊆ L of size V , and a pre-trained embeddings table W ∈ RV×d where each word {wk}Vk=1 is assigned a vector ek of dimension d, our model is trained to find the function f : L → Rd such that the projected function f |V approximates the assignments f(wk) ≈ ek.']"
+L → Rd such that the projected function f |V approximates the assignments f(wk),3 MIMICK Word Embeddings,[0],[0]
+≈ ek.,3 MIMICK Word Embeddings,[0],[0]
+"Given such a model, a new word wk∗ ∈ L \ V can now be assigned an embedding ek∗ = f(wk∗).
+",3 MIMICK Word Embeddings,[0],[0]
+Our predictive function of choice is a Word Type Character Bi-LSTM.,3 MIMICK Word Embeddings,[0],[0]
+"Given a word with character sequence w = {ci}n1 , a forward-LSTM and a backward-LSTM are run over the corresponding character embeddings sequence {e(c)i }n1 .",3 MIMICK Word Embeddings,[0],[0]
+"Let hnf represent the final hidden vector for the forward-LSTM, and let h0b represent the final hidden vector for the backward-LSTM.",3 MIMICK Word Embeddings,[1.0],"['Let hnf represent the final hidden vector for the forward-LSTM, and let h0b represent the final hidden vector for the backward-LSTM.']"
+"The word embedding is computed by a multilayer perceptron:
+(1)f(w) = OT · g(Th ·",3 MIMICK Word Embeddings,[0],[0]
+"[hnf ; h0b ] + bh) + bT ,
+where Th, bh and OT , bT are parameters of affine transformations, and g is a nonlinear elementwise function.",3 MIMICK Word Embeddings,[0],[0]
+"The model is presented in Figure 1.
+",3 MIMICK Word Embeddings,[0],[0]
+The training objective is similar to that of Yin and Schütze (2016).,3 MIMICK Word Embeddings,[0],[0]
+"We match the predicted embeddings f(wk) to the pre-trained word embeddings ewk , by minimizing the squared Euclidean distance,
+(2)L = ‖f(wk)− ewk‖22 .
+",3 MIMICK Word Embeddings,[0],[0]
+"By backpropagating from this loss, it is possible to obtain local gradients with respect to the parameters of the LSTMs, the character embeddings, and the output model.",3 MIMICK Word Embeddings,[0],[0]
+"The ultimate output of the training phase is the character embeddings matrix C and the parameters of the neural network: M = {C,F,B,Th, bh,OT , bT }, where F,B are the forward and backward LSTM component parameters, respectively.",3 MIMICK Word Embeddings,[0],[0]
+"The pretrained embeddings we use in our experiments are obtained from Polyglot (Al-Rfou et al., 2013), a multilingual word embedding effort.",3.1 MIMICK Polyglot Embeddings,[1.0],"['The pretrained embeddings we use in our experiments are obtained from Polyglot (Al-Rfou et al., 2013), a multilingual word embedding effort.']"
+"Available for dozens of languages, each dataset contains 64-dimension embeddings for the 100,000 most frequent words in a language’s training corpus (of variable size), as well as an UNK embedding to be used for OOV words.",3.1 MIMICK Polyglot Embeddings,[0],[0]
+"Even with this vocabulary size, querying words from respective UD corpora (train + dev + test) yields high
+OOV rates: in at least half of the 23 languages in our experiments (see Section 5), 29.1% or more of the word types do not appear in the Polyglot vocabulary.",3.1 MIMICK Polyglot Embeddings,[0.9999999641539467],"['Even with this vocabulary size, querying words from respective UD corpora (train + dev + test) yields high OOV rates: in at least half of the 23 languages in our experiments (see Section 5), 29.1% or more of the word types do not appear in the Polyglot vocabulary.']"
+"The token-level median rate is 9.2%.1
+Applying our MIMICK algorithm to Polyglot embeddings, we obtain a prediction model for each of the 23 languages.",3.1 MIMICK Polyglot Embeddings,[0],[0]
+"Based on preliminary testing on randomly selected held-out development sets of 1% from each Polyglot vocabulary (with error calculated as in Equation 2), we set the following hyper-parameters for the remainder of the experiments: character embedding dimension = 20; one LSTM layer with 50 hidden units; 60 training epochs with no dropout; nonlinearity function g =",3.1 MIMICK Polyglot Embeddings,[0],[0]
+"tanh.2 We initialize character embeddings randomly, and use DyNet to implement the model (Neubig et al., 2017).
+",3.1 MIMICK Polyglot Embeddings,[0],[0]
+Nearest-neighbor examination.,3.1 MIMICK Polyglot Embeddings,[0],[0]
+"As a preliminary sanity check for the validity of our protocol, we examined nearest-neighbor samples in languages for which speakers were available: English, Hebrew, Tamil, and Spanish.",3.1 MIMICK Polyglot Embeddings,[0],[0]
+"Table 1 presents selected English OOV words with
+1Some OOV counts, and resulting model performance, may be adversely affected by tokenization differences between Polyglot and UD.",3.1 MIMICK Polyglot Embeddings,[0],[0]
+"Notably, some languages such as Spanish, Hebrew and Italian exhibit relational synthesis wherein words of separate grammatical phrases are joined into one form (e.g. Spanish del = de + el, ‘from the-masc.sg.’).",3.1 MIMICK Polyglot Embeddings,[0],[0]
+"For these languages, the UD annotations adhere to the sub-token level, while Polyglot does not perform subtokenization.",3.1 MIMICK Polyglot Embeddings,[0],[0]
+"As this is a real-world difficulty facing users of out-of-the-box embeddings, we do not patch it over in our implementations or evaluation.
+",3.1 MIMICK Polyglot Embeddings,[0],[0]
+"2Other settings, described below, were tuned on the supervised downstream tasks.
+",3.1 MIMICK Polyglot Embeddings,[0],[0]
+their nearest in-vocabulary Polyglot words computed by cosine similarity.,3.1 MIMICK Polyglot Embeddings,[0],[0]
+"These examples demonstrate several properties: (a) word shape is learned well (acronyms, capitalizations, suffixes); (b) the model shows robustness to typos (e.g., developiong, corssing); (c) part-of-speech is learned across multiple suffixes (pesky – euphoric, ghastly); (d) word compounding is detected (e.g., lawnmower – bookmaker, postman); (e) semantics are not learned well (as is to be expected from the lack of context in training), but there are surprises (e.g., flatfish – slimy, watery).",3.1 MIMICK Polyglot Embeddings,[1.0],"['These examples demonstrate several properties: (a) word shape is learned well (acronyms, capitalizations, suffixes); (b) the model shows robustness to typos (e.g., developiong, corssing); (c) part-of-speech is learned across multiple suffixes (pesky – euphoric, ghastly); (d) word compounding is detected (e.g., lawnmower – bookmaker, postman); (e) semantics are not learned well (as is to be expected from the lack of context in training), but there are surprises (e.g., flatfish – slimy, watery).']"
+"Table 2 presents examples from Hebrew that show learned properties can be extended to nominal morphosyntactic attributes (gender, number – first two examples) and even relational syntactic subword forms such as genetive markers (third example).",3.1 MIMICK Polyglot Embeddings,[1.0],"['Table 2 presents examples from Hebrew that show learned properties can be extended to nominal morphosyntactic attributes (gender, number – first two examples) and even relational syntactic subword forms such as genetive markers (third example).']"
+Names are learned (fourth example) despite the lack of casing in the script.,3.1 MIMICK Polyglot Embeddings,[1.0],['Names are learned (fourth example) despite the lack of casing in the script.']
+"Spanish examples exhibit wordshape and part-of-speech learning patterns with some loose semantics: for example, the plural adjective form prenatales is similar to other familyrelated plural adjectives such as patrimoniales and generacionales.",3.1 MIMICK Polyglot Embeddings,[1.0],"['Spanish examples exhibit wordshape and part-of-speech learning patterns with some loose semantics: for example, the plural adjective form prenatales is similar to other familyrelated plural adjectives such as patrimoniales and generacionales.']"
+"Tamil displays some semantic similarities as well: e.g. enjineer (‘engineer’) predicts similarity to other professional terms such as kalviyiyal (‘education’), thozhilnutpa (‘technical’), and iraanuva (‘military’).
+",3.1 MIMICK Polyglot Embeddings,[0],[0]
+Stanford RareWords.,3.1 MIMICK Polyglot Embeddings,[0],[0]
+"The Stanford RareWord evaluation corpus (Luong et al., 2013) focuses on predicting word similarity between pairs involving low-frequency English words, predominantly ones with common morphological affixes.",3.1 MIMICK Polyglot Embeddings,[1.0],"['The Stanford RareWord evaluation corpus (Luong et al., 2013) focuses on predicting word similarity between pairs involving low-frequency English words, predominantly ones with common morphological affixes.']"
+"As these words are unlikely to be above the cutoff threshold for standard word embedding models, they emphasize the performance on OOV words.
+",3.1 MIMICK Polyglot Embeddings,[0],[0]
+"For evaluation of our MIMICK model on the RareWord corpus, we trained the Variational Embeddings algorithm (VarEmbed; Bhatia et al., 2016) on a 20-million-token, 100,000- type Wikipedia corpus, obtaining 128-dimension
+word embeddings for all words in the test corpus.",3.1 MIMICK Polyglot Embeddings,[0],[0]
+"VarEmbed estimates a prior distribution over word embeddings, conditional on the morphological composition.",3.1 MIMICK Polyglot Embeddings,[0],[0]
+"For in-vocabulary words, a posterior is estimated from unlabeled data; for outof-vocabulary words, the expected embedding can be obtained from the prior alone.",3.1 MIMICK Polyglot Embeddings,[0],[0]
+"In addition, we compare to FastText (Bojanowski et al., 2016), a high-vocabulary, high-dimensionality embedding benchmark.
+",3.1 MIMICK Polyglot Embeddings,[0],[0]
+"The results, shown in Table 3, demonstrate that the MIMICK RNN recovers about half of the loss in performance incurred by the original Polyglot training model due to out-of-vocabulary words in the “All pairs” condition.",3.1 MIMICK Polyglot Embeddings,[1.0],"['The results, shown in Table 3, demonstrate that the MIMICK RNN recovers about half of the loss in performance incurred by the original Polyglot training model due to out-of-vocabulary words in the “All pairs” condition.']"
+MIMICK also outperforms VarEmbed.,3.1 MIMICK Polyglot Embeddings,[0],[0]
+"FastText can be considered an upper bound: with a vocabulary that is 25 times larger than the other models, it was missing words from only 44 pairs on this data.",3.1 MIMICK Polyglot Embeddings,[0],[0]
+"The Universal Dependencies (UD) scheme (De Marneffe et al., 2014) features a minimal set of 17 POS tags (Petrov et al., 2012) and supports tagging further language-specific features using attribute-specific inventories.",4 Joint Tagging of Parts-of-Speech and Morphosyntactic Attributes,[1.0],"['The Universal Dependencies (UD) scheme (De Marneffe et al., 2014) features a minimal set of 17 POS tags (Petrov et al., 2012) and supports tagging further language-specific features using attribute-specific inventories.']"
+"For example, a verb in Turkish could be assigned a value for the evidentiality attribute, one which is absent from Danish.",4 Joint Tagging of Parts-of-Speech and Morphosyntactic Attributes,[1.0],"['For example, a verb in Turkish could be assigned a value for the evidentiality attribute, one which is absent from Danish.']"
+"These additional morphosyntactic attributes are marked in the UD dataset as optional per-token attribute-value pairs.
+",4 Joint Tagging of Parts-of-Speech and Morphosyntactic Attributes,[0],[0]
+"Our approach for tagging morphosyntactic attributes is similar to the part-of-speech tagging model of Ling et al. (2015), who attach a projection layer to the output of a sentence-level bidirectional LSTM.",4 Joint Tagging of Parts-of-Speech and Morphosyntactic Attributes,[1.0],"['Our approach for tagging morphosyntactic attributes is similar to the part-of-speech tagging model of Ling et al. (2015), who attach a projection layer to the output of a sentence-level bidirectional LSTM.']"
+We extend this approach to morphosyntactic tagging by duplicating this projection layer for each attribute type.,4 Joint Tagging of Parts-of-Speech and Morphosyntactic Attributes,[1.0],['We extend this approach to morphosyntactic tagging by duplicating this projection layer for each attribute type.']
+"The input to our multilayer perceptron (MLP) projection network is the hidden state produced for each token in the sentence by an underlying LSTM, and the output is
+attribute-specific probability distributions over the possible values for each attribute on each token in the sequence.",4 Joint Tagging of Parts-of-Speech and Morphosyntactic Attributes,[0],[0]
+"Formally, for a given attribute a with possible values v ∈ Va, the tagging probability for the i’th word in a sentence is given by:
+Pr(awi = v) =",4 Joint Tagging of Parts-of-Speech and Morphosyntactic Attributes,[0],[0]
+"(Softmax(φ(hi)))v , (3)
+with
+(4)φ(hi) = OaW · tanh(Wah ·",4 Joint Tagging of Parts-of-Speech and Morphosyntactic Attributes,[0],[0]
+"hi + bah) + baW ,
+where hi is the i’th hidden state in the underlying LSTM, and φ(hi) is a two-layer feedforward neural network, with weights Wah and O a W .",4 Joint Tagging of Parts-of-Speech and Morphosyntactic Attributes,[0],[0]
+We apply a softmax transformation to the output; the value at position v is then equal to the probability of attribute v applying to token wi.,4 Joint Tagging of Parts-of-Speech and Morphosyntactic Attributes,[0],[0]
+"The input to the underlying LSTM is a sequence of word embeddings, which are initialized to the Polyglot vectors when possible, and to MIMICK vectors when necessary.",4 Joint Tagging of Parts-of-Speech and Morphosyntactic Attributes,[0],[0]
+"Alternative initializations are considered in the evaluation, as described in Section 5.2.
+",4 Joint Tagging of Parts-of-Speech and Morphosyntactic Attributes,[1.000000070633277],"['Alternative initializations are considered in the evaluation, as described in Section 5.2.']"
+Each tagged attribute sequence (including POS tags) produces a loss equal to the sum of negative log probabilities of the true tags.,4 Joint Tagging of Parts-of-Speech and Morphosyntactic Attributes,[0],[0]
+One way to combine these losses is to simply compute the sum loss.,4 Joint Tagging of Parts-of-Speech and Morphosyntactic Attributes,[0],[0]
+"However, many languages have large differences in sparsity across morpho-syntactic attributes, as apparent from Table 4 (rightmost column).",4 Joint Tagging of Parts-of-Speech and Morphosyntactic Attributes,[0],[0]
+"We therefore also compute a weighted sum
+loss, in which each attribute is weighted by the proportion of training corpus tokens on which it is assigned a non-NONE value.",4 Joint Tagging of Parts-of-Speech and Morphosyntactic Attributes,[0],[0]
+"Preliminary experiments on development set data were inconclusive across languages and training set sizes, and so we kept the simpler sum loss objective for the remainder of our study.",4 Joint Tagging of Parts-of-Speech and Morphosyntactic Attributes,[0],[0]
+"In all cases, part-of-speech tagging was less accurate when learned jointly with morphosyntactic attributes.",4 Joint Tagging of Parts-of-Speech and Morphosyntactic Attributes,[0],[0]
+This may be because the attribute loss acts as POS-unrelated “noise” affecting the common LSTM layer and the word embeddings.,4 Joint Tagging of Parts-of-Speech and Morphosyntactic Attributes,[0],[0]
+The morphological complexity and compositionality of words varies greatly across languages.,5 Experimental Settings,[1.0],['The morphological complexity and compositionality of words varies greatly across languages.']
+"While a morphologically-rich agglutinative language such as Hungarian contains words that carry many attributes as fully separable morphemes, a sentence in an analytic language such as Vietnamese may have not a single polymorphemic or inflected word in it.",5 Experimental Settings,[1.0],"['While a morphologically-rich agglutinative language such as Hungarian contains words that carry many attributes as fully separable morphemes, a sentence in an analytic language such as Vietnamese may have not a single polymorphemic or inflected word in it.']"
+"To see whether this property is influential on our MIMICK model and its performance in the downstream tagging task, we select languages that comprise a sample of multiple morphological patterns.",5 Experimental Settings,[0],[0]
+"Language family and script type are other potentially influential factors in an orthography-based approach such as ours, and so we vary along these parameters as well.",5 Experimental Settings,[1.0],"['Language family and script type are other potentially influential factors in an orthography-based approach such as ours, and so we vary along these parameters as well.']"
+"We also considered language selection recommendations from de Lhoneux and Nivre (2016) and Schluter and Agić (2017).
+",5 Experimental Settings,[0],[0]
+"As stated above, our approach is built on the Polyglot word embeddings.",5 Experimental Settings,[0],[0]
+The intersection of the Polyglot embeddings and the UD dataset (version 1.4) yields 44 languages.,5 Experimental Settings,[0],[0]
+"Of these, many are under-annotated for morphosyntactic attributes; we select twenty-three sufficiently-tagged languages, with the exception of Indonesian.3 Table 4 presents the selected languages and their typological properties.",5 Experimental Settings,[0],[0]
+"As an additional proxy for mor-
+3Vietnamese has no attributes by design; it is a pure analytic language.
+",5 Experimental Settings,[0],[0]
+"phological expressiveness, the rightmost column shows the proportion of UD tokens which are annotated with any morphosyntactic attribute.",5 Experimental Settings,[0],[0]
+"As noted above, we use the UD datasets for testing our MIMICK algorithm on 23 languages4 with the supplied train/dev/test division.",5.1 Metrics,[0],[0]
+"We measure partof-speech tagging by overall token-level accuracy.
+",5.1 Metrics,[0],[0]
+"For morphosyntactic attributes, there does not seem to be an agreed-upon metric for reporting performance.",5.1 Metrics,[0],[0]
+Dzeroski et al. (2000) report pertag accuracies on a morphosyntactically tagged corpus of Slovene.,5.1 Metrics,[0],[0]
+"Faruqui et al. (2016) report macro-averages of F1 scores of 11 languages from UD 1.1 for the various attributes (e.g., part-ofspeech, case, gender, tense); recall and precision were calculated for the full set of each attribute’s values, pooled together.5",5.1 Metrics,[0],[0]
+Agić,5.1 Metrics,[0],[0]
+"et al. (2013) report separately on parts-of-speech and morphosyntactic attribute accuracies in Serbian and Croatian, as well as precision, recall, and F1 scores per tag.",5.1 Metrics,[0],[0]
+"Georgiev et al. (2012) report token-level accuracy for exact all-attribute tags (e.g. ‘Ncmsh’ for “Noun short masculine singular definite”) in Bulgarian, reaching a tagset of size 680.",5.1 Metrics,[0],[0]
+Müller et al. (2013) do the same for six other languages.,5.1 Metrics,[0],[0]
+"We report micro F1: each token’s value for each attribute is compared separately with the gold labeling, where a correct prediction is a matching non-NONE attribute/value assignment.",5.1 Metrics,[0],[0]
+"Recall and
+4When several datasets are available for a language, we use the unmarked corpus.
+5Details were clarified in personal communication with the authors.
+precision are calculated over the entire set, with F1 defined as their harmonic mean.",5.1 Metrics,[0],[0]
+"We implement and test the following models:
+No-Char.",5.2 Models,[0],[0]
+"Word embeddings are initialized from Polyglot models, with unseen words assigned the Polyglot-supplied UNK vector.",5.2 Models,[0],[0]
+"Following tuning experiments on all languages with cased script, we found it beneficial to first back off to the lowercased form for an OOV word if its embedding exists, and only otherwise assign UNK.
+MIMICK.",5.2 Models,[0],[0]
+"Word embeddings are initialized from Polyglot, with OOV embeddings inferred from a MIMICK model (Section 3) trained on the Polyglot embeddings.",5.2 Models,[0],[0]
+"Unlike the No-Char case, backing off to lowercased embeddings before using the MIMICK output did not yield conclusive benefits and thus we report results for the more straightforward no-backoff implementation.
+CHAR→TAG.",5.2 Models,[0],[0]
+"Word embeddings are initialized from Polyglot as in the No-Char model (with lowercase backoff), and appended with the output of a character-level LSTM updated during training (Plank et al., 2016).",5.2 Models,[0],[0]
+"This additional module causes a threefold increase in training time.
+",5.2 Models,[0],[0]
+Both.,5.2 Models,[0],[0]
+"Word embeddings are initialized as in MIMICK, and appended with the CHAR→TAG LSTM.
+",5.2 Models,[0],[0]
+Other models.,5.2 Models,[0],[0]
+"Several non-Polyglot embedding models were examined, all performed substantially worse than Polyglot.",5.2 Models,[0],[0]
+"Two of these
+are notable: a random-initialization baseline, and a model initialized from FastText embeddings (tested on English).",5.2 Models,[0],[0]
+"FastText supplies 300-dimension embeddings for 2.51 million lowercase-only forms, and no UNK vector.6 Both of these embedding models were attempted with and without CHAR→TAG concatenation.",5.2 Models,[0],[0]
+"Another model, initialized from only MIMICK output embeddings, performed well only on the language with smallest Polyglot training corpus (Latvian).",5.2 Models,[0],[0]
+"A Polyglot model where OOVs were initialized using an averaged embedding of all Polyglot vectors, rather than the supplied UNK vector, performed worse than our No-Char baseline on a great majority of the languages.
+",5.2 Models,[0],[0]
+"Last, we do not employ type-based tagset restrictions.",5.2 Models,[0],[0]
+All tag inventories are computed from the training sets and each tag selection is performed over the full set.,5.2 Models,[0],[0]
+"Based on development set experiments, we set the following hyperparameters for all models on all languages: two LSTM layers of hidden size 128, MLP hidden layers of size equal to the number of each attribute’s possible values; momentum stochastic gradient descent with 0.01 learning rate; 40 training epochs (80 for 5K settings) with a dropout rate of 0.5.",5.3 Hyperparameters,[0],[0]
+The CHAR→TAG models use 20-dimension character embeddings and a single hidden layer of size 128.,5.3 Hyperparameters,[0],[0]
+We report performance in both low-resource and full-resource settings.,6 Results,[0],[0]
+"Low-resource training sets were obtained by randomly sampling training sentences, without replacement, until a predefined token limit was reached.",6 Results,[0],[0]
+We report the results on the full sets and on N = 5000 tokens in Table 5 (partof-speech tagging accuracy) and Table 6 (morphosyntactic attribute tagging micro-F1).,6 Results,[0],[0]
+"Results for additional training set sizes are shown in Figure 2; space constraints prevent us from showing figures for all languages.
+MIMICK as OOV initialization.",6 Results,[0],[0]
+"In nearly all experimental settings on both tasks, across languages and training corpus sizes, the MIMICK embeddings significantly improve over the Polyglot UNK embedding for OOV tokens on both
+6Vocabulary type-level coverage for the English UD corpus: 55.6% case-sensitive, 87.9% case-insensitive.
+",6 Results,[0],[0]
+POS and morphosyntactic tagging.,6 Results,[0],[0]
+"For POS, the largest margins are in the Slavic languages (Russian, Czech, Bulgarian), where word order is relatively free and thus rich word representations are imperative.",6 Results,[0],[0]
+"Chinese also exhibits impressive improvement across all settings, perhaps due to the large character inventory (> 12,000), for which a model such as MIMICK can learn well-informed embeddings using the large Polyglot vocabulary dataset, overcoming both word- and characterlevel sparsity in the UD",6 Results,[0],[0]
+"corpus.7 In morphosyntactic tagging, gains are apparent for Slavic languages and Chinese, but also for agglutinative languages — especially Tamil and Turkish — where the stable morpheme representation makes it easy for subword modeling to provide a type-level signal.8 To examine the effects on Slavic and agglutinative languages in a more fine-grained view, we present results of multiple training-set size experiments for each model, averaged over five repetitions (with different corpus samples), in Figure 2.
+MIMICK vs. CHAR→TAG.",6 Results,[0],[0]
+"In several languages, the MIMICK algorithm fares better than the CHAR→TAG model on part-of-speech tagging in low-resource settings.",6 Results,[1.0],"['In several languages, the MIMICK algorithm fares better than the CHAR→TAG model on part-of-speech tagging in low-resource settings.']"
+"Table 7 presents the POS tagging improvements that MIMICK achieves over the pre-trained Polyglot models, with and without CHAR→TAG concatenation, with 10,000 tokens of training data.",6 Results,[0],[0]
+"We obtain statistically significant improvements in most languages, even when CHAR→TAG is included.",6 Results,[0],[0]
+"These improvements are particularly substantial for test-set tokens outside the UD training set, as shown in the right two columns.",6 Results,[0],[0]
+"While test set OOVs are a strength of the CHAR→TAG model (Plank et al., 2016), in many languages there are still considerable improvements to be obtained from the application of MIMICK initialization.",6 Results,[1.0],"['While test set OOVs are a strength of the CHAR→TAG model (Plank et al., 2016), in many languages there are still considerable improvements to be obtained from the application of MIMICK initialization.']"
+"This suggests that with limited training data, the end-to-end CHAR→TAG model is unable to learn a sufficiently accurate representational mapping from orthography.",6 Results,[0],[0]
+"We present a straightforward algorithm to infer OOV word embedding vectors from pre-trained,
+7Character coverage in Chinese Polyglot is surprisingly good: only eight characters from the UD dataset are unseen in Polyglot, across more than 10,000 unseen word types.
+",7 Conclusion,[0],[0]
+8Persian is officially classified as agglutinative but it is mostly so with respect to derivations.,7 Conclusion,[0],[0]
+"Its word-level inflections are rare and usually fusional.
+limited-vocabulary models, without need to access the originating corpus.",7 Conclusion,[0],[0]
+"This method is particularly useful for low-resource languages and tasks with little labeled data available, and in fact is task-agnostic.",7 Conclusion,[0],[0]
+"Our method improves performance over word-based models on annotated sequence-tagging tasks for a large variety of languages across dimensions of family, orthography, and morphology.",7 Conclusion,[1.0],"['Our method improves performance over word-based models on annotated sequence-tagging tasks for a large variety of languages across dimensions of family, orthography, and morphology.']"
+"In addition, we present a BiLSTM approach for tagging morphosyntactic attributes at the token level.",7 Conclusion,[1.0],"['In addition, we present a BiLSTM approach for tagging morphosyntactic attributes at the token level.']"
+"In this paper, the MIMICK model was trained using characters as input, but future work may consider the use of other subword units, such as morphemes, phonemes, or even bitmap representations of ideographic characters (Costa-jussà et al., 2017).",7 Conclusion,[1.0],"['In this paper, the MIMICK model was trained using characters as input, but future work may consider the use of other subword units, such as morphemes, phonemes, or even bitmap representations of ideographic characters (Costa-jussà et al., 2017).']"
+"We thank Umashanthi Pavalanathan, Sandeep Soni, Roi Reichart, and our anonymous reviewers for their valuable input.",8 Acknowledgments,[0],[0]
+We thank Manaal Faruqui and Ryan McDonald for their help in understanding the metrics for morphosyntactic tagging.,8 Acknowledgments,[0],[0]
+The project was supported by project HDTRA1-15-10019 from the Defense Threat Reduction Agency.,8 Acknowledgments,[0],[0]
+"Word embeddings improve generalization over lexical features by placing each word in a lower-dimensional space, using distributional information obtained from unlabeled data.",abstractText,[0],[0]
+"However, the effectiveness of word embeddings for downstream NLP tasks is limited by out-of-vocabulary (OOV) words, for which embeddings do not exist.",abstractText,[0],[0]
+"In this paper, we present MIMICK, an approach to generating OOV word embeddings compositionally, by learning a function from spellings to distributional embeddings.",abstractText,[0],[0]
+"Unlike prior work, MIMICK does not require re-training on the original word embedding corpus; instead, learning is performed at the type level.",abstractText,[0],[0]
+Intrinsic and extrinsic evaluations demonstrate the power of this simple approach.,abstractText,[0],[0]
+"On 23 languages, MIMICK improves performance over a word-based baseline for tagging part-of-speech and morphosyntactic attributes.",abstractText,[0],[0]
+It is competitive with (and complementary to) a supervised characterbased model in low-resource settings.,abstractText,[0],[0]
+Mimicking Word Embeddings using Subword RNNs,title,[0],[0]

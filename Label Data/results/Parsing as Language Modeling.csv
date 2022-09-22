@@ -1,0 +1,521 @@
+0,1,label2,summary_sentences
+"Deep neural networks achieve near-human accuracy on many perception tasks (He et al., 2016; Amodei et al., 2015).",1. Introduction,[0],[0]
+"However, they lack robustness to small alterations of the inputs at test time (Szegedy et al., 2014).",1. Introduction,[0],[0]
+"Indeed when presented with a corrupted image that is barely distinguishable from a legitimate one by a human, they can predict incorrect labels, with high-confidence.",1. Introduction,[0],[0]
+"An adversary can design such so-called adversarial examples, by adding a small perturbation to a legitimate input to maximize the likelihood of an incorrect class under constraints on the magnitude of the perturbation (Szegedy et al., 2014; Goodfellow et al., 2015; Moosavi-Dezfooli et al., 2015; Pa-
+1Facebook AI Research.",1. Introduction,[0],[0]
+"Correspondence to: Moustapha Cisse <moustaphacisse@fb.com>.
+",1. Introduction,[0],[0]
+"Proceedings of the 34 th International Conference on Machine Learning, Sydney, Australia, PMLR 70, 2017.",1. Introduction,[0],[0]
+"Copyright 2017 by the author(s).
+",1. Introduction,[0],[0]
+"pernot et al., 2016a).",1. Introduction,[0],[0]
+"In practice, for a significant portion of inputs, a single step in the direction of the gradient sign is sufficient to generate an adversarial example (Goodfellow et al., 2015) that is even transferable from one network to another one trained for the same problem but with a different architecture (Liu et al., 2016; Kurakin et al., 2016).
+",1. Introduction,[0],[0]
+The existence of transferable adversarial examples has two undesirable corollaries.,1. Introduction,[0],[0]
+"First, it creates a security threat for production systems by enabling black-box attacks (Papernot et al., 2016a).",1. Introduction,[0],[0]
+"Second, it underlines the lack of robustness of neural networks and questions their ability to generalize in settings where the train and test distributions can be (slightly) different as is the case for the distributions of legitimate and adversarial examples.
+",1. Introduction,[0],[0]
+"Whereas the earliest works on adversarial examples already suggested that their existence was related to the magnitude of the hidden activations gradient with respect to their inputs (Szegedy et al., 2014), they also empirically assessed that standard regularization schemes such as weight decay or training with random noise do not solve the problem (Goodfellow et al., 2015; Fawzi et al., 2016).",1. Introduction,[0],[0]
+The current mainstream approach to improving the robustness of deep networks is adversarial training.,1. Introduction,[0],[0]
+"It consists in generating adversarial examples on-line using the current network’s parameters (Goodfellow et al., 2015; Miyato et al., 2015; Moosavi-Dezfooli et al., 2015; Szegedy et al., 2014; Kurakin et al., 2016) and adding them to the training data.",1. Introduction,[0],[0]
+"This data augmentation method can be interpreted as a robust optimization procedure (Shaham et al., 2015).
+",1. Introduction,[0],[0]
+"In this paper, we introduce Parseval networks, a layerwise regularization method for reducing the network’s sensitivity to small perturbations by carefully controlling its global Lipschitz constant.",1. Introduction,[0],[0]
+"Since the network is a composition of functions represented by its layers, we achieve increased robustness by maintaining a small Lipschitz constant (e.g., 1) at every hidden layer; be it fully-connected, convolutional or residual.",1. Introduction,[0],[0]
+"In particular, a critical quantity governing the local Lipschitz constant in both fully connected and convolutional layers is the spectral norm of the weight matrix.",1. Introduction,[0],[0]
+"Our main idea is to control this norm by parameterizing the network with parseval tight frames (Kovačević & Chebira, 2008), a generalization of orthogonal matrices.
+",1. Introduction,[0],[0]
+"The idea that regularizing the spectral norm of each weight
+matrix could help in the context of robustness appeared as early as (Szegedy et al., 2014), but no experiment nor algorithm was proposed, and no clear conclusion was drawn on how to deal with convolutional layers.",1. Introduction,[0],[0]
+"Previous work, such as double backpropagation (Drucker & Le Cun, 1992) has also explored jacobian normalization as a way to improve generalization.",1. Introduction,[0],[0]
+Our contribution is twofold.,1. Introduction,[0],[0]
+"First, we provide a deeper analysis which applies to fully connected networks, convolutional networks, as well as Residual networks (He et al., 2016).",1. Introduction,[0],[0]
+"Second, we propose a computationally efficient algorithm and validate its effectiveness on standard benchmark datasets.",1. Introduction,[0],[0]
+"We report results on MNIST, CIFAR-10, CIFAR-100 and Street View House Numbers (SVHN), in which fully connected and wide residual networks were trained (Zagoruyko & Komodakis, 2016) with Parseval regularization.",1. Introduction,[0],[0]
+"The accuracy of Parseval networks on legitimate test examples matches the state-of-the-art, while the results show notable improvements on adversarial examples.",1. Introduction,[0],[0]
+"Besides, Parseval networks train significantly faster than their vanilla counterpart.
+",1. Introduction,[0],[0]
+"In the remainder of the paper, we first discuss the previous work on adversarial examples.",1. Introduction,[0],[0]
+"Next, we give formal definitions of the adversarial examples and provide an analysis of the robustness of deep neural networks.",1. Introduction,[0],[0]
+"Then, we introduce Parseval networks and its efficient training algorithm.",1. Introduction,[0],[0]
+Section 5 presents experimental results validating the model and providing several insights.,1. Introduction,[0],[0]
+"Early papers on adversarial examples attributed the vulnerability of deep networks to high local variations (Szegedy et al., 2014; Goodfellow et al., 2015).",2. Related work,[0],[0]
+"Some authors argued that this sensitivity of deep networks to small changes in their inputs is because neural networks only learn the discriminative information sufficient to obtain good accuracy rather than capturing the true concepts defining the classes (Fawzi et al., 2015; Nguyen et al., 2015).
+",2. Related work,[0],[0]
+"Strategies to improve the robustness of deep networks include defensive distillation (Papernot et al., 2016b), as well as various regularization procedures such as contractive networks (Gu & Rigazio, 2015).",2. Related work,[0],[0]
+"However, the bulk of recent proposals relies on data augmentation (Goodfellow et al., 2015; Miyato et al., 2015; Moosavi-Dezfooli et al., 2015; Shaham et al., 2015; Szegedy et al., 2014; Kurakin et al., 2016).",2. Related work,[0],[0]
+It uses adversarial examples generated online during training.,2. Related work,[0],[0]
+"As we shall see in the experimental section, regularization can be complemented with data augmentation; in particular, Parseval networks with data augmentation appear more robust than either data augmentation or Parseval networks considered in isolation.",2. Related work,[0],[0]
+"We consider a multiclass prediction setting, where we have Y classes in Y = {1, ..., Y }.",3. Robustness in Neural Networks,[0],[0]
+"A multiclass classifier is a function ĝ : (x ∈ RD,W ∈ W) 7→ argmaxȳ∈Y",3. Robustness in Neural Networks,[0],[0]
+"gȳ(x,W ), where W are the parameters to be learnt, and gȳ(x,W ) is the score given to the (input, class) pair (x, ȳ) by a function g :",3. Robustness in Neural Networks,[0],[0]
+RD × W → RY .,3. Robustness in Neural Networks,[0],[0]
+"We take g to be a neural network, represented by a computation graph G = (N , E), which is a directed acyclic graph with a single root node, and each node n ∈ N takes values in Rd (n) out and is a function of its children in the graph, with learnable parameters W (n):
+n : x 7→ φ(n) ( W (n), ( n′(x) )",3. Robustness in Neural Networks,[0],[0]
+"n′:(n,n′)∈E ) .",3. Robustness in Neural Networks,[0],[0]
+"(1)
+The function g we want to learn is the root of G. The training data ((xi, yi))mi=1 ∈",3. Robustness in Neural Networks,[0],[0]
+"(X × Y)m is an i.i.d. sample of D, and we assume X ⊂",3. Robustness in Neural Networks,[0],[0]
+RD is compact.,3. Robustness in Neural Networks,[0],[0]
+"A function ` : RY × Y → R measures the loss of g on an example (x, y); in a single-label classification setting for instance, a common choice for ` is the log-loss:
+` ( g(x,W ), y ) = −gy(x,W ) + log (∑ ȳ∈Y egȳ(x,W ) ) .",3. Robustness in Neural Networks,[0],[0]
+"(2)
+The arguments that we develop below depend only on the Lipschitz constant of the loss, with respect to the norm of interest.",3. Robustness in Neural Networks,[0],[0]
+"Formally, we assume that given a p-norm of interest ‖.‖p, there is a constant λp such that
+∀z, z′ ∈ RY ,∀ȳ ∈ Y, |`(z, ȳ)−`(z′, ȳ)| ≤",3. Robustness in Neural Networks,[0],[0]
+"λp‖z−z′‖p .
+",3. Robustness in Neural Networks,[0],[0]
+"For the log-loss of (2), we have λ2 ≤ √
+2 and λ∞ ≤ 2.",3. Robustness in Neural Networks,[0],[0]
+"In the next subsection, we define adversarial examples and the generalization performance of the classifier.",3. Robustness in Neural Networks,[0],[0]
+"Then, we make the relationship between robustness to adversarial examples and the lipschitz constant of the networks.",3. Robustness in Neural Networks,[0],[0]
+"Given an input (train or test) example (x, y), an adversarial example is a perturbation of the input pattern x̃ = x",3.1. Adversarial examples,[0],[0]
+"+ δx where δx is small enough so that x̃ is nearly undistinguishable from x (at least from the point of view of a human annotator), but has the network predict an incorrect label.",3.1. Adversarial examples,[0],[0]
+"Given the network parameters and structure g(.,W ) and a p-norm, the adversarial example is formally defined as
+x̃ = argmax x̃:‖x̃−x‖p≤
+` ( g(x̃,W ), y ) , (3)
+where represents the strength of the adversary.",3.1. Adversarial examples,[0.9647322427992141],"['Recurrent Neural Network Grammars (RNNG), a generative parsing model, defines a joint distribution over a tree in terms of actions the model takes to generate the tree (Dyer et al., 2016): P (x,y) = P (a) = m∏ t=1 P (at|a1, · · · , at−1), (3) where a is a sequence of actions whose output precisely matches the sequence of symbols in z, which implies Equation (3) is the same as Equation (2).']"
+"Since the optimization problem above is non-convex, Shaham et al. (2015) propose to take the first order taylor expansion of x 7→ `(g(x,W ), y) to compute δx by solving
+x̃ = argmax x̃:‖x̃−x‖p≤
+( ∇x`(g(x,W ), y) )",3.1. Adversarial examples,[0],[0]
+T (x̃− x) .,3.1. Adversarial examples,[0],[0]
+"(4)
+If p = ∞, then x̃ = x + sign(∇x`(g(x,W ), y)).",3.1. Adversarial examples,[0],[0]
+This is the fast gradient sign method.,3.1. Adversarial examples,[0],[0]
+"For the case p = 2, we obtain x̃ = x + ∇x`(g(x,W ), y).",3.1. Adversarial examples,[0],[0]
+"A more involved method is the iterative fast gradient sign method, in which several gradient steps of (4) are performed with a smaller stepsize to obtain a local minimum of (3).",3.1. Adversarial examples,[0],[0]
+"In the context of adversarial examples, there are two different generalization errors of interest:
+L(W )",3.2. Generalization with adversarial examples,[0],[0]
+"= E (x,y)∼D
+[ `(g(x,W ), y) ] ,
+Ladv(W,p, ) =",3.2. Generalization with adversarial examples,[0],[0]
+"E (x,y)∼D
+[ max
+x̃:‖x̃−x‖p≤ `(g(x̃,W ), y)
+] .
+",3.2. Generalization with adversarial examples,[0],[0]
+"By definition, L(W )",3.2. Generalization with adversarial examples,[0],[0]
+"≤ Ladv(W,p, ) for every p and >0.",3.2. Generalization with adversarial examples,[0],[0]
+"Reciprocally, denoting by λp and Λp the Lipschitz constant (with respect to ‖.‖p) of ` and g respectively, we have:
+Ladv(W,p, ) ≤ L(W )",3.2. Generalization with adversarial examples,[0],[0]
++,3.2. Generalization with adversarial examples,[0],[0]
+"E
+(x,y)∼D
+[ max
+x̃:‖x̃−x‖p≤ |`(g(x̃,W ), y)− `(g(x,W ), y)| ] ≤ L(W ) +",3.2. Generalization with adversarial examples,[0],[0]
+"λpΛp .
+",3.2. Generalization with adversarial examples,[0],[0]
+This suggests that the sensitivity to adversarial examples can be controlled by the Lipschitz constant of the network.,3.2. Generalization with adversarial examples,[0],[0]
+"In the robustness framework of (Xu & Mannor, 2012), the Lipschitz constant also controls the difference between the average loss on the training set and the generalization performance.",3.2. Generalization with adversarial examples,[0],[0]
+"More precisely, let us denote by Cp(X , γ) the covering number of X using γ-balls for ‖.‖p.",3.2. Generalization with adversarial examples,[0],[0]
+"Using M = supx,W,y `(g(x,W ), y), Theorem 3 of (Xu & Mannor, 2012) implies that for every δ ∈ (0, 1), with probability 1− δ over the i.i.d. sample ((xi, yi)mi=1, we have:
+L(W )",3.2. Generalization with adversarial examples,[0],[0]
+≤ 1 m m∑ i=1,3.2. Generalization with adversarial examples,[0],[0]
+"`(g(xi,W ), yi)
++ λpΛpγ",3.2. Generalization with adversarial examples,[0],[0]
+"+M
+√ 2Y Cp(X , γ2 )",3.2. Generalization with adversarial examples,[0],[0]
+"ln(2)− 2 ln(δ)
+m .
+",3.2. Generalization with adversarial examples,[0],[0]
+"Since covering numbers of a p-norm ball in RD increases exponentially with RD, the bound above suggests that it is critical to control the Lipschitz constant of g, for both good generalization and robustness to adversarial examples.",3.2. Generalization with adversarial examples,[0],[0]
+"From the network structure we consider (1), for every node n ∈",3.3. Lipschitz constant of neural networks,[0],[0]
+"N , we have (see below for the definition of Λ(n,n ′) p ):
+",3.3. Lipschitz constant of neural networks,[0],[0]
+"‖n(x)− n(x̃)‖p ≤ ∑
+n′:(n,n′)∈E
+Λ(n,n ′) p ‖n′(x)− n′(x̃)‖p ,
+for any Λ(n,n ′)
+p that is greater than the worst case variation of n with respect to a change in its input n′(x).",3.3. Lipschitz constant of neural networks,[0],[0]
+"In particular we can take for Λ(n,n ′)",3.3. Lipschitz constant of neural networks,[0],[0]
+"p any value greater than the
+supremum over x0 ∈ X of the Lipschitz constant for ‖.‖p of the function (1n′′ = n′ is 1 if n′′ = n′ and 0 otherwise):
+x 7→ φ(n) ( W (n), ( n′′(x0+1n ′′ = n′(x−x0)) )",3.3. Lipschitz constant of neural networks,[0],[0]
+"n′′:(n,n′′)∈E ) .
+",3.3. Lipschitz constant of neural networks,[0],[0]
+"The Lipschitz constant of n, denoted by Λ(n)p satisfies:
+Λ(n)p ≤ ∑
+n′:(n,n′)∈E
+Λ(n,n ′) p Λ (n′) p (5)
+",3.3. Lipschitz constant of neural networks,[0],[0]
+"Thus, the Lipschitz constant of the network g can grow exponentially with its depth.",3.3. Lipschitz constant of neural networks,[0],[0]
+"We now give the Lipschitz constants of standard layers as a function of their parameters:
+Linear layers: For layer n(x) = W (n)n′(x) where n′ is the unique child of n in the graph, the Lipschitz constant for ‖.‖p is, by definition, the matrix norm of W (n) induced by ‖.‖p, which is usually denoted ‖W (n)‖p and defined by
+‖W (n)‖p = sup z:‖z‖p=1 ‖W (n)z‖p .
+",3.3. Lipschitz constant of neural networks,[0],[0]
+"Then Λ(n)2 = ‖W (n)‖2Λ (n′) 2 , where ‖W (n)‖2, called the spectral norm of W (n), is the maximum singular value of W (n).",3.3. Lipschitz constant of neural networks,[0],[0]
+"We also have Λ(n)∞ = ‖W (n)‖∞Λ(n ′) ∞ , where
+‖W (n)‖∞ = maxi ∑ j |W (n)",3.3. Lipschitz constant of neural networks,[0],[0]
+ij,3.3. Lipschitz constant of neural networks,[0],[0]
+| is the maximum 1-norm of the rows.,3.3. Lipschitz constant of neural networks,[0],[0]
+"W (n).
+",3.3. Lipschitz constant of neural networks,[0],[0]
+"Convolutional layers: To simplify notation, let us consider convolutions on 1D inputs without striding, and we take the width of the convolution to be 2k + 1 for k ∈ N. To write convolutional layers in the same way as linear layers, we first define an unfolding operator U , which prepares the input z, denoted by U(z).",3.3. Lipschitz constant of neural networks,[0],[0]
+"If the input has length T with din inputs channels, the unfolding operator maps z",3.3. Lipschitz constant of neural networks,[0],[0]
+"For a convolution of the unfolding of z considered as a T × (2k + 1)din matrix, its j-th column is:
+Uj(z) =",3.3. Lipschitz constant of neural networks,[0],[0]
+"[zj−k; ...; zj+k] ,
+where “;” is the concatenation along the vertical axis (each zi is seen as a column din-dimensional vector), and zi",3.3. Lipschitz constant of neural networks,[0],[0]
+= 0,3.3. Lipschitz constant of neural networks,[0],[0]
+if i is out of bounds (0-padding).,3.3. Lipschitz constant of neural networks,[0],[0]
+"A convolutional layer with dout output channels is then defined as
+n(x) =",3.3. Lipschitz constant of neural networks,[0],[0]
+"W (n) ∗ n′(x) = W (n)U(n′(x)) ,
+where W (n) is a dout × (2k + 1)din matrix.",3.3. Lipschitz constant of neural networks,[0],[0]
+"We thus have Λ
+(n) 2 ≤ ‖W‖2‖U(n′(x))‖2.",3.3. Lipschitz constant of neural networks,[0],[0]
+"Since U is a linear operator that essentially repeats its input (2k + 1) times, we have ‖U(n′(x))",3.3. Lipschitz constant of neural networks,[0],[0]
+− U(n′(x̃))‖22 ≤ (2k + 1)‖n′(x),3.3. Lipschitz constant of neural networks,[0],[0]
+"− n′(x̃)‖22, so that Λ(n)2 ≤ √ 2k + 1‖W‖2Λ(n ′) 2 .",3.3. Lipschitz constant of neural networks,[0],[0]
+"Also, ‖U(n′(x))",3.3. Lipschitz constant of neural networks,[0],[0]
+"− U(n′(x̃))‖∞ = ‖n′(x) − n′(x̃)‖∞, and so for a convolutional layer, Λ(n)∞ ≤ ‖W (n)‖∞Λ(n ′) ∞ .
+",3.3. Lipschitz constant of neural networks,[0],[0]
+"Aggregation layers/transfer functions: Layers that perform the sum of their inputs, as in Residual Netowrks (He et al., 2016), fall in the case where the values Λ(n,n ′) p in (5) come into play.",3.3. Lipschitz constant of neural networks,[0],[0]
+"For a node n that sums its inputs, we have Λ (n,n′) p = 1, and thus Λ (n) p ≤ ∑ n′:(n,n′)∈E Λ (n′) p .",3.3. Lipschitz constant of neural networks,[0],[0]
+"If n is a tranfer function layer (e.g., an element-wise application of ReLU)",3.3. Lipschitz constant of neural networks,[0],[0]
+"we can check that Λ(n)p ≤ Λ(n ′) p , where n′ is the input node, as soon as the Lipschitz constant of the transfer function (as a function R→ R) is ≤ 1.",3.3. Lipschitz constant of neural networks,[0],[0]
+"Parseval regularization, which we introduce in this section, is a regularization scheme to make deep neural networks robust, by constraining the Lipschitz constant (5) of each hidden layer to be smaller than one, assuming the Lipschitz constant of children nodes is smaller than one.",4. Parseval networks,[0],[0]
+"That way, we avoid the exponential growth of the Lipschitz constant, and a usual regularization scheme (i.e., weight decay) at the last layer then controls the overall Lipschitz constant of the network.",4. Parseval networks,[0],[0]
+"To enforce these constraints in practice, Parseval networks use two ideas: maintaining orthonormal rows in linear/convolutional layers, and performing convex combinations in aggregation layers.",4. Parseval networks,[0],[0]
+"Below, we first explain the rationale of these constraints and then describe our approach to efficiently enforce the constraints during training.",4. Parseval networks,[0],[0]
+"Orthonormality of weight matrices: For linear layers, we need to maintain the spectral norm of the weight matrix at 1.",4.1. Parseval Regularization,[0],[0]
+Computing the largest singular value of weight matrices is not practical in an SGD setting unless the rows of the matrix are kept orthogonal.,4.1. Parseval Regularization,[0],[0]
+"For a weight matrix W ∈ Rdout×din with dout ≤ din, Parseval regularization maintains WTW",4.1. Parseval Regularization,[0],[0]
+"≈ Idout×dout , where I refers to the identity matrix.",4.1. Parseval Regularization,[0],[0]
+"W is then approximately a Parseval tight frame (Kovačević & Chebira, 2008), hence the name of Parseval networks.",4.1. Parseval Regularization,[0],[0]
+"For convolutional layers, the matrix W ∈ Rdout×(2k+1)din is constrained to be a Parseval tight frame (with the notations of the previous section), and the output is rescaled by a factor (2k + 1)−1/2.",4.1. Parseval Regularization,[0],[0]
+"This maintains all singular values of W to (2k+ 1)−1/2, so that Λ
+(n) 2 ≤ Λ (n′) 2 where n
+′ is the input node.",4.1. Parseval Regularization,[0],[0]
+"More generally, keeping the rows of weight matrices orthogonal makes it possible to control both the spectral norm and the ‖.‖∞ of a weight matrix through the norm of its individual rows.",4.1. Parseval Regularization,[0],[0]
+Robustness for ‖.‖∞ is achieved by rescaling the rows so that their 1-norm is smaller than 1.,4.1. Parseval Regularization,[0],[0]
+"For now, we only experimented with constraints on the 2-norm of the rows, so we aim for robustness in the sense of ‖.‖2.
+",4.1. Parseval Regularization,[0],[0]
+Remark 1 (Orthogonality is required).,4.1. Parseval Regularization,[0],[0]
+"Without orthogonality, constraints on the 2-norm of the rows of weight ma-
+trices are not sufficient to control the spectral norm.",4.1. Parseval Regularization,[0],[0]
+"Parseval networks are thus fundamentally different from weight normalization (Salimans & Kingma, 2016).
+",4.1. Parseval Regularization,[0],[0]
+Aggregation Layers:,4.1. Parseval Regularization,[0],[0]
+"In parseval networks, aggregation layers do not make the sum of their inputs, but rather take a convex combination of them:
+n(x) = ∑
+n′:(n,n′)∈E
+α(n,n ′)n′(x)
+with ∑ n′:(n,n′)∈E α (n,n′) = 1 and α(n,n ′) ≥ 0.",4.1. Parseval Regularization,[0],[0]
+"The parameters α(n,n ′) are learnt, but using (5), these constraint guarantee that Λ(n)p ≤ 1 as soon as the children satisfy the inequality for the same p-norm.",4.1. Parseval Regularization,[0],[0]
+Orthonormality constraints: The first significant difference between Parseval networks and its vanilla counterpart is the orthogonality constraint on the weight matrices.,4.2. Parseval Training,[0],[0]
+"This requirement calls for an optimization algorithm on the manifold of orthogonal matrices, namely the Stiefel manifold.",4.2. Parseval Training,[0],[0]
+"Optimization on matrix manifolds is a well-studied topic (see (Absil et al., 2009) for a comprehensive survey).",4.2. Parseval Training,[0],[0]
+The simplest first-order geometry approaches consist in optimizing the unconstrained function of interest by moving in the direction of steepest descent (given by the gradient of the function) while at the same time staying on the manifold.,4.2. Parseval Training,[0],[0]
+"To guarantee that we remain in the manifold after every parameter update, we need to define a retraction operator.",4.2. Parseval Training,[0],[0]
+"There exist several pullback operators for embedded submanifolds such as the Stiefel manifold based for example on Cayley transforms (Absil et al., 2009).",4.2. Parseval Training,[0],[0]
+"However, when learning the parameters of neural networks, these methods are computationally prohibitive.",4.2. Parseval Training,[0],[0]
+"To overcome this difficulty, we use an approximate operator derived from the following layer-wise regularizer of weight matrices to ensure their parseval tightness (Kovačević & Chebira, 2008):
+Rβ(Wk) =",4.2. Parseval Training,[0],[0]
+"β
+2 ‖W>k Wk − I‖22.
+Optimizing Rβ(Wk) to convergence after every gradient descent step (w.r.t the main objective) guarantees us to stay on the desired manifold but this is an expensive procedure.",4.2. Parseval Training,[0],[0]
+"Moreover, it may result in parameters that are far from the ones obtained after the main gradient update.",4.2. Parseval Training,[0],[0]
+"We use two approximations to make the algorithm more efficient: First, we only do one step of descent on the function Rα(Wk).",4.2. Parseval Training,[0],[0]
+The gradient of this regularization term is∇WkRβ(Wk) =,4.2. Parseval Training,[0],[0]
+β(WkW > k − I)Wk.,4.2. Parseval Training,[0],[0]
+"Consequently, after every main update we perform the following secondary update:
+Wk ← (1 + β)Wk",4.2. Parseval Training,[0],[0]
+"− βWkW>k Wk.
+Algorithm 1 Parseval Training Θ = {Wk,αk}Kk=1, e← 0",4.2. Parseval Training,[0],[0]
+"while e ≤ E do
+Sample a minibatch {(xi, yi)}Bi=1.",4.2. Parseval Training,[0],[0]
+"for k ∈ {1, . . .",4.2. Parseval Training,[0],[0]
+",K} do
+Compute the gradient:",4.2. Parseval Training,[0],[0]
+"GWk ← ∇Wk`(Θ, {(xi, yi)}), Gαk ← ∇αk`(Θ, {(xi, yi)}).",4.2. Parseval Training,[0],[0]
+Update the parameters: Wk ←Wk − ·GWk αk ← αk − ·Gαk .,4.2. Parseval Training,[0],[0]
+"if hidden layer then
+Sample a subset S of rows of Wk.",4.2. Parseval Training,[0],[0]
+Projection: WS ← (1 + β)WS,4.2. Parseval Training,[0],[0]
+− βWSW>S WS .,4.2. Parseval Training,[0],[0]
+αk ← argminγ∈∆K−1‖αK,4.2. Parseval Training,[0],[0]
+"− γ‖22
+e← e+ 1.
+Optionally, instead of updating the whole matrix, one can randomly select a subset S of rows and perform the update from Eq.",4.2. Parseval Training,[0],[0]
+(4.2) on the submatrix composed of rows indexed by S. This sampling based approach reduces the overall complexity to O(|S|2d).,4.2. Parseval Training,[0],[0]
+"Provided the rows are carefully sampled, the procedure is an accurate Monte Carlo approximation of the regularizer loss function (Drineas et al., 2006).",4.2. Parseval Training,[0],[0]
+"The optimal sampling probabilities, also called statistical leverages are approximately equal if we start from an orthogonal matrix and (approximately) stay on the manifold throughout the optimization since they are proportional to the eigenvalues of W (Mahoney et al., 2011).",4.2. Parseval Training,[0],[0]
+"Therefore, we can sample a subset of columns uniformly at random when applying this projection step.
+",4.2. Parseval Training,[0],[0]
+"While the full update does not result in an increased overhead for convolutional layers, the picture can be very different for large fully connected layers making the sampling approach computationally more appealing for such layers.",4.2. Parseval Training,[0],[0]
+We show in the experiments that the weight matrices resulting from this procedure are (quasi)-orthogonal.,4.2. Parseval Training,[0],[0]
+"Also, note that quasi-orthogonalization procedures similar to the one described here have been successfully used previously in the context of learning overcomplete representations with independent component analysis (Hyvärinen & Oja, 2000).
+",4.2. Parseval Training,[0],[0]
+"Convexity constraints in aggregation layers: In Parseval networks, aggregation layers output a convex combination of their inputs instead of e.g., their sum as in Residual networks (He et al., 2016).",4.2. Parseval Training,[0],[0]
+"For an aggregation node n of the network, let us denote by α = (α(n,n
+′))n′:(n,n′)∈E the K-size vector of coefficients used for the convex combination output by the layer.",4.2. Parseval Training,[0],[0]
+"To ensure that the Lipschitz constant at the node n is such that Λ(n)p ≤ 1, the constraints of 4.1 call for a euclidean projection of α onto the positive simplex after a gradient update:
+α∗ = argmin γ∈∆K−1 ‖α− γ‖22 ,
+where ∆K−1 = {γ ∈ RK |1>γ = 1,γ ≥ 0}.",4.2. Parseval Training,[0],[0]
+"This is a well studied problem (Michelot, 1986; Pardalos & Kovoor, 1990; Duchi et al., 2008; Condat, 2016).",4.2. Parseval Training,[0],[0]
+"Its solution is of the form: α∗i = max(0, αi − τ(α)), with τ : RK → R the unique function satisfying ∑ i(xi − τ(α))",4.2. Parseval Training,[0],[0]
+= 1 for every x ∈ RK .,4.2. Parseval Training,[0],[0]
+"Therefore, the solution essentially boils down to a soft thresholding operation.",4.2. Parseval Training,[0],[0]
+If we denote α1 ≥ α2 ≥ . . .,4.2. Parseval Training,[0],[0]
+"αK the sorted coefficients and k(α) = max{k ∈ (1, . . .",4.2. Parseval Training,[0],[0]
+",K)|1+kαk > ∑ j≤k αj}, the optimal thresholding is given by (Duchi et al., 2008):
+τ(α) =",4.2. Parseval Training,[0],[0]
+"( ∑ j≤k(α) αj)− 1 k(α)
+",4.2. Parseval Training,[0],[0]
+"Consequently, the complexity of the projection is O(K log(K))",4.2. Parseval Training,[0],[0]
+since it is only dominated by the sorting of the coefficients and is typically cheap because aggregation nodes will only have few children in practice (e.g. 2).,4.2. Parseval Training,[0],[0]
+"If the number of children is large, there exist efficient linear time algorithms for finding the optimal thresholding τ(α) (Michelot, 1986; Pardalos & Kovoor, 1990; Condat, 2016).",4.2. Parseval Training,[0],[0]
+"In this work, we use the method detailed above (Duchi et al., 2008) to perform the projection of the coefficient α after every gradient update step.",4.2. Parseval Training,[0],[0]
+"We evaluate the effectiveness of Parseval networks on well-established image classification benchmark datasets namely MNIST, CIFAR-10, CIFAR-100 (Krizhevsky, 2009) and Street View House Numbers (SVHN) (Netzer et al.).",5. Experimental evaluation,[0],[0]
+We train both fully connected networks and wide residual networks.,5. Experimental evaluation,[0],[0]
+"The details of the datasets, the models, and the training routines are summarized below.",5. Experimental evaluation,[0],[0]
+CIFAR.,5.1. Datasets,[0],[0]
+Each of the CIFAR datasets is composed of 60K natural scene color images of size 32 × 32 split between 50K training images and 10K test images.,5.1. Datasets,[0],[0]
+CIFAR-10 and CIFAR-100 have respectively 10 and 100 classes.,5.1. Datasets,[0],[0]
+"For these two datasets, we adopt the following standard preprocessing and data augmentation scheme (Lin et al., 2013;",5.1. Datasets,[0],[0]
+"He et al., 2016; Huang et al., 2016a; Zagoruyko & Komodakis, 2016): Each training image is first zero-padded with 4 pixels on each side.",5.1. Datasets,[0],[0]
+The resulting image is randomly cropped to produce a new 32 × 32 image which is subsequently horizontally flipped with probability 0.5.,5.1. Datasets,[0],[0]
+We also normalize every image with the mean and standard deviation of its channels.,5.1. Datasets,[0],[0]
+"Following the same practice as (Huang et al., 2016a), we initially use 5K images from the training as a validation set.",5.1. Datasets,[0],[0]
+"Next, we train de novo the best model on the full set of 50K images and report the results on the test set.",5.1. Datasets,[0],[0]
+SVHN The Street View House Number dataset is a set of 32× 32 color digit images officially split into 73257 training images and 26032 test images.,5.1. Datasets,[0],[0]
+"Following common practice (Zagoruyko & Komodakis, 2016; He et al., 2016; Huang et al., 2016a;b), we randomly sample 10000 images from the available extra set of about 600K images as a validation set and combine the rest of the pictures with the official training set.",5.1. Datasets,[0],[0]
+We divide the pixel values by 255 as a preprocessing step and report the test set performance of the best performing model on the validation set.,5.1. Datasets,[0],[0]
+ConvNet Models.,5.2. Models and Implementation details,[0],[0]
+"For the CIFAR and SVHN datasets, we trained wide residual networks (Zagoruyko & Komodakis, 2016) as they perform on par with standard resnets (He et al., 2016) while being faster to train thanks to a reduced depth.",5.2. Models and Implementation details,[0],[0]
+We used wide resnets of depth 28 and width 10 for both CIFAR-10 and CIFAR-100.,5.2. Models and Implementation details,[0],[0]
+For SVHN we used wide resnet of depth 16 and width 4.,5.2. Models and Implementation details,[0],[0]
+"For each architecture, we compare Parseval networks with the vanilla model trained with standard regularization both in the adversarial and the non-adversarial training settings.
+",5.2. Models and Implementation details,[0],[0]
+ConvNet Training.,5.2. Models and Implementation details,[0],[0]
+We train the networks with stochastic gradient descent using a momentum of 0.9.,5.2. Models and Implementation details,[0],[0]
+"On CIFAR datasets, the initial learning rate is set to 0.1 and scaled by a factor of 0.2 after epochs 60, 120 and 160, for a total number of 200 epochs.",5.2. Models and Implementation details,[0],[0]
+We used mini-batches of size 128.,5.2. Models and Implementation details,[0],[0]
+"For SVHN, we trained the models with mini-batches of size 128 for 160 epochs starting with a learning rate of 0.01 and decreasing it by a factor of 0.1 at epochs 80 and 120.",5.2. Models and Implementation details,[0],[0]
+"For all the vanilla models, we applied by default weight decay regularization (with parameter λ = 0.0005) together with batch normalization and dropout since this combination resulted in better accuracy and increased robustness in preliminary experiments.",5.2. Models and Implementation details,[0],[0]
+"The dropout rate use
+is 0.3 for CIFAR and 0.4 for SVHN.",5.2. Models and Implementation details,[0],[0]
+"For Parseval regularized models, we choose the value of the retraction parameter to be β = 0.0003 for CIFAR datasets and β = 0.0001 for SVHN based on the performance on the validation set.",5.2. Models and Implementation details,[0],[0]
+"In all cases, We also adversarially trained each of the models on CIFAR-10 and CIFAR-100 following the guidelines in (Goodfellow et al., 2015; Shaham et al., 2015; Kurakin et al., 2016).",5.2. Models and Implementation details,[0],[0]
+"In particular, we replace 50% of the examples of every minibatch by their adversarially perturbed version generated using the one-step method to avoid label leaking (Kurakin et al., 2016).",5.2. Models and Implementation details,[0],[0]
+"For each mini-batch, the magnitude of the adversarial perturbation is obtained by sampling from a truncated Gaussian centered at 0 with standard deviation 2.
+Fully Connected Model.",5.2. Models and Implementation details,[0],[0]
+We also train feedforward networks composed of 4 fully connected hidden layers of size 2048 and a classification layer.,5.2. Models and Implementation details,[0],[0]
+The input to these networks are images unrolled into a C × 1024 dimensional vector where C is the number of channels.,5.2. Models and Implementation details,[0],[0]
+We used these models on MNIST and CIFAR-10 mainly to demonstrate that the proposed approach is also useful on non-convolutional networks.,5.2. Models and Implementation details,[0],[0]
+We compare a Parseval networks to vanilla models with and without weight decay regularization.,5.2. Models and Implementation details,[0],[0]
+"For adversarially trained models, we follow the guidelines previously described for the convolutional networks.
+",5.2. Models and Implementation details,[0],[0]
+Fully Connected Training.,5.2. Models and Implementation details,[0],[0]
+We train the models with SGD and divide the learning rate by two every 10 epochs.,5.2. Models and Implementation details,[0],[0]
+We use mini-batches of size 100 and train the model for 50 epochs.,5.2. Models and Implementation details,[0],[0]
+We chose the hyperparameters on the validation set and retrain the model on the union of the training and validation sets.,5.2. Models and Implementation details,[0],[0]
+"The hyperparameters are β, the size of the row subset S, the learning rate and its decrease rate.",5.2. Models and Implementation details,[0],[0]
+Using a subset S of 30% of all the rows of each of weight matrix for the retraction step worked well in practice.,5.2. Models and Implementation details,[0],[0]
+We first validate that Parseval training (Algorithm 1) indeed yields (near)-orthonormal weight matrices.,5.3.1. (QUASI)-ORTHOGONALITY.,[0],[0]
+"To do so, we analyze the spectrum of the weight matrices of the different models by plotting the histograms of their singular values, and compare these histograms for Parseval networks to networks trained using standard SGD with and without weight decay (SGD-wd and SGD).
+",5.3.1. (QUASI)-ORTHOGONALITY.,[0],[0]
+The histograms representing the distribution of singular values at layers 1 and 4 for the fully connected network (using S = 30%) trained on the dataset CIFAR-10 are shown in Fig. 2 (the figures for convolutional networks are similar).,5.3.1. (QUASI)-ORTHOGONALITY.,[0],[0]
+The singular values obtained with our method are tightly concentrated around 1.,5.3.1. (QUASI)-ORTHOGONALITY.,[0],[0]
+"This experiment confirms that the weight matrices produced by the proposed opti-
+mization procedure are (almost) orthonormal.",5.3.1. (QUASI)-ORTHOGONALITY.,[0],[0]
+"The distribution of the singular values of the weight matrices obtained with SGD has a lot more variance, with nearly as many small values as large ones.",5.3.1. (QUASI)-ORTHOGONALITY.,[0],[0]
+"Adding weight decay to standard SGD leads to a sparse spectrum for the weight matrices, especially in the higher layers of the network suggesting a low-rank structure.",5.3.1. (QUASI)-ORTHOGONALITY.,[0],[0]
+"This observation has motivated recent work on compressing deep neural networks (Denton et al., 2014).",5.3.1. (QUASI)-ORTHOGONALITY.,[0],[0]
+"We evaluate the robustness of the models to adversarial noise by generating adversarial examples from the test set, for various magnitudes of the noise vector.",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"Following common practice (Kurakin et al., 2016), we use the fast gradient sign method to generate the adversarial examples (using ‖.‖∞, see Section 3.1).",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"Since these adversarial examples transfer from one network to the other, the fast gradient sign method allows to benchmark the network for reasonable settings where the opponent does not know the network.",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+We report the accuracy of each model as a function of the magnitude of the noise.,5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"To make the results easier to interpret, we compute the corresponding Signal to Noise Ratio (SNR).",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"For an input x and perturbation δx, the SNR is defined as SNR(x, δx) = 20 log10 ‖x‖2 ‖δx‖2 .",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"We show some adversarial examples in Fig. 1.
+Fully Connected Nets.",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+Figure 3 depicts a comparison of Parseval and vanilla networks with and without adversarial training at various noise levels.,5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"On both MNIST and CIFAR-10, Parseval networks consistently outperforms weight decay regularization.",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"In addition, it is as robust as
+adversarial training (SGD-wd-da) on CIFAR-10.",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"Combining Parseval Networks and adversarial training results in the most robust method on MNIST.
+ResNets.",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"Table 1 summarizes the results of our experiments with wide residual Parseval and vanilla networks on CIFAR-10, CIFAR-100 and SVHN.",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"In the table, we denote Parseval(OC) the Parseval network with orthogonality constraint and without using a convex combination in aggregation layers.",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+Parseval indicates the configuration where both of the orthogonality and convexity constraints are used.,5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+We first observe that Parseval networks outperform vanilla ones on all datasets on the clean examples and match the state of the art performances on CIFAR-10 (96.28%) and SVHN (98.44%).,5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"On CIFAR-100, when we use Parseval wide Resnet of depth 40 instead of 28, we achieve an accuracy of 81.76%.",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"In comparison, the best performance achieved by a vanilla wide resnet (Zagoruyko & Komodakis, 2016) and a pre-activation resnet (He et al., 2016) are respectively 81.12% and 77.29%.",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"Therefore, our proposal is a useful regularizer for legitimate examples.",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"Also note that in most cases, Parseval networks combining both the orthogonality constraint and the convexity constraint is superior to use the orthogonality constraint solely.
+",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+The results presented in the table validate our most important claim: Parseval networks significantly improve the robustness of vanilla models to adversarial examples.,5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"When no adversarial training is used, the gap in accuracy be-
+tween the two methods is significant (particularly in the high noise scenario).",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"For an SNR value of 40, the best Parseval network achieves 55.41% accuracy while the best vanilla model is at 44.62%.",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"When the models are adversarially trained, Parseval networks remain superior to vanilla models in most cases.",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"Interestingly, adversarial training only slightly improves the robustness of Parseval networks in low noise setting (e.g. SNR values of 45-50) and sometimes even deteriorates it (e.g. on CIFAR-10).",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"In contrast, combining adversarial training and Parseval networks is an effective approach in the high noise setting.",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"This result suggests that thanks to the particular form of regularizer (controlling the Lipschitz constant of the network), Parseval networks achieves robustness to adversarial examples located in the immediate vicinity of each data point.",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"Therefore, adversarial training only helps for adversarial examples found further away from the legitimate patterns.",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"This observation holds consistently across all our datasets.
+",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"Better use of capacity Given the distribution of singular values observed in Figure 2, we want to analyze the intrinsic dimensionality of the representation learned by the different networks at every layer.",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"To that end, we use the local covariance dimension (Dasgupta & Freund, 2008) which can be measured from the covariance matrix of the data.",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"For each layer k of the fully connected network, we compute the activation’s empirical covariance matrix 1 n",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"∑n i=1 φk(x)φk(x)
+",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+>,5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+and obtain its sorted eigenvalues σ1 ≥ · · · ≥ σd.,5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"For each method and each layer, we select the smallest integer p such that ∑p i=1",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+σi ≥ 0.99 ∑d i=1,5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+σi.,5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+This gives us the number of dimensions that we need to explain 99% of the covariance.,5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"We can also compute the same quantity for the examples of each class, by only considering in the empirical estimation of the covariance of the examples xi such that yi = c. Table 2 report these numbers for all examples and the per-class average on CIFAR-10.
+Table 2 shows that the local covariance dimension of all the data is consistently higher for Parseval networks than all the other approaches at any layer of the network.",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"SGDwd-da contracts all the data in very low dimensional spaces at the upper levels of the network by using only 0.4% of the total dimension (layer 3 and 4) while Parseval networks use about 81% and 56% at of the whole dimension respectively
+in the same layers.",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"This is intriguing given that SGD-wd-da also increases the robustness of the network, apparently not in the same way as Parseval networks.",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"For the average local covariance dimension of the classes, SGD-wd-da contracts each class into the same dimensionality as it contracts all the data at the upper layers of the network.",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"For Parseval, the data of each class is contracted in about 30% and 19% of the overall dimension.",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"These results suggest that Parseval contracts the data of each class in a lower dimensional manifold (compared to the intrinsic dimensionality of the whole data) hence making classification easier.
+faster convergence Parseval networks converge significantly faster than vanilla networks trained with batch normalization and dropout as depicted by figure 4.",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"Thanks to the orthogonalization step following each gradient update, the weight matrices are well conditioned at each step during the optimization.",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+We hypothesize this is the main explanation of this phenomenon.,5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"For convolutional networks (resnets), the faster convergence is not obtained at the expense of larger wall-time since the cost of the projection step is negligible compared to the total cost of the forward pass on modern GPU architecture thanks to the small size of the filters.",5.3.2. ROBUSTNESS TO ADVERSARIAL NOISE.,[0],[0]
+"We introduced Parseval networks, a new approach for learning neural networks that are intrinsically robust to adversarial noise.",6. Conclusion,[0],[0]
+We proposed an algorithm that allows us to optimize the model efficiently.,6. Conclusion,[0],[0]
+Empirical results on three classification datasets with fully connected and wide residual networks illustrate the performance of our approach.,6. Conclusion,[0],[0]
+"As a byproduct of the regularization we propose, the model trains faster and makes a better use of its capacity.",6. Conclusion,[0],[0]
+Further investigation of this phenomenon is left to future work.,6. Conclusion,[0],[0]
+"The authors would like to thank M.A. Ranzato, Y. Tian, A. Bordes and F. Perronnin for their valuable feedback on this work.",Acknowledgements,[0],[0]
+"We introduce Parseval networks, a form of deep neural networks in which the Lipschitz constant of linear, convolutional and aggregation layers is constrained to be smaller than 1.",abstractText,[0],[0]
+Parseval networks are empirically and theoretically motivated by an analysis of the robustness of the predictions made by deep neural networks when their input is subject to an adversarial perturbation.,abstractText,[0],[0]
+"The most important feature of Parseval networks is to maintain weight matrices of linear and convolutional layers to be (approximately) Parseval tight frames, which are extensions of orthogonal matrices to non-square matrices.",abstractText,[0],[0]
+We describe how these constraints can be maintained efficiently during SGD.,abstractText,[0],[0]
+"We show that Parseval networks match the state-of-the-art in terms of accuracy on CIFAR-10/100 and Street View House Numbers (SVHN), while being more robust than their vanilla counterpart against adversarial examples.",abstractText,[0],[0]
+"Incidentally, Parseval networks also tend to train faster and make a better usage of the full capacity of the networks.",abstractText,[0],[0]
+Parseval Networks: Improving Robustness to Adversarial Examples,title,[0],[0]
+"Proceedings of the 2016 Conference on Empirical Methods in Natural Language Processing, pages 2331–2336, Austin, Texas, November 1-5, 2016. c©2016 Association for Computational Linguistics
+We recast syntactic parsing as a language modeling problem and use recent advances in neural network language modeling to achieve a new state of the art for constituency Penn Treebank parsing — 93.8 F1 on section 23, using 2-21 as training, 24 as development, plus tri-training. When trees are converted to Stanford dependencies, UAS and LAS are 95.9% and 94.1%.",text,[0],[0]
+"Recent work on deep learning syntactic parsing models has achieved notably good results, e.g., Dyer et al. (2016) with 92.4 F1 on Penn Treebank constituency parsing and Vinyals et al. (2015) with 92.8 F1.",1 Introduction,[1.0],"['Recent work on deep learning syntactic parsing models has achieved notably good results, e.g., Dyer et al. (2016) with 92.4 F1 on Penn Treebank constituency parsing and Vinyals et al. (2015) with 92.8 F1.']"
+"In this paper we borrow from the approaches of both of these works and present a neural-net parse reranker that achieves very good results, 93.8 F1, with a comparatively simple architecture.
+",1 Introduction,[1.0000000066805534],"['In this paper we borrow from the approaches of both of these works and present a neural-net parse reranker that achieves very good results, 93.8 F1, with a comparatively simple architecture.']"
+In the remainder of this section we outline the major difference between this and previous work — viewing parsing as a language modeling problem.,1 Introduction,[0],[0]
+Section 2 looks more closely at three of the most relevant previous papers.,1 Introduction,[0],[0]
+"We then describe our exact model (Section 3), followed by the experimental setup and results (Sections 4 and 5).",1 Introduction,[0],[0]
+"Formally, a language model (LM) is a probability distribution over strings of a language:
+P (x) = P (x1, · · · , xn)
+=
+n∏
+t=1
+P (xt|x1, · · · , xt−1), (1)
+where x is a sentence and t indicates a word position.",1.1 Language Modeling,[0.999999962933496],"['Formally, a language model (LM) is a probability distribution over strings of a language: P (x) = P (x1, · · · , xn) = n∏ t=1 P (xt|x1, · · · , xt−1), (1) where x is a sentence and t indicates a word position.']"
+"The efforts in language modeling go into computing P (xt|x1, · · · , xt−1), which as described next is useful for parsing as well.",1.1 Language Modeling,[1.0],"['The efforts in language modeling go into computing P (xt|x1, · · · , xt−1), which as described next is useful for parsing as well.']"
+"A generative parsing model parses a sentence (x) into its phrasal structure (y) according to
+argmax y′∈Y(x)
+P (x,y′),
+where Y(x) lists all possible structures of x.",1.2 Parsing as Language Modeling,[0],[0]
+"If we think of a tree (x,y) as a sequence (z) (Vinyals et
+2331
+al., 2015) as illustrated in Figure 1, we can define a probability distribution over (x,y) as follows:
+P (x,y) = P (z) = P (z1, · · · , zm)
+= m∏
+t=1
+P (zt|z1, · · · , zt−1), (2)
+which is equivalent to Equation (1).",1.2 Parsing as Language Modeling,[0.9999999676765278],"['If we think of a tree (x,y) as a sequence (z) (Vinyals et 2331 al., 2015) as illustrated in Figure 1, we can define a probability distribution over (x,y) as follows: P (x,y) = P (z) = P (z1, · · · , zm) = m∏ t=1 P (zt|z1, · · · , zt−1), (2) which is equivalent to Equation (1).']"
+"We have reduced parsing to language modeling and can use language modeling techniques of estimating P (zt|z1, · · · , zt−1) for parsing.",1.2 Parsing as Language Modeling,[0],[0]
+We look here at three neural net (NN) models closest to our research along various dimensions.,2 Previous Work,[0],[0]
+"The first (Zaremba et al., 2014) gives the basic language modeling architecture that we have adopted, while the other two (Vinyals et al., 2015; Dyer et al., 2016) are parsing models that have the current best results in NN parsing.",2 Previous Work,[0],[0]
+"The LSTM-LM of Zaremba et al. (2014) turns (x1, · · · , xt−1) into ht, a hidden state of an LSTM (Hochreiter and Schmidhuber, 1997; Gers et al., 2003; Graves, 2013), and uses ht to guess xt:
+P (xt|x1, · · · , xt−1) = P (xt|ht) = softmax(Wht)[xt],
+where W is a parameter matrix and [i] indexes ith element of a vector.",2.1 LSTM-LM,[0],[0]
+"The simplicity of the model makes it easily extendable and scalable, which has inspired a character-based LSTM-LM that works well for many languages (Kim et al., 2016) and an ensemble of large LSTM-LMs for English with astonishing perplexity of 23.7 (Jozefowicz et al., 2016).",2.1 LSTM-LM,[0],[0]
+"In this paper, we build a parsing model based on the LSTM-LM of Zaremba et al. (2014).",2.1 LSTM-LM,[0],[0]
+"Vinyals et al. (2015) observe that a phrasal structure (y) can be expressed as a sequence and build a machine translation parser (MTP), a sequence-tosequence model, which translates x into y using a
+conditional probability:
+P (y|x)",2.2 MTP,[0],[0]
+"= P (y1, · · · , yl|x)
+= l∏
+t=1
+P (yt|x, y1, · · · , yt−1),
+where the conditioning event (x, y1, · · · , yt−1) is modeled by an LSTM encoder and an LSTM decoder.",2.2 MTP,[0],[0]
+"The encoder maps x into he, a set of vectors that represents x, and the decoder obtains a summary vector (h′t) which is concatenation of the decoder’s hidden state (hdt ) and weighted sum of word representations ( ∑n i=1 αih e i ) with an alignment vector (α).",2.2 MTP,[0],[0]
+Finally the decoder predicts yt given h′t.,2.2 MTP,[0],[0]
+"Inspired by MTP, our model processes sequential trees.",2.2 MTP,[0],[0]
+"Recurrent Neural Network Grammars (RNNG), a generative parsing model, defines a joint distribution over a tree in terms of actions the model takes to generate the tree (Dyer et al., 2016):
+P (x,y) = P (a) =
+m∏
+t=1
+P (at|a1, · · · , at−1), (3)
+where a is a sequence of actions whose output precisely matches the sequence of symbols in z, which implies Equation (3) is the same as Equation (2).",2.3 RNNG,[0],[0]
+"RNNG and our model differ in how they compute the conditioning event (z1, · · · , zt−1): RNNG combines hidden states of three LSTMs that keep track of actions the model has taken, an incomplete tree the model has generated and words the model has generated whereas our model uses one LSTM’s hidden state as shown in the next section.",2.3 RNNG,[0],[0]
+"Our model, the model of Zaremba et al. (2014) applied to sequential trees and we call LSTM-LM from now on, is a joint distribution over trees:
+P (x,y)",3 Model,[0],[0]
+"= P (z) = m∏
+t=1
+P (zt|z1, · · · , zt−1)
+=
+m∏
+t=1
+P (zt|ht)
+= m∏
+t=1
+softmax(Wht)[zt],
+where ht is a hidden state of an LSTM.",3 Model,[0],[0]
+"Due to lack of an algorithm that searches through an exponentially large phrase-structure space, we use an n-best parser to reduce Y(x) to Y ′(x), whose size is polynomial, and use LSTM-LM to find y that satisfies
+argmax y′∈Y ′(x)
+P (x,y′).",3 Model,[1.0000000506589],"['Due to lack of an algorithm that searches through an exponentially large phrase-structure space, we use an n-best parser to reduce Y(x) to Y ′(x), whose size is polynomial, and use LSTM-LM to find y that satisfies argmax y′∈Y ′(x) P (x,y′).']"
+(4),3 Model,[0],[0]
+"The model has three LSTM layers with 1,500 units and gets trained with truncated backpropagation through time with mini-batch size 20 and step size 50.",3.1 Hyper-parameters,[1.0],"['The model has three LSTM layers with 1,500 units and gets trained with truncated backpropagation through time with mini-batch size 20 and step size 50.']"
+"We initialize starting states with previous minibatch’s last hidden states (Sutskever, 2013).",3.1 Hyper-parameters,[0],[0]
+"The forget gate bias is initialized to be one (Jozefowicz et al., 2015) and the rest of model parameters are sampled from U(−0.05, 0.05).",3.1 Hyper-parameters,[0],[0]
+"Dropout is applied to non-recurrent connections (Pham et al., 2014) and gradients are clipped when their norm is bigger than 20 (Pascanu et al., 2013).",3.1 Hyper-parameters,[0],[0]
+"The learning rate is 0.25 · 0.85max( −15, 0) where is an epoch number.",3.1 Hyper-parameters,[0],[0]
+"For simplicity, we use vanilla softmax over an entire vocabulary as opposed to hierarchical softmax (Morin and Bengio, 2005) or noise contrastive estimation (Gutmann and Hyvärinen, 2012).",3.1 Hyper-parameters,[0],[0]
+"We describe datasets we use for evaluation, detail training and development processes.1",4 Experiments,[0],[0]
+"We use the Wall Street Journal (WSJ) of the Penn Treebank (Marcus et al., 1993) for training (2-21), development (24) and testing (23) and millions of auto-parsed “silver” trees (McClosky et al., 2006; Huang et al., 2010; Vinyals et al., 2015) for tritraining.",4.1 Data,[1.0],"['We use the Wall Street Journal (WSJ) of the Penn Treebank (Marcus et al., 1993) for training (2-21), development (24) and testing (23) and millions of auto-parsed “silver” trees (McClosky et al., 2006; Huang et al., 2010; Vinyals et al., 2015) for tritraining.']"
+"To obtain silver trees, we parse the entire section of the New York Times (NYT) of the fifth Gigaword (Parker et al., 2011) with a product of eight Berkeley parsers (Petrov, 2010)2 and ZPar (Zhu et al., 2013) and select 24 million trees on which both parsers agree (Li et al., 2014).",4.1 Data,[1.0],"['To obtain silver trees, we parse the entire section of the New York Times (NYT) of the fifth Gigaword (Parker et al., 2011) with a product of eight Berkeley parsers (Petrov, 2010)2 and ZPar (Zhu et al., 2013) and select 24 million trees on which both parsers agree (Li et al., 2014).']"
+"We do not resample trees to match the sentence length distribution of the NYT to that of the WSJ (Vinyals et
+1The code and trained models used for experiments are available at github.com/cdg720/emnlp2016.
+",4.1 Data,[0],[0]
+2We use the reimplementation by Huang et al. (2010).,4.1 Data,[0],[0]
+"al., 2015) because in preliminary experiments Charniak parser (Charniak, 2000) performed better when trained on all of 24 million trees than when trained on resampled two million trees.
+",500 97.0 91.8 40.0,[0],[0]
+"Given x, we produce Y ′(x), 50-best trees, with Charniak parser and find y with LSTM-LM as Dyer et al. (2016) do with their discriminative and generative models.3",500 97.0 91.8 40.0,[0],[0]
+"We unk words that appear fewer than 10 times in the WSJ training (6,922 types) and drop activations with probability 0.7.",4.2.1 Supervision,[0],[0]
+"At the beginning of each epoch, we shuffle the order of trees in the training data.",4.2.1 Supervision,[0],[0]
+Both perplexity and F1 of LSTM-LM (G) improve and then plateau (Figure 2).,4.2.1 Supervision,[0],[0]
+"Perplexity, the
+3Dyer et al. (2016)’s discriminative model performs comparably to Charniak (89.8 vs. 89.7).
+model’s training objective, nicely correlates with F1, what we care about.",4.2.1 Supervision,[0],[0]
+Training takes 12 hours (37 epochs) on a Titan X. We also evaluate our model with varying n-best trees including optimal 51-best trees that contain gold trees (51o).,4.2.1 Supervision,[0],[0]
+"As shown in Table 1, the LSTM-LM (G) is robust given sufficiently large n, i.e. 50, but does not exhibit its full capacity because of search errors in Charniak parser.",4.2.1 Supervision,[0],[0]
+We address this problem in Section 5.3.,4.2.1 Supervision,[1.0],['We address this problem in Section 5.3.']
+"We unk words that appear at most once in the training (21,755 types).",4.2.2 Semi-supervision,[0],[0]
+"We drop activations with probability 0.45, smaller than 0.7, thanks to many silver trees, which help regularization.",4.2.2 Semi-supervision,[0],[0]
+"We train LSTM-LM (GS) on the WSJ and a different set of 400,000 NYT trees for each epoch except for the last one during which we use the WSJ only.",4.2.2 Semi-supervision,[0],[0]
+Training takes 26 epochs and 68 hours on a Titan X. LSTMLM (GS) achieves 92.5 F1 on the development.,4.2.2 Semi-supervision,[0],[0]
+"As shown in Table 2, with 92.6 F1 LSTM-LM (G) outperforms an ensemble of five MTPs (Vinyals et al., 2015) and RNNG (Dyer et al., 2016), both of which are trained on the WSJ only.",5.1 Supervision,[0],[0]
+"We compare LSTM-LM (GS) to two very strong semi-supervised NN parsers: an ensemble of five MTPs trained on 11 million trees of the highconfidence corpus4 (HC) (Vinyals et al., 2015); and an ensemble of six one-to-many sequence models
+4The HC consists of 90,000 gold trees, from the WSJ, English Web Treebank and Question Treebank, and 11 million silver trees, whose sentence length distribution matches that of the WSJ, parsed and agreed on by Berkeley parser and ZPar.
+trained on the HC and 4.5 millions of EnglishGerman translation sentence pairs (Luong et al., 2016).",5.2 Semi-supervision,[0.9737728232926255],"['We compare LSTM-LM (GS) to two very strong semi-supervised NN parsers: an ensemble of five MTPs trained on 11 million trees of the highconfidence corpus4 (HC) (Vinyals et al., 2015); and an ensemble of six one-to-many sequence models trained on the HC and 4.5 millions of EnglishGerman translation sentence pairs (Luong et al., 2016).']"
+We also compare LSTM-LM (GS) to best performing non-NN parsers in the literature.,5.2 Semi-supervision,[1.0],['We also compare LSTM-LM (GS) to best performing non-NN parsers in the literature.']
+Parsers’ parsing performance along with their training data is reported in Table 3.,5.2 Semi-supervision,[1.0],['Parsers’ parsing performance along with their training data is reported in Table 3.']
+LSTM-LM (GS) outperforms all the other parsers with 93.1 F1.,5.2 Semi-supervision,[0],[0]
+"Due to search errors – good trees are missing in 50-best trees – in Charniak (G), our supervised and semi-supervised models do not exhibit their full potentials when Charniak (G) provides Y ′(x).",5.3 Improved Semi-supervision,[1.0],"['Due to search errors – good trees are missing in 50-best trees – in Charniak (G), our supervised and semi-supervised models do not exhibit their full potentials when Charniak (G) provides Y ′(x).']"
+"To mitigate the search problem, we tri-train Charniak (GS) on all of 24 million NYT trees in addition to the WSJ, to yield Y ′(x).",5.3 Improved Semi-supervision,[0],[0]
+"As shown in Table 3, both LSTM-LM (G) and LSTM-LM (GS) are affected by the quality of Y ′(x).",5.3 Improved Semi-supervision,[1.0],"['As shown in Table 3, both LSTM-LM (G) and LSTM-LM (GS) are affected by the quality of Y ′(x).']"
+"A single LSTM-LM (GS) together with Charniak (GS) reaches 93.6 and an ensemble of eight LSTM-LMs (GS) with Charniak (GS) achieves a new state of the art, 93.8 F1.",5.3 Improved Semi-supervision,[1.0],"['A single LSTM-LM (GS) together with Charniak (GS) reaches 93.6 and an ensemble of eight LSTM-LMs (GS) with Charniak (GS) achieves a new state of the art, 93.8 F1.']"
+"When trees are converted to Stanford dependencies,5 UAS and LAS are 95.9% and 94.1%,6 more than 1% higher than those of the state of the art dependency parser (Andor et al., 2016).",5.3 Improved Semi-supervision,[1.0],"['When trees are converted to Stanford dependencies,5 UAS and LAS are 95.9% and 94.1%,6 more than 1% higher than those of the state of the art dependency parser (Andor et al., 2016).']"
+"Why an indirect method (converting trees to dependencies) is more accurate than a direct one (dependency parsing) remains unanswered (Kong and Smith, 2014).",5.3 Improved Semi-supervision,[1.0],"['Why an indirect method (converting trees to dependencies) is more accurate than a direct one (dependency parsing) remains unanswered (Kong and Smith, 2014).']"
+The generative parsing model we presented in this paper is very powerful.,6 Conclusion,[1.0],['The generative parsing model we presented in this paper is very powerful.']
+"In fact, we see that a generative parsing model, LSTM-LM, is more effective than discriminative parsing models (Dyer et al., 2016).",6 Conclusion,[1.0],"['In fact, we see that a generative parsing model, LSTM-LM, is more effective than discriminative parsing models (Dyer et al., 2016).']"
+"We suspect building large models with character embeddings would lead to further improvement as in language modeling (Kim et al., 2016; Jozefowicz et al., 2016).",6 Conclusion,[1.0],"['We suspect building large models with character embeddings would lead to further improvement as in language modeling (Kim et al., 2016; Jozefowicz et al., 2016).']"
+We also wish to develop a complete parsing model using the LSTMLM framework.,6 Conclusion,[1.0],['We also wish to develop a complete parsing model using the LSTMLM framework.']
+"We thank the NVIDIA corporation for its donation of a Titan X GPU, Tstaff of Computer Science
+5Version 3.3.0.",Acknowledgments,[0],[0]
+6We use the CoNLL evaluator available through the CoNLL website: ilk.uvt.nl/conll/software/eval.pl.,Acknowledgments,[0],[0]
+"Following the convention, we ignore punctuation.
+at Brown University for setting up GPU machines and David McClosky for helping us train Charniak parser on millions trees.",Acknowledgments,[0],[0]
+"We recast syntactic parsing as a language modeling problem and use recent advances in neural network language modeling to achieve a new state of the art for constituency Penn Treebank parsing — 93.8 F1 on section 23, using 2-21 as training, 24 as development, plus tri-training.",abstractText,[0],[0]
+"When trees are converted to Stanford dependencies, UAS and LAS are 95.9% and 94.1%.",abstractText,[0],[0]
+Parsing as Language Modeling,title,[0],[0]
