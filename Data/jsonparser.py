@@ -1,7 +1,7 @@
 import json
 import os
 import requests
-directory = 'C:\\Users\\mariam.riaz\\PycharmProjects\\LongSumm\\extractive_summaries\\talksumm_summaries\\fullpapers'
+directory = 'C:\Users\mariam.riaz\PycharmProjects\Scientific-Paper-Summarizer\Data\fullpapers'
 
 for filename in os.listdir(directory):
     url = 'http://localhost:8080/v1'
