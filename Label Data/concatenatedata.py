@@ -3,7 +3,7 @@ import pandas as pd
 import os
 import json
 
-cdir ='C:\\Users\\mariam.riaz\\PycharmProjects\\Scientific-Paper-Summarizer\\Label Data\\results'
+cdir ='C:\\Users\\mariam.riaz\\PycharmProjects\\Scientific-Paper-Summarizer\\testdata'
 
 appended_data = []
 for subdir, dirs, files in os.walk(cdir):
@@ -15,5 +15,5 @@ for subdir, dirs, files in os.walk(cdir):
 (print("Appending finished"))
 appended_data = pd.concat(appended_data)
 (print("Concatination finished"))
-appended_data.to_csv('final.csv', encoding="utf-8", index=None)
+appended_data.to_csv('C:\\Users\\mariam.riaz\\PycharmProjects\\Scientific-Paper-Summarizer\\testdata\\testfinal.csv', encoding="utf-8", index=None)
 (print("finished"))
